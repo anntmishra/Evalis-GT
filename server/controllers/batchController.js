@@ -1,6 +1,5 @@
 const asyncHandler = require('express-async-handler');
-const Batch = require('../models/batchModel');
-const Student = require('../models/studentModel');
+const { Batch, Student } = require('../models');
 
 /**
  * @desc    Get all batches
@@ -8,7 +7,9 @@ const Student = require('../models/studentModel');
  * @access  Private/Admin, Teacher
  */
 const getAllBatches = asyncHandler(async (req, res) => {
-  const batches = await Batch.find({}).sort({ startYear: -1 });
+  const batches = await Batch.findAll({
+    order: [['startYear', 'DESC']]
+  });
   res.json(batches);
 });
 
@@ -18,7 +19,7 @@ const getAllBatches = asyncHandler(async (req, res) => {
  * @access  Private/Admin, Teacher
  */
 const getBatchById = asyncHandler(async (req, res) => {
-  const batch = await Batch.findById(req.params.id);
+  const batch = await Batch.findByPk(req.params.id);
   
   if (batch) {
     res.json(batch);
@@ -43,7 +44,7 @@ const createBatch = asyncHandler(async (req, res) => {
   }
   
   // Check if batch with same name already exists
-  const batchExists = await Batch.findOne({ name });
+  const batchExists = await Batch.findOne({ where: { name } });
   if (batchExists) {
     res.status(400);
     throw new Error('Batch with this name already exists');
@@ -83,7 +84,7 @@ const createBatch = asyncHandler(async (req, res) => {
 const updateBatch = asyncHandler(async (req, res) => {
   const { name, department, startYear, endYear, active } = req.body;
   
-  const batch = await Batch.findById(req.params.id);
+  const batch = await Batch.findByPk(req.params.id);
   
   if (!batch) {
     res.status(404);
@@ -92,7 +93,7 @@ const updateBatch = asyncHandler(async (req, res) => {
   
   // If name is being updated, check if it conflicts with another batch
   if (name && name !== batch.name) {
-    const nameExists = await Batch.findOne({ name });
+    const nameExists = await Batch.findOne({ where: { name } });
     if (nameExists) {
       res.status(400);
       throw new Error('Batch with this name already exists');
@@ -116,7 +117,7 @@ const updateBatch = asyncHandler(async (req, res) => {
  * @access  Private/Admin
  */
 const deleteBatch = asyncHandler(async (req, res) => {
-  const batch = await Batch.findById(req.params.id);
+  const batch = await Batch.findByPk(req.params.id);
   
   if (!batch) {
     res.status(404);
@@ -126,7 +127,7 @@ const deleteBatch = asyncHandler(async (req, res) => {
   // TODO: Check if there are students or submissions associated with this batch
   // before deletion, or implement soft delete
   
-  await batch.deleteOne();
+  await batch.destroy();
   res.json({ message: 'Batch removed' });
 });
 
@@ -136,14 +137,17 @@ const deleteBatch = asyncHandler(async (req, res) => {
  * @access  Private/Admin, Teacher
  */
 const getBatchStudents = asyncHandler(async (req, res) => {
-  const batch = await Batch.findById(req.params.id);
+  const batch = await Batch.findByPk(req.params.id);
 
   if (!batch) {
     res.status(404);
     throw new Error('Batch not found');
   }
 
-  const students = await Student.find({ batch: req.params.id }).select('-password');
+  const students = await Student.findAll({
+    where: { batch: req.params.id },
+    attributes: { exclude: ['password'] }
+  });
   
   res.json(students);
 });

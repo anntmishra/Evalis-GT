@@ -46,6 +46,84 @@ Evalis is a comprehensive university grading and submission portal that provides
    npm run data:import
    ```
 
+## Database Setup (PostgreSQL)
+
+### Prerequisites
+- PostgreSQL installed on your system (version 12 or higher recommended)
+- Basic knowledge of PostgreSQL administration
+
+### Setup Instructions
+
+1. Install PostgreSQL if you haven't already:
+   ```bash
+   # For Ubuntu/Debian
+   sudo apt update
+   sudo apt install postgresql postgresql-contrib
+   
+   # For macOS with Homebrew
+   brew install postgresql
+   
+   # For Windows
+   # Download the installer from https://www.postgresql.org/download/windows/
+   ```
+
+2. Start the PostgreSQL service:
+   ```bash
+   # Ubuntu/Debian
+   sudo service postgresql start
+   
+   # macOS
+   brew services start postgresql
+   
+   # Windows
+   # The service should start automatically after installation
+   ```
+
+3. Create the database:
+   ```bash
+   # Option 1: Using the provided SQL script
+   psql -U postgres -f init-db.sql
+   
+   # Option 2: Manually via psql
+   psql -U postgres
+   postgres=# CREATE DATABASE evalis;
+   postgres=# \q
+   ```
+
+4. Configure environment variables:
+   Update the `.env` file with your PostgreSQL connection details if different from the defaults:
+   ```
+   POSTGRES_HOST=localhost
+   POSTGRES_PORT=5432
+   POSTGRES_DB=evalis
+   POSTGRES_USER=postgres
+   POSTGRES_PASSWORD=yourpassword
+   POSTGRES_SSL=false
+   ```
+
+5. Run the application with database synchronization:
+   ```bash
+   npm run server:dev
+   ```
+   This will create all the required tables in the database.
+
+6. (Optional) Seed the database with initial data:
+   ```bash
+   npm run data:import
+   ```
+
+### Database Schemas
+
+The application uses the following main database tables:
+
+- `Students`: Student records with authentication
+- `Teachers`: Teacher records with authentication
+- `Subjects`: Available subjects/courses 
+- `Batches`: Student batch/year information
+- `Submissions`: Student assignment/exam submissions
+- `TeacherSubjects`: Association between teachers and their assigned subjects
+- `Admins`: Administrator accounts
+
 ## Running the Application
 
 ### Development Mode

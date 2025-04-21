@@ -1,5 +1,6 @@
 const asyncHandler = require('express-async-handler');
-const Subject = require('../models/subjectModel');
+const { Subject, Teacher, TeacherSubject } = require('../models');
+const { Op } = require('sequelize');
 
 /**
  * @desc    Get all subjects
@@ -7,12 +8,12 @@ const Subject = require('../models/subjectModel');
  * @access  Private
  */
 const getSubjects = asyncHandler(async (req, res) => {
-  const section = req.query.section || null;
-  
-  const filter = {};
-  if (section) filter.section = section;
-
-  const subjects = await Subject.find(filter);
+  const subjects = await Subject.findAll({
+    include: [{
+      model: Teacher,
+      through: { attributes: [] }
+    }]
+  });
   res.json(subjects);
 });
 
@@ -22,7 +23,12 @@ const getSubjects = asyncHandler(async (req, res) => {
  * @access  Private
  */
 const getSubjectById = asyncHandler(async (req, res) => {
-  const subject = await Subject.findOne({ id: req.params.id });
+  const subject = await Subject.findByPk(req.params.id, {
+    include: [{
+      model: Teacher,
+      through: { attributes: [] }
+    }]
+  });
 
   if (subject) {
     res.json(subject);
@@ -38,21 +44,30 @@ const getSubjectById = asyncHandler(async (req, res) => {
  * @access  Private/Admin
  */
 const createSubject = asyncHandler(async (req, res) => {
-  const { id, name, section, description, credits } = req.body;
+  const { name, section, description, credits, id } = req.body;
 
-  const subjectExists = await Subject.findOne({ id });
+  if (!name || !section) {
+    res.status(400);
+    throw new Error('Please provide name and section');
+  }
+
+  // Generate a subject ID if not provided
+  const subjectId = id || `${section.replace('-', '')}${Math.floor(Math.random() * 1000)}`;
+
+  // Check if subject already exists with the same ID
+  const subjectExists = await Subject.findOne({ where: { id: subjectId } });
 
   if (subjectExists) {
     res.status(400);
-    throw new Error('Subject already exists');
+    throw new Error('Subject with this ID already exists');
   }
 
   const subject = await Subject.create({
-    id,
+    id: subjectId,
     name,
     section,
-    description,
-    credits,
+    description: description || '',
+    credits: credits || 3,
   });
 
   if (subject) {
@@ -69,13 +84,15 @@ const createSubject = asyncHandler(async (req, res) => {
  * @access  Private/Admin
  */
 const updateSubject = asyncHandler(async (req, res) => {
-  const subject = await Subject.findOne({ id: req.params.id });
+  const { name, section, description, credits } = req.body;
+
+  const subject = await Subject.findByPk(req.params.id);
 
   if (subject) {
-    subject.name = req.body.name || subject.name;
-    subject.section = req.body.section || subject.section;
-    subject.description = req.body.description || subject.description;
-    subject.credits = req.body.credits || subject.credits;
+    subject.name = name || subject.name;
+    subject.section = section || subject.section;
+    subject.description = description !== undefined ? description : subject.description;
+    subject.credits = credits !== undefined ? credits : subject.credits;
 
     const updatedSubject = await subject.save();
     res.json(updatedSubject);
@@ -91,15 +108,38 @@ const updateSubject = asyncHandler(async (req, res) => {
  * @access  Private/Admin
  */
 const deleteSubject = asyncHandler(async (req, res) => {
-  const subject = await Subject.findOne({ id: req.params.id });
+  const subject = await Subject.findByPk(req.params.id);
 
   if (subject) {
-    await subject.deleteOne();
+    // First remove all teacher-subject associations
+    await TeacherSubject.destroy({
+      where: { subjectId: subject.id }
+    });
+    
+    // Then delete the subject
+    await subject.destroy();
     res.json({ message: 'Subject removed' });
   } else {
     res.status(404);
     throw new Error('Subject not found');
   }
+});
+
+/**
+ * @desc    Get subjects by section
+ * @route   GET /api/subjects/section/:sectionId
+ * @access  Private
+ */
+const getSubjectsBySection = asyncHandler(async (req, res) => {
+  const subjects = await Subject.findAll({
+    where: { section: req.params.sectionId },
+    include: [{
+      model: Teacher,
+      through: { attributes: [] }
+    }]
+  });
+  
+  res.json(subjects);
 });
 
 module.exports = {
@@ -108,4 +148,5 @@ module.exports = {
   createSubject,
   updateSubject,
   deleteSubject,
+  getSubjectsBySection
 }; 

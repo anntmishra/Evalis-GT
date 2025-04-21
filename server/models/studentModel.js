@@ -1,59 +1,57 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
 const bcrypt = require('bcryptjs');
+const { sequelize } = require('../config/db');
 
-const studentSchema = mongoose.Schema({
+const Student = sequelize.define('Student', {
   id: {
-    type: String,
-    required: true,
-    unique: true
+    type: DataTypes.STRING,
+    primaryKey: true,
+    allowNull: false,
   },
   name: {
-    type: String,
-    required: true
+    type: DataTypes.STRING,
+    allowNull: false,
   },
   section: {
-    type: String,
-    required: true
+    type: DataTypes.STRING,
+    allowNull: false,
   },
   batch: {
-    type: String,
-    required: true,
-    ref: 'Batch'
+    type: DataTypes.STRING,
+    allowNull: false,
   },
   email: {
-    type: String,
-    required: false,
+    type: DataTypes.STRING,
+    allowNull: true,
     unique: true,
-    sparse: true
   },
   password: {
-    type: String,
-    required: true
+    type: DataTypes.STRING,
+    allowNull: false,
   },
   role: {
-    type: String,
-    default: 'student'
+    type: DataTypes.STRING,
+    defaultValue: 'student',
   }
 }, {
-  timestamps: true
+  timestamps: true,
+  hooks: {
+    beforeSave: async (student) => {
+      // Only hash password if it has been modified (or is new)
+      if (!student.changed('password')) {
+        return;
+      }
+      
+      // Hash password
+      const salt = await bcrypt.genSalt(10);
+      student.password = await bcrypt.hash(student.password, salt);
+    }
+  }
 });
 
-// Method to check if entered password matches the stored hashed password
-studentSchema.methods.matchPassword = async function(enteredPassword) {
+// Instance method to check if entered password matches the stored hashed password
+Student.prototype.matchPassword = async function(enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
-
-// Pre-save hook to hash password
-studentSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) {
-    return next();
-  }
-
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
-  next();
-});
-
-const Student = mongoose.model('Student', studentSchema);
 
 module.exports = Student; 

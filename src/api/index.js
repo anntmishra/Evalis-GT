@@ -1,11 +1,9 @@
 import axios from 'axios';
-
-// Make sure the API URL is correct
-const API_URL = 'http://localhost:5000/api';
+import config from '../config/environment';
 
 // Create axios instance with base URL
 const api = axios.create({
-  baseURL: API_URL,
+  baseURL: config.API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -14,7 +12,7 @@ const api = axios.create({
 // Add request interceptor to add auth token to headers
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('userToken');
+    const token = localStorage.getItem(config.AUTH.TOKEN_STORAGE_KEY);
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -38,6 +36,28 @@ export const createStudent = (studentData) => api.post('/students', studentData)
 export const updateStudent = (id, studentData) => api.put(`/students/${id}`, studentData);
 export const deleteStudent = (id) => api.delete(`/students/${id}`);
 export const importStudents = (formData) => api.post('/students/import', formData);
+export const importStudentsFromExcel = (file, batchId) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('batchId', batchId);
+  
+  console.log(`Uploading file ${file.name} to batch ${batchId}`);
+  
+  return api.post('/students/import-excel', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+    // Add timeout and additional error handling
+    timeout: 60000, // Increase timeout to 60 seconds for large files
+    validateStatus: (status) => {
+      console.log(`Response status: ${status}`);
+      return status >= 200 && status < 300; // Default validate function
+    }
+  }).catch(error => {
+    console.error('Excel import error details:', error.response?.data || error.message);
+    throw error; // Re-throw to let the component handle it
+  });
+};
 
 // Teacher API
 export const getTeachers = () => api.get('/teachers');

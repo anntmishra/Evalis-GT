@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getTeacherById, updateTeacher, createTeacher, getSubjects } from '../api';
+import config from '../config/environment';
 
 export default function EditTeacher({ teacherId, onClose, onSuccess }) {
   const [teacher, setTeacher] = useState({
@@ -78,7 +79,7 @@ export default function EditTeacher({ teacherId, onClose, onSuccess }) {
       }
       
       // Check token is present
-      const token = localStorage.getItem('userToken');
+      const token = localStorage.getItem(config.AUTH.TOKEN_STORAGE_KEY);
       if (!token) {
         setError('You are not authenticated. Please log in again.');
         setSaving(false);
@@ -105,33 +106,9 @@ export default function EditTeacher({ teacherId, onClose, onSuccess }) {
         console.log('Updating teacher with ID:', teacherId);
         response = await updateTeacher(teacherId, teacherData);
       } else {
-        // Create new teacher using fetch directly to debug
+        // Create new teacher using API service
         console.log('Creating new teacher');
-        try {
-          const fetchResponse = await fetch('http://localhost:5000/api/teachers', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify(teacherData)
-          });
-          
-          if (!fetchResponse.ok) {
-            const errorData = await fetchResponse.json();
-            throw new Error(errorData.message || 'Failed to create teacher');
-          }
-          
-          response = await fetchResponse.json();
-          console.log('Direct fetch response:', response);
-          
-          // Try the standard API call as well
-          const apiResponse = await createTeacher(teacherData);
-          console.log('API response:', apiResponse);
-        } catch (fetchError) {
-          console.error('Fetch error:', fetchError);
-          throw fetchError;
-        }
+        response = await createTeacher(teacherData);
       }
       
       console.log('API response:', response);

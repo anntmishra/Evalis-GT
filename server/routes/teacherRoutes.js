@@ -8,6 +8,7 @@ const {
   deleteTeacher,
   assignSubject,
   removeSubject,
+  importTeachersFromExcel
 } = require('../controllers/teacherController');
 const { protect, admin } = require('../middleware/authMiddleware');
 
@@ -26,5 +27,8 @@ router.route('/:id/subjects')
 
 router.route('/:id/subjects/:subjectId')
   .delete(protect, admin, removeSubject);
+
+router.route('/import-excel')
+  .post(protect, admin, importTeachersFromExcel);
 
 module.exports = router; 

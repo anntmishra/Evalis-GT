@@ -1,8 +1,6 @@
 const jwt = require('jsonwebtoken');
 const asyncHandler = require('express-async-handler');
-const Student = require('../models/studentModel');
-const Teacher = require('../models/teacherModel');
-const Admin = require('../models/adminModel');
+const { Student, Teacher, Admin } = require('../models');
 
 // Middleware to protect routes that require authentication
 const protect = asyncHandler(async (req, res, next) => {
@@ -11,33 +9,70 @@ const protect = asyncHandler(async (req, res, next) => {
   console.log('Auth middleware checking token...');
   console.log('Headers:', req.headers.authorization ? 'Authorization header present' : 'No authorization header');
   
-  // Check if token exists in the Authorization header
+  // Check for token in headers
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
     try {
       // Get token from header
       token = req.headers.authorization.split(' ')[1];
       console.log('Token extracted from header');
       
-      // Verify token
+      // Decode token
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       console.log('Token verified, user role:', decoded.role);
       
-      // Get user based on role
-      if (decoded.role === 'student') {
-        req.user = await Student.findById(decoded.id).select('-password');
-      } else if (decoded.role === 'teacher') {
-        req.user = await Teacher.findById(decoded.id).select('-password');
-      } else if (decoded.role === 'admin') {
-        req.user = await Admin.findById(decoded.id).select('-password');
-      }
+      // Check if the user exists in any of the models
+      // First try student model
+      let user = await Student.findOne({ 
+        where: { id: decoded.id },
+        attributes: { exclude: ['password'] }
+      });
       
-      if (!req.user) {
+      if (user) {
+        // For students
+        req.user = user;
+        req.user.role = 'student';
+        req.student = user;
+        console.log('User authenticated:', req.user.role);
+        return next();
+      }
+
+      // If not found in students, try teacher model
+      user = await Teacher.findOne({ 
+        where: { id: decoded.id },
+        attributes: { exclude: ['password'] }
+      });
+
+      if (user) {
+        // For teachers
+        req.user = user;
+        req.user.role = 'teacher';
+        req.teacher = user;
+        console.log('User authenticated:', req.user.role);
+        return next();
+      }
+
+      // Finally try admin model (by username)
+      user = await Admin.findOne({ 
+        where: { username: decoded.id },
+        attributes: { exclude: ['password'] }
+      });
+
+      if (user) {
+        // For admins
+        req.user = user;
+        req.user.role = 'admin';
+        req.admin = user;
+        console.log('User authenticated:', req.user.role);
+        return next();
+      }
+
+      // If user not found in any model
+      if (!user) {
         console.log('No user found with decoded ID:', decoded.id);
         res.status(404);
         throw new Error('User not found');
       }
-      
-      console.log('User authenticated:', req.user.role);
+
       next();
     } catch (error) {
       console.error('Token verification error:', error.message);

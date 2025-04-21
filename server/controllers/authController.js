@@ -1,29 +1,27 @@
 const asyncHandler = require('express-async-handler');
-const Student = require('../models/studentModel');
-const Teacher = require('../models/teacherModel');
-const Admin = require('../models/adminModel');
-const generateToken = require('../utils/generateToken');
+const jwt = require('jsonwebtoken');
+const { Student, Teacher, Admin, Subject } = require('../models');
 
 /**
- * @desc    Authenticate student
+ * @desc    Auth student & get token
  * @route   POST /api/auth/student/login
  * @access  Public
  */
-const loginStudent = asyncHandler(async (req, res) => {
+const authStudent = asyncHandler(async (req, res) => {
   const { id, password } = req.body;
 
-  const student = await Student.findOne({ id });
+  // Check for student
+  const student = await Student.findOne({ where: { id } });
 
   if (student && (await student.matchPassword(password))) {
     res.json({
-      _id: student._id,
       id: student.id,
       name: student.name,
       section: student.section,
       batch: student.batch,
       email: student.email,
-      role: student.role,
-      token: generateToken(student._id, student.role),
+      role: 'student',
+      token: generateToken(student.id, 'student'),
     });
   } else {
     res.status(401);
@@ -32,24 +30,30 @@ const loginStudent = asyncHandler(async (req, res) => {
 });
 
 /**
- * @desc    Authenticate teacher
+ * @desc    Auth teacher & get token
  * @route   POST /api/auth/teacher/login
  * @access  Public
  */
-const loginTeacher = asyncHandler(async (req, res) => {
+const authTeacher = asyncHandler(async (req, res) => {
   const { id, password } = req.body;
 
-  const teacher = await Teacher.findOne({ id });
+  // Check for teacher
+  const teacher = await Teacher.findOne({ 
+    where: { id },
+    include: [{
+      model: Subject,
+      through: { attributes: [] }
+    }]
+  });
 
   if (teacher && (await teacher.matchPassword(password))) {
     res.json({
-      _id: teacher._id,
       id: teacher.id,
       name: teacher.name,
       email: teacher.email,
-      subjects: teacher.subjects,
-      role: teacher.role,
-      token: generateToken(teacher._id, teacher.role),
+      subjects: teacher.Subjects || [],
+      role: 'teacher',
+      token: generateToken(teacher.id, 'teacher'),
     });
   } else {
     res.status(401);
@@ -58,25 +62,39 @@ const loginTeacher = asyncHandler(async (req, res) => {
 });
 
 /**
- * @desc    Authenticate admin
+ * @desc    Auth admin & get token
  * @route   POST /api/auth/admin/login
  * @access  Public
  */
-const loginAdmin = asyncHandler(async (req, res) => {
+const authAdmin = asyncHandler(async (req, res) => {
   const { username, password } = req.body;
 
-  const admin = await Admin.findOne({ username });
+  console.log(`Admin login attempt for username: ${username}`);
 
-  if (admin && (await admin.matchPassword(password))) {
+  // Check for admin
+  const admin = await Admin.findOne({ where: { username } });
+
+  if (!admin) {
+    console.log(`Admin login failed: No admin found with username ${username}`);
+    res.status(401);
+    throw new Error('Invalid username or password');
+  }
+
+  const isMatch = await admin.matchPassword(password);
+  console.log(`Admin password match result: ${isMatch}`);
+
+  if (admin && isMatch) {
+    console.log(`Admin login successful for: ${admin.username}`);
     res.json({
-      _id: admin._id,
+      id: admin.id,
       username: admin.username,
       name: admin.name,
       email: admin.email,
-      role: admin.role,
-      token: generateToken(admin._id, admin.role),
+      role: 'admin',
+      token: generateToken(admin.username, 'admin'),
     });
   } else {
+    console.log(`Admin login failed: Invalid password for ${username}`);
     res.status(401);
     throw new Error('Invalid username or password');
   }
@@ -88,17 +106,24 @@ const loginAdmin = asyncHandler(async (req, res) => {
  * @access  Private
  */
 const getUserProfile = asyncHandler(async (req, res) => {
-  if (!req.user) {
+  if (req.user) {
+    res.json(req.user);
+  } else {
     res.status(404);
     throw new Error('User not found');
   }
-
-  res.json(req.user);
 });
 
+// Generate JWT
+const generateToken = (id, role) => {
+  return jwt.sign({ id, role }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRE,
+  });
+};
+
 module.exports = {
-  loginStudent,
-  loginTeacher,
-  loginAdmin,
+  authStudent,
+  authTeacher,
+  authAdmin,
   getUserProfile,
 }; 

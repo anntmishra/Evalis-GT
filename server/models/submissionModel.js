@@ -1,57 +1,70 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/db');
 
-const submissionSchema = mongoose.Schema({
+const Submission = sequelize.define('Submission', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
   studentId: {
-    type: String,
-    required: true,
-    ref: 'Student'
+    type: DataTypes.STRING,
+    allowNull: false,
+    references: {
+      model: 'Students',
+      key: 'id'
+    }
   },
   subjectId: {
-    type: String,
-    required: true,
-    ref: 'Subject'
+    type: DataTypes.STRING,
+    allowNull: false,
+    references: {
+      model: 'Subjects',
+      key: 'id'
+    }
   },
   examType: {
-    type: String,
-    required: true
+    type: DataTypes.STRING,
+    allowNull: false,
   },
   submissionText: {
-    type: String,
-    required: true
+    type: DataTypes.TEXT,
+    allowNull: false,
   },
   submissionDate: {
-    type: Date,
-    default: Date.now
+    type: DataTypes.DATE,
+    defaultValue: DataTypes.NOW,
   },
   score: {
-    type: Number,
-    default: null
+    type: DataTypes.FLOAT,
+    allowNull: true,
   },
   plagiarismScore: {
-    type: Number,
-    default: 0
+    type: DataTypes.FLOAT,
+    defaultValue: 0,
   },
   feedback: {
-    type: String,
-    default: ''
+    type: DataTypes.TEXT,
+    defaultValue: '',
   },
   graded: {
-    type: Boolean,
-    default: false
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
   },
   gradedBy: {
-    type: String,
-    ref: 'Teacher',
-    default: null
+    type: DataTypes.STRING,
+    allowNull: true,
+    references: {
+      model: 'Teachers',
+      key: 'id'
+    }
   },
   gradedDate: {
-    type: Date,
-    default: null
+    type: DataTypes.DATE,
+    allowNull: true,
   }
 }, {
   timestamps: true
 });
-
-const Submission = mongoose.model('Submission', submissionSchema);
 
 module.exports = Submission; 

@@ -1,9 +1,8 @@
 const asyncHandler = require('express-async-handler');
-const Student = require('../models/studentModel');
-const Submission = require('../models/submissionModel');
+const { Student, Submission, Batch } = require('../models');
 const jwt = require('jsonwebtoken');
 const XLSX = require('xlsx');
-const Batch = require('../models/batchModel');
+const { Op } = require('sequelize');
 
 /**
  * @desc    Get all students
@@ -20,11 +19,13 @@ const getStudents = asyncHandler(async (req, res) => {
   if (batch) filter.batch = batch;
   if (section) filter.section = section;
 
-  const count = await Student.countDocuments(filter);
-  const students = await Student.find(filter)
-    .select('-password')
-    .limit(pageSize)
-    .skip(pageSize * (page - 1));
+  const { count, rows: students } = await Student.findAndCountAll({
+    where: filter,
+    attributes: { exclude: ['password'] },
+    limit: pageSize,
+    offset: pageSize * (page - 1),
+    order: [['id', 'ASC']]
+  });
 
   res.json({
     students,
@@ -40,7 +41,10 @@ const getStudents = asyncHandler(async (req, res) => {
  * @access  Private/Admin or Teacher
  */
 const getStudentById = asyncHandler(async (req, res) => {
-  const student = await Student.findOne({ id: req.params.id }).select('-password');
+  const student = await Student.findOne({ 
+    where: { id: req.params.id },
+    attributes: { exclude: ['password'] }
+  });
 
   if (student) {
     res.json(student);
@@ -58,7 +62,7 @@ const getStudentById = asyncHandler(async (req, res) => {
 const createStudent = asyncHandler(async (req, res) => {
   const { id, name, section, batch, email, password } = req.body;
 
-  const studentExists = await Student.findOne({ id });
+  const studentExists = await Student.findOne({ where: { id } });
 
   if (studentExists) {
     res.status(400);
@@ -76,7 +80,6 @@ const createStudent = asyncHandler(async (req, res) => {
 
   if (student) {
     res.status(201).json({
-      _id: student._id,
       id: student.id,
       name: student.name,
       section: student.section,
@@ -95,7 +98,7 @@ const createStudent = asyncHandler(async (req, res) => {
  * @access  Private/Admin
  */
 const updateStudent = asyncHandler(async (req, res) => {
-  const student = await Student.findOne({ id: req.params.id });
+  const student = await Student.findOne({ where: { id: req.params.id } });
 
   if (student) {
     student.name = req.body.name || student.name;
@@ -110,7 +113,6 @@ const updateStudent = asyncHandler(async (req, res) => {
     const updatedStudent = await student.save();
 
     res.json({
-      _id: updatedStudent._id,
       id: updatedStudent.id,
       name: updatedStudent.name,
       section: updatedStudent.section,
@@ -129,10 +131,10 @@ const updateStudent = asyncHandler(async (req, res) => {
  * @access  Private/Admin
  */
 const deleteStudent = asyncHandler(async (req, res) => {
-  const student = await Student.findOne({ id: req.params.id });
+  const student = await Student.findOne({ where: { id: req.params.id } });
 
   if (student) {
-    await student.deleteOne();
+    await student.destroy();
     res.json({ message: 'Student removed' });
   } else {
     res.status(404);
@@ -143,24 +145,20 @@ const deleteStudent = asyncHandler(async (req, res) => {
 /**
  * @desc    Get student submissions
  * @route   GET /api/students/:id/submissions
- * @access  Private/Student, Teacher, Admin
+ * @access  Private/Admin or Teacher or Student (if own submissions)
  */
 const getStudentSubmissions = asyncHandler(async (req, res) => {
-  const student = await Student.findOne({ id: req.params.id });
+  const student = await Student.findOne({ where: { id: req.params.id } });
 
   if (!student) {
     res.status(404);
     throw new Error('Student not found');
   }
 
-  // Only the student or a teacher/admin can view their submissions
-  if (req.user.role === 'student' && req.user.id !== req.params.id) {
-    res.status(403);
-    throw new Error('Not authorized to view this student\'s submissions');
-  }
-
-  const submissions = await Submission.find({ studentId: req.params.id })
-    .sort({ submissionDate: -1 });
+  const submissions = await Submission.findAll({
+    where: { studentId: req.params.id },
+    order: [['submissionDate', 'DESC']]
+  });
 
   res.json(submissions);
 });
@@ -195,7 +193,7 @@ const importStudents = asyncHandler(async (req, res) => {
         continue;
       }
 
-      const studentExists = await Student.findOne({ id });
+      const studentExists = await Student.findOne({ where: { id } });
 
       if (studentExists) {
         errors.push(`Student with ID ${id} already exists`);
@@ -234,6 +232,12 @@ const importStudents = asyncHandler(async (req, res) => {
  * @access  Private/Admin
  */
 const importStudentsFromExcel = asyncHandler(async (req, res) => {
+  console.log('Import request received:', {
+    files: req.files ? Object.keys(req.files) : 'No files',
+    body: req.body,
+    content_type: req.headers['content-type']
+  });
+
   // Check if file is uploaded
   if (!req.files || !req.files.file) {
     res.status(400);
@@ -247,19 +251,76 @@ const importStudentsFromExcel = asyncHandler(async (req, res) => {
   }
 
   // Verify that the batch exists
-  const batch = await Batch.findOne({ id: req.body.batchId });
+  const batch = await Batch.findByPk(req.body.batchId);
   if (!batch) {
     res.status(404);
-    throw new Error('Batch not found');
+    throw new Error(`Batch with ID ${req.body.batchId} not found`);
   }
 
   try {
     // Get the file buffer
     const file = req.files.file;
-    const workbook = XLSX.read(file.data, { type: 'buffer' });
+    console.log('File info:', {
+      name: file.name,
+      size: file.size,
+      mimetype: file.mimetype
+    });
+
+    // Check file type
+    if (!file.name.match(/\.(xlsx|xls|csv)$/i)) {
+      res.status(400);
+      throw new Error('Invalid file format. Please upload an Excel file (.xlsx, .xls) or CSV (.csv)');
+    }
+
+    let workbook;
+    try {
+      // Determine the type based on file extension
+      const fileExt = file.name.split('.').pop().toLowerCase();
+      let type = 'buffer';
+      
+      if (fileExt === 'csv') {
+        // For CSV files, first convert to string then to sheet
+        const csvString = file.data.toString('utf8');
+        workbook = XLSX.read(csvString, { type: 'string' });
+      } else {
+        // For Excel files (.xlsx, .xls)
+        workbook = XLSX.read(file.data, { type: 'buffer' });
+      }
+    } catch (error) {
+      console.error('XLSX parsing error:', error);
+      res.status(400);
+      throw new Error(`Error parsing Excel file: ${error.message}`);
+    }
+
+    if (!workbook.SheetNames || workbook.SheetNames.length === 0) {
+      res.status(400);
+      throw new Error('Excel file does not contain any sheets');
+    }
+
     const sheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[sheetName];
-    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+    
+    if (!worksheet) {
+      res.status(400);
+      throw new Error('Could not read worksheet from Excel file');
+    }
+    
+    let jsonData;
+    try {
+      jsonData = XLSX.utils.sheet_to_json(worksheet);
+    } catch (error) {
+      console.error('JSON conversion error:', error);
+      res.status(400);
+      throw new Error(`Error converting sheet to JSON: ${error.message}`);
+    }
+
+    // Check if we have any data
+    if (!jsonData || jsonData.length === 0) {
+      res.status(400);
+      throw new Error('Excel file contains no data');
+    }
+
+    console.log('First row example:', jsonData[0]);
 
     // Validate and prepare data
     const studentsToCreate = [];
@@ -270,60 +331,93 @@ const importStudentsFromExcel = asyncHandler(async (req, res) => {
       const row = jsonData[i];
       
       // Skip empty rows
-      if (!row.id || !row.name) {
-        errors.push(`Row ${i + 2}: Missing required fields (id, name)`);
+      if (!row.id && !row.ID && !row.StudentId && !row.StudentID) {
+        errors.push(`Row ${i + 2}: Missing required fields (id)`);
         continue;
       }
 
       // Create student object
       const studentData = {
-        id: row.id.toString().trim(),
-        name: row.name.trim(),
-        section: row.section ? row.section.trim() : '',
+        id: (row.id || row.ID || row.StudentId || row.StudentID || '').toString().trim(),
+        name: (row.name || row.Name || row.StudentName || '').toString().trim(),
+        section: (row.section || row.Section || '').toString().trim() || batch.id.split('-')[0] || 'CSE-1',
         batch: req.body.batchId,
-        email: row.email ? row.email.trim() : '',
-        password: row.password ? row.password.toString().trim() : row.id.toString().trim(), // Default to ID if no password provided
+        email: (row.email || row.Email || row.StudentEmail || '').toString().trim(),
+        password: (row.id || row.ID || row.StudentId || row.StudentID || '').toString().trim(), // Default to student ID
       };
 
+      // Validate student data
+      if (!studentData.id) {
+        errors.push(`Row ${i + 2}: Student ID is required`);
+        continue;
+      }
+
+      if (!studentData.name) {
+        errors.push(`Row ${i + 2}: Student name is required`);
+        continue;
+      }
+
+      // Generate a default password (last 4 digits of student ID)
+      if (studentData.id.length >= 4) {
+        studentData.password = studentData.id.slice(-4);
+      }
+
       // Check if student already exists
-      const existingStudent = await Student.findOne({ id: studentData.id });
-      if (existingStudent) {
-        studentsToUpdate.push({
-          id: studentData.id,
-          update: {
-            name: studentData.name,
-            section: studentData.section,
-            batch: studentData.batch,
-            email: studentData.email,
-            ...(studentData.password !== existingStudent.id && { password: studentData.password })
-          }
-        });
-      } else {
-        studentsToCreate.push(studentData);
+      try {
+        const existingStudent = await Student.findOne({ where: { id: studentData.id } });
+        
+        if (existingStudent) {
+          studentsToUpdate.push({
+            id: studentData.id,
+            update: {
+              name: studentData.name,
+              section: studentData.section,
+              batch: studentData.batch,
+              email: studentData.email || existingStudent.email,
+            }
+          });
+        } else {
+          studentsToCreate.push(studentData);
+        }
+      } catch (error) {
+        console.error(`Error checking student ${studentData.id}:`, error);
+        errors.push(`Row ${i + 2}: Error processing student: ${error.message}`);
       }
     }
 
     // Create new students
     if (studentsToCreate.length > 0) {
-      await Student.create(studentsToCreate);
+      try {
+        await Student.bulkCreate(studentsToCreate);
+      } catch (error) {
+        console.error('Error creating students:', error);
+        errors.push(`Failed to create students: ${error.message}`);
+      }
     }
 
     // Update existing students
     for (const student of studentsToUpdate) {
-      await Student.findOneAndUpdate(
-        { id: student.id },
-        student.update,
-        { new: true }
-      );
+      try {
+        await Student.update(
+          student.update,
+          { where: { id: student.id } }
+        );
+      } catch (error) {
+        console.error(`Error updating student ${student.id}:`, error);
+        errors.push(`Failed to update student ${student.id}: ${error.message}`);
+      }
     }
 
-    res.status(200).json({
+    const response = {
       message: 'Students imported successfully',
       totalImported: studentsToCreate.length + studentsToUpdate.length,
       created: studentsToCreate.length,
       updated: studentsToUpdate.length,
       errors: errors
-    });
+    };
+
+    console.log('Import response:', response);
+    res.status(200).json(response);
   } catch (error) {
     console.error('Import error:', error);
     res.status(500);
@@ -331,24 +425,26 @@ const importStudentsFromExcel = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc    Auth student & get token
-// @route   POST /api/students/login
-// @access  Public
+/**
+ * @desc    Auth student & get token
+ * @route   POST /api/students/login
+ * @access  Public
+ */
 const authStudent = asyncHandler(async (req, res) => {
   const { id, password } = req.body;
 
-  const student = await Student.findOne({ id });
+  // Check for student
+  const student = await Student.findOne({ where: { id } });
 
   if (student && (await student.matchPassword(password))) {
     res.json({
-      _id: student._id,
       id: student.id,
       name: student.name,
-      email: student.email,
       section: student.section,
       batch: student.batch,
+      email: student.email,
       role: student.role,
-      token: generateToken(student._id),
+      token: generateToken(student.id),
     });
   } else {
     res.status(401);
@@ -356,22 +452,19 @@ const authStudent = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc    Get student profile
-// @route   GET /api/students/profile
-// @access  Private
+/**
+ * @desc    Get student profile
+ * @route   GET /api/students/profile
+ * @access  Private/Student
+ */
 const getStudentProfile = asyncHandler(async (req, res) => {
-  const student = await Student.findById(req.student._id);
+  const student = await Student.findOne({
+    where: { id: req.student.id },
+    attributes: { exclude: ['password'] }
+  });
 
   if (student) {
-    res.json({
-      _id: student._id,
-      id: student.id,
-      name: student.name,
-      email: student.email,
-      section: student.section,
-      batch: student.batch,
-      role: student.role,
-    });
+    res.json(student);
   } else {
     res.status(404);
     throw new Error('Student not found');
@@ -381,7 +474,7 @@ const getStudentProfile = asyncHandler(async (req, res) => {
 // Generate JWT
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: '30d',
+    expiresIn: process.env.JWT_EXPIRE,
   });
 };
 

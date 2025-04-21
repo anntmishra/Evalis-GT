@@ -1,53 +1,49 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
 const bcrypt = require('bcryptjs');
+const { sequelize } = require('../config/db');
 
-const teacherSchema = mongoose.Schema({
+const Teacher = sequelize.define('Teacher', {
   id: {
-    type: String,
-    required: true,
-    unique: true
+    type: DataTypes.STRING,
+    primaryKey: true,
+    allowNull: false,
   },
   name: {
-    type: String,
-    required: true
+    type: DataTypes.STRING,
+    allowNull: false,
   },
   email: {
-    type: String,
-    required: true,
-    unique: true
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true,
   },
   password: {
-    type: String,
-    required: true
+    type: DataTypes.STRING,
+    allowNull: false,
   },
-  subjects: [{
-    type: String,
-    ref: 'Subject'
-  }],
   role: {
-    type: String,
-    default: 'teacher'
+    type: DataTypes.STRING,
+    defaultValue: 'teacher',
   }
 }, {
-  timestamps: true
+  timestamps: true,
+  hooks: {
+    beforeSave: async (teacher) => {
+      // Only hash password if it has been modified (or is new)
+      if (!teacher.changed('password')) {
+        return;
+      }
+      
+      // Hash password
+      const salt = await bcrypt.genSalt(10);
+      teacher.password = await bcrypt.hash(teacher.password, salt);
+    }
+  }
 });
 
-// Method to check if entered password matches the stored hashed password
-teacherSchema.methods.matchPassword = async function(enteredPassword) {
+// Instance method to check if entered password matches the stored hashed password
+Teacher.prototype.matchPassword = async function(enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
-
-// Pre-save hook to hash password
-teacherSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) {
-    return next();
-  }
-
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
-  next();
-});
-
-const Teacher = mongoose.model('Teacher', teacherSchema);
 
 module.exports = Teacher; 

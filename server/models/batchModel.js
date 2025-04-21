@@ -1,35 +1,34 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/db');
 
-const batchSchema = mongoose.Schema({
+const Batch = sequelize.define('Batch', {
   id: {
-    type: String,
-    required: true,
-    unique: true
+    type: DataTypes.STRING,
+    primaryKey: true,
+    allowNull: false,
   },
   name: {
-    type: String,
-    required: true
+    type: DataTypes.STRING,
+    allowNull: false,
   },
   startYear: {
-    type: Number,
-    required: true
+    type: DataTypes.INTEGER,
+    allowNull: false,
   },
   endYear: {
-    type: Number,
-    required: true
+    type: DataTypes.INTEGER,
+    allowNull: false,
   },
   department: {
-    type: String,
-    required: true
+    type: DataTypes.STRING,
+    allowNull: false,
   },
   active: {
-    type: Boolean,
-    default: true
+    type: DataTypes.BOOLEAN,
+    defaultValue: true,
   }
 }, {
   timestamps: true
 });
-
-const Batch = mongoose.model('Batch', batchSchema);
 
 module.exports = Batch; 

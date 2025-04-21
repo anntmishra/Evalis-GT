@@ -2,11 +2,17 @@ export interface Student {
   id: string;
   name: string;
   section: string;
+  email?: string;
+  batch?: string;
+  password?: string;
 }
 
 export interface Subject {
   id: string;
   name: string;
+  section?: string;
+  description?: string;
+  credits?: number;
 }
 
 export interface StudentSubmission {

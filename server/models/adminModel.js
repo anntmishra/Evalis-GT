@@ -1,49 +1,54 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
 const bcrypt = require('bcryptjs');
+const { sequelize } = require('../config/db');
 
-const adminSchema = mongoose.Schema({
+const Admin = sequelize.define('Admin', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
   username: {
-    type: String,
-    required: true,
-    unique: true
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true,
   },
   name: {
-    type: String,
-    required: true
+    type: DataTypes.STRING,
+    allowNull: false,
   },
   email: {
-    type: String,
-    required: true,
-    unique: true
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true,
   },
   password: {
-    type: String,
-    required: true
+    type: DataTypes.STRING,
+    allowNull: false,
   },
   role: {
-    type: String,
-    default: 'admin'
+    type: DataTypes.STRING,
+    defaultValue: 'admin',
   }
 }, {
-  timestamps: true
+  timestamps: true,
+  hooks: {
+    beforeSave: async (admin) => {
+      // Only hash password if it has been modified (or is new)
+      if (!admin.changed('password')) {
+        return;
+      }
+      
+      // Hash password
+      const salt = await bcrypt.genSalt(10);
+      admin.password = await bcrypt.hash(admin.password, salt);
+    }
+  }
 });
 
-// Method to check if entered password matches the stored hashed password
-adminSchema.methods.matchPassword = async function(enteredPassword) {
+// Instance method to check if entered password matches the stored hashed password
+Admin.prototype.matchPassword = async function(enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
-
-// Pre-save hook to hash password
-adminSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) {
-    return next();
-  }
-
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
-  next();
-});
-
-const Admin = mongoose.model('Admin', adminSchema);
 
 module.exports = Admin; 

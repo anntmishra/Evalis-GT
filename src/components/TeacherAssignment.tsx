@@ -26,9 +26,10 @@ import {
   DialogActions,
   TextField,
   Snackbar,
-  Alert
+  Alert,
+  CircularProgress
 } from '@mui/material';
-import { Add, Edit, Save, Cancel } from '@mui/icons-material';
+import { Add, Edit, Save, Cancel, Delete } from '@mui/icons-material';
 import { Teacher, Subject } from '../types/university';
 
 interface TeacherAssignmentProps {
@@ -38,6 +39,7 @@ interface TeacherAssignmentProps {
   onRemoveSubject: (teacherId: string, subjectId: string) => void;
   onAddTeacher: (teacher: Teacher) => void;
   onEditTeacher: (teacher: Teacher) => void;
+  onDeleteTeacher?: (teacherId: string) => void;
 }
 
 const TeacherAssignment: React.FC<TeacherAssignmentProps> = ({
@@ -46,7 +48,8 @@ const TeacherAssignment: React.FC<TeacherAssignmentProps> = ({
   onAssignSubject,
   onRemoveSubject,
   onAddTeacher,
-  onEditTeacher
+  onEditTeacher,
+  onDeleteTeacher
 }) => {
   const [selectedTeacher, setSelectedTeacher] = useState<string>('');
   const [selectedSubject, setSelectedSubject] = useState<string>('');
@@ -54,8 +57,11 @@ const TeacherAssignment: React.FC<TeacherAssignmentProps> = ({
   const [editingTeacher, setEditingTeacher] = useState<Teacher | null>(null);
   const [newTeacher, setNewTeacher] = useState<Teacher>({ id: '', name: '', email: '', subjects: [] });
   const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
+  const [deleteConfirmDialog, setDeleteConfirmDialog] = useState(false);
+  const [teacherToDelete, setTeacherToDelete] = useState<string>('');
+  const [isAssigning, setIsAssigning] = useState(false);
 
-  const handleAssign = () => {
+  const handleAssign = async () => {
     if (!selectedTeacher || !selectedSubject) {
       setNotification({
         open: true,
@@ -76,25 +82,22 @@ const TeacherAssignment: React.FC<TeacherAssignmentProps> = ({
       return;
     }
 
-    onAssignSubject(selectedTeacher, selectedSubject);
+    setIsAssigning(true);
     
-    setNotification({
-      open: true,
-      message: 'Subject assigned successfully',
-      severity: 'success'
-    });
-    
-    // Reset selections
-    setSelectedSubject('');
+    try {
+      await onAssignSubject(selectedTeacher, selectedSubject);
+      
+      // Reset selections
+      setSelectedSubject('');
+    } catch (error) {
+      console.error("Error in handleAssign:", error);
+    } finally {
+      setIsAssigning(false);
+    }
   };
 
   const handleRemoveSubject = (teacherId: string, subjectId: string) => {
     onRemoveSubject(teacherId, subjectId);
-    setNotification({
-      open: true,
-      message: 'Subject removed successfully',
-      severity: 'success'
-    });
   };
 
   const handleAddTeacher = () => {
@@ -119,18 +122,8 @@ const TeacherAssignment: React.FC<TeacherAssignmentProps> = ({
 
     if (editingTeacher) {
       onEditTeacher(newTeacher);
-      setNotification({
-        open: true,
-        message: 'Teacher updated successfully',
-        severity: 'success'
-      });
     } else {
       onAddTeacher({ ...newTeacher, subjects: [] });
-      setNotification({
-        open: true,
-        message: 'Teacher added successfully',
-        severity: 'success'
-      });
     }
 
     // Reset form and close dialog
@@ -145,9 +138,27 @@ const TeacherAssignment: React.FC<TeacherAssignmentProps> = ({
     setOpenDialog(true);
   };
 
+  const openDeleteDialog = (teacherId: string) => {
+    setTeacherToDelete(teacherId);
+    setDeleteConfirmDialog(true);
+  };
+
+  const handleDeleteTeacher = () => {
+    if (onDeleteTeacher && teacherToDelete) {
+      onDeleteTeacher(teacherToDelete);
+      setDeleteConfirmDialog(false);
+      setTeacherToDelete('');
+    }
+  };
+
   const getSubjectName = (subjectId: string): string => {
     const subject = subjects.find(s => s.id === subjectId);
     return subject ? subject.name : subjectId;
+  };
+
+  const getTeacherName = (teacherId: string): string => {
+    const teacher = teachers.find(t => t.id === teacherId);
+    return teacher ? teacher.name : teacherId;
   };
 
   return (
@@ -166,6 +177,7 @@ const TeacherAssignment: React.FC<TeacherAssignmentProps> = ({
                   value={selectedTeacher}
                   label="Select Teacher"
                   onChange={(e) => setSelectedTeacher(e.target.value)}
+                  disabled={isAssigning}
                 >
                   {teachers.map((teacher) => (
                     <MenuItem key={teacher.id} value={teacher.id}>
@@ -181,7 +193,7 @@ const TeacherAssignment: React.FC<TeacherAssignmentProps> = ({
                   value={selectedSubject}
                   label="Select Subject"
                   onChange={(e) => setSelectedSubject(e.target.value)}
-                  disabled={!selectedTeacher}
+                  disabled={!selectedTeacher || isAssigning}
                 >
                   {subjects.map((subject) => (
                     <MenuItem key={subject.id} value={subject.id}>
@@ -196,9 +208,10 @@ const TeacherAssignment: React.FC<TeacherAssignmentProps> = ({
                 color="primary"
                 fullWidth
                 onClick={handleAssign}
-                disabled={!selectedTeacher || !selectedSubject}
+                disabled={!selectedTeacher || !selectedSubject || isAssigning}
+                startIcon={isAssigning ? <CircularProgress size={20} color="inherit" /> : null}
               >
-                Assign Subject
+                {isAssigning ? "Assigning..." : "Assign Subject"}
               </Button>
             </CardContent>
           </Card>
@@ -268,15 +281,29 @@ const TeacherAssignment: React.FC<TeacherAssignmentProps> = ({
                       )}
                     </TableCell>
                     <TableCell align="right">
-                      <Tooltip title="Edit Teacher">
-                        <IconButton
-                          size="small"
-                          color="primary"
-                          onClick={() => openEditDialog(teacher)}
-                        >
-                          <Edit fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
+                      <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                        <Tooltip title="Edit Teacher">
+                          <IconButton
+                            size="small"
+                            color="primary"
+                            onClick={() => openEditDialog(teacher)}
+                          >
+                            <Edit fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                        {onDeleteTeacher && (
+                          <Tooltip title="Delete Teacher">
+                            <IconButton
+                              size="small"
+                              color="error"
+                              onClick={() => openDeleteDialog(teacher.id)}
+                              sx={{ ml: 1 }}
+                            >
+                              <Delete fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        )}
+                      </Box>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -336,6 +363,32 @@ const TeacherAssignment: React.FC<TeacherAssignmentProps> = ({
           <Button onClick={() => setOpenDialog(false)} startIcon={<Cancel />}>Cancel</Button>
           <Button onClick={handleAddTeacher} color="primary" variant="contained" startIcon={<Save />}>
             {editingTeacher ? 'Update' : 'Add'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteConfirmDialog}
+        onClose={() => setDeleteConfirmDialog(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogContent>
+          <Typography variant="body1">
+            Are you sure you want to delete teacher: <strong>{getTeacherName(teacherToDelete)}</strong>?
+          </Typography>
+          <Typography variant="body2" color="error" sx={{ mt: 2 }}>
+            This action cannot be undone. All associated data including subject assignments will be permanently removed.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteConfirmDialog(false)} startIcon={<Cancel />}>
+            Cancel
+          </Button>
+          <Button onClick={handleDeleteTeacher} color="error" variant="contained" startIcon={<Delete />}>
+            Delete
           </Button>
         </DialogActions>
       </Dialog>

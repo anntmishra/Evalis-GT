@@ -14,6 +14,7 @@ import { getBatches, createBatch, updateBatch, deleteBatch, getBatchStudents } f
 import EditBatch from './EditBatch';
 import * as XLSX from 'xlsx';
 import axios from 'axios';
+import config from '../config/environment';
 
 const BatchList = () => {
   const [batches, setBatches] = useState([]);
@@ -222,7 +223,7 @@ const BatchList = () => {
 
           // Use axios directly for multipart form data
           const response = await axios.post(
-            'http://localhost:5000/api/students/import-excel', 
+            `${config.API_ENDPOINTS.STUDENTS.IMPORT}`, 
             formData,
             {
               headers: {

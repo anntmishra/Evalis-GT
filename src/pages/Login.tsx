@@ -24,6 +24,7 @@ import {
   AdminPanelSettings
 } from '@mui/icons-material';
 import Header from '../components/Header';
+import config from '../config/environment';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -68,23 +69,22 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const theme = useTheme();
 
   const handleLogin = async () => {
-    // Basic validation
     if (!username || !password) {
-      setError('Please fill in all fields');
+      setError('Please enter all fields');
       return;
     }
 
+    setLoading(true);
+    
     try {
-      setError('');
-      
-      // Perform actual API login
       if (tabValue === 0) { // Student login
         try {
-          const response = await fetch('http://localhost:5000/api/auth/student/login', {
+          const response = await fetch(config.API_ENDPOINTS.AUTH.STUDENT_LOGIN, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -97,14 +97,13 @@ export default function Login() {
           }
           
           const data = await response.json();
-          console.log('Login successful:', data);
           
           // Store token and user info
-          localStorage.setItem('userToken', data.token);
-          localStorage.setItem('user', JSON.stringify(data));
-          localStorage.setItem('currentUser', JSON.stringify({ 
+          localStorage.setItem(config.AUTH.TOKEN_STORAGE_KEY, data.token);
+          localStorage.setItem(config.AUTH.USER_STORAGE_KEY, JSON.stringify(data));
+          localStorage.setItem(config.AUTH.CURRENT_USER_KEY, JSON.stringify({ 
             id: username, 
-            name: data.name, 
+            name: data.name,
             role: 'student' 
           }));
           
@@ -116,7 +115,7 @@ export default function Login() {
         }
       } else if (tabValue === 1) { // Teacher login
         try {
-          const response = await fetch('http://localhost:5000/api/auth/teacher/login', {
+          const response = await fetch(config.API_ENDPOINTS.AUTH.TEACHER_LOGIN, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -129,12 +128,11 @@ export default function Login() {
           }
           
           const data = await response.json();
-          console.log('Login successful:', data);
           
           // Store token and user info
-          localStorage.setItem('userToken', data.token);
-          localStorage.setItem('user', JSON.stringify(data));
-          localStorage.setItem('currentUser', JSON.stringify({ 
+          localStorage.setItem(config.AUTH.TOKEN_STORAGE_KEY, data.token);
+          localStorage.setItem(config.AUTH.USER_STORAGE_KEY, JSON.stringify(data));
+          localStorage.setItem(config.AUTH.CURRENT_USER_KEY, JSON.stringify({ 
             id: username, 
             name: data.name,
             role: 'teacher' 
@@ -148,7 +146,9 @@ export default function Login() {
         }
       } else if (tabValue === 2) { // Admin login
         try {
-          const response = await fetch('http://localhost:5000/api/auth/admin/login', {
+          console.log('Attempting admin login with username:', username);
+          
+          const response = await fetch(config.API_ENDPOINTS.AUTH.ADMIN_LOGIN, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -157,16 +157,18 @@ export default function Login() {
           });
           
           if (!response.ok) {
-            throw new Error('Invalid credentials');
+            const errorData = await response.json().catch(() => null);
+            console.error('Admin login failed:', response.status, errorData);
+            throw new Error(errorData?.message || 'Invalid credentials');
           }
           
           const data = await response.json();
-          console.log('Login successful:', data);
+          console.log('Admin login successful:', data);
           
           // Store token and user info
-          localStorage.setItem('userToken', data.token);
-          localStorage.setItem('user', JSON.stringify(data));
-          localStorage.setItem('currentUser', JSON.stringify({ 
+          localStorage.setItem(config.AUTH.TOKEN_STORAGE_KEY, data.token);
+          localStorage.setItem(config.AUTH.USER_STORAGE_KEY, JSON.stringify(data));
+          localStorage.setItem(config.AUTH.CURRENT_USER_KEY, JSON.stringify({ 
             id: username, 
             name: data.name,
             role: 'admin' 
@@ -182,36 +184,6 @@ export default function Login() {
     } catch (error) {
       console.error('Error:', error);
       setError('An error occurred. Please try again.');
-    }
-
-    // Fallback to demo credentials if API login fails
-    if (tabValue === 0) { // Student login
-      if (username in DEMO_CREDENTIALS.students) {
-        const studentCred = DEMO_CREDENTIALS.students[username];
-        if (password === studentCred.password) {
-          localStorage.setItem('currentUser', JSON.stringify({ id: username, name: studentCred.name, role: 'student' }));
-          navigate('/student');
-          return;
-        }
-      }
-      setError('Invalid credentials. Please try again.');
-    } else if (tabValue === 1) { // Teacher login
-      const teacherCred = DEMO_CREDENTIALS.teacher;
-      if (username === teacherCred.id && password === teacherCred.password) {
-        localStorage.setItem('currentUser', JSON.stringify({ id: username, role: 'teacher' }));
-        navigate('/teacher');
-      } else {
-        setError('Invalid credentials. Please try again.');
-      }
-    } else if (tabValue === 2) { // Admin login
-      const adminCred = DEMO_CREDENTIALS.admin;
-      if (username === adminCred.id && password === adminCred.password) {
-        localStorage.setItem('currentUser', JSON.stringify({ id: username, role: 'admin' }));
-        localStorage.setItem('userToken', 'dummy-token-for-demo-admin');
-        navigate('/admin');
-      } else {
-        setError('Invalid credentials. Please try again.');
-      }
     }
   };
 
