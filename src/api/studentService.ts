@@ -62,7 +62,7 @@ export const createStudent = async (student: Partial<Student>) => {
     const response = await axios.post(API_URL, student, authConfig());
     console.log('Create student response:', response.data);
     return response.data;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating student:', error.response?.data || error);
     throw error;
   }
@@ -73,7 +73,7 @@ export const updateStudent = async (id: string, student: Partial<Student>) => {
   try {
     const response = await axios.put(`${API_URL}/${id}`, student, authConfig());
     return response.data;
-  } catch (error) {
+  } catch (error: any) {
     throw error;
   }
 };
@@ -83,7 +83,7 @@ export const deleteStudent = async (id: string) => {
   try {
     const response = await axios.delete(`${API_URL}/${id}`, authConfig());
     return response.data;
-  } catch (error) {
+  } catch (error: any) {
     throw error;
   }
 };

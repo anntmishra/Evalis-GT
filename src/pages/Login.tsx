@@ -52,24 +52,12 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
-const DEMO_CREDENTIALS = {
-  students: {
-    'E23CSE001': { password: 'anant123', name: 'Anant Mishra' },
-    'E23CSE002': { password: 'kushagra123', name: 'Kushagra' },
-    'E23CSE003': { password: 'divyansh123', name: 'Divyansh Chouhan' },
-    'E23CSE004': { password: 'shubhangam123', name: 'Shubhangam Mishra' }
-  } as Record<string, { password: string; name: string }>,
-  teacher: { id: 'T12345', password: 'teacher123' },
-  admin: { id: 'admin', password: 'admin123' }
-};
-
 export default function Login() {
   const [tabValue, setTabValue] = useState(0);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const theme = useTheme();
 
@@ -78,8 +66,6 @@ export default function Login() {
       setError('Please enter all fields');
       return;
     }
-
-    setLoading(true);
     
     try {
       if (tabValue === 0) { // Student login

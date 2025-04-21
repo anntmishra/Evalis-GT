@@ -49,7 +49,7 @@ import StudentImporter from "../components/StudentImporter";
 import TeacherImporter from "../components/TeacherImporter";
 import StudentForm from "../components/StudentForm";
 import { getTeachers, assignSubject, removeSubject, createTeacher, updateTeacher, deleteTeacher } from "../api/teacherService";
-import { getAllSubjects, createSubject } from "../api/subjectService";
+import { getAllSubjects } from "../api/subjectService";
 import { 
   getAllStudents, 
   getStudentsByBatch, 
@@ -91,13 +91,12 @@ const AdminPortal: React.FC = (): React.ReactElement => {
   });
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
-  const [loading, setLoading] = useState(true);
   const [subjectsLoading, setSubjectsLoading] = useState(true);
   const [seedingSubjects, setSeedingSubjects] = useState(false);
   const [seedingBatches, setSeedingBatches] = useState(false);
   
   // Student data state
-  const [selectedBatch, setSelectedBatch] = useState('2023-2027');
+  const batchId = '2023-2027'; // Using a constant instead of state since it's not changed
   const [students, setStudents] = useState<Student[]>([]);
   const [studentsLoading, setStudentsLoading] = useState(true);
   const [studentFormOpen, setStudentFormOpen] = useState(false);
@@ -140,7 +139,7 @@ const AdminPortal: React.FC = (): React.ReactElement => {
   useEffect(() => {
     const fetchTeachers = async () => {
       try {
-        setLoading(true);
+        setSubjectsLoading(true);
         const response = await getTeachers();
         // Transform teacher data to match the required format
         const fetchedTeachers = response.map((teacher: any) => ({
@@ -158,7 +157,7 @@ const AdminPortal: React.FC = (): React.ReactElement => {
           severity: "error"
         });
       } finally {
-        setLoading(false);
+        setSubjectsLoading(false);
       }
     };
 
@@ -172,8 +171,8 @@ const AdminPortal: React.FC = (): React.ReactElement => {
 
   // Fetch students based on selected batch
   useEffect(() => {
-    fetchStudents(selectedBatch);
-  }, [selectedBatch]);
+    fetchStudents(batchId);
+  }, []);
 
   // Function to fetch students
   const fetchStudents = async (batchId: string) => {
@@ -438,8 +437,8 @@ const AdminPortal: React.FC = (): React.ReactElement => {
     });
     
     // If the imported batch matches the currently displayed batch, refresh immediately
-    if (batchId === selectedBatch) {
-      fetchStudents(selectedBatch);
+    if (batchId === batchId) {
+      fetchStudents(batchId);
     }
   };
 
@@ -513,7 +512,7 @@ const AdminPortal: React.FC = (): React.ReactElement => {
         await updateStudent(student.id, student);
         
         // Fetch updated students list 
-        await fetchStudents(selectedBatch);
+        await fetchStudents(batchId);
         
         setNotification({
           open: true,
@@ -539,7 +538,7 @@ const AdminPortal: React.FC = (): React.ReactElement => {
         await createStudent(studentWithPassword);
         
         // Fetch updated students list to ensure we have the latest data
-        await fetchStudents(selectedBatch);
+        await fetchStudents(batchId);
         
         setNotification({
           open: true,
@@ -572,7 +571,7 @@ const AdminPortal: React.FC = (): React.ReactElement => {
       await deleteStudent(studentToDelete.id);
       
       // Fetch updated students list
-      await fetchStudents(selectedBatch);
+      await fetchStudents(batchId);
       
       setNotification({
         open: true,
@@ -770,7 +769,7 @@ const AdminPortal: React.FC = (): React.ReactElement => {
                             variant="outlined" 
                             size="small"
                             startIcon={<Refresh />}
-                            onClick={() => fetchStudents(selectedBatch)}
+                            onClick={() => fetchStudents(batchId)}
                             disabled={studentsLoading}
                           >
                             Refresh
@@ -863,7 +862,7 @@ const AdminPortal: React.FC = (): React.ReactElement => {
         title={editingStudent ? "Edit Student" : "Add New Student"}
         saving={savingStudent}
         error={studentError}
-        selectedBatch={selectedBatch}
+        selectedBatch={batchId}
       />
 
       {/* Delete Confirmation Dialog */}
