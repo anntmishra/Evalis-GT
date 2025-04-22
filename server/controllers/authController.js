@@ -35,30 +35,46 @@ const authStudent = asyncHandler(async (req, res) => {
  * @access  Public
  */
 const authTeacher = asyncHandler(async (req, res) => {
-  const { id, password } = req.body;
+  const { email, password } = req.body;
+  
+  console.log(`Teacher login attempt with email: ${email}`);
+  
+  if (!email || !password) {
+    res.status(400);
+    throw new Error('Please provide email and password');
+  }
 
-  // Check for teacher
+  // Check for teacher by email (primary login method)
   const teacher = await Teacher.findOne({ 
-    where: { id },
+    where: { email },
     include: [{
       model: Subject,
       through: { attributes: [] }
     }]
   });
 
-  if (teacher && (await teacher.matchPassword(password))) {
-    res.json({
-      id: teacher.id,
-      name: teacher.name,
-      email: teacher.email,
-      subjects: teacher.Subjects || [],
-      role: 'teacher',
-      token: generateToken(teacher.id, 'teacher'),
-    });
-  } else {
-    res.status(401);
-    throw new Error('Invalid ID or password');
+  console.log(`Teacher found: ${teacher ? 'Yes' : 'No'}`);
+  
+  if (teacher) {
+    console.log(`Teacher ID: ${teacher.id}, Name: ${teacher.name}`);
+    const isMatch = await teacher.matchPassword(password);
+    console.log(`Password match result: ${isMatch}`);
+    
+    if (isMatch) {
+      res.json({
+        id: teacher.id,
+        name: teacher.name,
+        email: teacher.email,
+        subjects: teacher.Subjects || [],
+        role: 'teacher',
+        token: generateToken(teacher.id, 'teacher'),
+      });
+      return;
+    }
   }
+  
+  res.status(401);
+  throw new Error('Invalid email or password');
 });
 
 /**
@@ -114,6 +130,47 @@ const getUserProfile = asyncHandler(async (req, res) => {
   }
 });
 
+/**
+ * @desc    Initial password setup for teachers
+ * @route   POST /api/auth/teacher/setup-password
+ * @access  Public
+ */
+const setupTeacherPassword = asyncHandler(async (req, res) => {
+  const { id, email, currentPassword, newPassword } = req.body;
+
+  if (!email || !currentPassword || !newPassword) {
+    res.status(400);
+    throw new Error('Please provide email, current password, and new password');
+  }
+
+  // Find teacher by email
+  const teacher = await Teacher.findOne({ where: { email } });
+
+  if (!teacher) {
+    res.status(404);
+    throw new Error('Teacher not found with this email');
+  }
+
+  // Verify current password
+  if (!(await teacher.matchPassword(currentPassword))) {
+    res.status(401);
+    throw new Error('Current password is incorrect');
+  }
+
+  // Update password
+  teacher.password = newPassword;
+  await teacher.save();
+
+  res.status(200).json({ 
+    message: 'Password updated successfully',
+    id: teacher.id,
+    name: teacher.name,
+    email: teacher.email,
+    role: 'teacher',
+    token: generateToken(teacher.id, 'teacher'),
+  });
+});
+
 // Generate JWT
 const generateToken = (id, role) => {
   return jwt.sign({ id, role }, process.env.JWT_SECRET, {
@@ -126,4 +183,5 @@ module.exports = {
   authTeacher,
   authAdmin,
   getUserProfile,
+  setupTeacherPassword,
 }; 

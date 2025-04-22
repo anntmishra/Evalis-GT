@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { loginStudent, loginTeacher, loginAdmin } from '../api';
+import { loginStudent, loginTeacher, loginAdmin, setupTeacherPassword as apiSetupTeacherPassword } from '../api';
 
 const AuthContext = createContext();
 
@@ -40,11 +40,11 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const teacherLogin = async (id, password) => {
+  const teacherLogin = async (email, password) => {
     try {
       setLoading(true);
       setError(null);
-      const response = await loginTeacher(id, password);
+      const response = await loginTeacher(email, password);
       const userData = response.data;
       
       localStorage.setItem('user', JSON.stringify(userData));
@@ -54,6 +54,27 @@ export const AuthProvider = ({ children }) => {
       return userData;
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed');
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const setupTeacherPassword = async (email, currentPassword, newPassword) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await apiSetupTeacherPassword(email, currentPassword, newPassword);
+      const userData = response.data;
+      
+      // Update user data and token
+      localStorage.setItem('user', JSON.stringify(userData));
+      localStorage.setItem('userToken', userData.token);
+      
+      setCurrentUser(userData);
+      return userData;
+    } catch (err) {
+      setError(err.response?.data?.message || 'Password setup failed');
       throw err;
     } finally {
       setLoading(false);
@@ -93,6 +114,7 @@ export const AuthProvider = ({ children }) => {
     studentLogin,
     teacherLogin,
     adminLogin,
+    setupTeacherPassword,
     logout,
     isAuthenticated: !!currentUser,
     isStudent: currentUser?.role === 'student',

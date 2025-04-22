@@ -1,9 +1,17 @@
 const { Sequelize } = require('sequelize');
 const colors = require('colors');
 
+// Log environment variables for debugging
+console.log('Database configuration:'.yellow);
+console.log('POSTGRES_DB:'.cyan, process.env.POSTGRES_DB || 'evalis');
+console.log('POSTGRES_USER:'.cyan, process.env.POSTGRES_USER || 'postgres');
+console.log('POSTGRES_HOST:'.cyan, process.env.POSTGRES_HOST || 'localhost');
+console.log('POSTGRES_PORT:'.cyan, process.env.POSTGRES_PORT || 5432);
+
+// Create the database connection using environment variables
 const sequelize = new Sequelize(
   process.env.POSTGRES_DB || 'evalis',
-  process.env.POSTGRES_USER || 'anantmishra',
+  process.env.POSTGRES_USER, // No default value to force environment variable to be used
   process.env.POSTGRES_PASSWORD || '',
   {
     host: process.env.POSTGRES_HOST || 'localhost',
@@ -28,6 +36,7 @@ const sequelize = new Sequelize(
 const connectDB = async () => {
   try {
     console.log('Connecting to PostgreSQL...'.yellow);
+    console.log(`Attempting connection with user: ${process.env.POSTGRES_USER}`.cyan);
     await sequelize.authenticate();
     console.log(`PostgreSQL Connected: ${sequelize.options.host}:${sequelize.options.port}`.cyan.underline);
     return sequelize;
@@ -42,4 +51,4 @@ const connectDB = async () => {
   }
 };
 
-module.exports = { connectDB, sequelize }; 
+module.exports = { connectDB, sequelize };

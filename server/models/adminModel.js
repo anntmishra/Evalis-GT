@@ -48,7 +48,29 @@ const Admin = sequelize.define('Admin', {
 
 // Instance method to check if entered password matches the stored hashed password
 Admin.prototype.matchPassword = async function(enteredPassword) {
-  return await bcrypt.compare(enteredPassword, this.password);
+  try {
+    console.log(`Comparing password for admin: ${this.username}`);
+    console.log(`Entered password length: ${enteredPassword?.length || 'undefined'}`);
+    console.log(`Stored password hash length: ${this.password?.length || 'undefined'}`);
+    
+    if (!enteredPassword) {
+      console.error('No password provided for comparison');
+      return false;
+    }
+    
+    if (!this.password) {
+      console.error('Admin record has no stored password hash');
+      return false;
+    }
+    
+    const isMatch = await bcrypt.compare(enteredPassword, this.password);
+    console.log(`Password match result: ${isMatch}`);
+    return isMatch;
+  } catch (error) {
+    console.error(`Error comparing passwords: ${error.message}`);
+    console.error(error.stack);
+    return false;
+  }
 };
 
 module.exports = Admin; 

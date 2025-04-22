@@ -7,12 +7,13 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true, // Add this to include cookies in cross-site requests
 });
 
 // Add request interceptor to add auth token to headers
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem(config.AUTH.TOKEN_STORAGE_KEY);
+    const token = localStorage.getItem('userToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -23,7 +24,9 @@ api.interceptors.request.use(
 
 // Auth API
 export const loginStudent = (id, password) => api.post('/auth/student/login', { id, password });
-export const loginTeacher = (id, password) => api.post('/auth/teacher/login', { id, password });
+export const loginTeacher = (email, password) => api.post('/auth/teacher/login', { email, password });
+export const setupTeacherPassword = (email, currentPassword, newPassword) => 
+  api.post('/auth/teacher/setup-password', { email, currentPassword, newPassword });
 export const loginAdmin = (username, password) => api.post('/auth/admin/login', { username, password });
 export const getUserProfile = () => api.get('/auth/profile');
 

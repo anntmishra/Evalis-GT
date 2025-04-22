@@ -16,8 +16,10 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "types": ["react", "react-dom", "node"],
-    "typeRoots": ["./node_modules/@types", "./src/types"]
+    "typeRoots": ["./node_modules/@types", "./src/types"],
+    "allowJs": true,
+    "esModuleInterop": true
   },
-  "include": ["src"],
+  "include": ["src", "src/context/AuthContext.d.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

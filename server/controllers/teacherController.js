@@ -53,16 +53,31 @@ const createTeacher = asyncHandler(async (req, res) => {
     console.log('Teacher creation request received');
     console.log('Request body:', req.body);
     
-    const { id, name, email, subjects, password, role } = req.body;
+    const { name, email, subjects, password, role } = req.body;
+    let { id } = req.body;
 
     console.log('Extracted fields:', { id, name, email, subjectsLength: subjects?.length });
 
-    // Validate required fields
-    if (!id || !name || !email) {
-      console.log('Missing required fields');
+    // Validate required name
+    if (!name) {
+      console.log('Missing required name field');
       res.status(400);
-      throw new Error('Please provide id, name, and email');
+      throw new Error('Please provide the teacher name');
     }
+
+    // Generate teacher ID if not provided
+    if (!id) {
+      id = await Teacher.generateTeacherId();
+      console.log('Generated teacher ID:', id);
+    }
+
+    // Generate email if not provided
+    const teacherEmail = email || Teacher.generateEmail(name);
+    console.log('Teacher email:', teacherEmail);
+
+    // Generate default password if not provided
+    const teacherPassword = password || Teacher.generatePassword(id);
+    console.log('Teacher password set (hashed during save)');
 
     // Check if teacher already exists
     const teacherExists = await Teacher.findOne({ where: { id } });
@@ -74,10 +89,10 @@ const createTeacher = asyncHandler(async (req, res) => {
     }
 
     // Check if email already exists
-    const emailExists = await Teacher.findOne({ where: { email } });
+    const emailExists = await Teacher.findOne({ where: { email: teacherEmail } });
     
     if (emailExists) {
-      console.log('Email already in use:', email);
+      console.log('Email already in use:', teacherEmail);
       res.status(400);
       throw new Error('Email already in use');
     }
@@ -87,8 +102,8 @@ const createTeacher = asyncHandler(async (req, res) => {
     const teacher = await Teacher.create({
       id,
       name,
-      email,
-      password: password || id, // Default password is the teacher ID
+      email: teacherEmail,
+      password: teacherPassword,
       role: role || 'teacher', // Ensure role is set
     });
 

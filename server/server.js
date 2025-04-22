@@ -8,6 +8,17 @@ const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 const models = require('./models');
 const { DEFAULT_PORT } = require('./config/constants');
 
+// Load env vars
+dotenv.config();
+
+// Log environment variables
+console.log('Environment Variables:'.yellow);
+console.log('NODE_ENV:'.cyan, process.env.NODE_ENV);
+console.log('POSTGRES_USER:'.cyan, process.env.POSTGRES_USER);
+console.log('POSTGRES_DB:'.cyan, process.env.POSTGRES_DB);
+console.log('POSTGRES_HOST:'.cyan, process.env.POSTGRES_HOST);
+console.log('POSTGRES_PORT:'.cyan, process.env.POSTGRES_PORT);
+
 // Routes
 const authRoutes = require('./routes/authRoutes');
 const studentRoutes = require('./routes/studentRoutes');
@@ -15,9 +26,6 @@ const teacherRoutes = require('./routes/teacherRoutes');
 const subjectRoutes = require('./routes/subjectRoutes');
 const batchRoutes = require('./routes/batchRoutes');
 const submissionRoutes = require('./routes/submissionRoutes');
-
-// Load env vars
-dotenv.config();
 
 // Connect to database
 const startServer = async () => {
@@ -36,7 +44,12 @@ const startServer = async () => {
     const app = express();
     
     // Middleware
-    app.use(cors());
+    app.use(cors({
+      origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175', 'http://localhost:5176'],
+      credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization']
+    }));
     app.use(express.json());
     app.use(fileUpload({
       useTempFiles: false,

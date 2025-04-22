@@ -10,8 +10,8 @@ const NODE_ENV = import.meta.env.NODE_ENV || 'development';
 
 // API URLs based on environment
 const API_BASE_URL = {
-  development: 'http://localhost:3000/api',
-  test: 'http://localhost:3000/api',
+  development: 'http://localhost:5001/api',
+  test: 'http://localhost:5001/api',
   production: '/api', // In production, use relative path for same-origin API
 }[NODE_ENV];
 
@@ -22,6 +22,7 @@ const config = {
     AUTH: {
       STUDENT_LOGIN: `${API_BASE_URL}/auth/student/login`,
       TEACHER_LOGIN: `${API_BASE_URL}/auth/teacher/login`,
+      TEACHER_SETUP_PASSWORD: `${API_BASE_URL}/auth/teacher/setup-password`,
       ADMIN_LOGIN: `${API_BASE_URL}/auth/admin/login`,
       PROFILE: `${API_BASE_URL}/auth/profile`,
     },

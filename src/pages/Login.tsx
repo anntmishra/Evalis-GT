@@ -25,6 +25,7 @@ import {
 } from '@mui/icons-material';
 import Header from '../components/Header';
 import config from '../config/environment';
+import { useAuth } from '../context/AuthContext';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -60,6 +61,7 @@ export default function Login() {
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const theme = useTheme();
+  const { studentLogin, teacherLogin, adminLogin } = useAuth();
 
   const handleLogin = async () => {
     if (!username || !password) {
@@ -106,7 +108,7 @@ export default function Login() {
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ id: username, password }),
+            body: JSON.stringify({ email: username, password }),
           });
           
           if (!response.ok) {
@@ -119,8 +121,9 @@ export default function Login() {
           localStorage.setItem(config.AUTH.TOKEN_STORAGE_KEY, data.token);
           localStorage.setItem(config.AUTH.USER_STORAGE_KEY, JSON.stringify(data));
           localStorage.setItem(config.AUTH.CURRENT_USER_KEY, JSON.stringify({ 
-            id: username, 
+            id: data.id, 
             name: data.name,
+            email: data.email,
             role: 'teacher' 
           }));
           
@@ -134,37 +137,39 @@ export default function Login() {
         try {
           console.log('Attempting admin login with username:', username);
           
-          const response = await fetch(config.API_ENDPOINTS.AUTH.ADMIN_LOGIN, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ username, password }),
-          });
+          // Add more debug info
+          console.log('API base URL:', config.API_BASE_URL);
+          console.log('Admin login endpoint:', config.API_ENDPOINTS.AUTH.ADMIN_LOGIN);
           
-          if (!response.ok) {
-            const errorData = await response.json().catch(() => null);
-            console.error('Admin login failed:', response.status, errorData);
-            throw new Error(errorData?.message || 'Invalid credentials');
-          }
+          // Use the AuthContext's adminLogin method
+          const userData = await adminLogin(username, password);
+          console.log('Admin login successful:', userData);
           
-          const data = await response.json();
-          console.log('Admin login successful:', data);
-          
-          // Store token and user info
-          localStorage.setItem(config.AUTH.TOKEN_STORAGE_KEY, data.token);
-          localStorage.setItem(config.AUTH.USER_STORAGE_KEY, JSON.stringify(data));
+          // Store token and user info explicitly to ensure it's saved
+          localStorage.setItem(config.AUTH.TOKEN_STORAGE_KEY, userData.token);
+          localStorage.setItem(config.AUTH.USER_STORAGE_KEY, JSON.stringify(userData));
           localStorage.setItem(config.AUTH.CURRENT_USER_KEY, JSON.stringify({ 
-            id: username, 
-            name: data.name,
+            id: userData.id, 
+            name: userData.name,
             role: 'admin' 
           }));
           
+          // Redirect to admin dashboard
           navigate('/admin');
-          return;
-        } catch (error) {
-          console.error('Login error:', error);
-          setError('Invalid credentials. Please try again.');
+        } catch (error: any) {
+          console.error('Admin login error:', error);
+          // More detailed error logging
+          if (error.response) {
+            console.error('Error response:', error.response.data);
+            console.error('Error status:', error.response.status);
+            setError(error.response.data?.message || 'Invalid credentials. Please try again.');
+          } else if (error.request) {
+            console.error('Error request:', error.request);
+            setError('Network error. Please check if the server is running.');
+          } else {
+            console.error('Error message:', error.message);
+            setError(error.message || 'Failed to login. Please try again.');
+          }
         }
       }
     } catch (error) {
@@ -322,9 +327,9 @@ export default function Login() {
                     margin="normal"
                     required
                     fullWidth
-                    id="teacher-id"
-                    label="Teacher ID"
-                    name="teacherId"
+                    id="teacher-email"
+                    label="Email Address"
+                    name="email"
                     autoFocus
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
@@ -426,7 +431,7 @@ export default function Login() {
                   Demo Teacher Credentials:
                 </Typography>
                 <Typography variant="caption" display="block" color="text.secondary">
-                  Teacher ID: T12345, Password: teacher123
+                  Email: teacher@university.edu.in, Password: uni0001
                 </Typography>
               </Box>
             </Box>
