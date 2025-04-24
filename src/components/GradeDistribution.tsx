@@ -10,7 +10,7 @@ import {
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
 import { Box, Typography } from '@mui/material';
-import { GRADE_SCALE } from '../data/universityData';
+import { GRADE_SCALE } from '../constants/universityData';
 
 ChartJS.register(
   CategoryScale,
@@ -143,4 +143,4 @@ const GradeDistribution: React.FC<GradeDistributionProps> = ({ grades }) => {
   );
 };
 
-export default GradeDistribution; 
+export default GradeDistribution;

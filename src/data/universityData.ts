@@ -54,74 +54,130 @@ export const EXAM_TYPES: ExamType[] = [
 export const STUDENT_SUBMISSIONS: Record<string, StudentSubmission[]> = {
   'E23CSE001': [
     {
-      examType: 'assignment',
+      id: 'S1A1',
+      studentId: 'E23CSE001',
       subjectId: 'CSE101',
+      subjectName: 'Introduction to Programming',
+      examType: 'assignment',
       submissionText: 'Implementation of Binary Search Tree with Red-Black Tree balancing',
       submissionDate: '2024-03-15',
       score: 92,
-      plagiarismScore: 0
+      plagiarismScore: 0,
+      feedback: 'Excellent implementation with proper documentation.',
+      graded: true,
+      gradedBy: 'T001',
+      gradedDate: '2024-03-20'
     },
     {
-      examType: 'project',
+      id: 'S1P1',
+      studentId: 'E23CSE001',
       subjectId: 'CSE102',
+      subjectName: 'Data Structures',
+      examType: 'project',
       submissionText: 'Distributed Database System Implementation',
       submissionDate: '2024-03-20',
       score: 88,
-      plagiarismScore: 5
+      plagiarismScore: 5,
+      feedback: 'Good work but some parts are similar to online resources.',
+      graded: true,
+      gradedBy: 'T001',
+      gradedDate: '2024-03-25'
     }
   ],
   'E23CSE002': [
     {
-      examType: 'assignment',
+      id: 'S2A1',
+      studentId: 'E23CSE002',
       subjectId: 'CSE101',
+      subjectName: 'Introduction to Programming',
+      examType: 'assignment',
       submissionText: 'Advanced Binary Search Tree with AVL balancing',
       submissionDate: '2024-03-15',
       score: 95,
-      plagiarismScore: 0
+      plagiarismScore: 0,
+      feedback: 'Outstanding work with novel approach to balancing.',
+      graded: true,
+      gradedBy: 'T001',
+      gradedDate: '2024-03-20'
     },
     {
-      examType: 'project',
+      id: 'S2P1',
+      studentId: 'E23CSE002',
       subjectId: 'CSE102',
+      subjectName: 'Data Structures',
+      examType: 'project',
       submissionText: 'Cloud-based Database Management System',
       submissionDate: '2024-03-20',
       score: 90,
-      plagiarismScore: 3
+      plagiarismScore: 3,
+      feedback: 'Excellent project with minor issues in documentation.',
+      graded: true,
+      gradedBy: 'T001',
+      gradedDate: '2024-03-25'
     }
   ],
   'E23CSE003': [
     {
-      examType: 'assignment',
+      id: 'S3A1',
+      studentId: 'E23CSE003',
       subjectId: 'CSE201',
+      subjectName: 'Object Oriented Programming',
+      examType: 'assignment',
       submissionText: 'Design Patterns in Enterprise Applications',
       submissionDate: '2024-03-15',
       score: 88,
-      plagiarismScore: 2
+      plagiarismScore: 2,
+      feedback: 'Good application of design patterns.',
+      graded: true,
+      gradedBy: 'T002',
+      gradedDate: '2024-03-20'
     },
     {
-      examType: 'project',
+      id: 'S3P1',
+      studentId: 'E23CSE003',
       subjectId: 'CSE202',
+      subjectName: 'Operating Systems',
+      examType: 'project',
       submissionText: 'Microservices Architecture Implementation',
       submissionDate: '2024-03-20',
       score: 91,
-      plagiarismScore: 0
+      plagiarismScore: 0,
+      feedback: 'Excellent project with clear understanding of concepts.',
+      graded: true,
+      gradedBy: 'T002',
+      gradedDate: '2024-03-25'
     }
   ],
   'E23CSE004': [
     {
-      examType: 'assignment',
+      id: 'S4A1',
+      studentId: 'E23CSE004',
       subjectId: 'CSE201',
+      subjectName: 'Object Oriented Programming',
+      examType: 'assignment',
       submissionText: 'Enterprise Application Patterns and Best Practices',
       submissionDate: '2024-03-15',
       score: 89,
-      plagiarismScore: 1
+      plagiarismScore: 1,
+      feedback: 'Very good understanding of enterprise patterns.',
+      graded: true,
+      gradedBy: 'T002',
+      gradedDate: '2024-03-20'
     },
     {
-      examType: 'project',
+      id: 'S4P1',
+      studentId: 'E23CSE004',
       subjectId: 'CSE202',
+      subjectName: 'Operating Systems',
+      examType: 'project',
       submissionText: 'Scalable Microservices with Docker and Kubernetes',
       submissionDate: '2024-03-20',
       score: 93,
-      plagiarismScore: 0
+      plagiarismScore: 0,
+      feedback: 'Outstanding implementation with excellent documentation.',
+      graded: true,
+      gradedBy: 'T002',
+      gradedDate: '2024-03-25'
     }
   ]
 };

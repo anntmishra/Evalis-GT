@@ -2,9 +2,10 @@ export interface Student {
   id: string;
   name: string;
   section: string;
-  email?: string;
   batch?: string;
-  password?: string;
+  email?: string;
+  role?: string;
+  initialPassword?: string;
 }
 
 export interface Subject {
@@ -16,12 +17,19 @@ export interface Subject {
 }
 
 export interface StudentSubmission {
-  examType: string;
+  id: string;
+  studentId: string;
   subjectId: string;
+  subjectName: string;
+  examType: string;
   submissionText: string;
   submissionDate: string;
   score?: number;
-  plagiarismScore?: number;
+  plagiarismScore: number;
+  feedback: string;
+  graded: boolean;
+  gradedBy: string | null;
+  gradedDate: string | null;
 }
 
 export interface Batch {

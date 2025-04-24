@@ -17,6 +17,7 @@ import {
   Tab,
   CircularProgress,
   Divider,
+  Alert,
 } from "@mui/material";
 import {
   Timeline,
@@ -29,12 +30,7 @@ import {
 import { School, TrendingUp, Grade as GradeIcon } from "@mui/icons-material";
 import Header from "../components/Header";
 import { useNavigate } from "react-router-dom";
-import {
-  STUDENTS,
-  STUDENT_SUBMISSIONS,
-  GRADE_SCALE,
-  SUBJECTS,
-} from "../data/universityData";
+import { getStudentProfile, getStudentSubmissions } from "../api";
 import { Student, StudentSubmission } from "../types/university";
 
 interface TabPanelProps {
@@ -60,45 +56,53 @@ const TabPanel = (props: TabPanelProps) => {
 const StudentPortal: React.FC = () => {
   const [tabValue, setTabValue] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [studentData, setStudentData] = useState<Student & { submissions: StudentSubmission[] } | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Get logged in user data
-    const userDataStr = localStorage.getItem("currentUser");
-    if (!userDataStr) {
-      navigate("/login");
-      return;
-    }
+    const fetchStudentData = async () => {
+      try {
+        // Get logged in user data
+        const userDataStr = localStorage.getItem("currentUser");
+        if (!userDataStr) {
+          navigate("/login");
+          return;
+        }
 
-    try {
-      const userData = JSON.parse(userDataStr);
-      if (!userData || typeof userData !== 'object' || !userData.id || !userData.role) {
-        navigate("/login");
-        return;
+        const userData = JSON.parse(userDataStr);
+        if (!userData || typeof userData !== 'object' || !userData.id || !userData.role) {
+          navigate("/login");
+          return;
+        }
+
+        if (userData.role !== "student") {
+          navigate("/login");
+          return;
+        }
+
+        // Fetch student profile and submissions
+        const [profileResponse, submissionsResponse] = await Promise.all([
+          getStudentProfile(),
+          getStudentSubmissions(userData.id)
+        ]);
+
+        const studentProfile = profileResponse.data;
+        const submissions = submissionsResponse.data;
+
+        setStudentData({
+          ...studentProfile,
+          submissions: submissions || []
+        });
+      } catch (error) {
+        console.error('Failed to fetch student data:', error);
+        setError('Failed to load student data. Please try again later.');
+      } finally {
+        setLoading(false);
       }
+    };
 
-      if (userData.role !== "student") {
-        navigate("/login");
-        return;
-      }
-
-      // Find student data
-      const student = Object.values(STUDENTS)
-        .flat()
-        .find((s) => s.id === userData.id);
-      if (!student) {
-        navigate("/login");
-        return;
-      }
-
-      const submissions = STUDENT_SUBMISSIONS[userData.id] || [];
-      setStudentData({ ...student, submissions });
-      setLoading(false);
-    } catch (error) {
-      console.error('Failed to parse user data:', error);
-      navigate("/login");
-    }
+    fetchStudentData();
   }, [navigate]);
 
   const calculateGrade = (score: number): string => {
@@ -106,12 +110,11 @@ const StudentPortal: React.FC = () => {
       return 'N/A';
     }
     
-    for (const [grade, range] of Object.entries(GRADE_SCALE)) {
-      if (score >= range.min && score <= range.max) {
-        return grade;
-      }
-    }
-    return "F";
+    if (score >= 90) return 'A';
+    if (score >= 80) return 'B';
+    if (score >= 70) return 'C';
+    if (score >= 60) return 'D';
+    return 'F';
   };
 
   const calculateAverageScore = (): number => {
@@ -119,35 +122,51 @@ const StudentPortal: React.FC = () => {
       return 0;
 
     const scores = studentData.submissions
-      .filter((sub) => sub.score !== undefined)
+      .filter((sub) => sub.score !== undefined && sub.score !== null)
       .map((sub) => sub.score as number);
 
     if (scores.length === 0) return 0;
-    return scores.reduce((a, b) => a + b, 0) / scores.length;
+    return Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
   };
 
-  if (loading || !studentData) {
+  if (loading) {
     return (
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100vh",
-        }}
-      >
+      <Box sx={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        height: "100vh",
+      }}>
         <CircularProgress />
       </Box>
     );
   }
 
-  const getSubjectName = (subjectId: string): string => {
-    for (const sectionSubjects of Object.values(SUBJECTS)) {
-      const found = sectionSubjects.find((s) => s.id === subjectId);
-      if (found) return found.name;
-    }
-    return subjectId;
-  };
+  if (error) {
+    return (
+      <Box sx={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        height: "100vh",
+      }}>
+        <Alert severity="error">{error}</Alert>
+      </Box>
+    );
+  }
+
+  if (!studentData) {
+    return (
+      <Box sx={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        height: "100vh",
+      }}>
+        <Alert severity="warning">No student data found. Please log in again.</Alert>
+      </Box>
+    );
+  }
 
   const avgScore = calculateAverageScore();
 
@@ -167,8 +186,7 @@ const StudentPortal: React.FC = () => {
                       Welcome, {studentData.name}
                     </Typography>
                     <Typography variant="subtitle1" color="text.secondary">
-                      Student ID: {studentData.id} | Section:{" "}
-                      {studentData.section}
+                      Student ID: {studentData.id} | Section: {studentData.section}
                     </Typography>
                   </Box>
                 </Box>
@@ -182,34 +200,22 @@ const StudentPortal: React.FC = () => {
                         </Typography>
                         {studentData.submissions.length > 0 ? (
                           <Box>
-                            {studentData.submissions.map(
-                              (submission: StudentSubmission, index: number) => (
-                                <Box key={index} sx={{ mb: 2 }}>
-                                  <Typography
-                                    variant="subtitle2"
-                                    color="primary"
-                                  >
-                                    {submission.subjectId} -{" "}
-                                    {submission.examType}
-                                  </Typography>
-                                  <Typography
-                                    variant="body2"
-                                    color="text.secondary"
-                                  >
-                                    Score: {submission.score}
-                                  </Typography>
-                                  <Typography
-                                    variant="body2"
-                                    color="text.secondary"
-                                  >
-                                    Submitted:{" "}
-                                    {new Date(
-                                      submission.submissionDate
-                                    ).toLocaleDateString()}
-                                  </Typography>
-                                </Box>
-                              )
-                            )}
+                            {studentData.submissions.slice(0, 5).map((submission, index) => (
+                              <Box key={index} sx={{ mb: 2 }}>
+                                <Typography variant="subtitle2" color="primary">
+                                  {submission.subjectId} - {submission.examType}
+                                </Typography>
+                                <Typography variant="body2" color="text.secondary">
+                                  Score: {submission.score || 'Pending'}
+                                </Typography>
+                                <Typography variant="body2" color="text.secondary">
+                                  Grade: {submission.score ? calculateGrade(submission.score) : 'Pending'}
+                                </Typography>
+                                <Typography variant="body2" color="text.secondary">
+                                  Submitted: {new Date(submission.submissionDate).toLocaleDateString()}
+                                </Typography>
+                              </Box>
+                            ))}
                           </Box>
                         ) : (
                           <Typography variant="body2" color="text.secondary">
@@ -225,41 +231,40 @@ const StudentPortal: React.FC = () => {
                         <Typography variant="h6" gutterBottom>
                           Performance Overview
                         </Typography>
+                        <Box sx={{ mb: 2 }}>
+                          <Typography variant="h4" color="primary">
+                            {avgScore}%
+                          </Typography>
+                          <Typography variant="subtitle1">
+                            Overall Average Score
+                          </Typography>
+                        </Box>
                         {studentData.submissions.length > 0 ? (
                           <Timeline>
-                            {studentData.submissions.map(
-                              (submission: StudentSubmission, index: number) => (
-                                <TimelineItem key={index}>
-                                  <TimelineSeparator>
-                                    <TimelineDot
-                                      color={
-                                        index % 2 ? "primary" : "secondary"
-                                      }
-                                    />
-                                    {index <
-                                      studentData.submissions.length - 1 && (
-                                      <TimelineConnector />
-                                    )}
-                                  </TimelineSeparator>
-                                  <TimelineContent>
-                                    <Typography variant="subtitle1">
-                                      {submission.subjectId} -{" "}
-                                      {submission.examType}
-                                    </Typography>
-                                    <Typography
-                                      variant="body2"
-                                      color="text.secondary"
-                                    >
-                                      Score: {submission.score}
-                                    </Typography>
-                                  </TimelineContent>
-                                </TimelineItem>
-                              )
-                            )}
+                            {studentData.submissions.map((submission, index) => (
+                              <TimelineItem key={index}>
+                                <TimelineSeparator>
+                                  <TimelineDot 
+                                    color={(submission.score && submission.score >= 70) ? "success" : 
+                                           (submission.score ? "error" : "grey")} 
+                                  />
+                                  {index < studentData.submissions.length - 1 && <TimelineConnector />}
+                                </TimelineSeparator>
+                                <TimelineContent>
+                                  <Typography variant="subtitle1">
+                                    {submission.subjectId} - {submission.examType}
+                                  </Typography>
+                                  <Typography variant="body2" color="text.secondary">
+                                    Score: {submission.score || 'Pending'} | 
+                                    Grade: {submission.score ? calculateGrade(submission.score) : 'Pending'}
+                                  </Typography>
+                                </TimelineContent>
+                              </TimelineItem>
+                            ))}
                           </Timeline>
                         ) : (
                           <Typography variant="body2" color="text.secondary">
-                            No performance data available
+                            No performance data available yet
                           </Typography>
                         )}
                       </CardContent>
@@ -293,7 +298,7 @@ const StudentPortal: React.FC = () => {
                           Average Score
                         </Typography>
                         <Typography variant="h6">
-                          {avgScore.toFixed(1)}%
+                          {avgScore}%
                         </Typography>
                       </Box>
                       <Box>
@@ -324,11 +329,11 @@ const StudentPortal: React.FC = () => {
                             <TableRow key={index}>
                               <TableCell>{submission.subjectId}</TableCell>
                               <TableCell>
-                                {getSubjectName(submission.subjectId)}
+                                {submission.subjectName || 'Unknown Subject'}
                               </TableCell>
                               <TableCell>{submission.examType}</TableCell>
                               <TableCell align="right">
-                                {submission.score}
+                                {submission.score || 'Pending'}
                               </TableCell>
                               <TableCell align="right">
                                 {submission.score ? calculateGrade(submission.score) : 'N/A'}

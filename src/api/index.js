@@ -6,18 +6,38 @@ const api = axios.create({
   baseURL: config.API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
-  },
-  withCredentials: true, // Add this to include cookies in cross-site requests
+  }
 });
+
+// Add response interceptor for better error handling
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    console.error('API Error:', error);
+    if (error.response) {
+      // The request was made and the server responded with a status code
+      // that falls out of the range of 2xx
+      console.error('Error data:', error.response.data);
+      console.error('Error status:', error.response.status);
+    } else if (error.request) {
+      // The request was made but no response was received
+      console.error('No response received:', error.request);
+    } else {
+      // Something happened in setting up the request that triggered an Error
+      console.error('Error setting up request:', error.message);
+    }
+    return Promise.reject(error);
+  }
+);
 
 // Add request interceptor to add auth token to headers
 api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('userToken');
+  (reqConfig) => {
+    const token = localStorage.getItem(config.AUTH.TOKEN_STORAGE_KEY);
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      reqConfig.headers.Authorization = `Bearer ${token}`;
     }
-    return config;
+    return reqConfig;
   },
   (error) => Promise.reject(error)
 );
@@ -29,6 +49,8 @@ export const setupTeacherPassword = (email, currentPassword, newPassword) =>
   api.post('/auth/teacher/setup-password', { email, currentPassword, newPassword });
 export const loginAdmin = (username, password) => api.post('/auth/admin/login', { username, password });
 export const getUserProfile = () => api.get('/auth/profile');
+export const resetStudentPassword = (studentId, newPassword) => 
+  api.post('/auth/student/reset-password', { studentId, newPassword });
 
 // Student API
 export const getStudents = (batch = '', page = 1) => 
@@ -88,4 +110,18 @@ export const getBatchStudents = (id) => api.get(`/batches/${id}/students`);
 export const createSubmission = (submissionData) => api.post('/submissions', submissionData);
 export const gradeSubmission = (id, gradeData) => api.put(`/submissions/${id}/grade`, gradeData);
 
-export default api; 
+// Teacher Submission Upload API
+export const uploadTeacherSubmission = (formData) => {
+  return api.post('/submissions/teacher-upload', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+    timeout: 60000, // 60 seconds timeout for large files
+  });
+};
+
+// Student Portal API
+export const getStudentProfile = () => api.get('/students/profile');
+export const getStudentGrades = (studentId) => api.get(`/students/${studentId}/grades`);
+
+export default api;

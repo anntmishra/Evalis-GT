@@ -14,7 +14,7 @@ import {
   CheckCircle,
   Description
 } from '@mui/icons-material';
-import { STUDENT_SUBMISSIONS } from '../data/universityData';
+import { STUDENT_SUBMISSIONS } from '../constants/universityData';
 
 interface SubmissionCheckerProps {
   studentIds: string[];
@@ -137,4 +137,4 @@ const SubmissionChecker: React.FC<SubmissionCheckerProps> = ({
   );
 };
 
-export default SubmissionChecker; 
+export default SubmissionChecker;

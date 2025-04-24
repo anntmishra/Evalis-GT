@@ -1,8 +1,8 @@
 import { Teacher } from '../types/university';
-import { STUDENTS, SUBJECTS, EXAM_TYPES, GRADE_SCALE } from '../data/universityData';
+import { STUDENTS, SUBJECTS, EXAM_TYPES, GRADE_SCALE, STUDENT_SUBMISSIONS } from '../data/universityData';
 
 // Re-export for backwards compatibility
-export { STUDENTS, SUBJECTS, EXAM_TYPES, GRADE_SCALE };
+export { STUDENTS, SUBJECTS, EXAM_TYPES, GRADE_SCALE, STUDENT_SUBMISSIONS };
 
 // Backward compatibility for components that expect BATCHES
 export const BATCHES: any = {

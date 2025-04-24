@@ -157,11 +157,11 @@ const LandingPage: React.FC = () => {
           <Grid item xs={12} md={6}>
             <Box 
               component="img"
-              src="/hero-image.png" 
-              alt="Grading System"
+              src="/src/assets/Bennett University Logo.png" 
+              alt="Bennett University"
               sx={{ 
                 width: '100%',
-                maxWidth: 500,
+                maxWidth: 400,
                 height: 'auto',
                 display: 'block',
                 margin: 'auto'

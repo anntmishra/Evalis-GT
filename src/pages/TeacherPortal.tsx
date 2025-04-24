@@ -32,13 +32,16 @@ import {
   Assessment,
   Warning,
   CheckCircle,
-  CompareArrows
+  CompareArrows,
+  CloudUpload
 } from '@mui/icons-material';
 import { Subject, ExamType } from '../types/university';
-import { STUDENTS, STUDENT_SUBMISSIONS, GRADE_SCALE, SUBJECTS, EXAM_TYPES } from '../data/universityData';
+import { STUDENTS, STUDENT_SUBMISSIONS, GRADE_SCALE, SUBJECTS, EXAM_TYPES } from '../constants/universityData';
 import GradeDistribution from '../components/GradeDistribution';
 import SubmissionChecker from '../components/SubmissionChecker';
+import SubmissionUploader, { SubmissionData } from '../components/SubmissionUploader';
 import Header from '../components/Header';
+import { uploadTeacherSubmission } from '../api';
 
 interface AlertState {
   open: boolean;
@@ -175,6 +178,39 @@ const TeacherPortal: React.FC = () => {
   // Get available subjects
   const availableSubjects: Subject[] = [...SUBJECTS['CSE-1'], ...SUBJECTS['CSE-2']];
 
+  const handleUploadSubmission = async (data: SubmissionData) => {
+    try {
+      const formData = new FormData();
+      formData.append('file', data.file);
+      formData.append('subjectId', data.subjectId);
+      formData.append('examTypeId', data.examTypeId);
+      formData.append('title', data.title);
+      formData.append('description', data.description);
+      if (data.dueDate) {
+        formData.append('dueDate', data.dueDate);
+      }
+
+      // Send the data to the backend
+      await uploadTeacherSubmission(formData);
+      
+      setAlert({
+        open: true,
+        message: 'Assignment uploaded successfully',
+        severity: 'success',
+      });
+      
+      return true;
+    } catch (error) {
+      console.error('Error uploading assignment:', error);
+      setAlert({
+        open: true,
+        message: 'Failed to upload assignment. Please try again.',
+        severity: 'error',
+      });
+      throw error;
+    }
+  };
+
   return (
     <Box>
       <Header title="Teacher Portal" />
@@ -244,6 +280,11 @@ const TeacherPortal: React.FC = () => {
               <Tab 
                 icon={<CompareArrows />} 
                 label="Submission Check" 
+                sx={{ textTransform: 'none' }}
+              />
+              <Tab 
+                icon={<CloudUpload />} 
+                label="Upload Assignment" 
                 sx={{ textTransform: 'none' }}
               />
             </Tabs>
@@ -346,6 +387,16 @@ const TeacherPortal: React.FC = () => {
                 />
               </Box>
             </TabPanel>
+
+            <TabPanel value={tabValue} index={2}>
+              <Box sx={{ mt: 2 }}>
+                <SubmissionUploader
+                  subjects={availableSubjects}
+                  examTypes={EXAM_TYPES}
+                  onUploadSubmission={handleUploadSubmission}
+                />
+              </Box>
+            </TabPanel>
           </Paper>
         )}
 
@@ -367,4 +418,4 @@ const TeacherPortal: React.FC = () => {
   );
 };
 
-export default TeacherPortal; 
+export default TeacherPortal;

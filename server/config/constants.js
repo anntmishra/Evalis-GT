@@ -39,7 +39,7 @@ const USER_ROLES = {
 };
 
 // Default port
-const DEFAULT_PORT = 5000;
+const DEFAULT_PORT = 3000;
 
 module.exports = {
   DEFAULT_ADMIN,

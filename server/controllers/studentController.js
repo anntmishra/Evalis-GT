@@ -1,5 +1,5 @@
 const asyncHandler = require('express-async-handler');
-const { Student, Submission, Batch } = require('../models');
+const { Student, Submission, Batch, Subject } = require('../models');
 const jwt = require('jsonwebtoken');
 const XLSX = require('xlsx');
 const { Op } = require('sequelize');
@@ -155,12 +155,29 @@ const getStudentSubmissions = asyncHandler(async (req, res) => {
     throw new Error('Student not found');
   }
 
+  // Check if the requesting user has permission to view these submissions
+  if (req.user.role === 'student' && req.user.id !== req.params.id) {
+    res.status(403);
+    throw new Error('Not authorized to view these submissions');
+  }
+
   const submissions = await Submission.findAll({
     where: { studentId: req.params.id },
+    include: [{
+      model: Subject,
+      attributes: ['name'],
+      required: true
+    }],
     order: [['submissionDate', 'DESC']]
   });
 
-  res.json(submissions);
+  // Format the response to include subject name
+  const formattedSubmissions = submissions.map(submission => ({
+    ...submission.toJSON(),
+    subjectName: submission.Subject.name
+  }));
+
+  res.json(formattedSubmissions);
 });
 
 /**
@@ -459,7 +476,7 @@ const authStudent = asyncHandler(async (req, res) => {
  */
 const getStudentProfile = asyncHandler(async (req, res) => {
   const student = await Student.findOne({
-    where: { id: req.student.id },
+    where: { id: req.user.id },
     attributes: { exclude: ['password'] }
   });
 

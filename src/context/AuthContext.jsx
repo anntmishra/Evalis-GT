@@ -1,9 +1,20 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { loginStudent, loginTeacher, loginAdmin, setupTeacherPassword as apiSetupTeacherPassword } from '../api';
+import config from '../config/environment';
 
 const AuthContext = createContext();
 
-export const useAuth = () => useContext(AuthContext);
+// Separate the hook from the provider to fix Fast Refresh issues
+const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
+
+// Export the hook separately
+export { useAuth };
 
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
@@ -12,7 +23,7 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     // Check for user in localStorage on page load
-    const storedUser = localStorage.getItem('user');
+    const storedUser = localStorage.getItem(config.AUTH.CURRENT_USER_KEY);
     if (storedUser) {
       setCurrentUser(JSON.parse(storedUser));
     }
@@ -27,8 +38,8 @@ export const AuthProvider = ({ children }) => {
       const response = await loginStudent(id, password);
       const userData = response.data;
       
-      localStorage.setItem('user', JSON.stringify(userData));
-      localStorage.setItem('userToken', userData.token);
+      localStorage.setItem(config.AUTH.CURRENT_USER_KEY, JSON.stringify(userData));
+      localStorage.setItem(config.AUTH.TOKEN_STORAGE_KEY, userData.token);
       
       setCurrentUser(userData);
       return userData;
@@ -47,8 +58,8 @@ export const AuthProvider = ({ children }) => {
       const response = await loginTeacher(email, password);
       const userData = response.data;
       
-      localStorage.setItem('user', JSON.stringify(userData));
-      localStorage.setItem('userToken', userData.token);
+      localStorage.setItem(config.AUTH.CURRENT_USER_KEY, JSON.stringify(userData));
+      localStorage.setItem(config.AUTH.TOKEN_STORAGE_KEY, userData.token);
       
       setCurrentUser(userData);
       return userData;
@@ -68,8 +79,8 @@ export const AuthProvider = ({ children }) => {
       const userData = response.data;
       
       // Update user data and token
-      localStorage.setItem('user', JSON.stringify(userData));
-      localStorage.setItem('userToken', userData.token);
+      localStorage.setItem(config.AUTH.CURRENT_USER_KEY, JSON.stringify(userData));
+      localStorage.setItem(config.AUTH.TOKEN_STORAGE_KEY, userData.token);
       
       setCurrentUser(userData);
       return userData;
@@ -88,8 +99,8 @@ export const AuthProvider = ({ children }) => {
       const response = await loginAdmin(username, password);
       const userData = response.data;
       
-      localStorage.setItem('user', JSON.stringify(userData));
-      localStorage.setItem('userToken', userData.token);
+      localStorage.setItem(config.AUTH.CURRENT_USER_KEY, JSON.stringify(userData));
+      localStorage.setItem(config.AUTH.TOKEN_STORAGE_KEY, userData.token);
       
       setCurrentUser(userData);
       return userData;
@@ -102,8 +113,8 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    localStorage.removeItem('user');
-    localStorage.removeItem('userToken');
+    localStorage.removeItem(config.AUTH.CURRENT_USER_KEY);
+    localStorage.removeItem(config.AUTH.TOKEN_STORAGE_KEY);
     setCurrentUser(null);
   };
 

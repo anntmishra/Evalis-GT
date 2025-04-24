@@ -171,6 +171,54 @@ const setupTeacherPassword = asyncHandler(async (req, res) => {
   });
 });
 
+/**
+ * @desc    Reset student password
+ * @route   POST /api/auth/student/reset-password
+ * @access  Private (Admin only)
+ */
+const resetStudentPassword = asyncHandler(async (req, res) => {
+  const { studentId, newPassword } = req.body;
+
+  // Verify admin access
+  if (req.user.role !== 'admin') {
+    res.status(403);
+    throw new Error('Not authorized to reset passwords');
+  }
+
+  // Find student by ID
+  const student = await Student.findOne({ where: { id: studentId } });
+
+  if (!student) {
+    res.status(404);
+    throw new Error('Student not found');
+  }
+
+  // Check if student has an email
+  if (!student.email) {
+    res.status(400);
+    throw new Error('Student does not have an email address set');
+  }
+
+  // Update password
+  if (newPassword) {
+    student.password = newPassword;
+    await student.save();
+    console.log(`Password reset for student ${studentId} by admin`);
+    
+    res.status(200).json({
+      success: true,
+      message: 'Student password has been reset'
+    });
+  } else {
+    // If no new password is provided, we assume this is just checking if the student can have their password reset
+    res.status(200).json({
+      success: true,
+      message: 'Student is eligible for password reset',
+      email: student.email
+    });
+  }
+});
+
 // Generate JWT
 const generateToken = (id, role) => {
   return jwt.sign({ id, role }, process.env.JWT_SECRET, {
@@ -184,4 +232,5 @@ module.exports = {
   authAdmin,
   getUserProfile,
   setupTeacherPassword,
+  resetStudentPassword,
 }; 

@@ -13,10 +13,21 @@ import {
   Typography,
   Box,
   CircularProgress,
-  SelectChangeEvent
+  SelectChangeEvent,
+  Divider,
+  Alert,
+  Tooltip,
+  IconButton
 } from '@mui/material';
+import { 
+  KeyRounded as KeyIcon,
+  RefreshRounded as ResetIcon,
+  ContentCopy as CopyIcon
+} from '@mui/icons-material';
 import { Student } from '../types/university';
 import { BATCHES } from '../data/universityData';
+import { sendPasswordReset } from '../config/firebase';
+import { resetStudentPassword } from '../api';
 
 interface StudentFormProps {
   open: boolean;
@@ -44,20 +55,37 @@ const StudentForm: React.FC<StudentFormProps> = ({
     name: '',
     section: 'CSE-1',
     email: '',
-    batch: selectedBatch
+    batch: selectedBatch,
+    role: 'student'
   });
+
+  const [passwordResetStatus, setPasswordResetStatus] = useState<{
+    loading: boolean;
+    success?: boolean;
+    message?: string;
+  }>({ loading: false });
+
+  const [generatedPassword, setGeneratedPassword] = useState<string>('');
+  const [showGeneratedPassword, setShowGeneratedPassword] = useState<boolean>(false);
 
   useEffect(() => {
     if (student) {
       setForm(student);
+      // Reset any previous password reset attempts
+      setPasswordResetStatus({ loading: false });
+      setGeneratedPassword('');
+      setShowGeneratedPassword(false);
     } else {
       setForm({
         id: '',
         name: '',
         section: 'CSE-1',
         email: '',
-        batch: selectedBatch
+        batch: selectedBatch,
+        role: 'student'
       });
+      // Generate initial password for new students
+      generateRandomPassword();
     }
   }, [student, open, selectedBatch]);
 
@@ -79,7 +107,59 @@ const StudentForm: React.FC<StudentFormProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave(form);
+    // Include the generated password in the submission if it's a new student
+    if (!student && generatedPassword) {
+      onSave({...form, initialPassword: generatedPassword});
+    } else {
+      onSave(form);
+    }
+  };
+
+  const handlePasswordReset = async () => {
+    if (!form.email) {
+      setPasswordResetStatus({
+        loading: false,
+        success: false,
+        message: 'Email address is required for password reset'
+      });
+      return;
+    }
+
+    setPasswordResetStatus({ loading: true });
+    try {
+      // First check if student exists and can have password reset via our API
+      if (form.id) {
+        await resetStudentPassword(form.id, null);
+      }
+      
+      // Then send the Firebase password reset email
+      const result = await sendPasswordReset(form.email);
+      setPasswordResetStatus({
+        loading: false,
+        success: result.success,
+        message: result.message
+      });
+    } catch (error) {
+      setPasswordResetStatus({
+        loading: false,
+        success: false,
+        message: 'An error occurred while sending the password reset email'
+      });
+    }
+  };
+
+  const generateRandomPassword = () => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+    let password = '';
+    for (let i = 0; i < 10; i++) {
+      password += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    setGeneratedPassword(password);
+    setShowGeneratedPassword(true);
+  };
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(generatedPassword);
   };
 
   return (
@@ -149,8 +229,89 @@ const StudentForm: React.FC<StudentFormProps> = ({
             fullWidth
             variant="outlined"
             type="email"
+            required
             sx={{ mb: 2 }}
           />
+
+          {!student && (
+            <>
+              <Divider sx={{ my: 2 }}>
+                <Typography variant="body2" color="text.secondary">
+                  Initial Password
+                </Typography>
+              </Divider>
+              
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <TextField
+                  margin="dense"
+                  label="Generated Password"
+                  value={generatedPassword}
+                  fullWidth
+                  variant="outlined"
+                  InputProps={{
+                    readOnly: true,
+                    startAdornment: (
+                      <KeyIcon sx={{ color: 'text.secondary', mr: 1 }} />
+                    ),
+                    endAdornment: (
+                      <Tooltip title="Copy to clipboard">
+                        <IconButton onClick={copyToClipboard} edge="end">
+                          <CopyIcon />
+                        </IconButton>
+                      </Tooltip>
+                    )
+                  }}
+                  type={showGeneratedPassword ? 'text' : 'password'}
+                />
+                <Tooltip title="Generate new password">
+                  <IconButton onClick={generateRandomPassword} sx={{ ml: 1 }}>
+                    <ResetIcon />
+                  </IconButton>
+                </Tooltip>
+              </Box>
+              
+              <Typography variant="caption" color="text.secondary">
+                This password will be required for the student's first login. 
+                Make sure to share it securely.
+              </Typography>
+            </>
+          )}
+
+          {student && (
+            <>
+              <Divider sx={{ my: 2 }}>
+                <Typography variant="body2" color="text.secondary">
+                  Password Management
+                </Typography>
+              </Divider>
+
+              <Box sx={{ mb: 2 }}>
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  startIcon={<ResetIcon />}
+                  onClick={handlePasswordReset}
+                  disabled={!form.email || passwordResetStatus.loading}
+                  fullWidth
+                >
+                  {passwordResetStatus.loading ? (
+                    <CircularProgress size={24} />
+                  ) : (
+                    'Send Password Reset Link'
+                  )}
+                </Button>
+              </Box>
+
+              {passwordResetStatus.message && (
+                <Alert
+                  severity={passwordResetStatus.success ? 'success' : 'error'}
+                  sx={{ mb: 2 }}
+                >
+                  {passwordResetStatus.message}
+                </Alert>
+              )}
+            </>
+          )}
 
           {error && (
             <Box mt={2}>

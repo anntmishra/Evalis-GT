@@ -31,6 +31,7 @@
     "express": "^4.18.2",
     "express-async-handler": "^1.2.0",
     "express-fileupload": "^1.4.3",
+    "firebase": "^11.6.0",
     "framer-motion": "^11.0.3",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.1.1",

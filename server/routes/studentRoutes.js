@@ -9,13 +9,17 @@ const {
   getStudentSubmissions,
   importStudents,
   importStudentsFromExcel,
+  getStudentProfile
 } = require('../controllers/studentController');
-const { protect, admin, teacher } = require('../middleware/authMiddleware');
+const { protect, admin, student } = require('../middleware/authMiddleware');
 
 // Student routes
 router.route('/')
   .get(protect, admin, getStudents)
   .post(protect, admin, createStudent);
+
+router.route('/profile')
+  .get(protect, student, getStudentProfile);
 
 router.route('/import')
   .post(protect, admin, importStudents);

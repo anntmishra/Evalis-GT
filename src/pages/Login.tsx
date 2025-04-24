@@ -24,8 +24,8 @@ import {
   AdminPanelSettings
 } from '@mui/icons-material';
 import Header from '../components/Header';
-import config from '../config/environment';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext.jsx';
+import PasswordResetForm from '../components/PasswordResetForm';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -59,6 +59,7 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [showResetPassword, setShowResetPassword] = useState(false);
   const navigate = useNavigate();
   const theme = useTheme();
   const { studentLogin, teacherLogin, adminLogin } = useAuth();
@@ -72,93 +73,26 @@ export default function Login() {
     try {
       if (tabValue === 0) { // Student login
         try {
-          const response = await fetch(config.API_ENDPOINTS.AUTH.STUDENT_LOGIN, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ id: username, password }),
-          });
-          
-          if (!response.ok) {
-            throw new Error('Invalid credentials');
-          }
-          
-          const data = await response.json();
-          
-          // Store token and user info
-          localStorage.setItem(config.AUTH.TOKEN_STORAGE_KEY, data.token);
-          localStorage.setItem(config.AUTH.USER_STORAGE_KEY, JSON.stringify(data));
-          localStorage.setItem(config.AUTH.CURRENT_USER_KEY, JSON.stringify({ 
-            id: username, 
-            name: data.name,
-            role: 'student' 
-          }));
-          
+          await studentLogin(username, password);
           navigate('/student');
-          return;
-        } catch (error) {
+        } catch (error: any) {
           console.error('Login error:', error);
-          setError('Invalid credentials. Please try again.');
+          setError(error.response?.data?.message || 'Invalid credentials. Please try again.');
         }
       } else if (tabValue === 1) { // Teacher login
         try {
-          const response = await fetch(config.API_ENDPOINTS.AUTH.TEACHER_LOGIN, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ email: username, password }),
-          });
-          
-          if (!response.ok) {
-            throw new Error('Invalid credentials');
-          }
-          
-          const data = await response.json();
-          
-          // Store token and user info
-          localStorage.setItem(config.AUTH.TOKEN_STORAGE_KEY, data.token);
-          localStorage.setItem(config.AUTH.USER_STORAGE_KEY, JSON.stringify(data));
-          localStorage.setItem(config.AUTH.CURRENT_USER_KEY, JSON.stringify({ 
-            id: data.id, 
-            name: data.name,
-            email: data.email,
-            role: 'teacher' 
-          }));
-          
+          await teacherLogin(username, password);
           navigate('/teacher');
-          return;
-        } catch (error) {
+        } catch (error: any) {
           console.error('Login error:', error);
-          setError('Invalid credentials. Please try again.');
+          setError(error.response?.data?.message || 'Invalid credentials. Please try again.');
         }
       } else if (tabValue === 2) { // Admin login
         try {
-          console.log('Attempting admin login with username:', username);
-          
-          // Add more debug info
-          console.log('API base URL:', config.API_BASE_URL);
-          console.log('Admin login endpoint:', config.API_ENDPOINTS.AUTH.ADMIN_LOGIN);
-          
-          // Use the AuthContext's adminLogin method
-          const userData = await adminLogin(username, password);
-          console.log('Admin login successful:', userData);
-          
-          // Store token and user info explicitly to ensure it's saved
-          localStorage.setItem(config.AUTH.TOKEN_STORAGE_KEY, userData.token);
-          localStorage.setItem(config.AUTH.USER_STORAGE_KEY, JSON.stringify(userData));
-          localStorage.setItem(config.AUTH.CURRENT_USER_KEY, JSON.stringify({ 
-            id: userData.id, 
-            name: userData.name,
-            role: 'admin' 
-          }));
-          
-          // Redirect to admin dashboard
+          await adminLogin(username, password);
           navigate('/admin');
         } catch (error: any) {
           console.error('Admin login error:', error);
-          // More detailed error logging
           if (error.response) {
             console.error('Error response:', error.response.data);
             console.error('Error status:', error.response.status);
@@ -185,6 +119,10 @@ export default function Login() {
     setError('');
   };
 
+  const handleForgotPassword = () => {
+    setShowResetPassword(true);
+  };
+
   return (
     <Box sx={{ 
       minHeight: '100vh',
@@ -203,200 +141,132 @@ export default function Login() {
           </Button>
         </Box>
 
-        <Paper elevation={3} sx={{ borderRadius: 2 }}>
-          <Box sx={{ 
-            p: 4,
-            display: 'flex', 
-            flexDirection: 'column', 
-            alignItems: 'center'
-          }}>
-            <Typography 
-              component="h1" 
-              variant="h4" 
-              gutterBottom
-              sx={{ 
-                fontWeight: 'bold',
-                color: theme.palette.primary.main
-              }}
-            >
-              Welcome Back
-            </Typography>
-            <Typography 
-              variant="body1" 
-              color="text.secondary" 
-              align="center"
-              gutterBottom
-            >
-              Login to access your Bennett University grading portal
-            </Typography>
-
-            <Box sx={{ width: '100%', mt: 3 }}>
-              <Tabs
-                value={tabValue}
-                onChange={handleTabChange}
-                variant="fullWidth"
-                sx={{ borderBottom: 1, borderColor: 'divider' }}
+        {showResetPassword ? (
+          <>
+            <PasswordResetForm 
+              email={tabValue === 1 ? username : ''}
+              onClose={() => setShowResetPassword(false)} 
+            />
+          </>
+        ) : (
+          <Paper elevation={3} sx={{ borderRadius: 2 }}>
+            <Box sx={{ 
+              p: 4,
+              display: 'flex', 
+              flexDirection: 'column', 
+              alignItems: 'center'
+            }}>
+              <Typography 
+                component="h1" 
+                variant="h4" 
+                gutterBottom
+                sx={{ 
+                  fontWeight: 'bold',
+                  color: theme.palette.primary.main
+                }}
               >
-                <Tab 
-                  icon={<Person />} 
-                  label="Student" 
-                  sx={{ 
-                    textTransform: 'none',
-                    minHeight: 64
-                  }}
-                />
-                <Tab 
-                  icon={<School />} 
-                  label="Teacher" 
-                  sx={{ 
-                    textTransform: 'none',
-                    minHeight: 64
-                  }}
-                />
-                <Tab 
-                  icon={<AdminPanelSettings />} 
-                  label="Admin" 
-                  sx={{ 
-                    textTransform: 'none',
-                    minHeight: 64
-                  }}
-                />
-              </Tabs>
+                Welcome Back
+              </Typography>
+              <Typography 
+                variant="body1" 
+                color="text.secondary" 
+                align="center"
+                gutterBottom
+              >
+                Login to access your Bennett University grading portal
+              </Typography>
 
-              {error && (
-                <Alert 
-                  severity="error" 
-                  sx={{ mt: 2, width: '100%' }}
-                  onClose={() => setError('')}
+              <Box sx={{ width: '100%', mt: 3 }}>
+                <Tabs
+                  value={tabValue}
+                  onChange={handleTabChange}
+                  variant="fullWidth"
+                  sx={{ borderBottom: 1, borderColor: 'divider' }}
                 >
-                  {error}
-                </Alert>
-              )}
-
-              <TabPanel value={tabValue} index={0}>
-                <Box component="form" sx={{ mt: 1 }}>
-                  <TextField
-                    required
-                    fullWidth
-                    id="student-id"
-                    label="Student ID"
-                    name="studentId"
-                    autoFocus
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    sx={{ mb: 2 }}
-                  />
-                  <TextField
-                    required
-                    fullWidth
-                    name="password"
-                    label="Password"
-                    type={showPassword ? "text" : "password"}
-                    id="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    InputProps={{
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <IconButton
-                            aria-label="toggle password visibility"
-                            onClick={() => setShowPassword(!showPassword)}
-                            edge="end"
-                          >
-                            {showPassword ? <VisibilityOff /> : <Visibility />}
-                          </IconButton>
-                        </InputAdornment>
-                      ),
-                    }}
-                    sx={{ mb: 2 }}
-                  />
-                  <Button
-                    fullWidth
-                    variant="contained"
-                    sx={{ mt: 3, mb: 2, py: 1.5 }}
-                    onClick={handleLogin}
-                  >
-                    Login as Student
-                  </Button>
-                </Box>
-              </TabPanel>
-
-              <TabPanel value={tabValue} index={1}>
-                <Box component="form" sx={{ mt: 1 }}>
-                  <TextField
-                    margin="normal"
-                    required
-                    fullWidth
-                    id="teacher-email"
-                    label="Email Address"
-                    name="email"
-                    autoFocus
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    sx={{ mb: 2 }}
-                  />
-                  <TextField
-                    margin="normal"
-                    required
-                    fullWidth
-                    name="password"
-                    label="Password"
-                    type={showPassword ? 'text' : 'password'}
-                    id="teacher-password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    InputProps={{
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <IconButton
-                            onClick={() => setShowPassword(!showPassword)}
-                            edge="end"
-                          >
-                            {showPassword ? <VisibilityOff /> : <Visibility />}
-                          </IconButton>
-                        </InputAdornment>
-                      ),
+                  <Tab 
+                    icon={<Person />} 
+                    label="Student" 
+                    sx={{ 
+                      textTransform: 'none',
+                      minHeight: 64
                     }}
                   />
-                  <Button
-                    fullWidth
-                    variant="contained"
-                    sx={{ mt: 3, mb: 2, py: 1.5 }}
-                    onClick={handleLogin}
-                  >
-                    Login as Teacher
-                  </Button>
-                </Box>
-              </TabPanel>
-
-              <TabPanel value={tabValue} index={2}>
-                <Box component="form" sx={{ mt: 1 }}>
-                  <TextField
-                    margin="normal"
-                    required
-                    fullWidth
-                    id="admin-username"
-                    label="Admin Username"
-                    name="adminUsername"
-                    autoFocus
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
+                  <Tab 
+                    icon={<School />} 
+                    label="Teacher" 
+                    sx={{ 
+                      textTransform: 'none',
+                      minHeight: 64
+                    }}
                   />
+                  <Tab 
+                    icon={<AdminPanelSettings />} 
+                    label="Admin" 
+                    sx={{ 
+                      textTransform: 'none',
+                      minHeight: 64
+                    }}
+                  />
+                </Tabs>
+
+                {error && (
+                  <Alert severity="error" onClose={() => setError('')} sx={{ mt: 2 }}>
+                    {error}
+                  </Alert>
+                )}
+
+                <form onSubmit={(e) => {
+                  e.preventDefault();
+                  handleLogin();
+                }}>
+                  <TabPanel value={tabValue} index={0}>
+                    <TextField
+                      label="Student ID"
+                      required
+                      fullWidth
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      margin="normal"
+                      placeholder="Enter your student ID (e.g., S00001)"
+                      helperText="Use your student ID, not email address"
+                    />
+                  </TabPanel>
+
+                  <TabPanel value={tabValue} index={1}>
+                    <TextField
+                      label="Email"
+                      type="email"
+                      required
+                      fullWidth
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      margin="normal"
+                    />
+                  </TabPanel>
+
+                  <TabPanel value={tabValue} index={2}>
+                    <TextField
+                      label="Username"
+                      required
+                      fullWidth
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      margin="normal"
+                    />
+                  </TabPanel>
+
                   <TextField
-                    margin="normal"
-                    required
-                    fullWidth
-                    name="password"
                     label="Password"
                     type={showPassword ? 'text' : 'password'}
-                    id="admin-password"
+                    required
+                    fullWidth
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    margin="normal"
                     InputProps={{
                       endAdornment: (
                         <InputAdornment position="end">
                           <IconButton
-                            aria-label="toggle password visibility"
                             onClick={() => setShowPassword(!showPassword)}
                             edge="end"
                           >
@@ -406,37 +276,33 @@ export default function Login() {
                       ),
                     }}
                   />
+
                   <Button
+                    type="submit"
                     fullWidth
                     variant="contained"
+                    size="large"
                     sx={{ mt: 3, mb: 2, py: 1.5 }}
-                    onClick={handleLogin}
                   >
-                    Sign In as Admin
+                    Login as {tabValue === 0 ? 'Student' : tabValue === 1 ? 'Teacher' : 'Admin'}
                   </Button>
-                </Box>
-              </TabPanel>
+                </form>
 
-              <Box sx={{ mt: 2, textAlign: 'center' }}>
-                <Typography variant="body2" color="text.secondary" gutterBottom>
-                  Demo Student Credentials:
-                </Typography>
-                <Typography variant="caption" display="block" color="text.secondary">
-                  Student ID: E23CSE001, Password: anant123
-                </Typography>
-                <Typography variant="caption" display="block" color="text.secondary">
-                  Student ID: E23CSE002, Password: kushagra123
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }} gutterBottom>
-                  Demo Teacher Credentials:
-                </Typography>
-                <Typography variant="caption" display="block" color="text.secondary">
-                  Email: teacher@university.edu.in, Password: uni0001
+                <Typography variant="body2" color="text.secondary" align="center">
+                  Having trouble logging in?{' '}
+                  <Link 
+                    component="button" 
+                    variant="body2" 
+                    onClick={handleForgotPassword}
+                    color="primary"
+                  >
+                    Reset Password
+                  </Link>
                 </Typography>
               </Box>
             </Box>
-          </Box>
-        </Paper>
+          </Paper>
+        )}
 
         <Typography variant="body2" color="text.secondary" sx={{ mt: 4, mb: 4, textAlign: 'center' }}>
           Need help? Contact{' '}

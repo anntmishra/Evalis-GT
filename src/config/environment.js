@@ -10,8 +10,8 @@ const NODE_ENV = import.meta.env.NODE_ENV || 'development';
 
 // API URLs based on environment
 const API_BASE_URL = {
-  development: 'http://localhost:5001/api',
-  test: 'http://localhost:5001/api',
+  development: 'http://localhost:3000/api',
+  test: 'http://localhost:3000/api',
   production: '/api', // In production, use relative path for same-origin API
 }[NODE_ENV];
 

@@ -8,6 +8,7 @@ import {
   Login as LoginIcon
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
+import bennettLogo from '../assets/Bennett University Logo.png';
 
 interface HeaderProps {
   title?: string;
@@ -50,6 +51,15 @@ export default function Header({ title = 'Bennett University', showBackButton = 
             Back to Home
           </Button>
         )}
+        <Box
+          component="img"
+          src={bennettLogo}
+          alt="Bennett University"
+          sx={{ 
+            height: 40,
+            mr: 1 
+          }}
+        />
         <Typography 
           variant="h6" 
           component="div" 
