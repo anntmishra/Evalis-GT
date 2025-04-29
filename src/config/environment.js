@@ -11,8 +11,8 @@ const NODE_ENV = import.meta.env.NODE_ENV || 'development';
 
 // API URLs based on environment - prefer explicit env var if available
 const API_BASE_URL = VITE_API_BASE_URL || {
-  development: 'http://localhost:3000/api',
-  test: 'http://localhost:3000/api',
+  development: 'http://localhost:3001/api',
+  test: 'http://localhost:3001/api',
   production: '/api', // In production, use relative path for same-origin API
 }[NODE_ENV];
 
