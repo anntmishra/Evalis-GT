@@ -6,6 +6,7 @@ export interface Student {
   email?: string;
   role?: string;
   initialPassword?: string;
+  firebaseUid?: string;
 }
 
 export interface Subject {
@@ -14,6 +15,10 @@ export interface Subject {
   section?: string;
   description?: string;
   credits?: number;
+  semesterId?: string;
+  batchId?: string;
+  Batch?: any;
+  Semester?: any;
 }
 
 export interface StudentSubmission {
@@ -65,4 +70,5 @@ export interface Teacher {
   name: string;
   email: string;
   subjects: string[];
+  initialPassword?: string;
 } 

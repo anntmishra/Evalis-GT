@@ -9,6 +9,7 @@ Evalis is a comprehensive university grading and submission portal that provides
 - **Admin Dashboard**: Manage teachers, subjects, batches, and student data
 - **Excel Import**: Import student data easily from Excel files
 - **MongoDB Database**: Secure storage of all academic data
+- **Automated Emails**: Send login credentials to students' email addresses
 
 ## Prerequisites
 
@@ -35,7 +36,24 @@ Evalis is a comprehensive university grading and submission portal that provides
    JWT_SECRET=your_jwt_secret
    NODE_ENV=development
    PORT=5000
+   
+   # Email Configuration (Optional but recommended)
+   EMAIL_HOST=smtp.gmail.com
+   EMAIL_PORT=587
+   EMAIL_SECURE=false
+   EMAIL_USER=your_email@gmail.com
+   EMAIL_PASS=your_app_password
+   FRONTEND_URL=http://localhost:5173
+   VITE_GOOGLE_AI_API_KEY=your_api_key_here
    ```
+
+   > **Note on Email Configuration**: 
+   > 
+   > To use the email functionality (sending login credentials to students):
+   > 
+   > - For Gmail: You need to create an "App Password" in your Google Account security settings.
+   > - For other providers: Use the appropriate SMTP settings and credentials.
+   > - The `FRONTEND_URL` should point to your frontend application's URL.
 
 ## Database Setup
 
@@ -204,6 +222,23 @@ The application uses the following main database tables:
 ### Admin Login
 - Username: admin
 - Password: admin123
+
+## Google AI Integration
+
+The ProfileChatbot component now integrates with Google AI Studio's Gemini model for real-time student analysis. To use this feature:
+
+1. Obtain a Google AI Studio API key from [Google AI Studio](https://makersuite.google.com/)
+2. Add your API key to the `.env` file:
+   ```
+   VITE_GOOGLE_AI_API_KEY=your_api_key_here
+   ```
+3. The chatbot will automatically use the Google AI API to generate personalized responses based on student data
+
+The AI provides:
+- Personalized academic insights
+- Performance analysis based on grades and attendance
+- Customized recommendations for improvement
+- Natural language interactions with students
 
 ## License
 

@@ -1,14 +1,17 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { sendPasswordReset } from '../config/firebase';
 
 export default function LoginForm() {
   const [userType, setUserType] = useState('student');
   const [id, setId] = useState('');
+  const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [resetStatus, setResetStatus] = useState({ loading: false, success: false, message: '' });
   
   const { studentLogin, teacherLogin, adminLogin } = useAuth();
   const navigate = useNavigate();
@@ -23,16 +26,48 @@ export default function LoginForm() {
         await studentLogin(id, password);
         navigate('/student/dashboard');
       } else if (userType === 'teacher') {
-        await teacherLogin(id, password);
+        await teacherLogin(email, password);
         navigate('/teacher/dashboard');
       } else {
         await adminLogin(username, password);
         navigate('/admin/dashboard');
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
+      console.error('Login error:', err);
+      setError(err.message || err.response?.data?.message || 'Login failed. Please check your credentials.');
     } finally {
       setLoading(false);
+    }
+  };
+  
+  const handlePasswordReset = async () => {
+    const resetEmail = email || (id && id.includes('@') ? id : '');
+    
+    if (!resetEmail) {
+      setResetStatus({
+        loading: false,
+        success: false,
+        message: 'Please enter a valid email address'
+      });
+      return;
+    }
+    
+    setResetStatus({ loading: true, success: false, message: 'Sending password reset email...' });
+    
+    try {
+      const result = await sendPasswordReset(resetEmail);
+      setResetStatus({
+        loading: false,
+        success: result.success,
+        message: result.message || 'Password reset email sent successfully'
+      });
+    } catch (err) {
+      console.error('Password reset error:', err);
+      setResetStatus({
+        loading: false,
+        success: false,
+        message: err.message || 'Failed to send password reset email'
+      });
     }
   };
 
@@ -88,6 +123,24 @@ export default function LoginForm() {
               placeholder="Enter your username"
             />
           </div>
+        ) : userType === 'teacher' ? (
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="teacherIdentifier">
+              Email or ID
+            </label>
+            <input
+              id="teacherIdentifier"
+              type="text"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Enter your email or teacher ID"
+            />
+            <p className="mt-1 text-sm text-gray-500">
+              You can use either your teacher ID (e.g., T0001) or your email address.
+            </p>
+          </div>
         ) : (
           <div className="mb-4">
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="id">
@@ -128,6 +181,26 @@ export default function LoginForm() {
           {loading ? 'Loading...' : 'Login'}
         </button>
       </form>
+      
+      {/* Password Reset Section */}
+      {(userType === 'student' || userType === 'teacher') && (
+        <div className="mt-4 text-center">
+          <button
+            type="button"
+            onClick={handlePasswordReset}
+            disabled={resetStatus.loading}
+            className="text-blue-500 hover:text-blue-700 text-sm"
+          >
+            Forgot password? Reset it here
+          </button>
+          
+          {resetStatus.message && (
+            <div className={`mt-2 p-2 text-sm rounded ${resetStatus.success ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+              {resetStatus.message}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
-} 
+}

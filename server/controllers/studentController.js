@@ -3,6 +3,9 @@ const { Student, Submission, Batch, Subject } = require('../models');
 const jwt = require('jsonwebtoken');
 const XLSX = require('xlsx');
 const { Op } = require('sequelize');
+const { generateRandomPassword } = require('../utils/passwordUtils');
+const { sendLoginCredentials, sendPasswordResetLink } = require('../utils/emailUtils');
+const { createFirebaseUser, sendPasswordResetEmail, updateFirebaseUser } = require('../utils/firebaseUtils');
 
 /**
  * @desc    Get all students
@@ -60,6 +63,11 @@ const getStudentById = asyncHandler(async (req, res) => {
  * @access  Private/Admin
  */
 const createStudent = asyncHandler(async (req, res) => {
+  console.log('Creating student with data:', { 
+    ...req.body, 
+    password: req.body.password ? '[REDACTED]' : undefined 
+  });
+  
   const { id, name, section, batch, email, password } = req.body;
 
   const studentExists = await Student.findOne({ where: { id } });
@@ -69,22 +77,97 @@ const createStudent = asyncHandler(async (req, res) => {
     throw new Error('Student already exists');
   }
 
+  // Generate a random password if not provided and email exists
+  const generatedPassword = password || (email ? generateRandomPassword(10) : id);
+  
+  console.log(`Generated password for student ${id}: ${generatedPassword.substring(0, 3)}***`);
+
   const student = await Student.create({
     id,
     name,
     section,
     batch,
     email,
-    password: password || id, // Default password is the student ID
+    password: generatedPassword,
   });
 
+  console.log(`Student created in database with ID: ${student.id}`);
+
   if (student) {
+    // If email is provided, create Firebase user and send password reset link
+    if (email) {
+      try {
+        console.log(`Attempting to create Firebase user for student ${id} with email ${email}`);
+        
+        // Create Firebase user
+        const firebaseUser = await createFirebaseUser(email, generatedPassword, {
+          id: student.id,
+          name: student.name,
+        });
+        
+        console.log(`Firebase user created successfully with UID: ${firebaseUser?.uid}`);
+        
+        // Generate password reset link
+        console.log(`Generating password reset link for ${email}`);
+        const resetLink = await sendPasswordResetEmail(email);
+        
+        console.log(`Password reset link generated: ${resetLink.substring(0, 30)}...`);
+        
+        // Send password reset email
+        console.log(`Sending password reset email to ${email}`);
+        await sendPasswordResetLink({
+          email,
+          name: student.name,
+        }, resetLink);
+        
+        console.log(`Password reset link sent to ${email}`);
+        
+        // Also send login credentials for reference
+        console.log(`Sending login credentials to ${email}`);
+        await sendLoginCredentials(student, generatedPassword);
+        
+        console.log(`Login credentials sent to ${email}`);
+        console.log(`All Firebase operations completed successfully for student ${id}`);
+        
+        return res.status(201).json({
+          id: student.id,
+          name: student.name,
+          section: student.section,
+          batch: student.batch,
+          email: student.email,
+          initialPassword: generatedPassword,
+          firebaseUserCreated: true,
+          firebaseUserId: firebaseUser?.uid
+        });
+      } catch (error) {
+        console.error('Error with Firebase operations:', error);
+        console.error('Stack trace:', error.stack);
+        
+        // Continue even if Firebase operations fail - don't block the API response
+        // But include the error in the response for troubleshooting
+        return res.status(201).json({
+          id: student.id,
+          name: student.name,
+          section: student.section,
+          batch: student.batch,
+          email: student.email,
+          initialPassword: generatedPassword,
+          firebaseError: {
+            message: error.message,
+            code: error.code || error.errorInfo?.code
+          }
+        });
+      }
+    }
+
+    console.log(`No email provided for student ${id}, skipping Firebase user creation`);
     res.status(201).json({
       id: student.id,
       name: student.name,
       section: student.section,
       batch: student.batch,
       email: student.email,
+      initialPassword: email ? generatedPassword : undefined, // Only include if email was provided
     });
   } else {
     res.status(400);
@@ -101,16 +184,75 @@ const updateStudent = asyncHandler(async (req, res) => {
   const student = await Student.findOne({ where: { id: req.params.id } });
 
   if (student) {
+    const previousEmail = student.email;
+    const newEmail = req.body.email;
+    
     student.name = req.body.name || student.name;
     student.section = req.body.section || student.section;
     student.batch = req.body.batch || student.batch;
-    student.email = req.body.email || student.email;
+    student.email = newEmail || student.email;
     
-    if (req.body.password) {
+    // If email is being added for the first time or changed
+    let passwordChanged = false;
+    let generatedPassword;
+    
+    if (newEmail && (!previousEmail || newEmail !== previousEmail)) {
+      // Generate a new password when email is added or changed
+      generatedPassword = generateRandomPassword(10);
+      student.password = generatedPassword;
+      passwordChanged = true;
+    } else if (req.body.password) {
+      // Or if password is explicitly provided
       student.password = req.body.password;
+      passwordChanged = true;
+      generatedPassword = req.body.password;
     }
 
     const updatedStudent = await student.save();
+
+    // Send login credentials if email was added or changed and create Firebase user
+    if (passwordChanged && newEmail) {
+      try {
+        // If changing email, first try to find if a Firebase user already exists
+        let firebaseUser;
+        try {
+          if (previousEmail) {
+            // Try to update the existing Firebase user with the new email
+            firebaseUser = await updateFirebaseUser(null, { 
+              email: newEmail,
+              password: generatedPassword
+            });
+          }
+        } catch (error) {
+          console.log('No existing Firebase user to update, creating new one');
+        }
+        
+        // If no existing user or couldn't update, create a new Firebase user
+        if (!firebaseUser) {
+          firebaseUser = await createFirebaseUser(newEmail, generatedPassword, {
+            id: updatedStudent.id,
+            name: updatedStudent.name,
+          });
+        }
+        
+        // Generate password reset link
+        const resetLink = await sendPasswordResetEmail(newEmail);
+        
+        // Send password reset email
+        await sendPasswordResetLink({
+          email: newEmail,
+          name: updatedStudent.name,
+        }, resetLink);
+        
+        console.log(`Firebase user updated/created and password reset link sent to ${newEmail}`);
+        
+        // Also send login credentials for reference
+        await sendLoginCredentials(updatedStudent, generatedPassword);
+      } catch (error) {
+        console.error('Error with Firebase operations:', error);
+        // Continue even if Firebase operations fail
+      }
+    }
 
     res.json({
       id: updatedStudent.id,
@@ -118,6 +260,7 @@ const updateStudent = asyncHandler(async (req, res) => {
       section: updatedStudent.section,
       batch: updatedStudent.batch,
       email: updatedStudent.email,
+      initialPassword: passwordChanged && newEmail ? generatedPassword : undefined,
     });
   } else {
     res.status(404);
@@ -203,7 +346,7 @@ const importStudents = asyncHandler(async (req, res) => {
 
   for (const student of students) {
     try {
-      const { id, name, section } = student;
+      const { id, name, section, email } = student;
       
       if (!id || !name || !section) {
         errors.push(`Missing required fields for student: ${JSON.stringify(student)}`);
@@ -217,18 +360,35 @@ const importStudents = asyncHandler(async (req, res) => {
         continue;
       }
 
+      // Generate random password if email is provided
+      const password = email ? generateRandomPassword(10) : id;
+
       const newStudent = await Student.create({
         id,
         name,
         section,
         batch,
-        password: id, // Default password is the student ID
+        email,
+        password,
       });
+
+      // Send email if provided
+      if (email) {
+        try {
+          await sendLoginCredentials(newStudent, password);
+          console.log(`Login credentials sent to ${email}`);
+        } catch (emailError) {
+          console.error(`Error sending email to ${email}:`, emailError);
+          // Log but continue with imports
+        }
+      }
 
       importedStudents.push({
         id: newStudent.id,
         name: newStudent.name,
         section: newStudent.section,
+        email: newStudent.email,
+        initialPassword: email ? password : undefined,
       });
     } catch (error) {
       errors.push(`Error importing student ${student.id}: ${error.message}`);
@@ -343,6 +503,7 @@ const importStudentsFromExcel = asyncHandler(async (req, res) => {
     const studentsToCreate = [];
     const studentsToUpdate = [];
     const errors = [];
+    const studentEmails = []; // Collect emails for password reset
 
     for (let i = 0; i < jsonData.length; i++) {
       const row = jsonData[i];
@@ -379,6 +540,11 @@ const importStudentsFromExcel = asyncHandler(async (req, res) => {
         studentData.password = studentData.id.slice(-4);
       }
 
+      // Add email to the collection for password reset if it exists
+      if (studentData.email) {
+        studentEmails.push(studentData.email);
+      }
+
       // Check if student already exists
       try {
         const existingStudent = await Student.findOne({ where: { id: studentData.id } });
@@ -405,7 +571,44 @@ const importStudentsFromExcel = asyncHandler(async (req, res) => {
     // Create new students
     if (studentsToCreate.length > 0) {
       try {
-        await Student.bulkCreate(studentsToCreate);
+        const createdStudents = await Student.bulkCreate(studentsToCreate);
+        
+        // Create Firebase users for students with emails
+        for (const student of createdStudents) {
+          if (student.email) {
+            try {
+              // Generate a random password
+              const generatedPassword = generateRandomPassword(10);
+              
+              // Update student password in database
+              await student.update({ password: generatedPassword });
+              
+              // Create Firebase user
+              const firebaseUser = await createFirebaseUser(student.email, generatedPassword, {
+                id: student.id,
+                name: student.name,
+              });
+              
+              // Generate password reset link
+              const resetLink = await sendPasswordResetEmail(student.email);
+              
+              // Send password reset email
+              await sendPasswordResetLink({
+                email: student.email,
+                name: student.name,
+              }, resetLink);
+              
+              console.log(`Firebase user created and password reset link sent to ${student.email}`);
+              
+              // Also send login credentials for reference
+              await sendLoginCredentials(student, generatedPassword);
+            } catch (error) {
+              console.error(`Error with Firebase operations for student ${student.id}:`, error);
+              errors.push(`Failed to create Firebase user for student ${student.id}: ${error.message}`);
+              // Continue with next student
+            }
+          }
+        }
       } catch (error) {
         console.error('Error creating students:', error);
         errors.push(`Failed to create students: ${error.message}`);
@@ -430,6 +633,7 @@ const importStudentsFromExcel = asyncHandler(async (req, res) => {
       totalImported: studentsToCreate.length + studentsToUpdate.length,
       created: studentsToCreate.length,
       updated: studentsToUpdate.length,
+      emails: studentEmails, // Include emails for further processing
       errors: errors
     };
 
@@ -475,16 +679,71 @@ const authStudent = asyncHandler(async (req, res) => {
  * @access  Private/Student
  */
 const getStudentProfile = asyncHandler(async (req, res) => {
-  const student = await Student.findOne({
-    where: { id: req.user.id },
-    attributes: { exclude: ['password'] }
-  });
+  try {
+    const student = await Student.findOne({
+      where: { id: req.user.id },
+      attributes: { exclude: ['password'] },
+      include: [
+        {
+          model: Batch,
+          attributes: ['id', 'name', 'startYear', 'endYear', 'department']
+        }
+      ]
+    });
 
-  if (student) {
-    res.json(student);
-  } else {
-    res.status(404);
-    throw new Error('Student not found');
+    if (!student) {
+      res.status(404);
+      throw new Error('Student not found');
+    }
+
+    // Get subjects associated with the student's batch
+    const batchSubjects = await Subject.findAll({
+      where: {
+        batchId: student.batch
+      },
+      attributes: ['id', 'name', 'section', 'credits', 'description']
+    });
+
+    // Get subjects from the student's active semester if available
+    let semesterSubjects = [];
+    if (student.activeSemesterId) {
+      semesterSubjects = await Subject.findAll({
+        where: {
+          semesterId: student.activeSemesterId
+        },
+        attributes: ['id', 'name', 'section', 'credits', 'description']
+      });
+    }
+
+    // Combine both sets of subjects (removing duplicates by ID)
+    const allSubjectIds = new Set();
+    const allSubjects = [];
+
+    // Add batch subjects first
+    batchSubjects.forEach(subject => {
+      if (!allSubjectIds.has(subject.id)) {
+        allSubjectIds.add(subject.id);
+        allSubjects.push(subject);
+      }
+    });
+
+    // Add semester subjects next
+    semesterSubjects.forEach(subject => {
+      if (!allSubjectIds.has(subject.id)) {
+        allSubjectIds.add(subject.id);
+        allSubjects.push(subject);
+      }
+    });
+
+    // Send the student data along with the subjects
+    res.json({
+      ...student.get({ plain: true }),
+      subjects: allSubjects
+    });
+  } catch (error) {
+    console.error('Error fetching student profile:', error);
+    res.status(500);
+    throw new Error('Server error fetching student profile');
   }
 });
 

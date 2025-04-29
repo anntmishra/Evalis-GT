@@ -22,6 +22,24 @@ const Subject = sequelize.define('Subject', {
   credits: {
     type: DataTypes.INTEGER,
     defaultValue: 3,
+  },
+  // Primary relationship - every subject should be tied to a semester
+  semesterId: {
+    type: DataTypes.STRING,
+    allowNull: true, // Keeping allowNull: true for backward compatibility with existing data
+    references: {
+      model: 'Semesters',
+      key: 'id'
+    }
+  },
+  // Secondary relationship - kept for backward compatibility
+  batchId: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    references: {
+      model: 'Batches',
+      key: 'id'
+    }
   }
 }, {
   timestamps: true

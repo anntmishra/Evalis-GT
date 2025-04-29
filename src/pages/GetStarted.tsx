@@ -28,7 +28,7 @@ import Header from '../components/Header';
 const steps = [
   {
     label: 'Choose Your Role',
-    description: 'Select whether you are a student or teacher at Bennett University.',
+    description: 'Select whether you are a student or teacher at Evalis.',
     icon: <Person />,
     content: [
       {
@@ -67,7 +67,7 @@ const steps = [
     content: [
       {
         title: 'Login Now',
-        description: 'Access your account with your Bennett University credentials.',
+        description: 'Access your account with your Evalis credentials.',
         icon: <LoginIcon sx={{ fontSize: 40 }} />
       },
       {

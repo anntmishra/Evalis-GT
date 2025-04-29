@@ -1,31 +1,37 @@
-const mongoose = require('mongoose');
+
+const { Sequelize } = require('sequelize');
 const dotenv = require('dotenv');
 const colors = require('colors');
 
 // Load environment variables
 dotenv.config();
 
-console.log('Starting MongoDB Atlas connection test...'.yellow);
-console.log(`Connection string: ${process.env.MONGODB_URI.substring(0, 50)}...`.cyan);
+console.log('Starting NeonDB connection test (MongoDB replacement)...'.yellow);
 
-// Updated options for connection (compatible with current driver)
-const options = {
-  serverSelectionTimeoutMS: 60000,
-  socketTimeoutMS: 45000,
-  connectTimeoutMS: 60000
-};
+//neondb connection string
+const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://neondb_owner:npg_OmpMql4AR0cs@ep-super-smoke-a1vkw609-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require';
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI, options)
-  .then(conn => {
+const sequelize = new Sequelize(DATABASE_URL, {
+  dialect: 'postgres',
+  logging: console.log,
+  dialectOptions: {
+    ssl: {
+      require: true,
+      rejectUnauthorized: false
+    }
+  }
+});
+
+// Connect to NeonDB
+sequelize.authenticate()
+  .then(() => {
     console.log('================================='.green);
     console.log('CONNECTION SUCCESSFUL!'.green.bold);
-    console.log(`Connected to: ${conn.connection.host}`.green);
-    console.log(`Database: ${conn.connection.name}`.green);
+    console.log('Connected to NeonDB PostgreSQL (MongoDB replacement)'.green);
     console.log('================================='.green);
     
     // Close connection
-    mongoose.disconnect().then(() => {
+    sequelize.close().then(() => {
       console.log('Connection closed.'.yellow);
       process.exit(0);
     });
@@ -37,8 +43,7 @@ mongoose.connect(process.env.MONGODB_URI, options)
     console.error('================================='.red);
     console.error('Please check:');
     console.error('1. Your network connection');
-    console.error('2. MongoDB Atlas IP whitelist (current IP should be added)');
-    console.error('3. MongoDB Atlas username and password');
-    console.error('4. MongoDB Atlas connection string format');
+    console.error('2. NeonDB connection string is correct');
+    console.error('3. NeonDB service is available');
     process.exit(1);
-  }); 
+  });

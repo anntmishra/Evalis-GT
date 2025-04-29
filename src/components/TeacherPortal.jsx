@@ -21,9 +21,23 @@ import {
   TableRow,
   Tabs,
   Tab,
+  Button,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Select
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import { getUserProfile, getTeacherById, getSubjects, getStudents, getBatches, getStudentSubmissions } from '../api';
+import { 
+  getUserProfile, 
+  getTeacherById, 
+  getSubjects, 
+  getStudents, 
+  getBatches, 
+  getStudentSubmissions,
+  getStudentsByBatch,
+  getTeacherSubjects
+} from '../api';
 import SubmissionChecker from './SubmissionChecker';
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
@@ -59,6 +73,9 @@ const TeacherPortal = () => {
   const [selectedSubject, setSelectedSubject] = useState(null);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [submissions, setSubmissions] = useState([]);
+  const [selectedBatch, setSelectedBatch] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   // Fetch teacher profile
   const { data: profile, isLoading: profileLoading, error: profileError } = useQuery({
@@ -66,16 +83,11 @@ const TeacherPortal = () => {
     queryFn: getUserProfile,
   });
 
-  // Fetch all subjects
-  const { data: subjects, isLoading: subjectsLoading } = useQuery({
-    queryKey: ['subjects'],
-    queryFn: getSubjects,
-  });
-
-  // Fetch all students
-  const { data: allStudents, isLoading: studentsLoading } = useQuery({
-    queryKey: ['students'],
-    queryFn: () => getStudents(),
+  // Fetch teacher's assigned subjects
+  const { data: teacherSubjects, isLoading: subjectsLoading } = useQuery({
+    queryKey: ['teacherSubjects'],
+    queryFn: getTeacherSubjects,
+    enabled: !!profile?.id,
   });
 
   // Fetch all batches
@@ -84,58 +96,79 @@ const TeacherPortal = () => {
     queryFn: getBatches,
   });
 
+  // Update teacher data when profile and subjects are loaded
+  useEffect(() => {
+    if (profile?.id && teacherSubjects) {
+      setTeacher(profile);
+      setAssignedSubjects(teacherSubjects);
+      if (teacherSubjects.length > 0 && !selectedSubject) {
+        setSelectedSubject(teacherSubjects[0]);
+      }
+    }
+  }, [profile, teacherSubjects]);
+
+  // Fetch students when a batch is selected
+  useEffect(() => {
+    const fetchStudentsByBatch = async () => {
+      if (!selectedBatch) return;
+      
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await getStudentsByBatch(selectedBatch);
+        
+        // If a subject is selected, filter students by section
+        if (selectedSubject) {
+          const filteredStudents = response.filter(student => 
+            student.section === selectedSubject.section
+          );
+          setStudents(filteredStudents);
+        } else {
+          setStudents(response);
+        }
+      } catch (err) {
+        console.error('Error fetching students by batch:', err);
+        setError('Failed to load students for this batch');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStudentsByBatch();
+  }, [selectedBatch, selectedSubject]);
+
   // Fetch submissions when a student is selected
   useEffect(() => {
-    if (selectedStudent?.id) {
-      getStudentSubmissions(selectedStudent.id)
+    if (selectedStudent?.id && selectedSubject?.id) {
+      setLoading(true);
+      getStudentSubmissions(selectedStudent.id, { subject: selectedSubject.id })
         .then(response => {
           setSubmissions(response.data);
+          setLoading(false);
         })
         .catch(error => {
           console.error('Error fetching submissions:', error);
+          setError('Failed to load student submissions');
+          setLoading(false);
         });
     }
-  }, [selectedStudent]);
+  }, [selectedStudent, selectedSubject]);
 
-  useEffect(() => {
-    if (profile?.id) {
-      // Fetch teacher details
-      getTeacherById(profile.id)
-        .then(response => {
-          setTeacher(response.data);
-          // Filter subjects assigned to this teacher
-          if (subjects) {
-            const teacherSubjects = subjects.filter(subject => 
-              subject.teachers?.some(t => t.id === profile.id)
-            );
-            setAssignedSubjects(teacherSubjects);
-            if (teacherSubjects.length > 0) {
-              setSelectedSubject(teacherSubjects[0]);
-            }
-          }
-        })
-        .catch(error => {
-          console.error('Error fetching teacher details:', error);
-        });
-    }
-  }, [profile, subjects]);
+  const handleBatchChange = (event) => {
+    setSelectedBatch(event.target.value);
+    setSelectedStudent(null); // Reset selected student when batch changes
+  };
 
-  useEffect(() => {
-    if (selectedSubject && allStudents) {
-      // Filter students based on the selected subject's section and batch
-      const filteredStudents = allStudents.filter(student => 
-        student.section === selectedSubject.section && 
-        student.batch === selectedSubject.batch
-      );
-      setStudents(filteredStudents);
-    }
-  }, [selectedSubject, allStudents]);
+  const handleSubjectChange = (subject) => {
+    setSelectedSubject(subject);
+    setSelectedStudent(null); // Reset selected student when subject changes
+  };
 
   const handleTabChange = (event, newValue) => {
     setSelectedTab(newValue);
     // Reset selections when changing tabs
-    if (newValue === 2) {
-      setSelectedStudent(null);
+    if (newValue === 2 && !selectedStudent) {
+      setError('Please select a student first');
     }
   };
 
@@ -158,7 +191,7 @@ const TeacherPortal = () => {
     }
   };
 
-  if (profileLoading || subjectsLoading || studentsLoading || batchesLoading) {
+  if (profileLoading || subjectsLoading || batchesLoading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="80vh">
         <CircularProgress />
@@ -222,7 +255,27 @@ const TeacherPortal = () => {
 
           {/* Main Content */}
           <Grid item xs={12} md={8}>
-            <StyledPaper>
+            <Paper sx={{ p: 3, mb: 3 }}>
+              <Box sx={{ mb: 3 }}>
+                <FormControl fullWidth sx={{ mb: 2 }}>
+                  <InputLabel>Select Batch</InputLabel>
+                  <Select
+                    value={selectedBatch}
+                    onChange={handleBatchChange}
+                    label="Select Batch"
+                  >
+                    <MenuItem value="">
+                      <em>Select a batch</em>
+                    </MenuItem>
+                    {batches?.map((batch) => (
+                      <MenuItem key={batch.id} value={batch.id}>
+                        {batch.name} ({batch.id})
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Box>
+
               <Tabs
                 value={selectedTab}
                 onChange={handleTabChange}
@@ -364,7 +417,7 @@ const TeacherPortal = () => {
                   )}
                 </Box>
               )}
-            </StyledPaper>
+            </Paper>
           </Grid>
         </Grid>
       </Box>

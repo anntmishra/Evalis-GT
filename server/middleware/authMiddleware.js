@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const asyncHandler = require('express-async-handler');
 const { Student, Teacher, Admin } = require('../models');
+const firebaseAdmin = require('firebase-admin');
 
 // Middleware to protect routes that require authentication
 const protect = asyncHandler(async (req, res, next) => {
@@ -14,66 +15,165 @@ const protect = asyncHandler(async (req, res, next) => {
     try {
       // Get token from header
       token = req.headers.authorization.split(' ')[1];
-      console.log('Token extracted from header');
       
-      // Decode token
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      console.log('Token verified, user role:', decoded.role);
+      if (!token) {
+        console.log('Token is empty or invalid');
+        res.status(401);
+        throw new Error('Not authorized, invalid token');
+      }
       
-      // Check if the user exists in any of the models
-      // First try student model
-      let user = await Student.findOne({ 
-        where: { id: decoded.id },
-        attributes: { exclude: ['password'] }
-      });
+      console.log('Token extracted from header:', token.substring(0, 15) + '...');
       
-      if (user) {
-        // For students
-        req.user = user;
-        req.user.role = 'student';
-        req.student = user;
-        console.log('User authenticated:', req.user.role);
-        return next();
-      }
-
-      // If not found in students, try teacher model
-      user = await Teacher.findOne({ 
-        where: { id: decoded.id },
-        attributes: { exclude: ['password'] }
-      });
-
-      if (user) {
-        // For teachers
-        req.user = user;
-        req.user.role = 'teacher';
-        req.teacher = user;
-        console.log('User authenticated:', req.user.role);
-        return next();
-      }
-
-      // Finally try admin model (by username)
-      user = await Admin.findOne({ 
-        where: { username: decoded.id },
-        attributes: { exclude: ['password'] }
-      });
-
-      if (user) {
-        // For admins
-        req.user = user;
-        req.user.role = 'admin';
-        req.admin = user;
-        console.log('User authenticated:', req.user.role);
-        return next();
-      }
-
-      // If user not found in any model
-      if (!user) {
-        console.log('No user found with decoded ID:', decoded.id);
+      // First try to verify as a Firebase token
+      try {
+        // Try Firebase token verification
+        const decodedFirebaseToken = await firebaseAdmin.auth().verifyIdToken(token);
+        console.log('Firebase token verified, uid:', decodedFirebaseToken.uid);
+        
+        // Check if this Firebase user exists in our database
+        let user = await Student.findOne({
+          where: { email: decodedFirebaseToken.email },
+          attributes: { exclude: ['password'] }
+        });
+        
+        if (user) {
+          // For students
+          req.user = user;
+          req.user.role = 'student';
+          req.student = user;
+          console.log('Firebase user authenticated as student:', user.id);
+          return next();
+        }
+        
+        // If not found in students, try teacher model
+        user = await Teacher.findOne({
+          where: { email: decodedFirebaseToken.email },
+          attributes: { exclude: ['password'] }
+        });
+        
+        if (user) {
+          // For teachers
+          req.user = user;
+          req.user.role = 'teacher';
+          req.teacher = user;
+          console.log('Firebase user authenticated as teacher:', user.id);
+          return next();
+        }
+        
+        // If the Firebase user doesn't match any database record
+        console.log('Firebase user not found in database');
         res.status(404);
-        throw new Error('User not found');
-      }
+        throw new Error('User not found in our system');
+        
+      } catch (firebaseError) {
+        // If it's not a valid Firebase token, try as a JWT token
+        console.log('Firebase token verification failed, trying as JWT token:', firebaseError.message);
+        
+        try {
+          // Decode JWT token
+          const decoded = jwt.verify(token, process.env.JWT_SECRET);
+          console.log('JWT token verified, user role:', decoded.role);
+          
+          // Check if the user exists in any of the models
+          // Check user role from the token to determine which model to use
+          const role = decoded.role || '';
+          let user;
+          
+          if (role === 'student') {
+            user = await Student.findOne({ 
+              where: { id: decoded.id },
+              attributes: { exclude: ['password'] }
+            });
+            
+            if (user) {
+              req.user = user;
+              req.user.role = 'student';
+              req.student = user;
+              console.log('User authenticated as student:', req.user.id);
+              return next();
+            }
+          } else if (role === 'teacher') {
+            user = await Teacher.findOne({ 
+              where: { id: decoded.id },
+              attributes: { exclude: ['password'] }
+            });
+            
+            if (user) {
+              req.user = user;
+              req.user.role = 'teacher';
+              req.teacher = user;
+              console.log('User authenticated as teacher:', req.user.id);
+              return next();
+            }
+          } else if (role === 'admin') {
+            user = await Admin.findOne({ 
+              where: { username: decoded.id },
+              attributes: { exclude: ['password'] }
+            });
+            
+            if (user) {
+              req.user = user;
+              req.user.role = 'admin';
+              req.admin = user;
+              console.log('User authenticated as admin:', req.user.username);
+              return next();
+            }
+          } else {
+            // If no role or unrecognized role, try all models
+            console.log('No specific role found in token, trying all models...');
+            
+            // First try student model
+            user = await Student.findOne({ 
+              where: { id: decoded.id },
+              attributes: { exclude: ['password'] }
+            });
+            
+            if (user) {
+              req.user = user;
+              req.user.role = 'student';
+              req.student = user;
+              console.log('User authenticated as student:', req.user.id);
+              return next();
+            }
 
-      next();
+            // If not found in students, try teacher model
+            user = await Teacher.findOne({ 
+              where: { id: decoded.id },
+              attributes: { exclude: ['password'] }
+            });
+
+            if (user) {
+              req.user = user;
+              req.user.role = 'teacher';
+              req.teacher = user;
+              console.log('User authenticated as teacher:', req.user.id);
+              return next();
+            }
+
+            // Finally try admin model (by username)
+            user = await Admin.findOne({ 
+              where: { username: decoded.id },
+              attributes: { exclude: ['password'] }
+            });
+
+            if (user) {
+              req.user = user;
+              req.user.role = 'admin';
+              req.admin = user;
+              console.log('User authenticated as admin:', req.user.username);
+              return next();
+            }
+          }
+
+          // If user not found in any model
+          console.log('No user found with decoded ID:', decoded.id);
+          res.status(404);
+          throw new Error('User not found');
+        } catch (jwtError) {
+          console.error('JWT token verification error:', jwtError.message);
+          throw new Error('Invalid token format');
+        }
+      }
     } catch (error) {
       console.error('Token verification error:', error.message);
       res.status(401);
@@ -101,6 +201,9 @@ const admin = (req, res, next) => {
   }
 };
 
+// Alias for admin middleware - alternative naming for better readability
+const adminOnly = admin;
+
 // Middleware to check if user is a teacher
 const teacher = (req, res, next) => {
   if (req.user && (req.user.role === 'teacher' || req.user.role === 'admin')) {
@@ -121,4 +224,4 @@ const student = (req, res, next) => {
   }
 };
 
-module.exports = { protect, admin, teacher, student }; 
+module.exports = { protect, admin, adminOnly, teacher, student }; 

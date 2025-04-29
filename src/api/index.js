@@ -6,15 +6,26 @@ const api = axios.create({
   baseURL: config.API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
-  }
+  },
+  timeout: 10000, // 10 second timeout
 });
+
+// Get the latest token from storage
+const getAuthToken = () => {
+  return localStorage.getItem(config.AUTH.TOKEN_STORAGE_KEY);
+};
 
 // Add response interceptor for better error handling
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     console.error('API Error:', error);
-    if (error.response) {
+    
+    // Handle network errors separately - these usually indicate the server is down
+    if (error.code === 'ECONNABORTED' || error.message.includes('Network Error')) {
+      console.error('Network error detected. Server might be down or unreachable.');
+      // You could dispatch an event or set a global state here to show a server status indicator
+    } else if (error.response) {
       // The request was made and the server responded with a status code
       // that falls out of the range of 2xx
       console.error('Error data:', error.response.data);
@@ -32,8 +43,10 @@ api.interceptors.response.use(
 
 // Add request interceptor to add auth token to headers
 api.interceptors.request.use(
-  (reqConfig) => {
-    const token = localStorage.getItem(config.AUTH.TOKEN_STORAGE_KEY);
+  async (reqConfig) => {
+    // Get the latest token
+    const token = getAuthToken();
+    
     if (token) {
       reqConfig.headers.Authorization = `Bearer ${token}`;
     }
@@ -42,9 +55,126 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+// Flag to prevent multiple token refresh attempts at once
+let isRefreshing = false;
+// Queue of requests to retry after token refresh
+let failedRequestsQueue = [];
+
+// Function to process the queue of failed requests
+const processQueue = (error, token = null) => {
+  failedRequestsQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  
+  failedRequestsQueue = [];
+};
+
+// Add response interceptor to handle token expiration or authentication errors
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+    
+    // If error is 401 (unauthorized) and we haven't tried to refresh
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        // If already refreshing, add request to queue
+        return new Promise((resolve, reject) => {
+          failedRequestsQueue.push({ resolve, reject });
+        })
+          .then(token => {
+            originalRequest.headers['Authorization'] = `Bearer ${token}`;
+            return axios(originalRequest);
+          })
+          .catch(err => Promise.reject(err));
+      }
+      
+      originalRequest._retry = true;
+      isRefreshing = true;
+      
+      // Try to get the user data with refresh token
+      const userData = localStorage.getItem(config.AUTH.CURRENT_USER_KEY);
+      if (userData) {
+        try {
+          const user = JSON.parse(userData);
+          
+          // If we have a stored refresh token, try to use it
+          if (user.refreshToken) {
+            try {
+              console.log('Attempting token refresh');
+              const response = await axios.post(
+                `${config.API_BASE_URL}/auth/refresh`,
+                { refreshToken: user.refreshToken }
+              );
+              
+              if (response.status === 200 && response.data.token) {
+                console.log('Token refresh successful');
+                // Update tokens
+                const newToken = response.data.token;
+                localStorage.setItem(config.AUTH.TOKEN_STORAGE_KEY, newToken);
+                
+                // Update user object
+                user.token = newToken;
+                if (response.data.refreshToken) {
+                  user.refreshToken = response.data.refreshToken;
+                }
+                
+                localStorage.setItem(config.AUTH.CURRENT_USER_KEY, JSON.stringify(user));
+                
+                // Update auth header and retry the original request
+                originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
+                
+                // Process any requests that came in while refreshing
+                processQueue(null, newToken);
+                isRefreshing = false;
+                
+                return axios(originalRequest);
+              }
+            } catch (refreshError) {
+              console.error('Token refresh failed:', refreshError);
+              processQueue(refreshError, null);
+            }
+          }
+        } catch (parseError) {
+          console.error('Error parsing user data:', parseError);
+        }
+      }
+      
+      isRefreshing = false;
+      
+      // If refresh failed or no refresh token, notify about session expiration
+      window.dispatchEvent(new CustomEvent('auth:error', {
+        detail: { 
+          message: 'Your session has expired.', 
+          status: error.response.status,
+          redirectUrl: '/login'
+        }
+      }));
+      
+      // Store auth error information in session storage
+      sessionStorage.setItem('auth:error', 'true');
+      sessionStorage.setItem('auth:errorTime', Date.now().toString());
+    }
+    
+    return Promise.reject(error);
+  }
+);
+
 // Auth API
 export const loginStudent = (id, password) => api.post('/auth/student/login', { id, password });
-export const loginTeacher = (email, password) => api.post('/auth/teacher/login', { email, password });
+export const loginTeacher = (identifier, password) => {
+  // Check if identifier is an email or ID
+  const isEmail = identifier.includes('@');
+  if (isEmail) {
+    return api.post('/auth/teacher/login', { email: identifier, password });
+  } else {
+    return api.post('/auth/teacher/login', { id: identifier, password });
+  }
+};
 export const setupTeacherPassword = (email, currentPassword, newPassword) => 
   api.post('/auth/teacher/setup-password', { email, currentPassword, newPassword });
 export const loginAdmin = (username, password) => api.post('/auth/admin/login', { username, password });
@@ -108,7 +238,21 @@ export const getBatchStudents = (id) => api.get(`/batches/${id}/students`);
 
 // Submission API
 export const createSubmission = (submissionData) => api.post('/submissions', submissionData);
-export const gradeSubmission = (id, gradeData) => api.put(`/submissions/${id}/grade`, gradeData);
+export const getSubmissionById = (id) => api.get(`/submissions/${id}`);
+export const gradeSubmission = (id, gradeData) => api.put(`/submissions/${id}`, gradeData);
+export const getSubmissionsBySubject = (subjectId) => api.get(`/submissions/subject/${subjectId}`);
+export const getSubmissionsByTeacher = (teacherId) => api.get(`/submissions/teacher/${teacherId}`);
+export const submitAssignment = (assignmentId, submissionData) => api.post(`/submissions/assignment/${assignmentId}`, submissionData);
+
+// Assignment API
+export const getAssignments = () => api.get('/assignments');
+export const getStudentAssignments = () => api.get('/assignments/student');
+export const getTeacherAssignments = () => api.get('/assignments/teacher');
+export const getAssignmentById = (id) => api.get(`/assignments/${id}`);
+export const createAssignment = (assignmentData) => api.post('/assignments', assignmentData);
+export const updateAssignment = (id, assignmentData) => api.put(`/assignments/${id}`, assignmentData);
+export const deleteAssignment = (id) => api.delete(`/assignments/${id}`);
+export const getAssignmentSubmissions = (assignmentId) => api.get(`/assignments/${assignmentId}/submissions`);
 
 // Teacher Submission Upload API
 export const uploadTeacherSubmission = (formData) => {
@@ -123,5 +267,17 @@ export const uploadTeacherSubmission = (formData) => {
 // Student Portal API
 export const getStudentProfile = () => api.get('/students/profile');
 export const getStudentGrades = (studentId) => api.get(`/students/${studentId}/grades`);
+
+export const sendBulkPasswordResetEmails = (studentEmails) => api.post('/auth/bulk-password-reset', { emails: studentEmails });
+
+// Add new function for teachers to get students by batch
+export const getStudentsByBatch = (batchId) => api.get(`/batches/${batchId}/students`);
+
+// Allow teachers to get student submissions by subject
+export const getStudentSubmissionsBySubject = (studentId, subjectId) => 
+  api.get(`/students/${studentId}/submissions`, { params: { subject: subjectId } });
+
+// Allow teachers to see their assigned subjects
+export const getTeacherSubjects = () => api.get('/teachers/subjects');
 
 export default api;

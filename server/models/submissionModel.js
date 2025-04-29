@@ -23,6 +23,14 @@ const Submission = sequelize.define('Submission', {
       key: 'id'
     }
   },
+  assignmentId: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: 'Assignments',
+      key: 'id'
+    }
+  },
   examType: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -30,6 +38,10 @@ const Submission = sequelize.define('Submission', {
   submissionText: {
     type: DataTypes.TEXT,
     allowNull: false,
+  },
+  fileUrl: {
+    type: DataTypes.STRING,
+    allowNull: true,
   },
   submissionDate: {
     type: DataTypes.DATE,

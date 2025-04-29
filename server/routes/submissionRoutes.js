@@ -6,7 +6,9 @@ const {
   createSubmission,
   updateSubmission,
   deleteSubmission,
-  getSubmissionsBySubject
+  getSubmissionsBySubject,
+  getSubmissionsByTeacher,
+  submitAssignment
 } = require('../controllers/submissionController');
 const { protect, admin, teacher, student } = require('../middleware/authMiddleware');
 
@@ -22,5 +24,13 @@ router.route('/:id')
 
 router.route('/subject/:subjectId')
   .get(protect, teacher, getSubmissionsBySubject);
+
+// New route to get submissions by teacher
+router.route('/teacher/:teacherId')
+  .get(protect, teacher, getSubmissionsByTeacher);
+
+// New route to submit an assignment
+router.route('/assignment/:id')
+  .post(protect, student, submitAssignment);
 
 module.exports = router; 

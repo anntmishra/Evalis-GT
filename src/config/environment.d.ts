@@ -20,6 +20,7 @@ export interface Config {
     SUBJECTS: string;
     BATCHES: string;
     SUBMISSIONS: string;
+    SEMESTERS: string;
   };
   AUTH: {
     TOKEN_STORAGE_KEY: string;

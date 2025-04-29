@@ -36,7 +36,9 @@ import {
   Add,
   People,
   Delete as DeleteIcon,
-  Edit as EditIcon
+  Edit as EditIcon,
+  Book as BookIcon,
+  Timeline as TimelineIcon
 } from "@mui/icons-material";
 import Header from "../components/Header";
 import { useNavigate } from "react-router-dom";
@@ -48,8 +50,9 @@ import TeacherAssignment from "../components/TeacherAssignment";
 import StudentImporter from "../components/StudentImporter";
 import TeacherImporter from "../components/TeacherImporter";
 import StudentForm from "../components/StudentForm";
+import SubjectForm from "../components/SubjectForm";
 import { getTeachers, assignSubject, removeSubject, createTeacher, updateTeacher, deleteTeacher } from "../api/teacherService";
-import { getAllSubjects } from "../api/subjectService";
+import { getAllSubjects, createSubject } from "../api/subjectService";
 import { 
   getAllStudents, 
   getStudentsByBatch, 
@@ -61,6 +64,7 @@ import { seedSubjectsToDatabase } from "../utils/seedSubjects";
 import { seedBatches } from "../api/batchService";
 // @ts-ignore
 import config from "../config/environment";
+import SemesterManagement from '../components/SemesterManagement';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -106,6 +110,11 @@ const AdminPortal: React.FC = (): React.ReactElement => {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [studentToDelete, setStudentToDelete] = useState<Student | null>(null);
   
+  // Subject data state
+  const [subjectFormOpen, setSubjectFormOpen] = useState(false);
+  const [savingSubject, setSavingSubject] = useState(false);
+  const [subjectError, setSubjectError] = useState<string | undefined>(undefined);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -181,18 +190,20 @@ const AdminPortal: React.FC = (): React.ReactElement => {
       let response;
       if (batchId) {
         response = await getStudentsByBatch(batchId);
+        // API returns array directly for batch students
+        setStudents(Array.isArray(response) ? response : 
+                   (response.students ? response.students : []));
       } else {
         response = await getAllStudents();
+        // getAllStudents may return either {students: []} or the array directly
+        setStudents(Array.isArray(response) ? response : 
+                   (response.students ? response.students : []));
       }
-      setStudents(response);
       console.log("Students loaded from API:", response);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching students:", error);
-      setNotification({
-        open: true,
-        message: "Failed to load students. Please try again.",
-        severity: "error"
-      });
+      // Use the improved error handler
+      handleApiError(error, "Failed to load students. Please try again.");
     } finally {
       setStudentsLoading(false);
     }
@@ -267,17 +278,45 @@ const AdminPortal: React.FC = (): React.ReactElement => {
   const handleApiError = (error: any, defaultMessage: string) => {
     console.error("API Error:", error);
     
-    // Extract error message from various possible formats
-    const errorMessage = 
-      error.response?.data?.message || // Standard API error format
-      error.message || // Error object message
-      (typeof error === 'string' ? error : defaultMessage); // Fallback
+    // Extract error message with more detail
+    let errorMessage = defaultMessage;
+    
+    if (error.response) {
+      // Server responded with error
+      const status = error.response.status;
+      const serverMessage = error.response.data?.message || JSON.stringify(error.response.data);
+      
+      console.error(`Server error (${status}):`, serverMessage);
+      
+      if (status === 401 || status === 403) {
+        errorMessage = "Authentication error. Please log in again.";
+        // Optional: redirect to login
+        setTimeout(() => navigate('/login'), 3000);
+      } else if (status === 404) {
+        errorMessage = `Not found: ${serverMessage}`;
+      } else if (status >= 500) {
+        errorMessage = `Server error (${status}): ${serverMessage}`;
+      } else {
+        errorMessage = `Error (${status}): ${serverMessage}`;
+      }
+    } else if (error.request) {
+      // No response received
+      console.error("No response from server:", error.request);
+      errorMessage = "Network error. Please check your connection and make sure the backend server is running.";
+    } else {
+      // Something else happened
+      errorMessage = error.message || defaultMessage;
+    }
+    
+    console.log(`Displaying error notification: ${errorMessage}`);
     
     setNotification({
       open: true,
       message: errorMessage,
       severity: "error"
     });
+    
+    return errorMessage;
   };
 
   // Handle teacher subject assignment
@@ -374,11 +413,23 @@ const AdminPortal: React.FC = (): React.ReactElement => {
       
       setTeachers(prevTeachers => [...prevTeachers, newTeacher]);
       
-      setNotification({
-        open: true,
-        message: "Teacher added successfully",
-        severity: "success"
-      });
+      // Show a success message with password info if available
+      if (response.initialPassword) {
+        const passwordInfo = `Initial password: ${response.initialPassword}`;
+        const emailInfo = response.email ? "A password reset link has been sent to the teacher's email." : "";
+        
+        setNotification({
+          open: true,
+          message: `Teacher ${response.name} added successfully. ${passwordInfo} ${emailInfo}`,
+          severity: "success"
+        });
+      } else {
+        setNotification({
+          open: true,
+          message: "Teacher added successfully",
+          severity: "success"
+        });
+      }
     } catch (error: any) {
       handleApiError(error, "Failed to add teacher. Please try again.");
     }
@@ -503,15 +554,13 @@ const AdminPortal: React.FC = (): React.ReactElement => {
 
   // Handle saving a student (add or edit)
   const handleSaveStudent = async (student: Student) => {
-    setSavingStudent(true);
-    setStudentError(undefined);
-    
     try {
+      setSavingStudent(true);
+      setStudentError(undefined);
+      
       if (editingStudent) {
-        // Update existing student
+        // Updating existing student
         await updateStudent(student.id, student);
-        
-        // Fetch updated students list 
         await fetchStudents(batchId);
         
         setNotification({
@@ -520,10 +569,9 @@ const AdminPortal: React.FC = (): React.ReactElement => {
           severity: "success"
         });
       } else {
-        // Add new student
-        // Check if ID already exists
-        if (students.some(s => s.id === student.id)) {
-          setStudentError("A student with this ID already exists");
+        // Creating new student
+        if (!student.id) {
+          setStudentError("Student ID is required");
           setSavingStudent(false);
           return;
         }
@@ -531,18 +579,45 @@ const AdminPortal: React.FC = (): React.ReactElement => {
         // Set password equal to student ID if not provided
         const studentWithPassword = {
           ...student,
-          password: student.id // Default password is the student ID
+          password: student.initialPassword || student.id // Use generated password or default to student ID
         };
         
         console.log('Submitting student with data:', studentWithPassword);
         await createStudent(studentWithPassword);
         
+        // Automatically send password reset email if email is provided
+        if (student.email) {
+          try {
+            // Import here to avoid circular dependencies
+            const { sendPasswordReset } = await import('../config/firebase');
+            const resetResult = await sendPasswordReset(student.email);
+            
+            if (resetResult.success) {
+              console.log(`Password reset email sent to ${student.email}`);
+            } else {
+              console.error(`Failed to send password reset email: ${resetResult.message}`);
+            }
+          } catch (resetError) {
+            console.error('Error sending password reset email:', resetError);
+            // Don't fail the whole operation if password reset fails
+          }
+        }
+        
         // Fetch updated students list to ensure we have the latest data
         await fetchStudents(batchId);
         
+        // Show success notification with password info if available
+        const passwordInfo = student.initialPassword 
+          ? `Initial password: ${student.initialPassword}`
+          : `Default password: ${student.id}`;
+          
+        const resetInfo = student.email 
+          ? "A password reset link has been sent to the student's email." 
+          : "";
+        
         setNotification({
           open: true,
-          message: `Student ${student.name} added successfully`,
+          message: `Student ${student.name} added successfully. ${passwordInfo} ${resetInfo}`,
           severity: "success"
         });
       }
@@ -564,7 +639,7 @@ const AdminPortal: React.FC = (): React.ReactElement => {
   };
 
   // Handle actual deletion
-  const handleDeleteStudent = async () => {
+  const handleConfirmDeleteStudent = async () => {
     if (!studentToDelete) return;
     
     try {
@@ -585,6 +660,54 @@ const AdminPortal: React.FC = (): React.ReactElement => {
       console.error("Error deleting student:", error);
       handleApiError(error, "Failed to delete student. Please try again.");
     }
+  };
+
+  // Handle creating a new subject
+  const handleAddSubject = () => {
+    setSubjectFormOpen(true);
+  };
+  
+  // Handle saving a subject
+  const handleSaveSubject = async (subjectData: Partial<Subject>) => {
+    try {
+      setSavingSubject(true);
+      setSubjectError(undefined);
+      
+      await createSubject(subjectData);
+      
+      // Refresh the subject list
+      fetchSubjects();
+      
+      // Close the form and show success notification
+      setSubjectFormOpen(false);
+      setNotification({
+        open: true,
+        message: "Subject created successfully!",
+        severity: "success"
+      });
+    } catch (error: any) {
+      console.error("Error creating subject:", error);
+      setSubjectError(error.response?.data?.message || "Failed to create subject. Please try again.");
+    } finally {
+      setSavingSubject(false);
+    }
+  };
+
+  // Custom notification handlers for semester management
+  const handleSemesterSuccess = (message: string) => {
+    setNotification({
+      open: true,
+      message,
+      severity: "success"
+    });
+  };
+  
+  const handleSemesterError = (message: string) => {
+    setNotification({
+      open: true,
+      message,
+      severity: "error"
+    });
   };
 
   return (
@@ -612,6 +735,8 @@ const AdminPortal: React.FC = (): React.ReactElement => {
                   <Tab icon={<CloudUpload />} label="Student Import" />
                   <Tab icon={<Group />} label="Data Management" />
                   <Tab icon={<People />} label="Students" />
+                  <Tab icon={<BookIcon />} label="Subjects" />
+                  <Tab icon={<TimelineIcon />} label="Semesters" />
                 </Tabs>
 
                 <TabPanel value={tabValue} index={0}>
@@ -758,94 +883,182 @@ const AdminPortal: React.FC = (): React.ReactElement => {
                 </TabPanel>
 
                 <TabPanel value={tabValue} index={4}>
-                  <Card variant="outlined">
-                    <CardContent>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                        <Typography variant="h6">
-                          BTech 2023-2027 Students
-                        </Typography>
-                        <Box sx={{ display: 'flex', gap: 2 }}>
-                          <Button 
-                            variant="outlined" 
-                            size="small"
-                            startIcon={<Refresh />}
-                            onClick={() => fetchStudents(batchId)}
-                            disabled={studentsLoading}
-                          >
-                            Refresh
-                          </Button>
-                          <Button 
-                            variant="outlined" 
-                            size="small"
-                            startIcon={<Add />}
-                            onClick={handleAddStudent}
-                          >
-                            Add Student
-                          </Button>
-                        </Box>
+                  <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Typography variant="h6">
+                      Students {students.length > 0 ? `(${students.length})` : ''}
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 2 }}>
+                      <Button 
+                        variant="outlined" 
+                        startIcon={<Refresh />}
+                        onClick={() => fetchStudents(batchId)}
+                        disabled={studentsLoading}
+                      >
+                        Refresh
+                      </Button>
+                      <Button 
+                        variant="contained" 
+                        startIcon={<Add />}
+                        onClick={handleAddStudent}
+                        disabled={studentsLoading}
+                      >
+                        Add Student
+                      </Button>
+                    </Box>
+                  </Box>
+                  
+                  {studentsLoading ? (
+                    <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+                      <CircularProgress />
+                    </Box>
+                  ) : students.length > 0 ? (
+                    <TableContainer component={Paper} variant="outlined">
+                      <Table>
+                        <TableHead>
+                          <TableRow>
+                            <TableCell>ID</TableCell>
+                            <TableCell>Name</TableCell>
+                            <TableCell>Section</TableCell>
+                            <TableCell>Email</TableCell>
+                            <TableCell align="right">Actions</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {students.map((student) => (
+                            <TableRow key={student.id}>
+                              <TableCell>{student.id}</TableCell>
+                              <TableCell>{student.name}</TableCell>
+                              <TableCell>{student.section}</TableCell>
+                              <TableCell>{student.email}</TableCell>
+                              <TableCell align="right">
+                                <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+                                  <Button
+                                    size="small"
+                                    startIcon={<EditIcon />}
+                                    onClick={() => handleEditStudent(student)}
+                                  >
+                                    Edit
+                                  </Button>
+                                  <Button
+                                    size="small"
+                                    color="error"
+                                    startIcon={<DeleteIcon />}
+                                    onClick={() => handleDeleteConfirm(student)}
+                                  >
+                                    Delete
+                                  </Button>
+                                </Box>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  ) : (
+                    <Paper sx={{ p: 4, textAlign: 'center' }}>
+                      <Typography variant="h6" color="text.secondary" gutterBottom>
+                        No students found
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" paragraph>
+                        There are no students in the selected batch or the database hasn't been initialized.
+                      </Typography>
+                      <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 2 }}>
+                        <Button 
+                          variant="outlined" 
+                          onClick={() => fetchStudents(batchId)}
+                          startIcon={<Refresh />}
+                        >
+                          Retry Loading
+                        </Button>
+                        <Button 
+                          variant="contained" 
+                          onClick={handleAddStudent}
+                          startIcon={<Add />}
+                        >
+                          Add First Student
+                        </Button>
                       </Box>
-                      
-                      {studentsLoading ? (
-                        <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
-                          <CircularProgress />
-                        </Box>
-                      ) : (
-                        <TableContainer component={Paper} variant="outlined">
-                          <Table>
-                            <TableHead>
-                              <TableRow>
-                                <TableCell>ID</TableCell>
-                                <TableCell>Name</TableCell>
-                                <TableCell>Section</TableCell>
-                                <TableCell>Email</TableCell>
-                                <TableCell align="right">Actions</TableCell>
-                              </TableRow>
-                            </TableHead>
-                            <TableBody>
-                              {students.map((student) => (
-                                <TableRow key={student.id}>
-                                  <TableCell>{student.id}</TableCell>
-                                  <TableCell>{student.name}</TableCell>
-                                  <TableCell>{student.section}</TableCell>
-                                  <TableCell>{student.email || '-'}</TableCell>
-                                  <TableCell align="right">
-                                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-                                      <Button 
-                                        size="small" 
-                                        variant="outlined"
-                                        startIcon={<EditIcon />}
-                                        onClick={() => handleEditStudent(student)}
-                                      >
-                                        Edit
-                                      </Button>
-                                      <Button 
-                                        size="small" 
-                                        variant="outlined" 
-                                        color="error"
-                                        startIcon={<DeleteIcon />}
-                                        onClick={() => handleDeleteConfirm(student)}
-                                      >
-                                        Delete
-                                      </Button>
-                                    </Box>
-                                  </TableCell>
-                                </TableRow>
-                              ))}
-                              {students.length === 0 && (
-                                <TableRow>
-                                  <TableCell colSpan={5} align="center">
-                                    <Typography variant="body2" color="text.secondary" sx={{ py: 2 }}>
-                                      No students found in this batch
-                                    </Typography>
-                                  </TableCell>
-                                </TableRow>
-                              )}
-                            </TableBody>
-                          </Table>
-                        </TableContainer>
-                      )}
-                    </CardContent>
-                  </Card>
+                    </Paper>
+                  )}
+                </TabPanel>
+
+                <TabPanel value={tabValue} index={5}>
+                  <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Typography variant="h6">
+                      Subjects {subjects.length > 0 ? `(${subjects.length})` : ''}
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 2 }}>
+                      <Button 
+                        variant="outlined" 
+                        startIcon={<Refresh />}
+                        onClick={fetchSubjects}
+                        disabled={subjectsLoading}
+                      >
+                        Refresh
+                      </Button>
+                      <Button 
+                        variant="contained" 
+                        startIcon={<Add />}
+                        onClick={handleAddSubject}
+                        disabled={subjectsLoading}
+                      >
+                        Add Subject
+                      </Button>
+                    </Box>
+                  </Box>
+                  
+                  {subjectsLoading ? (
+                    <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+                      <CircularProgress />
+                    </Box>
+                  ) : subjects.length > 0 ? (
+                    <TableContainer component={Paper} variant="outlined">
+                      <Table>
+                        <TableHead>
+                          <TableRow>
+                            <TableCell>ID</TableCell>
+                            <TableCell>Name</TableCell>
+                            <TableCell>Section</TableCell>
+                            <TableCell>Credits</TableCell>
+                            <TableCell>Semester</TableCell>
+                            <TableCell>Batch</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {subjects.map((subject) => (
+                            <TableRow key={subject.id}>
+                              <TableCell>{subject.id}</TableCell>
+                              <TableCell>{subject.name}</TableCell>
+                              <TableCell>{subject.section}</TableCell>
+                              <TableCell>{subject.credits}</TableCell>
+                              <TableCell>
+                                {subject.Semester?.name || 'Not assigned'}
+                              </TableCell>
+                              <TableCell>
+                                {subject.Batch?.name || subject.batchId || 'N/A'}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  ) : (
+                    <Box sx={{ textAlign: 'center', my: 4 }}>
+                      <Typography variant="h6" color="text.secondary" gutterBottom>
+                        No subjects found
+                      </Typography>
+                      <Typography color="text.secondary" paragraph>
+                        Click "Add Subject" to create your first subject.
+                      </Typography>
+                    </Box>
+                  )}
+                </TabPanel>
+
+                <TabPanel value={tabValue} index={6}>
+                  <SemesterManagement 
+                    onSuccess={handleSemesterSuccess}
+                    onError={handleSemesterError}
+                  />
                 </TabPanel>
               </CardContent>
             </Card>
@@ -856,45 +1069,67 @@ const AdminPortal: React.FC = (): React.ReactElement => {
       {/* Student Form Dialog */}
       <StudentForm
         open={studentFormOpen}
-        onClose={() => setStudentFormOpen(false)}
+        onClose={() => {
+          setStudentFormOpen(false);
+          setEditingStudent(undefined);
+          setStudentError(undefined);
+        }}
         onSave={handleSaveStudent}
         student={editingStudent}
-        title={editingStudent ? "Edit Student" : "Add New Student"}
+        title={editingStudent ? "Edit Student" : "Add Student"}
         saving={savingStudent}
         error={studentError}
-        selectedBatch={batchId}
+      />
+
+      {/* Subject Form Dialog */}
+      <SubjectForm
+        open={subjectFormOpen}
+        onClose={() => {
+          setSubjectFormOpen(false);
+          setSubjectError(undefined);
+        }}
+        onSave={handleSaveSubject}
+        title="Create New Subject"
+        saving={savingSubject}
+        error={subjectError}
       />
 
       {/* Delete Confirmation Dialog */}
-      <Dialog open={deleteConfirmOpen} onClose={() => setDeleteConfirmOpen(false)}>
+      <Dialog
+        open={deleteConfirmOpen}
+        onClose={() => setDeleteConfirmOpen(false)}
+      >
         <DialogTitle>Confirm Delete</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Are you sure you want to delete student {studentToDelete?.name} ({studentToDelete?.id})? This action cannot be undone.
+            Are you sure you want to delete student {studentToDelete?.name} ({studentToDelete?.id})? 
+            This action cannot be undone.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDeleteConfirmOpen(false)}>Cancel</Button>
+          <Button onClick={() => setDeleteConfirmOpen(false)} color="primary">
+            Cancel
+          </Button>
           <Button 
-            onClick={handleDeleteStudent} 
+            onClick={handleConfirmDeleteStudent} 
             color="error" 
             variant="contained"
-            startIcon={<DeleteIcon />}
+            disabled={savingStudent}
           >
-            Delete
+            {savingStudent ? <CircularProgress size={24} /> : 'Delete'}
           </Button>
         </DialogActions>
       </Dialog>
 
+      {/* Notification Snackbar */}
       <Snackbar
         open={notification.open}
         autoHideDuration={6000}
-        onClose={() => setNotification({ ...notification, open: false })}
+        onClose={() => setNotification(prev => ({ ...prev, open: false }))}
       >
-        <Alert
-          onClose={() => setNotification({ ...notification, open: false })}
+        <Alert 
+          onClose={() => setNotification(prev => ({ ...prev, open: false }))} 
           severity={notification.severity}
-          sx={{ width: '100%' }}
         >
           {notification.message}
         </Alert>

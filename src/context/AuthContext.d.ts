@@ -8,16 +8,13 @@ interface User {
 
 export interface AuthContextType {
   currentUser: User | null;
+  firebaseUser: any | null;
   loading: boolean;
   error: string | null;
-  studentLogin: (id: string, password: string) => Promise<User>;
-  teacherLogin: (id: string, password: string) => Promise<User>;
-  adminLogin: (username: string, password: string) => Promise<User>;
+  login: (identifier: string, password: string) => Promise<User>;
   logout: () => void;
-  isAuthenticated: boolean;
-  isStudent: boolean;
-  isTeacher: boolean;
-  isAdmin: boolean;
+  setupTeacherPassword: (email: string, currentPassword: string, newPassword: string) => Promise<User>;
+  requestPasswordReset: (email: string) => Promise<void>;
 }
 
 export function useAuth(): AuthContextType;

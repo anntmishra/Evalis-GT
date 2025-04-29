@@ -8,12 +8,16 @@ import TeacherPortal from './pages/TeacherPortal';
 import StudentPortal from './pages/StudentPortal';
 import AdminPortal from './pages/AdminPortal';
 import Login from './pages/Login';
+import AuthListener from './components/AuthListener';
+import AuthPersistenceHandler from './components/AuthPersistenceHandler';
 
 function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Router>
+        <AuthListener />
+        <AuthPersistenceHandler />
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/get-started" element={<GetStarted />} />

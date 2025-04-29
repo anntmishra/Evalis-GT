@@ -1,5 +1,5 @@
 const asyncHandler = require('express-async-handler');
-const { Submission, Student, Subject, Teacher } = require('../models');
+const { Submission, Student, Subject, Teacher, TeacherSubject, Assignment } = require('../models');
 const { Op } = require('sequelize');
 
 /**
@@ -21,6 +21,10 @@ const getSubmissions = asyncHandler(async (req, res) => {
       {
         model: Teacher,
         attributes: ['id', 'name']
+      },
+      {
+        model: Assignment,
+        attributes: ['id', 'title']
       }
     ],
     order: [['submissionDate', 'DESC']]
@@ -48,6 +52,10 @@ const getSubmissionById = asyncHandler(async (req, res) => {
       {
         model: Teacher,
         attributes: ['id', 'name']
+      },
+      {
+        model: Assignment,
+        attributes: ['id', 'title', 'description', 'dueDate']
       }
     ]
   });
@@ -98,11 +106,26 @@ const getSubmissionById = asyncHandler(async (req, res) => {
  * @access  Private/Student
  */
 const createSubmission = asyncHandler(async (req, res) => {
-  const { subjectId, examType, submissionText } = req.body;
+  const { subjectId, examType, submissionText, assignmentId, fileUrl } = req.body;
 
   if (!subjectId || !examType || !submissionText) {
     res.status(400);
-    throw new Error('Please provide all fields: subjectId, examType, submissionText');
+    throw new Error('Please provide all required fields: subjectId, examType, submissionText');
+  }
+
+  // If assignmentId is provided, verify it exists and matches the subject
+  if (assignmentId) {
+    const assignment = await Assignment.findByPk(assignmentId);
+    
+    if (!assignment) {
+      res.status(404);
+      throw new Error('Assignment not found');
+    }
+    
+    if (assignment.subjectId !== subjectId) {
+      res.status(400);
+      throw new Error('Assignment does not match the provided subject');
+    }
   }
 
   // Confirm the subject exists
@@ -116,8 +139,10 @@ const createSubmission = asyncHandler(async (req, res) => {
   const submission = await Submission.create({
     studentId: req.user.id,
     subjectId,
+    assignmentId: assignmentId || null,
     examType,
     submissionText,
+    fileUrl: fileUrl || null,
     submissionDate: new Date(),
     score: null,
     plagiarismScore: 0,
@@ -193,6 +218,10 @@ const updateSubmission = asyncHandler(async (req, res) => {
       {
         model: Teacher,
         attributes: ['id', 'name']
+      },
+      {
+        model: Assignment,
+        attributes: ['id', 'title']
       }
     ]
   });
@@ -268,6 +297,10 @@ const getSubmissionsBySubject = asyncHandler(async (req, res) => {
       {
         model: Teacher,
         attributes: ['id', 'name']
+      },
+      {
+        model: Assignment,
+        attributes: ['id', 'title']
       }
     ],
     order: [['submissionDate', 'DESC']]
@@ -276,11 +309,139 @@ const getSubmissionsBySubject = asyncHandler(async (req, res) => {
   res.json(submissions);
 });
 
+/**
+ * @desc    Get submissions by teacher ID
+ * @route   GET /api/submissions/teacher/:teacherId
+ * @access  Private/Teacher, Admin
+ */
+const getSubmissionsByTeacher = asyncHandler(async (req, res) => {
+  const teacherId = req.params.teacherId;
+  
+  // Verify the teacher exists
+  const teacher = await Teacher.findByPk(teacherId, {
+    include: [{
+      model: Subject,
+      through: { attributes: [] }
+    }]
+  });
+  
+  if (!teacher) {
+    res.status(404);
+    throw new Error('Teacher not found');
+  }
+
+  // Check if the requesting user is the teacher or an admin
+  if (req.user.role !== 'admin' && req.user.id !== teacherId) {
+    res.status(403);
+    throw new Error('Not authorized to access submissions for this teacher');
+  }
+
+  // Get all subjects taught by this teacher
+  const subjectIds = teacher.Subjects.map(subject => subject.id);
+  
+  if (subjectIds.length === 0) {
+    return res.json([]);
+  }
+
+  // Find all submissions for these subjects
+  const submissions = await Submission.findAll({
+    where: {
+      subjectId: {
+        [Op.in]: subjectIds
+      }
+    },
+    include: [
+      {
+        model: Student,
+        attributes: ['id', 'name', 'section', 'batch']
+      },
+      {
+        model: Subject,
+        attributes: ['id', 'name', 'section']
+      },
+      {
+        model: Teacher,
+        attributes: ['id', 'name']
+      },
+      {
+        model: Assignment,
+        attributes: ['id', 'title']
+      }
+    ],
+    order: [['submissionDate', 'DESC']]
+  });
+
+  res.json(submissions);
+});
+
+/**
+ * @desc    Submit an assignment solution
+ * @route   POST /api/submissions/assignment/:id
+ * @access  Private/Student
+ */
+const submitAssignment = asyncHandler(async (req, res) => {
+  const assignmentId = req.params.id;
+  const { submissionText, fileUrl } = req.body;
+
+  // Verify the assignment exists
+  const assignment = await Assignment.findByPk(assignmentId);
+  
+  if (!assignment) {
+    res.status(404);
+    throw new Error('Assignment not found');
+  }
+
+  // Check if due date has passed
+  if (assignment.dueDate && new Date(assignment.dueDate) < new Date()) {
+    res.status(400);
+    throw new Error('The deadline for this assignment has passed');
+  }
+
+  // Check if student has already submitted this assignment
+  const existingSubmission = await Submission.findOne({
+    where: {
+      assignmentId,
+      studentId: req.user.id
+    }
+  });
+
+  if (existingSubmission) {
+    res.status(400);
+    throw new Error('You have already submitted this assignment');
+  }
+
+  // Create submission
+  const submission = await Submission.create({
+    studentId: req.user.id,
+    subjectId: assignment.subjectId,
+    assignmentId,
+    examType: assignment.examType,
+    submissionText: submissionText || '',
+    fileUrl: fileUrl || null,
+    submissionDate: new Date(),
+    score: null,
+    plagiarismScore: 0,
+    feedback: '',
+    graded: false,
+    gradedBy: null,
+    gradedDate: null
+  });
+
+  if (submission) {
+    res.status(201).json(submission);
+  } else {
+    res.status(400);
+    throw new Error('Invalid submission data');
+  }
+});
+
 module.exports = {
   getSubmissions,
   getSubmissionById,
   createSubmission,
   updateSubmission,
   deleteSubmission,
-  getSubmissionsBySubject
+  getSubmissionsBySubject,
+  getSubmissionsByTeacher,
+  submitAssignment
 }; 

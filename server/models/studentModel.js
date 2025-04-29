@@ -32,6 +32,14 @@ const Student = sequelize.define('Student', {
   role: {
     type: DataTypes.STRING,
     defaultValue: 'student',
+  },
+  activeSemesterId: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    references: {
+      model: 'Semesters',
+      key: 'id'
+    }
   }
 }, {
   timestamps: true,

@@ -157,8 +157,8 @@ const LandingPage: React.FC = () => {
           <Grid item xs={12} md={6}>
             <Box 
               component="img"
-              src="/src/assets/Bennett University Logo.png" 
-              alt="Bennett University"
+              src="/src/assets/Evalis-Logo.svg" 
+              alt="Evalis"
               sx={{ 
                 width: '100%',
                 maxWidth: 400,

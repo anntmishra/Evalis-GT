@@ -8,14 +8,14 @@ import {
   Login as LoginIcon
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
-import bennettLogo from '../assets/Bennett University Logo.png';
+import evalisLogo from '../assets/Evalis-Logo.svg';
 
 interface HeaderProps {
   title?: string;
   showBackButton?: boolean;
 }
 
-export default function Header({ title = 'Bennett University', showBackButton = true }: HeaderProps) {
+export default function Header({ title = 'Evalis', showBackButton = true }: HeaderProps) {
   const theme = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
@@ -53,8 +53,8 @@ export default function Header({ title = 'Bennett University', showBackButton = 
         )}
         <Box
           component="img"
-          src={bennettLogo}
-          alt="Bennett University"
+          src={evalisLogo}
+          alt="Evalis"
           sx={{ 
             height: 40,
             mr: 1 

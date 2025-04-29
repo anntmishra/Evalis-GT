@@ -24,13 +24,23 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  TextField,
   Snackbar,
   Alert,
   CircularProgress
 } from '@mui/material';
-import { Add, Edit, Save, Cancel, Delete } from '@mui/icons-material';
-import { Teacher, Subject } from '../types/university';
+import { Add, Edit, Cancel, Delete } from '@mui/icons-material';
+import { Teacher, Subject, ExamType } from '../types/university';
+import TeacherForm from './TeacherForm';
+import SubmissionUploader from './SubmissionUploader';
+
+export interface SubmissionData {
+  subjectId: string;
+  examTypeId: string;
+  title: string;
+  description: string;
+  file: File;
+  dueDate?: string;
+}
 
 interface TeacherAssignmentProps {
   teachers: Teacher[];
@@ -55,11 +65,11 @@ const TeacherAssignment: React.FC<TeacherAssignmentProps> = ({
   const [selectedSubject, setSelectedSubject] = useState<string>('');
   const [openDialog, setOpenDialog] = useState(false);
   const [editingTeacher, setEditingTeacher] = useState<Teacher | null>(null);
-  const [newTeacher, setNewTeacher] = useState<Teacher>({ id: '', name: '', email: '', subjects: [] });
   const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
   const [deleteConfirmDialog, setDeleteConfirmDialog] = useState(false);
   const [teacherToDelete, setTeacherToDelete] = useState<string>('');
   const [isAssigning, setIsAssigning] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleAssign = async () => {
     if (!selectedTeacher || !selectedSubject) {
@@ -101,40 +111,51 @@ const TeacherAssignment: React.FC<TeacherAssignmentProps> = ({
   };
 
   const handleAddTeacher = () => {
-    if (!newTeacher.id || !newTeacher.name || !newTeacher.email) {
-      setNotification({
-        open: true,
-        message: 'Please fill all required fields',
-        severity: 'error'
-      });
-      return;
-    }
-
-    // Check if teacher ID already exists
-    if (teachers.some(t => t.id === newTeacher.id) && !editingTeacher) {
-      setNotification({
-        open: true,
-        message: 'Teacher ID already exists',
-        severity: 'error'
-      });
-      return;
-    }
-
-    if (editingTeacher) {
-      onEditTeacher(newTeacher);
-    } else {
-      onAddTeacher({ ...newTeacher, subjects: [] });
-    }
-
-    // Reset form and close dialog
-    setNewTeacher({ id: '', name: '', email: '', subjects: [] });
     setEditingTeacher(null);
-    setOpenDialog(false);
+    setOpenDialog(true);
+  };
+
+  const handleSaveTeacher = async (teacher: Teacher) => {
+    setIsSaving(true);
+    try {
+      if (editingTeacher) {
+        await onEditTeacher(teacher);
+      } else {
+        await onAddTeacher(teacher);
+      }
+      
+      // Show success notification with password info if available
+      if (!editingTeacher && 'initialPassword' in teacher) {
+        setNotification({
+          open: true,
+          message: `Teacher ${teacher.name} added successfully. Initial password: ${teacher.initialPassword}. A password reset link has been sent to their email.`,
+          severity: 'success'
+        });
+      } else {
+        setNotification({
+          open: true,
+          message: `Teacher ${teacher.name} ${editingTeacher ? 'updated' : 'added'} successfully.`,
+          severity: 'success'
+        });
+      }
+      
+      // Reset form and close dialog
+      setEditingTeacher(null);
+      setOpenDialog(false);
+    } catch (error) {
+      console.error("Error saving teacher:", error);
+      setNotification({
+        open: true,
+        message: `Failed to ${editingTeacher ? 'update' : 'add'} teacher. Please try again.`,
+        severity: 'error'
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const openEditDialog = (teacher: Teacher) => {
     setEditingTeacher(teacher);
-    setNewTeacher({ ...teacher });
     setOpenDialog(true);
   };
 
@@ -227,11 +248,7 @@ const TeacherAssignment: React.FC<TeacherAssignmentProps> = ({
                 <Button
                   variant="outlined"
                   startIcon={<Add />}
-                  onClick={() => {
-                    setEditingTeacher(null);
-                    setNewTeacher({ id: '', name: '', email: '', subjects: [] });
-                    setOpenDialog(true);
-                  }}
+                  onClick={handleAddTeacher}
                 >
                   Add Teacher
                 </Button>
@@ -323,49 +340,14 @@ const TeacherAssignment: React.FC<TeacherAssignmentProps> = ({
         </Grid>
       </Grid>
 
-      {/* Add/Edit Teacher Dialog */}
-      <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>
-          {editingTeacher ? 'Edit Teacher' : 'Add New Teacher'}
-        </DialogTitle>
-        <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            label="Teacher ID"
-            fullWidth
-            variant="outlined"
-            value={newTeacher.id}
-            onChange={(e) => setNewTeacher({ ...newTeacher, id: e.target.value })}
-            disabled={!!editingTeacher}
-            sx={{ mb: 2, mt: 1 }}
-          />
-          <TextField
-            margin="dense"
-            label="Full Name"
-            fullWidth
-            variant="outlined"
-            value={newTeacher.name}
-            onChange={(e) => setNewTeacher({ ...newTeacher, name: e.target.value })}
-            sx={{ mb: 2 }}
-          />
-          <TextField
-            sx={{ mb: 2 }}
-            label="Email Address"
-            fullWidth
-            variant="outlined"
-            value={newTeacher.email}
-            onChange={(e) => setNewTeacher({ ...newTeacher, email: e.target.value })}
-            type="email"
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenDialog(false)} startIcon={<Cancel />}>Cancel</Button>
-          <Button onClick={handleAddTeacher} color="primary" variant="contained" startIcon={<Save />}>
-            {editingTeacher ? 'Update' : 'Add'}
-          </Button>
-        </DialogActions>
-      </Dialog>
+      {/* Replace the existing dialog with TeacherForm */}
+      <TeacherForm
+        open={openDialog}
+        onClose={() => setOpenDialog(false)}
+        onSave={handleSaveTeacher}
+        teacher={editingTeacher || undefined}
+        saving={isSaving}
+      />
 
       {/* Delete Confirmation Dialog */}
       <Dialog
@@ -407,6 +389,28 @@ const TeacherAssignment: React.FC<TeacherAssignmentProps> = ({
           {notification.message}
         </Alert>
       </Snackbar>
+    </Box>
+  );
+};
+
+interface TeacherAssignmentViewProps {
+  subjects: Subject[];
+  onAssignmentUploaded: (data: SubmissionData) => Promise<boolean>;
+  examTypes: ExamType[];
+}
+
+export const TeacherAssignmentView: React.FC<TeacherAssignmentViewProps> = ({
+  subjects,
+  onAssignmentUploaded,
+  examTypes
+}) => {
+  return (
+    <Box>
+      <SubmissionUploader
+        subjects={subjects}
+        examTypes={examTypes}
+        onUploadSubmission={onAssignmentUploaded}
+      />
     </Box>
   );
 };

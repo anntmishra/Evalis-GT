@@ -1,52 +1,43 @@
 const { Sequelize } = require('sequelize');
 const colors = require('colors');
 
-// Log environment variables for debugging
-console.log('Database configuration:'.yellow);
-console.log('POSTGRES_DB:'.cyan, process.env.POSTGRES_DB || 'evalis');
-console.log('POSTGRES_USER:'.cyan, process.env.POSTGRES_USER || 'postgres');
-console.log('POSTGRES_HOST:'.cyan, process.env.POSTGRES_HOST || 'localhost');
-console.log('POSTGRES_PORT:'.cyan, process.env.POSTGRES_PORT || 5432);
+ // NeonDB connection string
+const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://neondb_owner:npg_OmpMql4AR0cs@ep-super-smoke-a1vkw609-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require';
 
-// Create the database connection using environment variables
-const sequelize = new Sequelize(
-  process.env.POSTGRES_DB || 'evalis',
-  process.env.POSTGRES_USER, // No default value to force environment variable to be used
-  process.env.POSTGRES_PASSWORD || '',
-  {
-    host: process.env.POSTGRES_HOST || 'localhost',
-    port: process.env.POSTGRES_PORT || 5432,
-    dialect: 'postgres',
-    logging: process.env.NODE_ENV === 'development' ? console.log : false,
-    dialectOptions: {
-      ssl: process.env.POSTGRES_SSL === 'true' ? {
-        require: true,
-        rejectUnauthorized: false
-      } : false
-    },
-    pool: {
-      max: 5,
-      min: 0,
-      acquire: 30000,
-      idle: 10000
+// Log database connection info
+console.log('Database configuration:'.yellow);
+console.log('Using NeonDB serverless PostgreSQL'.cyan);
+
+// Create Sequelize instance using the connection string
+const sequelize = new Sequelize(DATABASE_URL, {
+  dialect: 'postgres',
+  logging: process.env.NODE_ENV === 'development' ? console.log : false,
+  dialectOptions: {
+    ssl: {
+      require: true,
+      rejectUnauthorized: false
     }
+  },
+  pool: {
+    max: 5,
+    min: 0,
+    acquire: 30000,
+    idle: 10000
   }
-);
+});
 
 const connectDB = async () => {
   try {
-    console.log('Connecting to PostgreSQL...'.yellow);
-    console.log(`Attempting connection with user: ${process.env.POSTGRES_USER}`.cyan);
+    console.log('Connecting to NeonDB PostgreSQL...'.yellow);
     await sequelize.authenticate();
-    console.log(`PostgreSQL Connected: ${sequelize.options.host}:${sequelize.options.port}`.cyan.underline);
+    console.log(`NeonDB PostgreSQL Connected`.cyan.underline);
     return sequelize;
   } catch (error) {
-    console.error(`Error connecting to PostgreSQL: ${error.message}`.red.bold);
+    console.error(`Error connecting to NeonDB PostgreSQL: ${error.message}`.red.bold);
     console.error('Please check:');
     console.error('1. Your network connection');
-    console.error('2. PostgreSQL server is running');
-    console.error('3. Database credentials are correct');
-    console.error('4. Database exists');
+    console.error('2. NeonDB connection string is correct');
+    console.error('3. Database exists and is accessible');
     process.exit(1);
   }
 };

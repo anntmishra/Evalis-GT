@@ -1,8 +1,9 @@
 const asyncHandler = require('express-async-handler');
-const { Teacher, Subject, TeacherSubject } = require('../models');
+const { Teacher, Subject, TeacherSubject, Student, Batch } = require('../models');
 const XLSX = require('xlsx');
 const jwt = require('jsonwebtoken');
 const { Op } = require('sequelize');
+const { sequelize } = require('../config/db');
 
 /**
  * @desc    Get all teachers
@@ -75,9 +76,15 @@ const createTeacher = asyncHandler(async (req, res) => {
     const teacherEmail = email || Teacher.generateEmail(name);
     console.log('Teacher email:', teacherEmail);
 
-    // Generate default password if not provided
-    const teacherPassword = password || Teacher.generatePassword(id);
-    console.log('Teacher password set (hashed during save)');
+    // Import generateRandomPassword
+    const { generateRandomPassword } = require('../utils/passwordUtils');
+    
+    // Generate random password if email is provided, otherwise use default
+    const generatedPassword = email ? generateRandomPassword(10) : Teacher.generatePassword(id);
+    console.log(`Generated password for teacher ${id}: ${generatedPassword.substring(0, 3)}***`);
+    
+    // Use the generated password
+    const teacherPassword = password || generatedPassword;
 
     // Check if teacher already exists
     const teacherExists = await Teacher.findOne({ where: { id } });
@@ -128,12 +135,61 @@ const createTeacher = asyncHandler(async (req, res) => {
 
     if (teacher) {
       console.log('Teacher created successfully:', teacher.id);
+      
+      // If email is provided, create Firebase user and send password reset link
+      if (email) {
+        try {
+          console.log(`Attempting to create Firebase user for teacher ${id} with email ${email}`);
+          
+          // Import Firebase functions
+          const { createFirebaseUser, sendPasswordResetEmail } = require('../utils/firebaseUtils');
+          const { sendPasswordResetLink, sendLoginCredentials } = require('../utils/emailUtils');
+          
+          // Create Firebase user
+          const firebaseUser = await createFirebaseUser(email, teacherPassword, {
+            id: teacher.id,
+            name: teacher.name,
+          });
+          
+          console.log(`Firebase user created successfully with UID: ${firebaseUser?.uid}`);
+          
+          // Generate password reset link
+          console.log(`Generating password reset link for ${email}`);
+          const resetLink = await sendPasswordResetEmail(email);
+          
+          console.log(`Password reset link generated: ${resetLink.substring(0, 30)}...`);
+          
+          // Send password reset email
+          console.log(`Sending password reset email to ${email}`);
+          await sendPasswordResetLink({
+            email,
+            name: teacher.name,
+          }, resetLink);
+          
+          console.log(`Password reset link sent to ${email}`);
+          
+          // Also send login credentials for reference (creating a teacher version of this utility)
+          await sendLoginCredentials({
+            email,
+            name: teacher.name,
+            id: teacher.id
+          }, teacherPassword);
+          
+          console.log(`Login credentials sent to ${email}`);
+          console.log(`All Firebase operations completed successfully for teacher ${id}`);
+        } catch (error) {
+          console.error(`Error with Firebase operations for teacher ${id}:`, error);
+          // Don't fail the whole operation if Firebase operations fail
+        }
+      }
+      
       res.status(201).json({
         id: teacher.id,
         name: teacher.name,
         email: teacher.email,
         Subjects: teacher.Subjects || [],
         role: teacher.role,
+        initialPassword: email ? teacherPassword : undefined
       });
     } else {
       console.log('Failed to create teacher');
@@ -158,11 +214,29 @@ const updateTeacher = asyncHandler(async (req, res) => {
   const teacher = await Teacher.findOne({ where: { id: req.params.id } });
 
   if (teacher) {
-    teacher.name = req.body.name || teacher.name;
-    teacher.email = req.body.email || teacher.email;
+    const previousEmail = teacher.email;
+    const newEmail = req.body.email;
     
-    if (req.body.password) {
+    teacher.name = req.body.name || teacher.name;
+    teacher.email = newEmail || teacher.email;
+    
+    // If email is being added for the first time or changed
+    let passwordChanged = false;
+    let generatedPassword;
+    
+    if (newEmail && (!previousEmail || newEmail !== previousEmail)) {
+      // Import generateRandomPassword
+      const { generateRandomPassword } = require('../utils/passwordUtils');
+      
+      // Generate a new password when email is added or changed
+      generatedPassword = generateRandomPassword(10);
+      teacher.password = generatedPassword;
+      passwordChanged = true;
+    } else if (req.body.password) {
+      // Or if password is explicitly provided
       teacher.password = req.body.password;
+      passwordChanged = true;
+      generatedPassword = req.body.password;
     }
 
     const updatedTeacher = await teacher.save();
@@ -183,6 +257,58 @@ const updateTeacher = asyncHandler(async (req, res) => {
       }
     }
 
+    // Send login credentials if email was added or changed and create Firebase user
+    if (passwordChanged && newEmail) {
+      try {
+        // Import Firebase functions
+        const { createFirebaseUser, updateFirebaseUser, sendPasswordResetEmail } = require('../utils/firebaseUtils');
+        const { sendPasswordResetLink, sendLoginCredentials } = require('../utils/emailUtils');
+        
+        // If changing email, first try to find if a Firebase user already exists
+        let firebaseUser;
+        try {
+          if (previousEmail) {
+            // Try to update the existing Firebase user with the new email
+            firebaseUser = await updateFirebaseUser(null, { 
+              email: newEmail,
+              password: generatedPassword
+            });
+          }
+        } catch (error) {
+          console.log('No existing Firebase user to update, creating new one');
+        }
+        
+        // If no existing user or couldn't update, create a new Firebase user
+        if (!firebaseUser) {
+          firebaseUser = await createFirebaseUser(newEmail, generatedPassword, {
+            id: updatedTeacher.id,
+            name: updatedTeacher.name,
+          });
+        }
+        
+        // Generate password reset link
+        const resetLink = await sendPasswordResetEmail(newEmail);
+        
+        // Send password reset email
+        await sendPasswordResetLink({
+          email: newEmail,
+          name: updatedTeacher.name,
+        }, resetLink);
+        
+        console.log(`Firebase user updated/created and password reset link sent to ${newEmail}`);
+        
+        // Also send login credentials for reference
+        await sendLoginCredentials({
+          id: updatedTeacher.id,
+          name: updatedTeacher.name,
+          email: newEmail
+        }, generatedPassword);
+      } catch (error) {
+        console.error('Error with Firebase operations:', error);
+        // Continue even if Firebase operations fail
+      }
+    }
+
     // Reload teacher with updated subjects
     const teacherWithSubjects = await Teacher.findOne({
       where: { id: teacher.id },
@@ -193,7 +319,10 @@ const updateTeacher = asyncHandler(async (req, res) => {
       }]
     });
 
-    res.json(teacherWithSubjects);
+    res.json({
+      ...teacherWithSubjects.get(),
+      initialPassword: passwordChanged && newEmail ? generatedPassword : undefined,
+    });
   } else {
     res.status(404);
     throw new Error('Teacher not found');
@@ -474,6 +603,525 @@ const generateToken = (id) => {
   });
 };
 
+/**
+ * @desc    Get students by teacher ID based on subjects taught
+ * @route   GET /api/teachers/:id/students
+ * @access  Private/Teacher
+ */
+const getStudentsByTeacher = asyncHandler(async (req, res) => {
+  try {
+    // Ensure all required models are available
+    if (!Teacher || !Subject || !Student) {
+      console.error('Required models not available', { 
+        Teacher: !!Teacher, 
+        Subject: !!Subject, 
+        Student: !!Student,
+        Batch: !!Batch 
+      });
+      res.status(500);
+      throw new Error('Server configuration error - required models not available');
+    }
+    
+    // Get the teacher ID from the request
+    const teacherId = req.params.id;
+    console.log(`Getting students for teacher ID: ${teacherId}`);
+    
+    // Verify the teacher exists
+    const teacher = await Teacher.findByPk(teacherId, {
+      include: [{
+        model: Subject,
+        through: { attributes: [] }
+      }]
+    });
+    
+    if (!teacher) {
+      console.log(`Teacher with ID ${teacherId} not found`);
+      res.status(404);
+      throw new Error('Teacher not found');
+    }
+
+    console.log(`Found teacher: ${teacher.name}, with ${teacher.Subjects ? teacher.Subjects.length : 0} subjects`);
+
+    // Check if the requesting user is the teacher or an admin
+    if (req.user && req.user.role !== 'admin' && req.user.id !== teacherId) {
+      console.log(`Unauthorized access attempt. User: ${req.user.id}, Role: ${req.user.role}, Requested: ${teacherId}`);
+      res.status(403);
+      throw new Error('Not authorized to access students for this teacher');
+    }
+
+    // Get all subject IDs taught by this teacher
+    const subjectIds = teacher.Subjects ? teacher.Subjects.map(subject => subject.id) : [];
+    console.log(`Subject IDs taught by teacher: ${subjectIds.join(', ') || 'None'}`);
+    
+    if (subjectIds.length === 0) {
+      console.log('No subjects assigned to this teacher, returning empty array');
+      return res.json([]);
+    }
+
+    // First, get all the teacher's subjects with their section details
+    const teacherSubjects = await Subject.findAll({
+      where: {
+        id: {
+          [Op.in]: subjectIds
+        }
+      },
+      include: [
+        // Check if Batch model is available before using it in the include
+        Batch ? {
+          model: Batch,
+          through: { attributes: [] }
+        } : null
+      ].filter(Boolean) // Filter out null values if Batch is undefined
+    });
+
+    console.log(`Found ${teacherSubjects.length} subjects with details`);
+    teacherSubjects.forEach(subject => {
+      console.log(`Subject ${subject.id}: ${subject.name}, Section: ${subject.section}`);
+      if (subject.Batches) {
+        console.log(`  Associated with batches: ${subject.Batches.map(b => b.id).join(', ')}`);
+      }
+    });
+
+    // Extract the unique sections taught by this teacher
+    const taughtSections = [...new Set(teacherSubjects.map(subject => subject.section).filter(Boolean))];
+    console.log(`Sections taught: ${taughtSections.join(', ') || 'None'}`);
+    
+    // Extract all batch IDs associated with the teacher's subjects
+    const taughtBatches = new Set();
+    teacherSubjects.forEach(subject => {
+      if (subject.Batches && Array.isArray(subject.Batches) && subject.Batches.length > 0) {
+        subject.Batches.forEach(batch => {
+          if (batch && batch.id) {
+            taughtBatches.add(batch.id);
+          }
+        });
+      }
+    });
+    const batchArray = [...taughtBatches];
+    console.log(`Batches taught: ${batchArray.join(', ') || 'None'}`);
+
+    if (taughtSections.length === 0 && batchArray.length === 0) {
+      console.log('No sections or batches found, returning empty array');
+      return res.json([]);
+    }
+
+    // Build the where clause based on what we have
+    const whereClause = {};
+    
+    if (taughtSections.length > 0) {
+      whereClause.section = {
+        [Op.in]: taughtSections
+      };
+    }
+    
+    if (batchArray.length > 0) {
+      whereClause.batch = {
+        [Op.in]: batchArray
+      };
+    }
+    
+    // If we have both section and batch filters, use OR to include students from either
+    const finalWhereClause = 
+      taughtSections.length > 0 && batchArray.length > 0 
+        ? { [Op.or]: [
+            { section: { [Op.in]: taughtSections } },
+            { batch: { [Op.in]: batchArray } }
+          ]}
+        : whereClause;
+
+    // Now find students in those sections or batches
+    const students = await Student.findAll({
+      where: finalWhereClause,
+      attributes: { exclude: ['password'] },
+      order: [['id', 'ASC']]
+    });
+
+    console.log(`Found ${students.length} students`);
+
+    // Get all batch ids
+    const batchIds = [...new Set(students.map(s => s.batch).filter(Boolean))];
+    console.log('Batch IDs found:', batchIds);
+
+    // Get batch details if available
+    let batches = [];
+    try {
+      if (batchIds.length > 0 && Batch) {
+        batches = await Batch.findAll({
+          where: {
+            id: {
+              [Op.in]: batchIds
+            }
+          }
+        });
+      }
+      console.log(`Found ${batches.length} batches`);
+    } catch (error) {
+      console.error('Error fetching batches:', error);
+    }
+
+    // Create a map of batch details for quick lookup
+    const batchMap = batches.reduce((map, batch) => {
+      map[batch.id] = batch;
+      return map;
+    }, {});
+
+    // Process students with batch information
+    const processedStudents = students.map(student => {
+      const plainStudent = student.get({ plain: true });
+      const batchId = plainStudent.batch;
+      
+      // Add batch information
+      if (batchId) {
+        const batchInfo = batchMap[batchId];
+        if (batchInfo) {
+          plainStudent.batchName = batchInfo.name;
+        } else {
+          plainStudent.batchName = `Batch ${batchId}`;
+        }
+      } else {
+        // Assign default batch info if missing
+        plainStudent.batch = 'default';
+        plainStudent.batchName = 'Default Batch';
+      }
+      
+      return plainStudent;
+    });
+
+    console.log('Processed students:', processedStudents.length);
+    res.json(processedStudents);
+  } catch (error) {
+    console.error('Error fetching students:', error);
+    res.status(500).json({ message: 'Server error while fetching students' });
+  }
+});
+
+/**
+ * @desc    Get current teacher's assigned subjects
+ * @route   GET /api/teachers/subjects
+ * @access  Private/Teacher
+ */
+const getTeacherSubjects = asyncHandler(async (req, res) => {
+  try {
+    // Check if user is logged in and has a valid ID
+    if (!req.user || !req.user.id) {
+      console.log('No valid user in request:', req.user);
+      res.status(401);
+      throw new Error('Not authenticated or invalid user');
+    }
+    
+    // Get the logged-in teacher's ID from the JWT
+    const teacherId = req.user.id;
+    console.log(`Getting subjects for teacher ID: ${teacherId}`);
+    
+    // Find the teacher with their assigned subjects
+    const teacher = await Teacher.findByPk(teacherId, {
+      include: [{
+        model: Subject,
+        through: { attributes: [] }
+      }]
+    });
+    
+    if (!teacher) {
+      console.log(`Teacher with ID ${teacherId} not found`);
+      res.status(404);
+      throw new Error('Teacher not found');
+    }
+    
+    console.log(`Found teacher: ${teacher.name}, with ${teacher.Subjects ? teacher.Subjects.length : 0} subjects`);
+    
+    // If teacher is found but has no subjects
+    if (!teacher.Subjects || teacher.Subjects.length === 0) {
+      console.log('Teacher found but has no assigned subjects');
+    } else {
+      console.log('Subjects:', teacher.Subjects.map(s => `${s.id}: ${s.name}`).join(', '));
+    }
+    
+    // Return the teacher's subjects (even if empty array)
+    res.json(teacher.Subjects || []);
+  } catch (error) {
+    console.error('Error in getTeacherSubjects:', error);
+    
+    // If response has not been sent yet
+    if (!res.headersSent) {
+      res.status(500).json({ 
+        message: 'Server error fetching subjects',
+        error: error.message
+      });
+    }
+  }
+});
+
+/**
+ * @desc    Create a test teacher account for development purposes
+ * @route   POST /api/teachers/create-test-account
+ * @access  Private/Admin
+ */
+const createTestTeacher = asyncHandler(async (req, res) => {
+  try {
+    // Only allow in development mode
+    if (process.env.NODE_ENV !== 'development') {
+      res.status(403);
+      throw new Error('This endpoint is only available in development mode');
+    }
+    
+    console.log('Creating test teacher account');
+    
+    // Use fixed data for test account
+    const testData = {
+      id: 'T0000',
+      name: 'Test Teacher',
+      email: req.body.email || 'teacher@test.com',
+      password: 'password123', // Simple password for testing
+      role: 'teacher'
+    };
+    
+    console.log('Creating test account with email:', testData.email);
+    
+    // Check if test teacher already exists
+    const existingTeacher = await Teacher.findOne({ 
+      where: { 
+        [Op.or]: [
+          { id: testData.id },
+          { email: testData.email }
+        ]
+      } 
+    });
+    
+    if (existingTeacher) {
+      // If exists, update the password
+      existingTeacher.password = testData.password;
+      await existingTeacher.save();
+      
+      console.log('Test teacher account updated');
+      res.status(200).json({
+        message: 'Test teacher account updated',
+        id: existingTeacher.id,
+        name: existingTeacher.name,
+        email: existingTeacher.email,
+        password: testData.password // Return password for testing purposes only
+      });
+    } else {
+      // Create new test teacher
+      const teacher = await Teacher.create(testData);
+      
+      console.log('Test teacher account created');
+      res.status(201).json({
+        message: 'Test teacher account created',
+        id: teacher.id,
+        name: teacher.name,
+        email: teacher.email,
+        password: testData.password // Return password for testing purposes only
+      });
+    }
+  } catch (error) {
+    console.error('Error creating test teacher account:', error);
+    if (!res.statusCode || res.statusCode === 200) {
+      res.status(500);
+    }
+    throw error;
+  }
+});
+
+/**
+ * @desc    Get students accessible to a teacher
+ * @route   GET /api/teachers/students
+ * @access  Private/Teacher
+ */
+const getAccessibleStudents = asyncHandler(async (req, res) => {
+  try {
+    const teacherId = req.user.id;
+    
+    // Find all subjects assigned to the teacher along with their batch information
+    const teacherWithSubjects = await Teacher.findByPk(teacherId, {
+      include: [{
+        model: Subject,
+        include: [{
+          model: Batch
+        }]
+      }]
+    });
+    
+    if (!teacherWithSubjects) {
+      res.status(404);
+      throw new Error('Teacher not found');
+    }
+    
+    // Extract unique batch IDs from teacher's subjects
+    const batchIds = [...new Set(
+      teacherWithSubjects.Subjects
+        .map(subject => subject.batchId)
+        .filter(id => id) // Filter out any undefined or null values
+    )];
+    
+    if (batchIds.length === 0) {
+      // Teacher has no assigned subjects with batches
+      return res.json([]);
+    }
+    
+    // Find all students from these batches
+    const students = await Student.findAll({
+      where: {
+        batch: {
+          [Op.in]: batchIds
+        }
+      },
+      attributes: { exclude: ['password'] },
+      include: [{
+        model: Batch
+      }]
+    });
+    
+    res.json(students);
+  } catch (error) {
+    console.error('Error fetching accessible students:', error);
+    res.status(500).json({ message: 'Server error while fetching students' });
+  }
+});
+
+/**
+ * @desc    Get batches accessible to a teacher
+ * @route   GET /api/teachers/batches
+ * @access  Private/Teacher
+ */
+const getAccessibleBatches = asyncHandler(async (req, res) => {
+  try {
+    const teacherId = req.user.id;
+    
+    // Find all subjects assigned to the teacher along with their batch information
+    const teacherWithSubjects = await Teacher.findByPk(teacherId, {
+      include: [{
+        model: Subject,
+        include: [{
+          model: Batch
+        }]
+      }]
+    });
+    
+    if (!teacherWithSubjects) {
+      res.status(404);
+      throw new Error('Teacher not found');
+    }
+    
+    // Extract unique batch IDs from teacher's subjects
+    const batchIds = [...new Set(
+      teacherWithSubjects.Subjects
+        .map(subject => subject.batchId)
+        .filter(id => id) // Filter out any undefined or null values
+    )];
+    
+    if (batchIds.length === 0) {
+      // Teacher has no assigned subjects with batches
+      return res.json([]);
+    }
+    
+    // Find all batches
+    const batches = await Batch.findAll({
+      where: {
+        id: {
+          [Op.in]: batchIds
+        }
+      }
+    });
+    
+    res.json(batches);
+  } catch (error) {
+    console.error('Error fetching accessible batches:', error);
+    res.status(500).json({ message: 'Server error while fetching batches' });
+  }
+});
+
+/**
+ * @desc    Get teacher dashboard data
+ * @route   GET /api/teachers/dashboard
+ * @access  Private/Teacher
+ */
+const getTeacherDashboard = asyncHandler(async (req, res) => {
+  try {
+    const teacherId = req.user.id;
+    
+    // Get teacher with subjects and their batches
+    const teacher = await Teacher.findByPk(teacherId, {
+      attributes: { exclude: ['password'] },
+      include: [{
+        model: Subject,
+        include: [{
+          model: Batch
+        }]
+      }]
+    });
+    
+    if (!teacher) {
+      res.status(404);
+      throw new Error('Teacher not found');
+    }
+    
+    // Extract all batch IDs from the teacher's subjects
+    const batchIds = [...new Set(
+      teacher.Subjects
+        .map(subject => subject.batchId)
+        .filter(id => id)
+    )];
+    
+    // Get students from these batches
+    const studentsPromise = batchIds.length > 0 ? Student.findAll({
+      where: { batch: { [Op.in]: batchIds } },
+      attributes: { exclude: ['password'] },
+      include: [{ model: Batch }]
+    }) : Promise.resolve([]);
+    
+    // Get all submissions for the teacher's subjects
+    const submissionsPromise = teacher.Subjects.length > 0 ? 
+      Submission.findAll({
+        where: { 
+          subjectId: { 
+            [Op.in]: teacher.Subjects.map(s => s.id) 
+          } 
+        },
+        include: [
+          { model: Student, attributes: { exclude: ['password'] } },
+          { model: Subject }
+        ]
+      }) : Promise.resolve([]);
+    
+    // Wait for all promises to resolve
+    const [students, submissions] = await Promise.all([studentsPromise, submissionsPromise]);
+    
+    // Organize students by batch
+    const studentsByBatch = {};
+    students.forEach(student => {
+      const batchId = student.batch;
+      if (!studentsByBatch[batchId]) {
+        studentsByBatch[batchId] = [];
+      }
+      studentsByBatch[batchId].push(student);
+    });
+    
+    // Organize submissions by subject
+    const submissionsBySubject = {};
+    submissions.forEach(submission => {
+      const subjectId = submission.subjectId;
+      if (!submissionsBySubject[subjectId]) {
+        submissionsBySubject[subjectId] = [];
+      }
+      submissionsBySubject[subjectId].push(submission);
+    });
+    
+    res.json({
+      teacher: {
+        id: teacher.id,
+        name: teacher.name,
+        email: teacher.email
+      },
+      subjects: teacher.Subjects,
+      studentsByBatch,
+      submissionsBySubject
+    });
+  } catch (error) {
+    console.error('Error fetching teacher dashboard:', error);
+    res.status(500).json({ message: 'Server error while fetching dashboard data' });
+  }
+});
+
 module.exports = {
   getTeachers,
   getTeacherById,
@@ -483,5 +1131,11 @@ module.exports = {
   assignSubject,
   removeSubject,
   importTeachersFromExcel,
-  authTeacher
+  authTeacher,
+  getStudentsByTeacher,
+  getTeacherSubjects,
+  createTestTeacher,
+  getAccessibleStudents,
+  getAccessibleBatches,
+  getTeacherDashboard
 }; 

@@ -26,6 +26,7 @@ import {
 import Header from '../components/Header';
 import { useAuth } from '../context/AuthContext.jsx';
 import PasswordResetForm from '../components/PasswordResetForm';
+import UserSignup from '../components/UserSignup';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -33,25 +34,25 @@ interface TabPanelProps {
   value: number;
 }
 
-function TabPanel(props: TabPanelProps) {
+const TabPanel = (props: TabPanelProps) => {
   const { children, value, index, ...other } = props;
 
   return (
     <div
       role="tabpanel"
       hidden={value !== index}
-      id={`login-tabpanel-${index}`}
-      aria-labelledby={`login-tab-${index}`}
+      id={`tabpanel-${index}`}
+      aria-labelledby={`tab-${index}`}
       {...other}
     >
       {value === index && (
-        <Box sx={{ pt: 3 }}>
+        <Box sx={{ py: 3 }}>
           {children}
         </Box>
       )}
     </div>
   );
-}
+};
 
 export default function Login() {
   const [tabValue, setTabValue] = useState(0);
@@ -60,68 +61,109 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [showResetPassword, setShowResetPassword] = useState(false);
+  const [showSignup, setShowSignup] = useState(false);
   const navigate = useNavigate();
   const theme = useTheme();
-  const { studentLogin, teacherLogin, adminLogin } = useAuth();
+  const { login } = useAuth();
 
   const handleLogin = async () => {
-    if (!username || !password) {
+    // Trim whitespace from username/email to prevent formatting issues
+    const trimmedUsername = username.trim();
+
+    if (!trimmedUsername || !password) {
       setError('Please enter all fields');
       return;
     }
     
     try {
-      if (tabValue === 0) { // Student login
-        try {
-          await studentLogin(username, password);
+      setError(''); // Clear any previous errors
+      console.log('Attempting login with:', { username: trimmedUsername, tab: tabValue });
+      
+      const userData = await login(trimmedUsername, password);
+      console.log('Login successful:', userData.role);
+      
+      // Check if there's a saved redirect path from session storage
+      const redirectPath = sessionStorage.getItem('auth:redirectPath');
+      
+      // Clear auth-related session storage
+      sessionStorage.removeItem('auth:redirectPath');
+      sessionStorage.removeItem('auth:error');
+      sessionStorage.removeItem('auth:errorTime');
+      
+      // Navigate based on redirect path or user role
+      if (redirectPath) {
+        console.log('Redirecting to saved path:', redirectPath);
+        navigate(redirectPath);
+      } else {
+        // Default navigation based on user role
+        if (userData.role === 'student') {
           navigate('/student');
-        } catch (error: any) {
-          console.error('Login error:', error);
-          setError(error.response?.data?.message || 'Invalid credentials. Please try again.');
-        }
-      } else if (tabValue === 1) { // Teacher login
-        try {
-          await teacherLogin(username, password);
+        } else if (userData.role === 'teacher') {
           navigate('/teacher');
-        } catch (error: any) {
-          console.error('Login error:', error);
-          setError(error.response?.data?.message || 'Invalid credentials. Please try again.');
-        }
-      } else if (tabValue === 2) { // Admin login
-        try {
-          await adminLogin(username, password);
+        } else if (userData.role === 'admin') {
           navigate('/admin');
-        } catch (error: any) {
-          console.error('Admin login error:', error);
-          if (error.response) {
-            console.error('Error response:', error.response.data);
-            console.error('Error status:', error.response.status);
-            setError(error.response.data?.message || 'Invalid credentials. Please try again.');
-          } else if (error.request) {
-            console.error('Error request:', error.request);
-            setError('Network error. Please check if the server is running.');
-          } else {
-            console.error('Error message:', error.message);
-            setError(error.message || 'Failed to login. Please try again.');
-          }
+        } else {
+          setError('Invalid user role');
         }
       }
-    } catch (error) {
-      console.error('Error:', error);
-      setError('An error occurred. Please try again.');
+    } catch (error: any) {
+      console.error('Login error in component:', error);
+      
+      // Show more specific error messages based on error code
+      if (error.code === 'auth/invalid-email') {
+        setError('Please enter a valid email address.');
+      } else if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+        setError('Invalid email or password. Please check your credentials and try again.');
+      } else {
+        setError(error.message || 'Invalid email or password. Please check your credentials and try again.');
+      }
     }
   };
 
-  const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
-    setUsername('');
-    setPassword('');
     setError('');
   };
 
   const handleForgotPassword = () => {
     setShowResetPassword(true);
   };
+
+  const handleSignup = () => {
+    setShowSignup(true);
+  };
+
+  const handleSignupSuccess = () => {
+    setShowSignup(false);
+    setError('');
+    // Optional: Show success message
+  };
+
+  if (showSignup) {
+    return (
+      <Box sx={{ 
+        minHeight: '100vh',
+        bgcolor: 'background.default',
+        py: 4
+      }}>
+        <Header />
+        <Container maxWidth="sm">
+          <Box sx={{ mb: 4 }}>
+            <Button
+              startIcon={<ArrowBack />}
+              onClick={() => setShowSignup(false)}
+            >
+              Back to Login
+            </Button>
+          </Box>
+          <UserSignup 
+            onSuccess={handleSignupSuccess}
+            onCancel={() => setShowSignup(false)}
+          />
+        </Container>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ 
@@ -173,7 +215,7 @@ export default function Login() {
                 align="center"
                 gutterBottom
               >
-                Login to access your Bennett University grading portal
+                Login to access your Evalis grading portal
               </Typography>
 
               <Box sx={{ width: '100%', mt: 3 }}>
@@ -221,14 +263,14 @@ export default function Login() {
                 }}>
                   <TabPanel value={tabValue} index={0}>
                     <TextField
-                      label="Student ID"
+                      label="Student ID or Email"
                       required
                       fullWidth
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
                       margin="normal"
-                      placeholder="Enter your student ID (e.g., S00001)"
-                      helperText="Use your student ID, not email address"
+                      placeholder="Enter your student ID (e.g., S00001) or email"
+                      helperText="Use your student ID or email address"
                     />
                   </TabPanel>
 
@@ -246,7 +288,7 @@ export default function Login() {
 
                   <TabPanel value={tabValue} index={2}>
                     <TextField
-                      label="Username"
+                      label="Username or Email"
                       required
                       fullWidth
                       value={username}
@@ -288,28 +330,43 @@ export default function Login() {
                   </Button>
                 </form>
 
-                <Typography variant="body2" color="text.secondary" align="center">
-                  Having trouble logging in?{' '}
-                  <Link 
-                    component="button" 
-                    variant="body2" 
-                    onClick={handleForgotPassword}
-                    color="primary"
-                  >
-                    Reset Password
-                  </Link>
-                </Typography>
+                <Box sx={{ 
+                  mt: 2,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 1
+                }}>
+                  <Typography variant="body2" color="text.secondary" align="center">
+                    Having trouble logging in?{' '}
+                    <Link 
+                      component="button" 
+                      variant="body2" 
+                      onClick={handleForgotPassword}
+                      color="primary"
+                    >
+                      Reset Password
+                    </Link>
+                  </Typography>
+                  
+                  {tabValue === 0 && (
+                    <Typography variant="body2" color="text.secondary" align="center">
+                      Don't have an account?{' '}
+                      <Link 
+                        component="button" 
+                        variant="body2" 
+                        onClick={handleSignup}
+                        color="primary"
+                      >
+                        Sign up
+                      </Link>
+                    </Typography>
+                  )}
+                </Box>
               </Box>
             </Box>
           </Paper>
         )}
-
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 4, mb: 4, textAlign: 'center' }}>
-          Need help? Contact{' '}
-          <Link href="mailto:support@bennett.edu.in" color="primary">
-            support@bennett.edu.in
-          </Link>
-        </Typography>
       </Container>
     </Box>
   );

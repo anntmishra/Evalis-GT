@@ -1,44 +1,65 @@
+const bcrypt = require('bcryptjs');
 const dotenv = require('dotenv');
 const colors = require('colors');
-const { Admin, sequelize } = require('./models');
-const { connectDB } = require('./config/db');
+const { connectDB, sequelize } = require('./config/db');
+const { Admin } = require('./models');
 
-// Load env vars
+// Load environment variables
 dotenv.config();
 
-const createAdmin = async () => {
+const createAdminUser = async () => {
   try {
-    console.log('Connecting to database...'.yellow);
+    console.log('Connecting to NeonDB...'.yellow);
     await connectDB();
-    console.log('Database connected'.green);
-
-    // Create admin user
-    const adminExists = await Admin.findOne({ where: { username: 'admin' } });
     
-    if (adminExists) {
-      console.log('Admin user already exists'.yellow);
-      process.exit(0);
-    }
-    
-    const admin = await Admin.create({
+    // Default admin credentials
+    const adminData = {
       username: 'admin',
       name: 'Administrator',
-      email: 'admin@example.com',
-      password: 'admin123', // This will be hashed by the model hooks
+      email: 'admin@evalis.edu',
+      password: 'admin123', // this will be hashed by the model hook
       role: 'admin'
-    });
+    };
     
-    console.log('Admin user created:'.green);
-    console.log('Username:'.cyan, admin.username);
-    console.log('Password:'.cyan, 'admin123');
+    console.log('Creating admin user...'.cyan);
     
-    console.log('\nPlease use these credentials to log in.'.green);
+    // Check if admin already exists
+    const existingAdmin = await Admin.findOne({ where: { username: adminData.username } });
     
+    if (existingAdmin) {
+      console.log('Admin user already exists'.yellow);
+      console.log(`Username: ${existingAdmin.username}`.green);
+      console.log(`Email: ${existingAdmin.email}`.green);
+      console.log('To login, use this username and the password you set previously'.cyan);
+      console.log('If you forgot the password, you can update it with:'.cyan);
+      
+      // Update password if needed
+      if (process.argv.includes('--reset')) {
+        existingAdmin.password = adminData.password;
+        await existingAdmin.save();
+        console.log('Admin password reset to: admin123'.green);
+      }
+    } else {
+      // Create new admin
+      const newAdmin = await Admin.create(adminData);
+      console.log('✅ Admin user created successfully!'.green.bold);
+      console.log(`Username: ${newAdmin.username}`.green);
+      console.log(`Password: admin123`.green);
+      console.log(`Email: ${newAdmin.email}`.green);
+      console.log('Please change the default password after first login'.yellow);
+    }
+    
+    // Close connection
+    await sequelize.close();
+    console.log('Database connection closed.'.yellow);
     process.exit(0);
   } catch (error) {
-    console.error('Error:'.red, error.message);
+    console.error('❌ Error creating admin user:'.red.bold);
+    console.error(`${error.message}`.red);
+    if (sequelize) await sequelize.close();
     process.exit(1);
   }
 };
 
-createAdmin(); 
+// Run the script
+createAdminUser();

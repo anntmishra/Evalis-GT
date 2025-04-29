@@ -1,6 +1,6 @@
 const asyncHandler = require('express-async-handler');
 const jwt = require('jsonwebtoken');
-const { Student, Teacher, Admin, Subject } = require('../models');
+const { Student, Teacher, Admin, Subject, Batch } = require('../models');
 
 /**
  * @desc    Auth student & get token
@@ -35,46 +35,82 @@ const authStudent = asyncHandler(async (req, res) => {
  * @access  Public
  */
 const authTeacher = asyncHandler(async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, id } = req.body;
   
-  console.log(`Teacher login attempt with email: ${email}`);
+  console.log(`===== TEACHER LOGIN ATTEMPT =====`);
+  console.log(`Email:`, email);
+  console.log(`ID:`, id);
+  console.log(`Password provided:`, !!password);
+  console.log(`===================================`);
   
-  if (!email || !password) {
+  if ((!email && !id) || !password) {
+    console.log('Login rejected: Missing email/ID or password');
     res.status(400);
-    throw new Error('Please provide email and password');
+    throw new Error('Please provide email/ID and password');
   }
 
-  // Check for teacher by email (primary login method)
-  const teacher = await Teacher.findOne({ 
-    where: { email },
-    include: [{
-      model: Subject,
-      through: { attributes: [] }
-    }]
-  });
-
-  console.log(`Teacher found: ${teacher ? 'Yes' : 'No'}`);
-  
-  if (teacher) {
-    console.log(`Teacher ID: ${teacher.id}, Name: ${teacher.name}`);
-    const isMatch = await teacher.matchPassword(password);
-    console.log(`Password match result: ${isMatch}`);
+  try {
+    // Check for teacher by email (primary login method) or ID (secondary method)
+    const whereClause = email ? { email } : { id };
+    console.log(`Searching for teacher with:`, whereClause);
     
-    if (isMatch) {
-      res.json({
-        id: teacher.id,
-        name: teacher.name,
-        email: teacher.email,
-        subjects: teacher.Subjects || [],
-        role: 'teacher',
-        token: generateToken(teacher.id, 'teacher'),
-      });
-      return;
+    const teacher = await Teacher.findOne({ 
+      where: whereClause,
+      include: [{
+        model: Subject,
+        include: [{
+          model: Batch
+        }],
+        through: { attributes: [] }
+      }]
+    });
+
+    console.log(`Teacher found: ${teacher ? 'Yes' : 'No'}`);
+    
+    if (teacher) {
+      console.log(`Teacher ID: ${teacher.id}, Name: ${teacher.name}, Email: ${teacher.email}`);
+      const isMatch = await teacher.matchPassword(password);
+      console.log(`Password match result: ${isMatch}`);
+      
+      if (isMatch) {
+        // Generate token and send response
+        const token = generateToken(teacher.id, 'teacher');
+        console.log('Authentication successful, sending response');
+        
+        // Extract batch IDs from subjects
+        const batchIds = [...new Set(
+          teacher.Subjects
+            .map(subject => subject.batchId)
+            .filter(id => id)
+        )];
+        
+        res.json({
+          id: teacher.id,
+          name: teacher.name,
+          email: teacher.email,
+          subjects: teacher.Subjects || [],
+          batchIds: batchIds,
+          role: 'teacher',
+          token: token,
+        });
+        return;
+      } else {
+        console.log('Password does not match');
+        res.status(401);
+        throw new Error('Invalid password');
+      }
+    } else {
+      console.log('Teacher not found');
+      res.status(401);
+      throw new Error('Teacher not found with the provided email/ID');
     }
+  } catch (error) {
+    console.error('Error in teacher authentication:', error);
+    if (!res.statusCode || res.statusCode === 200) {
+      res.status(500);
+    }
+    throw error;
   }
-  
-  res.status(401);
-  throw new Error('Invalid email or password');
 });
 
 /**
@@ -219,6 +255,65 @@ const resetStudentPassword = asyncHandler(async (req, res) => {
   }
 });
 
+/**
+ * @desc    Handle bulk password reset emails
+ * @route   POST /api/auth/bulk-password-reset
+ * @access  Private/Admin
+ */
+const bulkPasswordReset = asyncHandler(async (req, res) => {
+  const { emails } = req.body;
+
+  // Verify admin access
+  if (req.user.role !== 'admin') {
+    res.status(403);
+    throw new Error('Not authorized to perform bulk operations');
+  }
+
+  if (!emails || !Array.isArray(emails) || emails.length === 0) {
+    res.status(400);
+    throw new Error('Please provide an array of email addresses');
+  }
+
+  const results = {
+    total: emails.length,
+    success: 0,
+    failed: 0,
+    errors: []
+  };
+
+  // For each email, find the student and log that a password reset was requested
+  for (const email of emails) {
+    try {
+      if (!email) {
+        results.failed++;
+        results.errors.push({ email: 'undefined', error: 'Email address is required' });
+        continue;
+      }
+
+      const student = await Student.findOne({ where: { email } });
+      
+      if (!student) {
+        results.failed++;
+        results.errors.push({ email, error: 'Student not found with this email' });
+        continue;
+      }
+
+      // In a production system, you would call your email service here
+      // For now, we'll just log the request and count it as successful
+      console.log(`Password reset email would be sent to ${email} for student ID ${student.id}`);
+      results.success++;
+    } catch (error) {
+      results.failed++;
+      results.errors.push({ email, error: error.message });
+    }
+  }
+
+  res.status(200).json({
+    message: `Password reset emails processed: ${results.success} successful, ${results.failed} failed`,
+    results
+  });
+});
+
 // Generate JWT
 const generateToken = (id, role) => {
   return jwt.sign({ id, role }, process.env.JWT_SECRET, {
@@ -233,4 +328,5 @@ module.exports = {
   getUserProfile,
   setupTeacherPassword,
   resetStudentPassword,
+  bulkPasswordReset,
 }; 
