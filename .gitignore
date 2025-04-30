@@ -34,3 +34,7 @@ yarn-error.log*
 
 # TypeScript
 *.tsbuildinfo 
+
+# Firebase credentials
+firebase-admin-sdk.json
+*Firebase Admin SD*.json 
