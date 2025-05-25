@@ -1,5 +1,7 @@
 import axios from 'axios';
 import config from '../config/environment';
+import { refreshFirebaseToken } from './authUtils';
+import { auth } from '../config/firebase';
 
 // Create axios instance with base URL
 const api = axios.create({
@@ -12,7 +14,15 @@ const api = axios.create({
 
 // Get the latest token from storage
 const getAuthToken = () => {
-  return localStorage.getItem(config.AUTH.TOKEN_STORAGE_KEY);
+  // First try to get Firebase token since that's more likely to be valid
+  let token = localStorage.getItem('firebaseToken');
+  
+  // Then fall back to our stored token
+  if (!token) {
+    token = localStorage.getItem(config.AUTH.TOKEN_STORAGE_KEY);
+  }
+  
+  return token;
 };
 
 // Add response interceptor for better error handling
@@ -45,11 +55,21 @@ api.interceptors.response.use(
 api.interceptors.request.use(
   async (reqConfig) => {
     // Get the latest token
-    const token = getAuthToken();
+    let token = getAuthToken();
+    
+    // If we have a Firebase user but no token, try to refresh it
+    if (auth.currentUser && !token) {
+      console.log('Firebase user exists but no token found. Refreshing token...');
+      token = await refreshFirebaseToken();
+    }
     
     if (token) {
+      console.log('Adding token to request:', token.substring(0, 15) + '...');
       reqConfig.headers.Authorization = `Bearer ${token}`;
+    } else {
+      console.warn('No auth token available for request');
     }
+    
     return reqConfig;
   },
   (error) => Promise.reject(error)
@@ -96,68 +116,87 @@ api.interceptors.response.use(
       originalRequest._retry = true;
       isRefreshing = true;
       
-      // Try to get the user data with refresh token
-      const userData = localStorage.getItem(config.AUTH.CURRENT_USER_KEY);
-      if (userData) {
+      // If we have a Firebase user, try to refresh the token first
+      if (auth.currentUser) {
         try {
-          const user = JSON.parse(userData);
+          console.log('401 response, refreshing Firebase token...');
+          const newToken = await refreshFirebaseToken();
           
-          // If we have a stored refresh token, try to use it
-          if (user.refreshToken) {
-            try {
-              console.log('Attempting token refresh');
-              const response = await axios.post(
-                `${config.API_BASE_URL}/auth/refresh`,
-                { refreshToken: user.refreshToken }
-              );
-              
-              if (response.status === 200 && response.data.token) {
-                console.log('Token refresh successful');
-                // Update tokens
-                const newToken = response.data.token;
-                localStorage.setItem(config.AUTH.TOKEN_STORAGE_KEY, newToken);
-                
-                // Update user object
-                user.token = newToken;
-                if (response.data.refreshToken) {
-                  user.refreshToken = response.data.refreshToken;
-                }
-                
-                localStorage.setItem(config.AUTH.CURRENT_USER_KEY, JSON.stringify(user));
-                
-                // Update auth header and retry the original request
-                originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
-                
-                // Process any requests that came in while refreshing
-                processQueue(null, newToken);
-                isRefreshing = false;
-                
-                return axios(originalRequest);
-              }
-            } catch (refreshError) {
-              console.error('Token refresh failed:', refreshError);
-              processQueue(refreshError, null);
-            }
+          if (newToken) {
+            console.log('Firebase token refreshed, retrying request');
+            originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
+            
+            // Process any requests that came in while refreshing
+            processQueue(null, newToken);
+            isRefreshing = false;
+            
+            return axios(originalRequest);
           }
-        } catch (parseError) {
-          console.error('Error parsing user data:', parseError);
+        } catch (refreshError) {
+          console.error('Firebase token refresh failed:', refreshError);
         }
+      }
+      
+      // If Firebase refresh didn't work or user doesn't exist, try backend refresh
+      try {
+        // Try to get the user data with refresh token
+        const userData = localStorage.getItem(config.AUTH.CURRENT_USER_KEY);
+        if (userData) {
+          try {
+            const user = JSON.parse(userData);
+            
+            // If we have a stored refresh token, try to use it
+            if (user.refreshToken) {
+              try {
+                console.log('Attempting token refresh through API');
+                const response = await axios.post(
+                  `${config.API_BASE_URL}/auth/refresh`,
+                  { refreshToken: user.refreshToken }
+                );
+                
+                if (response.status === 200 && response.data.token) {
+                  console.log('Token refresh successful through API');
+                  // Update tokens
+                  const newToken = response.data.token;
+                  localStorage.setItem(config.AUTH.TOKEN_STORAGE_KEY, newToken);
+                  
+                  // Update user object
+                  user.token = newToken;
+                  if (response.data.refreshToken) {
+                    user.refreshToken = response.data.refreshToken;
+                  }
+                  
+                  localStorage.setItem(config.AUTH.CURRENT_USER_KEY, JSON.stringify(user));
+                  
+                  // Update auth header and retry the original request
+                  originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
+                  
+                  // Process any requests that came in while refreshing
+                  processQueue(null, newToken);
+                  isRefreshing = false;
+                  
+                  return axios(originalRequest);
+                }
+              } catch (refreshError) {
+                console.error('Token refresh failed:', refreshError);
+                processQueue(refreshError, null);
+              }
+            }
+          } catch (parseError) {
+            console.error('Error parsing user data:', parseError);
+          }
+        }
+      } catch (err) {
+        processQueue(err, null);
       }
       
       isRefreshing = false;
       
-      // If refresh failed or no refresh token, notify about session expiration
-      window.dispatchEvent(new CustomEvent('auth:error', {
-        detail: { 
-          message: 'Your session has expired.', 
-          status: error.response.status,
-          redirectUrl: '/login'
-        }
-      }));
+      // If all refresh attempts failed, clear auth data and reject
+      // This will force the user to login again
+      console.warn('All token refresh attempts failed, clearing auth data');
       
-      // Store auth error information in session storage
-      sessionStorage.setItem('auth:error', 'true');
-      sessionStorage.setItem('auth:errorTime', Date.now().toString());
+      return Promise.reject(error);
     }
     
     return Promise.reject(error);

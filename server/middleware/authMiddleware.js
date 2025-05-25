@@ -3,12 +3,31 @@ const asyncHandler = require('express-async-handler');
 const { Student, Teacher, Admin } = require('../models');
 const firebaseAdmin = require('firebase-admin');
 
+// Simple in-memory cache for authenticated tokens (lasts until server restart)
+// WARNING: This is a simple solution - for production consider using Redis or similar
+const tokenCache = new Map();
+const CACHE_TTL = 15 * 60 * 1000; // 15 minutes in milliseconds
+
+// Periodically clean expired cache entries
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, value] of tokenCache.entries()) {
+    if (now > value.expiresAt) {
+      tokenCache.delete(key);
+    }
+  }
+}, 60000); // Clean every minute
+
 // Middleware to protect routes that require authentication
 const protect = asyncHandler(async (req, res, next) => {
   let token;
   
-  console.log('Auth middleware checking token...');
-  console.log('Headers:', req.headers.authorization ? 'Authorization header present' : 'No authorization header');
+  // Skip detailed logging in production to improve performance
+  const isDev = process.env.NODE_ENV === 'development';
+  if (isDev) {
+    console.log('Auth middleware checking token...');
+    console.log('Headers:', req.headers.authorization ? 'Authorization header present' : 'No authorization header');
+  }
   
   // Check for token in headers
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
@@ -21,14 +40,51 @@ const protect = asyncHandler(async (req, res, next) => {
         res.status(401);
         throw new Error('Not authorized, invalid token');
       }
+
+      // Check cache first
+      const cachedUser = tokenCache.get(token);
+      if (cachedUser && cachedUser.expiresAt > Date.now()) {
+        // Use cached user info
+        req.user = cachedUser.user;
+        req.user.role = cachedUser.role;
+        
+        // Set role-specific property
+        if (cachedUser.role === 'student') req.student = cachedUser.user;
+        if (cachedUser.role === 'teacher') req.teacher = cachedUser.user;
+        if (cachedUser.role === 'admin') req.admin = cachedUser.user;
+        
+        if (isDev) console.log(`User authenticated from cache: ${req.user.id}, role: ${req.user.role}`);
+        return next();
+      }
       
-      console.log('Token extracted from header:', token.substring(0, 15) + '...');
+      if (isDev) console.log('Token extracted from header:', token.substring(0, 15) + '...');
       
       // First try to verify as a Firebase token
       try {
-        // Try Firebase token verification
-        const decodedFirebaseToken = await firebaseAdmin.auth().verifyIdToken(token);
+        // Check if Firebase Admin is initialized
+        if (!firebaseAdmin.apps.length) {
+          console.warn('Firebase Admin SDK not initialized, skipping Firebase token verification');
+          throw new Error('Firebase not initialized');
+        }
+        
+        // Try Firebase token verification with timeout
+        const tokenVerificationPromise = firebaseAdmin.auth().verifyIdToken(token);
+        
+        // Add timeout to prevent hanging on Firebase verification
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => {
+            reject(new Error('Firebase token verification timeout'));
+          }, 5000); // 5 second timeout
+        });
+        
+        // Race the verification against the timeout
+        const decodedFirebaseToken = await Promise.race([
+          tokenVerificationPromise,
+          timeoutPromise
+        ]);
+        
         console.log('Firebase token verified, uid:', decodedFirebaseToken.uid);
+        console.log('Firebase token email:', decodedFirebaseToken.email);
         
         // Check if this Firebase user exists in our database
         let user = await Student.findOne({
@@ -42,6 +98,14 @@ const protect = asyncHandler(async (req, res, next) => {
           req.user.role = 'student';
           req.student = user;
           console.log('Firebase user authenticated as student:', user.id);
+          
+          // Cache the user
+          tokenCache.set(token, {
+            user,
+            role: 'student',
+            expiresAt: Date.now() + CACHE_TTL
+          });
+          
           return next();
         }
         
@@ -57,17 +121,40 @@ const protect = asyncHandler(async (req, res, next) => {
           req.user.role = 'teacher';
           req.teacher = user;
           console.log('Firebase user authenticated as teacher:', user.id);
+          
+          // Cache the user
+          tokenCache.set(token, {
+            user,
+            role: 'teacher',
+            expiresAt: Date.now() + CACHE_TTL
+          });
+          
           return next();
         }
         
-        // If the Firebase user doesn't match any database record
-        console.log('Firebase user not found in database');
-        res.status(404);
-        throw new Error('User not found in our system');
+        // If no exact match but we have a validated Firebase token, we could create a new user record
+        // This is optional and depends on your application's requirements
+        console.log('Firebase token valid, but no matching user in database. Email:', decodedFirebaseToken.email);
+        
+        // Option 1: Deny access because no matching user
+        res.status(403);
+        throw new Error('Valid Firebase token, but no matching user in our system');
+        
+        // Option 2: Auto-provision the user (uncomment if you want to implement this)
+        // const newUser = await Student.create({
+        //   email: decodedFirebaseToken.email,
+        //   name: decodedFirebaseToken.name || decodedFirebaseToken.email.split('@')[0],
+        //   // Add any other required fields with default values
+        // });
+        // req.user = newUser;
+        // req.user.role = 'student';
+        // req.student = newUser;
+        // console.log('Auto-provisioned new student from Firebase token:', newUser.id);
+        // return next();
         
       } catch (firebaseError) {
         // If it's not a valid Firebase token, try as a JWT token
-        console.log('Firebase token verification failed, trying as JWT token:', firebaseError.message);
+        console.log('Firebase token verification failed:', firebaseError.message);
         
         try {
           // Decode JWT token
@@ -90,6 +177,14 @@ const protect = asyncHandler(async (req, res, next) => {
               req.user.role = 'student';
               req.student = user;
               console.log('User authenticated as student:', req.user.id);
+              
+              // Cache the user
+              tokenCache.set(token, {
+                user,
+                role: 'student',
+                expiresAt: Date.now() + CACHE_TTL
+              });
+              
               return next();
             }
           } else if (role === 'teacher') {
@@ -103,6 +198,14 @@ const protect = asyncHandler(async (req, res, next) => {
               req.user.role = 'teacher';
               req.teacher = user;
               console.log('User authenticated as teacher:', req.user.id);
+              
+              // Cache the user
+              tokenCache.set(token, {
+                user,
+                role: 'teacher',
+                expiresAt: Date.now() + CACHE_TTL
+              });
+              
               return next();
             }
           } else if (role === 'admin') {
@@ -116,6 +219,14 @@ const protect = asyncHandler(async (req, res, next) => {
               req.user.role = 'admin';
               req.admin = user;
               console.log('User authenticated as admin:', req.user.username);
+              
+              // Cache the user
+              tokenCache.set(token, {
+                user,
+                role: 'admin',
+                expiresAt: Date.now() + CACHE_TTL
+              });
+              
               return next();
             }
           } else {
@@ -133,6 +244,14 @@ const protect = asyncHandler(async (req, res, next) => {
               req.user.role = 'student';
               req.student = user;
               console.log('User authenticated as student:', req.user.id);
+              
+              // Cache the user
+              tokenCache.set(token, {
+                user,
+                role: 'student',
+                expiresAt: Date.now() + CACHE_TTL
+              });
+              
               return next();
             }
 
@@ -147,6 +266,14 @@ const protect = asyncHandler(async (req, res, next) => {
               req.user.role = 'teacher';
               req.teacher = user;
               console.log('User authenticated as teacher:', req.user.id);
+              
+              // Cache the user
+              tokenCache.set(token, {
+                user,
+                role: 'teacher',
+                expiresAt: Date.now() + CACHE_TTL
+              });
+              
               return next();
             }
 
@@ -161,6 +288,14 @@ const protect = asyncHandler(async (req, res, next) => {
               req.user.role = 'admin';
               req.admin = user;
               console.log('User authenticated as admin:', req.user.username);
+              
+              // Cache the user
+              tokenCache.set(token, {
+                user,
+                role: 'admin',
+                expiresAt: Date.now() + CACHE_TTL
+              });
+              
               return next();
             }
           }

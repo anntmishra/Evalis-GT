@@ -19,10 +19,11 @@ const sequelize = new Sequelize(DATABASE_URL, {
     }
   },
   pool: {
-    max: 5,
+    max: 10,
     min: 0,
-    acquire: 30000,
-    idle: 10000
+    acquire: 60000,
+    idle: 10000,
+    evict: 1000
   }
 });
 

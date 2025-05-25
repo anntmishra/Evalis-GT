@@ -3,7 +3,9 @@ import config from '../config/environment';
 import { getStudentProfile, getStudentSubmissions } from '../api';
 
 // API key for AI Analyzer - Get from environment variable
-const AI_API_KEY = import.meta.env.VITE_AI_ANALYZER_API_KEY || '';
+const AI_API_KEY = import.meta.env.VITE_AI_ANALYZER_API_KEY;
+// OpenAI API key - using the provided key from environment variable
+const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
 
 // Track which responses have been used to avoid repetition
 let lastResponseTemplate = '';
@@ -11,7 +13,6 @@ let responseCounter = 0;
 
 // Get token from local storage
 const getToken = (): string | null => {
-  if (typeof window === 'undefined') return null;
   const token = localStorage.getItem(config.AUTH.TOKEN_STORAGE_KEY);
   return token;
 };
@@ -29,8 +30,9 @@ const getAuthConfig = () => {
 };
 
 // Define the API base URL
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || config.API_BASE_URL || '';
-const AI_API_URL = API_BASE_URL + '/ai-analyzer';
+const AI_API_URL = config.API_BASE_URL + '/ai-analyzer';
+// OpenAI API URL
+const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';
 
 // Define the types for the API responses
 export interface StudentDataForAnalysis {
@@ -331,22 +333,15 @@ function generateMockResponse(
 ): string {
   console.log('Generating mock response for:', userMessage);
   
-  // Try to get a random subject for variety
-  let randomSubjectId = "";
-  let randomSubjectName = "";
+  // Create variation by using the current timestamp
+  const timestamp = new Date().getTime().toString().slice(-4);
   
-  if (subjects.length > 0) {
-    const randomSubjectObj = subjects[Math.floor(Math.random() * subjects.length)];
-    randomSubjectId = randomSubjectObj.id;
-    randomSubjectName = randomSubjectObj.name;
-  } else {
-    // Get first subject ID from grades
-    const subjectIds = Object.keys(studentData.grades.bySubject);
-    if (subjectIds.length > 0) {
-      randomSubjectId = subjectIds[0];
-      randomSubjectName = randomSubjectId; // Use ID as name if no mapping exists
-    }
-  }
+  // Select a subject the student is struggling with
+  const randomSubject = subjects[Math.floor(Math.random() * subjects.length)];
+  const overallGrade = Math.floor(75 + Math.random() * 15);
+  const subjectGrade = Math.floor(65 + Math.random() * 20);
+  const onTime = Math.floor(8 + Math.random() * 7);
+  const late = Math.floor(1 + Math.random() * 3);
   
   // Randomize the trend
   const trends = ["improving", "stable", "slightly declining", "showing potential for growth"];
@@ -357,31 +352,30 @@ function generateMockResponse(
   
   // Get greeting with name
   let greeting = getRandomResponse('greeting')
-    .replace(/{{name}}/g, studentData.name || "Student");
+    .replace("{{name}}", studentData.name || "Student");
   mockResponse += greeting + "\n\n";
   
   // Add grades information
   let gradesText = getRandomResponse('grades')
-    .replace(/{{overall}}/g, studentData.grades.overall.toString())
-    .replace(/{{subject}}/g, randomSubjectName)
-    .replace(/{{grade}}/g, (randomSubjectId && studentData.grades.bySubject[randomSubjectId] ? 
-      studentData.grades.bySubject[randomSubjectId].toString() : "70"));
+    .replace("{{overall}}", overallGrade.toString())
+    .replace("{{subject}}", randomSubject)
+    .replace("{{grade}}", subjectGrade.toString());
   mockResponse += gradesText + "\n\n";
   
   // Add submissions information
   let submissionsText = getRandomResponse('submissions')
-    .replace(/{{onTime}}/g, studentData.submissions.onTime.toString())
-    .replace(/{{late}}/g, studentData.submissions.late.toString());
+    .replace("{{onTime}}", onTime.toString())
+    .replace("{{late}}", late.toString());
   mockResponse += submissionsText + "\n\n";
   
   // Add trend information
   let trendText = getRandomResponse('trend')
-    .replace(/{{trend}}/g, trend);
+    .replace("{{trend}}", trend);
   mockResponse += trendText + "\n\n";
   
   // Add advice
   let adviceText = getRandomResponse('advice')
-    .replace(/{{subject}}/g, randomSubjectName);
+    .replace("{{subject}}", randomSubject);
   mockResponse += adviceText;
   
   return mockResponse;

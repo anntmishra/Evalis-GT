@@ -33,7 +33,8 @@ import {
   CheckCircle,
   CloudUpload,
   Refresh,
-  People
+  People,
+  Description
 } from '@mui/icons-material';
 import { Subject } from '../types/university';
 import { EXAM_TYPES } from '../constants/universityData';
@@ -45,6 +46,7 @@ import { gradeSubmission } from '../api';
 import config from '../config/environment';
 import { useNavigate } from 'react-router-dom';
 import TeacherAssignmentCreator from '../components/TeacherAssignmentCreator';
+import TeacherQuestionPaperCreator from '../components/TeacherQuestionPaperCreator';
 
 // Simplified Student type that matches the backend response
 interface Student {
@@ -705,6 +707,15 @@ const TeacherPortal: React.FC = () => {
     // fetchAssignments();
   };
 
+  // Handle question paper creation
+  const handleQuestionPaperCreated = () => {
+    setAlert({
+      open: true,
+      message: 'Question paper created successfully!',
+      severity: 'success'
+    });
+  };
+
   return (
     <>
       <Header title="Teacher Portal" />
@@ -813,6 +824,7 @@ const TeacherPortal: React.FC = () => {
                 >
                   <Tab label="Student List" icon={<Assessment />} iconPosition="start" />
                   <Tab label="Create Assignment" icon={<CloudUpload />} iconPosition="start" />
+                  <Tab label="Create Question Paper" icon={<Description />} iconPosition="start" />
                   <Tab label="Grade Students" icon={<CheckCircle />} iconPosition="start" />
                 </Tabs>
               </Box>
@@ -888,6 +900,17 @@ const TeacherPortal: React.FC = () => {
               </TabPanel>
 
               <TabPanel value={tabValue} index={2}>
+                {/* Create Question Paper Tab */}
+                <Box sx={{ maxWidth: '800px', mx: 'auto' }}>
+                  <TeacherQuestionPaperCreator 
+                    subjects={teacherSubjects} 
+                    examTypes={EXAM_TYPES}
+                    onQuestionPaperCreated={handleQuestionPaperCreated} 
+                  />
+                </Box>
+              </TabPanel>
+
+              <TabPanel value={tabValue} index={3}>
                 {/* Student List and Grading Tab */}
                 <Box>
                   <Grid container spacing={3}>

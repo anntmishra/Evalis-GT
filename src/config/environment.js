@@ -5,14 +5,13 @@
  * to avoid hardcoded values throughout the application.
  */
 
-// Get environment variables with fallbacks
-const VITE_API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+// Default to development environment if not specified
 const NODE_ENV = import.meta.env.NODE_ENV || 'development';
 
-// API URLs based on environment - prefer explicit env var if available
-const API_BASE_URL = VITE_API_BASE_URL || {
-  development: 'http://localhost:3001/api',
-  test: 'http://localhost:3001/api',
+// API URLs based on environment
+const API_BASE_URL = {
+  development: 'http://localhost:3000/api',
+  test: 'http://localhost:3000/api',
   production: '/api', // In production, use relative path for same-origin API
 }[NODE_ENV];
 
@@ -52,9 +51,7 @@ const config = {
     TOKEN_STORAGE_KEY: 'userToken',
     USER_STORAGE_KEY: 'user',
     CURRENT_USER_KEY: 'currentUser',
-  },
-  IS_PRODUCTION: NODE_ENV === 'production',
-  IS_DEVELOPMENT: NODE_ENV === 'development'
+  }
 };
 
 export default config; 

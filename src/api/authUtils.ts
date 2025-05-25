@@ -5,7 +5,14 @@ import config from '../config/environment';
  * Get token from local storage
  */
 export const getToken = (): string | null => {
-  const token = localStorage.getItem(config.AUTH.TOKEN_STORAGE_KEY);
+  // First try to get Firebase token
+  let token = localStorage.getItem('firebaseToken');
+  
+  // Then fall back to our stored token
+  if (!token) {
+    token = localStorage.getItem(config.AUTH.TOKEN_STORAGE_KEY);
+  }
+  
   return token;
 };
 
@@ -31,13 +38,27 @@ export const refreshFirebaseToken = async (): Promise<string | null> => {
       return null;
     }
     
+    console.log('Refreshing Firebase token for user:', currentUser.email);
+    
     // Force token refresh
     const newToken = await currentUser.getIdToken(true);
-    console.log('Firebase token refreshed');
+    console.log('Firebase token refreshed successfully');
     
-    // Update token in storage
+    // Update token in both storage locations
     localStorage.setItem('firebaseToken', newToken);
     localStorage.setItem(config.AUTH.TOKEN_STORAGE_KEY, newToken);
+    
+    // Also update the token in the currentUser object in localStorage
+    const userData = localStorage.getItem(config.AUTH.CURRENT_USER_KEY);
+    if (userData) {
+      try {
+        const user = JSON.parse(userData);
+        user.token = newToken; // Update the token
+        localStorage.setItem(config.AUTH.CURRENT_USER_KEY, JSON.stringify(user));
+      } catch (error) {
+        console.error('Error updating user data with new token:', error);
+      }
+    }
     
     return newToken;
   } catch (error) {
@@ -57,9 +78,29 @@ export const getAuthToken = async (): Promise<string | null> => {
   }
   
   // If we have a Firebase user but token is missing or potentially expired, refresh it
-  if (auth.currentUser && (!token || Math.random() < 0.1)) {
-    // Randomly refresh token 10% of the time to avoid expiration issues
-    return refreshFirebaseToken();
+  if (auth.currentUser) {
+    if (!token) {
+      console.log('No token found, refreshing Firebase token');
+      return refreshFirebaseToken();
+    }
+    
+    // Decode the token to check its expiration
+    // Firebase tokens expire in 1 hour by default
+    try {
+      // Simplified check: if token is older than 50 minutes, refresh it
+      // In a production app, you would decode and check the exp claim
+      const lastRefresh = localStorage.getItem('lastTokenRefresh');
+      const now = Date.now();
+      
+      if (!lastRefresh || (now - parseInt(lastRefresh)) > 50 * 60 * 1000) {
+        console.log('Token might be expired, refreshing');
+        localStorage.setItem('lastTokenRefresh', now.toString());
+        return refreshFirebaseToken();
+      }
+    } catch (e) {
+      console.error('Error checking token expiration:', e);
+      return refreshFirebaseToken();
+    }
   }
   
   return token;
@@ -71,5 +112,8 @@ export const isAuthenticated = (): boolean => {
                 localStorage.getItem('firebaseToken');
   const userData = localStorage.getItem(config.AUTH.CURRENT_USER_KEY);
   
-  return !!(token && userData);
+  // Also check if we have a current Firebase user
+  const firebaseUser = auth.currentUser;
+  
+  return !!(token && userData) || !!firebaseUser;
 }; 
