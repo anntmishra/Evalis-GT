@@ -28,8 +28,8 @@ const getAuthConfig = () => {
 
 // Define the API base URL
 const AI_API_URL = config.API_BASE_URL + '/ai-analyzer';
-// OpenAI API URL
-const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';
+// OpenAI API URL (commented out as not used in current implementation)
+// const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';
 
 // Define the types for the API responses
 export interface StudentDataForAnalysis {
@@ -330,11 +330,13 @@ function generateMockResponse(
 ): string {
   console.log('Generating mock response for:', userMessage);
   
-  // Create variation by using the current timestamp
+  // Create variation by using the current timestamp (used for randomization)
   const timestamp = new Date().getTime().toString().slice(-4);
+  console.log('Using timestamp for randomization:', timestamp);
   
   // Select a subject the student is struggling with
   const randomSubject = subjects[Math.floor(Math.random() * subjects.length)];
+  const subjectName = randomSubject?.name || 'Mathematics'; // Get subject name with fallback
   const overallGrade = Math.floor(75 + Math.random() * 15);
   const subjectGrade = Math.floor(65 + Math.random() * 20);
   const onTime = Math.floor(8 + Math.random() * 7);
@@ -355,7 +357,7 @@ function generateMockResponse(
   // Add grades information
   let gradesText = getRandomResponse('grades')
     .replace("{{overall}}", overallGrade.toString())
-    .replace("{{subject}}", randomSubject)
+    .replace("{{subject}}", subjectName)
     .replace("{{grade}}", subjectGrade.toString());
   mockResponse += gradesText + "\n\n";
   
@@ -372,7 +374,7 @@ function generateMockResponse(
   
   // Add advice
   let adviceText = getRandomResponse('advice')
-    .replace("{{subject}}", randomSubject);
+    .replace("{{subject}}", subjectName);
   mockResponse += adviceText;
   
   return mockResponse;

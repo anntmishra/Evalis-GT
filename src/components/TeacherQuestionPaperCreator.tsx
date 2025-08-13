@@ -37,7 +37,7 @@ import {
   AutoAwesome, 
   School,
   TipsAndUpdates,
-  CheckCircle,
+  // CheckCircle, // Unused import
   BarChart,
   Image as ImageIcon,
   PictureAsPdf,
@@ -49,11 +49,11 @@ import { Subject } from '../types/university';
 import { EXAM_TYPES } from '../constants/universityData';
 import questionEnhancerService, { 
   Question as EnhancerQuestion, 
-  EnhanceQuestionResponse, 
+  // EnhanceQuestionResponse, // Unused types
   EnhancePaperResponse,
   CognitiveLevel,
-  QuestionSuggestionResponse,
-  PromptGenerationResponse
+  // QuestionSuggestionResponse, // Unused types
+  // PromptGenerationResponse // Unused types
 } from '../api/questionEnhancerService';
 import { generateQuestionPaperPDF, PDFQuestion } from '../api/pdfExportService';
 
@@ -89,7 +89,7 @@ const TeacherQuestionPaperCreator: React.FC<QuestionPaperCreatorProps> = ({
   const [title, setTitle] = useState<string>('');
   const [selectedSubject, setSelectedSubject] = useState<string>('');
   const [selectedExamType, setSelectedExamType] = useState<string>('');
-  const [totalMarks, setTotalMarks] = useState<number>(100);
+  // const [totalMarks, setTotalMarks] = useState<number>(100); // Unused state
   const [duration, setDuration] = useState<number>(180); // in minutes
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentQuestion, setCurrentQuestion] = useState<string>('');

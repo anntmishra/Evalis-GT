@@ -1,6 +1,7 @@
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
-import autoTable from 'jspdf-autotable';
+// Remove unused import
+// import autoTable from 'jspdf-autotable';
 
 // Define our own interface for Question to avoid circular dependency
 export interface PDFQuestion {
@@ -22,7 +23,8 @@ interface PDFExportParams {
   institution?: string;
 }
 
-// Function to convert data URL to Blob
+// Function to convert data URL to Blob (currently unused but kept for future features)
+/*
 const dataURLtoBlob = (dataURL: string): Blob => {
   const parts = dataURL.split(';base64,');
   const contentType = parts[0].split(':')[1];
@@ -36,6 +38,7 @@ const dataURLtoBlob = (dataURL: string): Blob => {
 
   return new Blob([uInt8Array], { type: contentType });
 };
+*/
 
 // Load image and return base64 data
 const loadImage = async (imageUrl: string): Promise<string> => {
