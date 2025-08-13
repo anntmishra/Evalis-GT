@@ -5,6 +5,9 @@ import { getStudentProfile, getStudentSubmissions } from '../api';
 // Note: API keys should be handled by the backend, not exposed in client code
 // These are kept for backward compatibility but should be moved to server-side
 
+// API keys (temporarily disabled for client-side security)
+// const OPENAI_API_KEY = ''; // Disabled - should be handled server-side
+
 // Track which responses have been used to avoid repetition
 let lastResponseTemplate = '';
 let responseCounter = 0;
