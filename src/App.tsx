@@ -1,7 +1,7 @@
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { Alert, Box } from '@mui/material';
+import { Alert, Box, CircularProgress } from '@mui/material';
 import { theme } from './theme';
 import LandingPage from './pages/LandingPage';
 import GetStarted from './pages/GetStarted';
@@ -12,11 +12,30 @@ import Login from './pages/Login';
 import AuthListener from './components/AuthListener';
 import AuthPersistenceHandler from './components/AuthPersistenceHandler';
 import config from './config/environment';
+import { useAuth } from './context/AuthContext';
 
-function App() {
+function AppContent() {
+  const { loading } = useAuth();
+
+  // Show loading spinner while auth is initializing
+  if (loading) {
+    return (
+      <Box 
+        display="flex" 
+        justifyContent="center" 
+        alignItems="center" 
+        minHeight="100vh"
+        flexDirection="column"
+        gap={2}
+      >
+        <CircularProgress />
+        <Box>Loading Evalis...</Box>
+      </Box>
+    );
+  }
+
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
+    <>
       {config.IS_FRONTEND_ONLY && (
         <Box sx={{ position: 'sticky', top: 0, zIndex: 1100 }}>
           <Alert severity="info" sx={{ borderRadius: 0 }}>
@@ -37,6 +56,15 @@ function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>
+    </>
+  );
+}
+
+function App() {
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <AppContent />
     </ThemeProvider>
   );
 }

@@ -7,7 +7,13 @@
 
 // Default to development environment if not specified
 const NODE_ENV = import.meta.env.NODE_ENV || 'development';
-const IS_VERCEL = typeof window !== 'undefined' && window.location.hostname.includes('vercel.app');
+
+// Better Vercel detection - check for multiple Vercel patterns
+const IS_VERCEL = typeof window !== 'undefined' && 
+  (window.location.hostname.includes('vercel.app') || 
+   window.location.hostname.includes('vercel-deployment') ||
+   import.meta.env.VERCEL === '1' ||
+   import.meta.env.VERCEL_ENV);
 
 // API URLs based on environment
 const API_BASE_URL = {

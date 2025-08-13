@@ -38,3 +38,4 @@ yarn-error.log*
 # Firebase credentials
 firebase-admin-sdk.json
 *Firebase Admin SD*.json 
+.vercel

@@ -89,3 +89,44 @@ Vercel will automatically:
 2. Build the frontend with Vite
 3. Install server dependencies
 4. Deploy as serverless functions
+
+## Troubleshooting Deployment Issues:
+
+If your Vercel deployment isn't updating despite successful builds and pushes:
+
+### 1. Force New Deployment
+```bash
+git commit --allow-empty -m "trigger vercel deployment"
+git push origin main
+```
+
+### 2. Check Vercel Dashboard
+- Go to [Vercel Dashboard](https://vercel.com/dashboard)
+- Select your project
+- Check the "Deployments" tab for build logs
+- Look for any failed deployments or errors
+
+### 3. Common Issues & Solutions:
+
+**Issue: Deployment not triggering**
+- Solution: Check if the repository is properly connected in Vercel
+- Solution: Verify the branch is set to `main` in Vercel settings
+
+**Issue: Build succeeds but site doesn't update**
+- Solution: Clear browser cache (Ctrl+Shift+R or Cmd+Shift+R)
+- Solution: Check if you're viewing the correct deployment URL
+
+**Issue: Build fails on Vercel but works locally**
+- Solution: Check environment variables are set correctly
+- Solution: Ensure all dependencies are in `dependencies` not `devDependencies`
+
+### 4. Verify Deployment Status
+Check these URLs after deployment:
+- Production: Your custom domain or `yourproject.vercel.app`
+- Latest deployment: Check the deployment URL from Vercel dashboard
+
+### 5. Force Cache Refresh
+```bash
+# Clear Vercel build cache (if you have Vercel CLI)
+vercel --prod --force
+```

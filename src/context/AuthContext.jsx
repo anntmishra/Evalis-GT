@@ -31,27 +31,29 @@ export function AuthProvider({ children }) {
 
   // This effect runs on initial component mount to restore user state
   useEffect(() => {
-    // Check for user in localStorage on page load
-    const storedUser = localStorage.getItem(config.AUTH.CURRENT_USER_KEY);
-    
-    if (storedUser) {
-      try {
-        const parsedUser = JSON.parse(storedUser);
-        setCurrentUser(parsedUser);
-        
-        // Make sure token is also available in the TOKEN_STORAGE_KEY
-        if (parsedUser.token && !localStorage.getItem(config.AUTH.TOKEN_STORAGE_KEY)) {
-          localStorage.setItem(config.AUTH.TOKEN_STORAGE_KEY, parsedUser.token);
-        }
-        
-        // Validate the session silently
-        const validateSession = async () => {
-          try {
-            // Skip API validation in frontend-only mode
-            if (config.IS_FRONTEND_ONLY) {
-              console.log('Frontend-only mode: Skipping API session validation');
-              return;
-            }
+    try {
+      // Check for user in localStorage on page load
+      const storedUser = localStorage.getItem(config.AUTH.CURRENT_USER_KEY);
+      
+      if (storedUser) {
+        try {
+          const parsedUser = JSON.parse(storedUser);
+          setCurrentUser(parsedUser);
+          
+          // Make sure token is also available in the TOKEN_STORAGE_KEY
+          if (parsedUser.token && !localStorage.getItem(config.AUTH.TOKEN_STORAGE_KEY)) {
+            localStorage.setItem(config.AUTH.TOKEN_STORAGE_KEY, parsedUser.token);
+          }
+          
+          // Validate the session silently
+          const validateSession = async () => {
+            try {
+              // Skip API validation in frontend-only mode
+              if (config.IS_FRONTEND_ONLY) {
+                console.log('Frontend-only mode: Skipping API session validation');
+                setLoading(false);
+                return;
+              }
             
             // Check if token is still valid by making a lightweight API call
             const token = localStorage.getItem(config.AUTH.TOKEN_STORAGE_KEY);
@@ -106,16 +108,27 @@ export function AuthProvider({ children }) {
         console.error('Error parsing stored user data:', e);
         // If there's an error parsing the user data, clear it
         localStorage.removeItem(config.AUTH.CURRENT_USER_KEY);
+        setLoading(false);
       }
+    } else {
+      // No stored user, set loading to false
+      setLoading(false);
     }
     
     // Subscribe to Firebase auth state changes
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setFirebaseUser(user);
-      setLoading(false);
+      // Only set loading false if we haven't already done so above
+      if (!storedUser) {
+        setLoading(false);
+      }
     });
     
     return () => unsubscribe();
+  } catch (mainError) {
+    console.error('Error in AuthContext initialization:', mainError);
+    setLoading(false);
+  }
   }, []);
 
   // Unified login function
