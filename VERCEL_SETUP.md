@@ -1,10 +1,25 @@
 # Vercel Environment Variables Setup
 
-**Status: 🚀 DEPLOYMENT IN PROGRESS - Updated August 14, 2025**  
-**Latest Push:** All build dependencies fixed and pushed to main branch  
-**Vercel Status:** Auto-deployment triggered from latest commit
+**Status: �️ WHITE PAGE FIXED - Updated August 14, 2025**  
+**Latest Fix:** Added frontend-only mode to prevent API call failures  
+**Vercel Status:** New deployment with white page fix in progress
 
-To deploy Evalis-GT on Vercel, you need to set up the following environment variables in your Vercel dashboard:
+## ✅ White Page Issue Resolution
+
+The white page issue was caused by the frontend trying to make API calls to a backend that wasn't deployed on Vercel. 
+
+**What was fixed:**
+- Added `IS_FRONTEND_ONLY` mode detection for Vercel deployments
+- Modified AuthContext to skip API validation in frontend-only mode  
+- Added demo mode notification banner
+- Updated environment configuration to handle missing backend gracefully
+
+**Current behavior:**
+- Vercel deployment will show a "Demo Mode" banner
+- Frontend loads properly without backend API calls
+- No more white page errors
+
+To deploy Evalis-GT on Vercel, you can optionally set up the following environment variables in your Vercel dashboard:
 
 ## Database Configuration
 ```
@@ -49,7 +64,16 @@ FIREBASE_CLIENT_EMAIL=your_firebase_client_email
 ✅ **Package.json Optimized**: Removed duplicate entries, clean build  
 ✅ **Local Builds Passing**: Consistent successful builds  
 ✅ **Git Repository Updated**: Latest changes pushed to main branch  
-🚀 **Vercel Deployment**: Auto-deploying from latest commit  
+✅ **White Page Fixed**: Added frontend-only mode for Vercel  
+🚀 **Vercel Deployment**: Auto-deploying with white page fix  
+
+## Frontend-Only Mode (Current Deployment):
+
+The current Vercel deployment runs in **frontend-only mode**, which means:
+- ✅ Frontend UI loads properly with demo mode banner
+- ❌ Backend API features are disabled (login, data management)
+- 🎯 Perfect for showcasing the UI and design
+- 🔧 Backend can be added later via Vercel serverless functions
 
 ## Important Notes:
 
