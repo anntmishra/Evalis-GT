@@ -130,13 +130,10 @@ const startServer = async () => {
     // Connect to database
     await connectDB();
     
-    // Sync models with database
-    // In production, you shouldn't use force: true
-    const isDev = process.env.NODE_ENV === 'development';
-    logger.info(`Syncing database in ${isDev ? 'development' : 'production'} mode...`);
-    
-    await models.sequelize.sync({ alter: true });
-    logger.info('Database synced successfully');
+    // Initialize models and sync database
+    logger.info('Initializing database models...');
+    await models.initModels();
+    logger.info('Database models initialized successfully');
     
     const app = express();
     

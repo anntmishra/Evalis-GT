@@ -66,6 +66,18 @@ Assignment.belongsTo(Subject, { foreignKey: 'subjectId', targetKey: 'id' });
 Assignment.hasMany(Submission, { foreignKey: 'assignmentId', sourceKey: 'id' });
 Submission.belongsTo(Assignment, { foreignKey: 'assignmentId', targetKey: 'id' });
 
+// Initialize database function
+const initModels = async () => {
+  try {
+    console.log('Initializing database models...');
+    await sequelize.sync({ alter: true }); // Use alter instead of force to preserve data
+    console.log('Database models synchronized successfully');
+  } catch (error) {
+    console.error('Error initializing database models:', error);
+    throw error;
+  }
+};
+
 // Export models
 module.exports = {
   Student,
@@ -77,5 +89,6 @@ module.exports = {
   TeacherSubject,
   Semester,
   Assignment,
-  sequelize
+  sequelize,
+  initModels
 }; 
