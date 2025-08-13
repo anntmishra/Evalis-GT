@@ -47,6 +47,12 @@ export function AuthProvider({ children }) {
         // Validate the session silently
         const validateSession = async () => {
           try {
+            // Skip API validation in frontend-only mode
+            if (config.IS_FRONTEND_ONLY) {
+              console.log('Frontend-only mode: Skipping API session validation');
+              return;
+            }
+            
             // Check if token is still valid by making a lightweight API call
             const token = localStorage.getItem(config.AUTH.TOKEN_STORAGE_KEY);
             if (!token) return;
