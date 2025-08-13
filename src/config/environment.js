@@ -3,17 +3,35 @@
  * 
  * This file centralizes all environment-specific configuration
  * to avoid hardcoded values throughout the application.
+ * 
+ * SECURITY NOTE: This file runs in the browser, so only include
+ * public environment variables. Never include sensitive data like
+ * DATABASE_URL, JWT_SECRET, etc.
  */
 
 // Default to development environment if not specified
-const NODE_ENV = import.meta.env.NODE_ENV || 'development';
+const NODE_ENV = import.meta.env.NODE_ENV || 'production';
 
 // Better Vercel detection - check for multiple Vercel patterns
 const IS_VERCEL = typeof window !== 'undefined' && 
   (window.location.hostname.includes('vercel.app') || 
    window.location.hostname.includes('vercel-deployment') ||
    import.meta.env.VERCEL === '1' ||
-   import.meta.env.VERCEL_ENV);
+   import.meta.env.VERCEL_ENV) ||
+   // Also check for build-time Vercel environment
+   import.meta.env.VITE_VERCEL === '1' ||
+   process.env.VERCEL === '1';
+
+// Ensure sensitive environment variables are not exposed to frontend
+if (typeof window !== 'undefined') {
+  // We're in the browser - make sure no sensitive data is exposed
+  const sensitiveVars = ['DATABASE_URL', 'JWT_SECRET', 'REDIS_URL', 'FIREBASE_PRIVATE_KEY'];
+  sensitiveVars.forEach(varName => {
+    if (import.meta.env[varName] || import.meta.env[`VITE_${varName}`]) {
+      console.warn(`Warning: Sensitive environment variable ${varName} detected in frontend!`);
+    }
+  });
+}
 
 // API URLs based on environment
 const API_BASE_URL = {
@@ -26,6 +44,8 @@ const API_BASE_URL = {
 const config = {
   API_BASE_URL,
   IS_FRONTEND_ONLY: IS_VERCEL || !API_BASE_URL,
+  NODE_ENV,
+  IS_VERCEL,
   API_ENDPOINTS: {
     AUTH: {
       STUDENT_LOGIN: API_BASE_URL ? `${API_BASE_URL}/auth/student/login` : null,
@@ -61,5 +81,16 @@ const config = {
     CURRENT_USER_KEY: 'currentUser',
   }
 };
+
+// Add debug logging in development
+if (NODE_ENV === 'development' || typeof window !== 'undefined') {
+  console.log('🔧 Environment Configuration:', {
+    NODE_ENV,
+    IS_VERCEL,
+    IS_FRONTEND_ONLY: config.IS_FRONTEND_ONLY,
+    API_BASE_URL,
+    hostname: typeof window !== 'undefined' ? window.location.hostname : 'server-side'
+  });
+}
 
 export default config; 

@@ -31,6 +31,12 @@ export function AuthProvider({ children }) {
 
   // This effect runs on initial component mount to restore user state
   useEffect(() => {
+    // Set a safety timeout to prevent infinite loading
+    const timeoutId = setTimeout(() => {
+      console.warn('Auth initialization timeout reached, setting loading to false');
+      setLoading(false);
+    }, 10000); // 10 second timeout
+
     try {
       // Check for user in localStorage on page load
       const storedUser = localStorage.getItem(config.AUTH.CURRENT_USER_KEY);
@@ -55,55 +61,62 @@ export function AuthProvider({ children }) {
                 return;
               }
             
-            // Check if token is still valid by making a lightweight API call
-            const token = localStorage.getItem(config.AUTH.TOKEN_STORAGE_KEY);
-            if (!token) return;
-            
-            const response = await axios.get(
-              `${config.API_BASE_URL}/auth/status`,
-              { 
-                headers: { 
-                  Authorization: `Bearer ${token}` 
-                },
-                // Avoid throwing 401s which might trigger logout
-                validateStatus: (status) => status < 500
+              // Check if token is still valid by making a lightweight API call
+              const token = localStorage.getItem(config.AUTH.TOKEN_STORAGE_KEY);
+              if (!token) {
+                setLoading(false);
+                return;
               }
-            );
             
-            // If session is invalid, try refresh token if available
-            if (response.status !== 200 && parsedUser.refreshToken) {
-              try {
-                const refreshResponse = await axios.post(
-                  `${config.API_BASE_URL}/auth/refresh`,
-                  { refreshToken: parsedUser.refreshToken }
-                );
-                
-                if (refreshResponse.status === 200 && refreshResponse.data.token) {
-                  // Update tokens
-                  localStorage.setItem(config.AUTH.TOKEN_STORAGE_KEY, refreshResponse.data.token);
-                  
-                  // Update user object
-                  parsedUser.token = refreshResponse.data.token;
-                  if (refreshResponse.data.refreshToken) {
-                    parsedUser.refreshToken = refreshResponse.data.refreshToken;
-                  }
-                  
-                  localStorage.setItem(config.AUTH.CURRENT_USER_KEY, JSON.stringify(parsedUser));
-                  setCurrentUser(parsedUser);
+              const response = await axios.get(
+                `${config.API_BASE_URL}/auth/status`,
+                { 
+                  headers: { 
+                    Authorization: `Bearer ${token}` 
+                  },
+                  // Avoid throwing 401s which might trigger logout
+                  validateStatus: (status) => status < 500
                 }
-              } catch (refreshError) {
-                console.error('Token refresh failed:', refreshError);
-                // Don't logout here, let the app continue with potentially invalid token
-                // The API interceptor will handle actual API call failures
+              );
+            
+              // If session is invalid, try refresh token if available
+              if (response.status !== 200 && parsedUser.refreshToken) {
+                try {
+                  const refreshResponse = await axios.post(
+                    `${config.API_BASE_URL}/auth/refresh`,
+                    { refreshToken: parsedUser.refreshToken }
+                  );
+                
+                  if (refreshResponse.status === 200 && refreshResponse.data.token) {
+                    // Update tokens
+                    localStorage.setItem(config.AUTH.TOKEN_STORAGE_KEY, refreshResponse.data.token);
+                  
+                    // Update user object
+                    parsedUser.token = refreshResponse.data.token;
+                    if (refreshResponse.data.refreshToken) {
+                      parsedUser.refreshToken = refreshResponse.data.refreshToken;
+                    }
+                  
+                    localStorage.setItem(config.AUTH.CURRENT_USER_KEY, JSON.stringify(parsedUser));
+                    setCurrentUser(parsedUser);
+                  }
+                } catch (refreshError) {
+                  console.error('Token refresh failed:', refreshError);
+                  // Don't logout here, let the app continue with potentially invalid token
+                  // The API interceptor will handle actual API call failures
+                }
               }
+            } catch (error) {
+              console.error('Session validation error:', error);
+              // Don't logout here to avoid disrupting user experience on page load
+            } finally {
+              // Always set loading to false regardless of success or failure
+              setLoading(false);
+              clearTimeout(timeoutId);
             }
-          } catch (error) {
-            console.error('Session validation error:', error);
-            // Don't logout here to avoid disrupting user experience on page load
-          }
-        };
+          };
         
-        validateSession();
+          validateSession();
       } catch (e) {
         console.error('Error parsing stored user data:', e);
         // If there's an error parsing the user data, clear it
@@ -121,13 +134,18 @@ export function AuthProvider({ children }) {
       // Only set loading false if we haven't already done so above
       if (!storedUser) {
         setLoading(false);
+        clearTimeout(timeoutId);
       }
     });
     
-    return () => unsubscribe();
+    return () => {
+      unsubscribe();
+      clearTimeout(timeoutId);
+    };
   } catch (mainError) {
     console.error('Error in AuthContext initialization:', mainError);
     setLoading(false);
+    clearTimeout(timeoutId);
   }
   }, []);
 
