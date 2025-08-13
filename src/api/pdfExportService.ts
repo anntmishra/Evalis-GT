@@ -1,5 +1,6 @@
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
+// import autoTable from 'jspdf-autotable'; // Unused import - commented out
 // Remove unused import
 // import autoTable from 'jspdf-autotable';
 
