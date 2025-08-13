@@ -173,7 +173,7 @@ const admins = [
     username: 'admin',
     name: 'Admin User',
     email: 'admin@university.edu',
-    password: 'admin123',
+    password: process.env.DEFAULT_ADMIN_PASSWORD || 'zyExeKhXoMFtd1Gc',
     role: 'admin'
   }
 ];

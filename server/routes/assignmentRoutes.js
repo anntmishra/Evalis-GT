@@ -1,8 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
 const {
   getAssignments,
   getStudentAssignments,
@@ -14,44 +11,10 @@ const {
   getAssignmentSubmissions
 } = require('../controllers/assignmentController');
 const { protect, admin, teacher, student } = require('../middleware/authMiddleware');
+const { createUploadMiddleware, processUploadedFile } = require('../utils/uploadHelper');
 
 // Configure multer for file uploads
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    const uploadDir = path.join(__dirname, '..', 'uploads', 'assignments');
-    // Create directory if it doesn't exist
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-    console.log('Upload directory:', uploadDir);
-    cb(null, uploadDir);
-  },
-  filename: function (req, file, cb) {
-    // Create unique filename: timestamp-originalname
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    const filename = uniqueSuffix + '-' + file.originalname;
-    console.log('Saving file as:', filename);
-    cb(null, filename);
-  }
-});
-
-const upload = multer({ 
-  storage,
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
-  fileFilter: function (req, file, cb) {
-    // Accept images, PDFs, and office documents
-    const filetypes = /jpeg|jpg|png|gif|pdf|doc|docx|xls|xlsx|ppt|pptx/;
-    const mimetype = filetypes.test(file.mimetype);
-    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-
-    console.log('File upload request:', file.originalname, 'mimetype:', file.mimetype);
-    
-    if (mimetype && extname) {
-      return cb(null, true);
-    }
-    cb(new Error('Only images, PDFs, and office documents are allowed'));
-  }
-});
+const upload = createUploadMiddleware();
 
 // Assignment routes
 router.route('/')
@@ -63,10 +26,10 @@ router.post('/upload', protect, teacher, upload.single('file'), async (req, res)
   try {
     console.log('Upload request received');
     console.log('Request body:', req.body);
-    console.log('File received:', req.file ? req.file.filename : 'No file attached');
+    console.log('File received:', req.file ? req.file.originalname : 'No file attached');
     
-    // If a file was uploaded, get the url
-    const fileUrl = req.file ? `/uploads/assignments/${req.file.filename}` : null;
+    // Process the uploaded file (handles both local and Vercel environments)
+    const fileUrl = await processUploadedFile(req.file, req);
     console.log('File URL:', fileUrl);
     
     // Add file URL to the request body

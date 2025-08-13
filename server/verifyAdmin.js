@@ -35,27 +35,27 @@ const verifyAdmin = async () => {
     console.log('Email:'.cyan, admin.email);
     
     // Test password match
-    const testPassword = 'admin123';
+    const testPassword = process.env.DEFAULT_ADMIN_PASSWORD || 'zyExeKhXoMFtd1Gc';
     const isMatch = await admin.matchPassword(testPassword);
     
     console.log('\nPassword match test:'.cyan);
     if (isMatch) {
-      console.log('Password "admin123" matches!'.green);
+      console.log('Admin password is correctly configured!'.green);
       console.log('You should be able to log in with:'.green);
       console.log('Username:'.cyan, 'admin');
-      console.log('Password:'.cyan, 'admin123');
+      console.log('Password:'.cyan, '[Use the configured admin password]');
     } else {
-      console.log('Password "admin123" does not match!'.red);
-      console.log('Updating admin password to "admin123"...'.yellow);
+      console.log('Admin password needs to be updated!'.red);
+      console.log('Updating admin password...'.yellow);
       
       // Update password
-      admin.password = 'admin123';
+      admin.password = testPassword;
       await admin.save();
       
       console.log('Admin password updated'.green);
       console.log('You should now be able to log in with:'.green);
       console.log('Username:'.cyan, 'admin');
-      console.log('Password:'.cyan, 'admin123');
+      console.log('Password:'.cyan, '[Use the configured admin password]');
     }
     
     process.exit(0);

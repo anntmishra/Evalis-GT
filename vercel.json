@@ -1,0 +1,39 @@
+{
+  "version": 2,
+  "name": "evalis-gt",
+  "builds": [
+    {
+      "src": "server/serverless.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/server/serverless.js"
+    },
+    {
+      "src": "/uploads/(.*)",
+      "dest": "/server/serverless.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/dist/$1"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  },
+  "functions": {
+    "server/serverless.js": {
+      "maxDuration": 30
+    }
+  }
+}

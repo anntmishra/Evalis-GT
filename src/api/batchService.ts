@@ -60,6 +60,32 @@ export const createBatch = async (batch: {
   }
 };
 
+// Update batch
+export const updateBatch = async (id: string, batch: {
+  name: string;
+  department: string;
+  startYear: number;
+  endYear: number;
+  active?: boolean;
+}) => {
+  try {
+    const response = await axios.put(`${API_URL}/${id}`, batch, authConfig());
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Delete batch
+export const deleteBatch = async (id: string) => {
+  try {
+    const response = await axios.delete(`${API_URL}/${id}`, authConfig());
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 // Seed batches function
 interface SeedResults {
   succeeded: number;
@@ -117,5 +143,7 @@ export default {
   getAllBatches,
   getBatchById,
   createBatch,
+  updateBatch,
+  deleteBatch,
   seedBatches
 }; 

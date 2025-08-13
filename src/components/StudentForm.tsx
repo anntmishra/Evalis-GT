@@ -25,7 +25,6 @@ import {
   ContentCopy as CopyIcon
 } from '@mui/icons-material';
 import { Student } from '../types/university';
-import { BATCHES } from '../data/universityData';
 import { sendPasswordReset } from '../config/firebase';
 import { resetStudentPassword } from '../api';
 
@@ -38,6 +37,7 @@ interface StudentFormProps {
   saving?: boolean;
   error?: string;
   selectedBatch?: string;
+  availableBatches?: Array<{ id: string; name: string; }>;
 }
 
 const StudentForm: React.FC<StudentFormProps> = ({
@@ -48,14 +48,18 @@ const StudentForm: React.FC<StudentFormProps> = ({
   title,
   saving = false,
   error,
-  selectedBatch = '2023-2027'
+  selectedBatch,
+  availableBatches = []
 }) => {
+  // Get the batch to use (selectedBatch or first available)
+  const defaultBatch = selectedBatch || (availableBatches.length > 0 ? availableBatches[0].id : '');
+  
   const [form, setForm] = useState<Student>({
     id: '',
     name: '',
     section: 'CSE-1',
     email: '',
-    batch: selectedBatch,
+    batch: defaultBatch,
     role: 'student'
   });
 
@@ -69,6 +73,8 @@ const StudentForm: React.FC<StudentFormProps> = ({
   const [showGeneratedPassword, setShowGeneratedPassword] = useState<boolean>(false);
 
   useEffect(() => {
+    const currentDefaultBatch = selectedBatch || (availableBatches.length > 0 ? availableBatches[0].id : '');
+    
     if (student) {
       setForm(student);
       // Reset any previous password reset attempts
@@ -81,13 +87,13 @@ const StudentForm: React.FC<StudentFormProps> = ({
         name: '',
         section: 'CSE-1',
         email: '',
-        batch: selectedBatch,
+        batch: currentDefaultBatch,
         role: 'student'
       });
       // Generate initial password for new students
       generateRandomPassword();
     }
-  }, [student, open, selectedBatch]);
+  }, [student, open, selectedBatch, availableBatches]);
 
   const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -213,7 +219,7 @@ const StudentForm: React.FC<StudentFormProps> = ({
               onChange={handleSelectChange}
               required
             >
-              {BATCHES.map((batch) => (
+              {availableBatches.map((batch) => (
                 <MenuItem key={batch.id} value={batch.id}>
                   {batch.name}
                 </MenuItem>

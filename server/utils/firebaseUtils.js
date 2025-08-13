@@ -12,36 +12,47 @@ if (!admin.apps.length) {
   try {
     // Check environment variables first
     if (process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PRIVATE_KEY) {
-      console.log('Initializing Firebase Admin SDK with environment variables');
+      // Skip initialization if using placeholder values
+      if (process.env.FIREBASE_CLIENT_EMAIL.includes('your-service-account-email') || 
+          process.env.FIREBASE_CLIENT_EMAIL.includes('firebase-adminsdk-xxxxx') ||
+          process.env.FIREBASE_PRIVATE_KEY.includes('MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC')) {
+        console.log('⚠️  Placeholder Firebase credentials detected. Skipping Firebase Admin SDK initialization.');
+        console.log('📋 To set up Firebase Admin SDK:');
+        console.log('   1. Download your service account JSON from Firebase Console');
+        console.log('   2. Run: node setup-firebase.js path/to/your/service-account.json');
+        console.log('   3. Or place the JSON file as "firebase-admin-sdk.json" in project root');
+      } else {
+        console.log('Initializing Firebase Admin SDK with environment variables');
       
-      // Format the private key correctly if it exists
-      const privateKey = process.env.FIREBASE_PRIVATE_KEY ? 
-        process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n') : 
-        undefined;
-      
-      console.log(`Using Firebase project: ${process.env.FIREBASE_PROJECT_ID}`);
-      console.log(`Using Firebase client email: ${process.env.FIREBASE_CLIENT_EMAIL}`);
-      console.log('Private key found (first 12 chars):', privateKey ? privateKey.substring(0, 12) + '...' : 'undefined');
-      
-      if (!privateKey) {
-        console.error('Private key is undefined or empty. Check your environment variables.');
-        throw new Error('Firebase private key is missing or invalid');
-      }
+        // Format the private key correctly if it exists
+        const privateKey = process.env.FIREBASE_PRIVATE_KEY ? 
+          process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n') : 
+          undefined;
         
-      try {
-        admin.initializeApp({
-          credential: admin.credential.cert({
-            type: "service_account",
-            project_id: process.env.FIREBASE_PROJECT_ID,
-            private_key: privateKey,
-            client_email: process.env.FIREBASE_CLIENT_EMAIL,
-          })
-        });
-        console.log('Firebase Admin SDK initialized successfully with env variables');
-        firebaseInitialized = true;
-      } catch (certError) {
-        console.error('Error creating credential certificate:', certError);
-        throw certError;
+        console.log(`Using Firebase project: ${process.env.FIREBASE_PROJECT_ID}`);
+        console.log(`Using Firebase client email: [CONFIGURED]`);
+        console.log('Private key found: [CONFIGURED]');
+        
+        if (!privateKey) {
+          console.error('Private key is undefined or empty. Check your environment variables.');
+          throw new Error('Firebase private key is missing or invalid');
+        }
+        
+        try {
+          admin.initializeApp({
+            credential: admin.credential.cert({
+              type: "service_account",
+              project_id: process.env.FIREBASE_PROJECT_ID,
+              private_key: privateKey,
+              client_email: process.env.FIREBASE_CLIENT_EMAIL,
+            })
+          });
+          console.log('Firebase Admin SDK initialized successfully with env variables');
+          firebaseInitialized = true;
+        } catch (certError) {
+          console.error('Error creating credential certificate:', certError);
+          throw certError;
+        }
       }
     } 
     // If env vars not complete, try service account file
@@ -50,6 +61,7 @@ if (!admin.apps.length) {
       // Check for both naming conventions of the service account JSON file
       const possibleServiceAccountPaths = [
         path.join(__dirname, '..', '..', 'Evalis Firebase Admin SDK.json'),
+        path.join(__dirname, '..', '..', 'Firebase Admin SDK.json'),
         path.join(__dirname, '..', '..', 'evalis-firebase-admin-sdk.json'),
         path.join(__dirname, '..', '..', 'firebase-admin-sdk.json')
       ];
@@ -81,9 +93,8 @@ if (!admin.apps.length) {
       if (serviceAccount) {
         try {
           console.log(`Using Firebase project from file: ${serviceAccount.project_id}`);
-          console.log(`Using Firebase client email from file: ${serviceAccount.client_email}`);
-          console.log('Private key found in file (first 12 chars):', 
-            serviceAccount.private_key ? serviceAccount.private_key.substring(0, 12) + '...' : 'undefined');
+          console.log(`Using Firebase client email from file: [CONFIGURED]`);
+          console.log('Private key found in file: [CONFIGURED]');
             
           admin.initializeApp({
             credential: admin.credential.cert(serviceAccount)

@@ -10,11 +10,15 @@ const {
   setActiveSemesterForBatch
 } = require('../controllers/adminController');
 const { protect, admin } = require('../middleware/authMiddleware');
+const monitoringRoutes = require('./monitoringRoutes');
 
 // All routes use the protect middleware to ensure authentication
 // and the admin middleware to ensure only admins can access these routes
 router.use(protect);
 router.use(admin);
+
+// Mount monitoring routes
+router.use('/', monitoringRoutes);
 
 // Admin routes for managing students and teachers
 router.post('/students/batch', addStudentsBatch);

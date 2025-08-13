@@ -5,18 +5,22 @@ const cors = require('cors');
 const path = require('path');
 const { connectDB } = require('./config/db');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
-const rateLimit = require('./middleware/rateLimitMiddleware');
+const { rateLimit, authRateLimit } = require('./middleware/rateLimitMiddleware');
 const models = require('./models');
 const { DEFAULT_PORT } = require('./config/constants');
 const fs = require('fs');
+const { logger, requestLogger } = require('./utils/logger');
+const healthRoutes = require('./routes/healthRoutes');
+const { validateSession } = require('./utils/sessionManager');
 
 // Load env vars
 dotenv.config();
 
 // Log environment variables
-console.log('Environment Variables:'.yellow);
-console.log('NODE_ENV:'.cyan, process.env.NODE_ENV);
-console.log('DATABASE_URL:'.cyan, process.env.DATABASE_URL ? 'Set (NeonDB connection)' : 'Not set');
+logger.info('Starting Evalis Server...');
+logger.info(`Environment: ${process.env.NODE_ENV}`);
+logger.info(`Database configured: ${process.env.DATABASE_URL ? 'Yes' : 'No'}`);
+logger.info(`Port: ${process.env.PORT || DEFAULT_PORT}`);
 
 // Routes
 const authRoutes = require('./routes/authRoutes');
@@ -32,7 +36,7 @@ const assignmentRoutes = require('./routes/assignmentRoutes');
 // Function to try binding to ports recursively
 const startServerOnPort = (app, port, maxAttempts = 10) => {
   if (maxAttempts <= 0) {
-    console.error('Exceeded maximum port attempts. Cannot start server.'.red.bold);
+    logger.error('Exceeded maximum port attempts. Cannot start server.');
     process.exit(1);
     return;
   }
@@ -40,20 +44,20 @@ const startServerOnPort = (app, port, maxAttempts = 10) => {
   return new Promise((resolve, reject) => {
     const server = app.listen(port)
       .on('listening', () => {
-        console.log(`Server running in ${process.env.NODE_ENV} mode on port ${port}`.green.bold);
+        logger.info(`Server running in ${process.env.NODE_ENV} mode on port ${port}`);
         resolve(server);
       })
       .on('error', (err) => {
         if (err.code === 'EADDRINUSE') {
-          console.log(`Port ${port} is in use, trying port ${port + 1}...`.yellow);
+          logger.warn(`Port ${port} is in use, trying port ${port + 1}...`);
           // Close the server that failed to bind
           server.close();
           // Try the next port
-          startServerOnPort(app, port + 1, maxAttempts - 1)
+          startServerOnPort(app, parseInt(port) + 1, maxAttempts - 1)
             .then(resolve)
             .catch(reject);
         } else {
-          console.error(`Failed to start server: ${err.message}`.red);
+          logger.error(`Failed to start server: ${err.message}`);
           reject(err);
         }
       });
@@ -65,7 +69,7 @@ const startServerOnPort = (app, port, maxAttempts = 10) => {
     // Set server connection limits if needed
     if (process.env.MAX_CONNECTIONS) {
       server.maxConnections = parseInt(process.env.MAX_CONNECTIONS, 10);
-      console.log(`Server connection limit set to: ${server.maxConnections}`.yellow);
+      logger.info(`Server connection limit set to: ${server.maxConnections}`);
     }
       
     // Monitor active connections (development only)
@@ -73,15 +77,50 @@ const startServerOnPort = (app, port, maxAttempts = 10) => {
       let connections = 0;
       server.on('connection', () => {
         connections++;
-        console.log(`New connection established. Total connections: ${connections}`.cyan);
+        logger.debug(`New connection established. Total connections: ${connections}`);
       });
       
       // Log when connections are closed
       server.on('close', () => {
         connections--;
-        console.log(`Connection closed. Total connections: ${connections}`.cyan);
+        logger.debug(`Connection closed. Total connections: ${connections}`);
       });
     }
+
+    // Graceful shutdown handling
+    const gracefulShutdown = (signal) => {
+      logger.info(`Received ${signal}. Starting graceful shutdown...`);
+      
+      server.close((err) => {
+        if (err) {
+          logger.error('Error during server shutdown:', err);
+          process.exit(1);
+        }
+        
+        logger.info('HTTP server closed.');
+        
+        // Close database connections
+        models.sequelize.close()
+          .then(() => {
+            logger.info('Database connections closed.');
+            process.exit(0);
+          })
+          .catch((dbErr) => {
+            logger.error('Error closing database connections:', dbErr);
+            process.exit(1);
+          });
+      });
+      
+      // Force shutdown after 30 seconds
+      setTimeout(() => {
+        logger.error('Forced shutdown after 30 seconds');
+        process.exit(1);
+      }, 30000);
+    };
+
+    // Handle shutdown signals
+    process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+    process.on('SIGINT', () => gracefulShutdown('SIGINT'));
   });
 };
 
@@ -94,37 +133,48 @@ const startServer = async () => {
     // Sync models with database
     // In production, you shouldn't use force: true
     const isDev = process.env.NODE_ENV === 'development';
-    console.log(`Syncing database in ${isDev ? 'development' : 'production'} mode...`.yellow);
+    logger.info(`Syncing database in ${isDev ? 'development' : 'production'} mode...`);
     
     await models.sequelize.sync({ alter: true });
-    console.log('Database synced successfully'.green);
+    logger.info('Database synced successfully');
     
     const app = express();
+    
+    // Request logging middleware (only in development or if explicitly enabled)
+    if (isDev || process.env.ENABLE_REQUEST_LOGGING === 'true') {
+      app.use(requestLogger);
+    }
+
+    // Session validation middleware
+    app.use(validateSession);
     
     // Middleware
     app.use(cors({
       origin: process.env.NODE_ENV === 'development' 
         ? ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175']
-        : process.env.FRONTEND_URL,
+        : process.env.FRONTEND_URL?.split(',') || false,
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'DELETE'],
       allowedHeaders: ['Content-Type', 'Authorization'],
       maxAge: 86400 // Cache preflight requests for 24 hours
     }));
-    app.use(express.json({ limit: '10mb' })); // Limit JSON payload size
-    app.use(express.urlencoded({ extended: true, limit: '10mb' })); // Limit form data size
+    app.use(express.json({ limit: process.env.MAX_FILE_SIZE || '10mb' })); // Configurable JSON payload size
+    app.use(express.urlencoded({ extended: true, limit: process.env.MAX_FILE_SIZE || '10mb' })); // Configurable form data size
     
     // Apply rate limiting
     app.use(rateLimit);
     
+    // Health check routes (before other routes)
+    app.use('/api', healthRoutes);
+    
     // Serve static files from the uploads directory - use absolute path
     const uploadsPath = path.join(__dirname, 'uploads');
-    console.log('Serving uploads from:', uploadsPath);
+    logger.debug('Serving uploads from:', uploadsPath);
     app.use('/uploads', express.static(uploadsPath));
     
     // Also try with relative path as fallback
     app.use('/uploads', express.static('server/uploads'));
-    console.log('Also serving uploads from: server/uploads (relative path)');
+    logger.debug('Also serving uploads from: server/uploads (relative path)');
     
     // Add a test endpoint for uploads
     app.get('/api/check-uploads', (req, res) => {
@@ -179,12 +229,12 @@ const startServer = async () => {
     app.use(errorHandler);
     
     // Use a different port if the default is already in use
-    const initialPort = process.env.PORT || DEFAULT_PORT;
+    const initialPort = parseInt(process.env.PORT) || DEFAULT_PORT;
     
     // Start the server with port retry mechanism
     await startServerOnPort(app, initialPort);
   } catch (error) {
-    console.error(`Error starting server: ${error.message}`.red.bold);
+    logger.error(`Error starting server: ${error.message}`);
     process.exit(1);
   }
 };

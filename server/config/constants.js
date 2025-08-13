@@ -10,7 +10,7 @@ const DEFAULT_ADMIN = {
   username: 'admin',
   name: 'Administrator',
   email: 'admin@example.com',
-  password: process.env.DEFAULT_ADMIN_PASSWORD || 'changeme',
+  password: process.env.DEFAULT_ADMIN_PASSWORD || 'zyExeKhXoMFtd1Gc',
   role: 'admin'
 };
 

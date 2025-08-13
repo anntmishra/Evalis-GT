@@ -38,7 +38,8 @@ import {
   Delete as DeleteIcon,
   Edit as EditIcon,
   Book as BookIcon,
-  Timeline as TimelineIcon
+  Timeline as TimelineIcon,
+  Class as ClassIcon
 } from "@mui/icons-material";
 import Header from "../components/Header";
 import { useNavigate } from "react-router-dom";
@@ -51,6 +52,7 @@ import StudentImporter from "../components/StudentImporter";
 import TeacherImporter from "../components/TeacherImporter";
 import StudentForm from "../components/StudentForm";
 import SubjectForm from "../components/SubjectForm";
+import BatchList from "../components/BatchList";
 import { getTeachers, assignSubject, removeSubject, createTeacher, updateTeacher, deleteTeacher } from "../api/teacherService";
 import { getAllSubjects, createSubject } from "../api/subjectService";
 import { 
@@ -61,7 +63,7 @@ import {
   deleteStudent 
 } from "../api/studentService";
 import { seedSubjectsToDatabase } from "../utils/seedSubjects";
-import { seedBatches } from "../api/batchService";
+import { seedBatches, getAllBatches } from "../api/batchService";
 // @ts-ignore
 import config from "../config/environment";
 import SemesterManagement from '../components/SemesterManagement';
@@ -100,7 +102,8 @@ const AdminPortal: React.FC = (): React.ReactElement => {
   const [seedingBatches, setSeedingBatches] = useState(false);
   
   // Student data state
-  const batchId = '2023-2027'; // Using a constant instead of state since it's not changed
+  const [availableBatches, setAvailableBatches] = useState<any[]>([]);
+  const [selectedBatchId, setSelectedBatchId] = useState<string>('');
   const [students, setStudents] = useState<Student[]>([]);
   const [studentsLoading, setStudentsLoading] = useState(true);
   const [studentFormOpen, setStudentFormOpen] = useState(false);
@@ -178,10 +181,34 @@ const AdminPortal: React.FC = (): React.ReactElement => {
     fetchSubjects();
   }, []);
 
-  // Fetch students based on selected batch
+  // Fetch batches and initialize selected batch
   useEffect(() => {
-    fetchStudents(batchId);
+    fetchBatches();
   }, []);
+
+  // Fetch students when a batch is selected
+  useEffect(() => {
+    if (selectedBatchId) {
+      fetchStudents(selectedBatchId);
+    }
+  }, [selectedBatchId]);
+
+  // Function to fetch batches
+  const fetchBatches = async () => {
+    try {
+      const response = await getAllBatches();
+      setAvailableBatches(response);
+      console.log("Batches loaded from API:", response);
+      
+      // Auto-select first batch if available
+      if (response && response.length > 0) {
+        setSelectedBatchId(response[0].id);
+      }
+    } catch (error: any) {
+      console.error("Error fetching batches:", error);
+      handleApiError(error, "Failed to load batches. Please try again.");
+    }
+  };
 
   // Function to fetch students
   const fetchStudents = async (batchId: string) => {
@@ -488,8 +515,8 @@ const AdminPortal: React.FC = (): React.ReactElement => {
     });
     
     // If the imported batch matches the currently displayed batch, refresh immediately
-    if (batchId === batchId) {
-      fetchStudents(batchId);
+    if (batchId === selectedBatchId) {
+      fetchStudents(selectedBatchId);
     }
   };
 
@@ -561,7 +588,7 @@ const AdminPortal: React.FC = (): React.ReactElement => {
       if (editingStudent) {
         // Updating existing student
         await updateStudent(student.id, student);
-        await fetchStudents(batchId);
+        await fetchStudents(selectedBatchId);
         
         setNotification({
           open: true,
@@ -604,7 +631,7 @@ const AdminPortal: React.FC = (): React.ReactElement => {
         }
         
         // Fetch updated students list to ensure we have the latest data
-        await fetchStudents(batchId);
+        await fetchStudents(selectedBatchId);
         
         // Show success notification with password info if available
         const passwordInfo = student.initialPassword 
@@ -646,7 +673,7 @@ const AdminPortal: React.FC = (): React.ReactElement => {
       await deleteStudent(studentToDelete.id);
       
       // Fetch updated students list
-      await fetchStudents(batchId);
+      await fetchStudents(selectedBatchId);
       
       setNotification({
         open: true,
@@ -736,6 +763,7 @@ const AdminPortal: React.FC = (): React.ReactElement => {
                   <Tab icon={<Group />} label="Data Management" />
                   <Tab icon={<People />} label="Students" />
                   <Tab icon={<BookIcon />} label="Subjects" />
+                  <Tab icon={<ClassIcon />} label="Batches" />
                   <Tab icon={<TimelineIcon />} label="Semesters" />
                 </Tabs>
 
@@ -883,27 +911,54 @@ const AdminPortal: React.FC = (): React.ReactElement => {
                 </TabPanel>
 
                 <TabPanel value={tabValue} index={4}>
-                  <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Typography variant="h6">
-                      Students {students.length > 0 ? `(${students.length})` : ''}
-                    </Typography>
-                    <Box sx={{ display: 'flex', gap: 2 }}>
-                      <Button 
-                        variant="outlined" 
-                        startIcon={<Refresh />}
-                        onClick={() => fetchStudents(batchId)}
-                        disabled={studentsLoading}
+                  <Box sx={{ mb: 3 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                      <Typography variant="h6">
+                        Students {students.length > 0 ? `(${students.length})` : ''}
+                      </Typography>
+                      <Box sx={{ display: 'flex', gap: 2 }}>
+                        <Button 
+                          variant="outlined" 
+                          startIcon={<Refresh />}
+                          onClick={() => fetchStudents(selectedBatchId)}
+                          disabled={studentsLoading}
+                        >
+                          Refresh
+                        </Button>
+                        <Button 
+                          variant="contained" 
+                          startIcon={<Add />}
+                          onClick={handleAddStudent}
+                          disabled={studentsLoading}
+                        >
+                          Add Student
+                        </Button>
+                      </Box>
+                    </Box>
+                    
+                    {/* Batch Selector */}
+                    <Box sx={{ mb: 2 }}>
+                      <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                        Select Batch:
+                      </Typography>
+                      <select 
+                        value={selectedBatchId} 
+                        onChange={(e) => setSelectedBatchId(e.target.value)}
+                        style={{ 
+                          padding: '8px 12px', 
+                          fontSize: '14px', 
+                          border: '1px solid #ccc', 
+                          borderRadius: '4px',
+                          minWidth: '200px'
+                        }}
                       >
-                        Refresh
-                      </Button>
-                      <Button 
-                        variant="contained" 
-                        startIcon={<Add />}
-                        onClick={handleAddStudent}
-                        disabled={studentsLoading}
-                      >
-                        Add Student
-                      </Button>
+                        <option value="">Select a batch...</option>
+                        {availableBatches.map((batch) => (
+                          <option key={batch.id} value={batch.id}>
+                            {batch.name} ({batch.id})
+                          </option>
+                        ))}
+                      </select>
                     </Box>
                   </Box>
                   
@@ -965,7 +1020,7 @@ const AdminPortal: React.FC = (): React.ReactElement => {
                       <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 2 }}>
                         <Button 
                           variant="outlined" 
-                          onClick={() => fetchStudents(batchId)}
+                          onClick={() => fetchStudents(selectedBatchId)}
                           startIcon={<Refresh />}
                         >
                           Retry Loading
@@ -1055,6 +1110,10 @@ const AdminPortal: React.FC = (): React.ReactElement => {
                 </TabPanel>
 
                 <TabPanel value={tabValue} index={6}>
+                  <BatchList onBatchChange={fetchBatches} />
+                </TabPanel>
+
+                <TabPanel value={tabValue} index={7}>
                   <SemesterManagement 
                     onSuccess={handleSemesterSuccess}
                     onError={handleSemesterError}
@@ -1079,6 +1138,8 @@ const AdminPortal: React.FC = (): React.ReactElement => {
         title={editingStudent ? "Edit Student" : "Add Student"}
         saving={savingStudent}
         error={studentError}
+        selectedBatch={selectedBatchId}
+        availableBatches={availableBatches}
       />
 
       {/* Subject Form Dialog */}

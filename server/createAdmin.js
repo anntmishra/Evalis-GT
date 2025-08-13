@@ -17,7 +17,7 @@ const createAdminUser = async () => {
       username: 'admin',
       name: 'Administrator',
       email: 'admin@evalis.edu',
-      password: 'admin123', // this will be hashed by the model hook
+      password: process.env.DEFAULT_ADMIN_PASSWORD || 'zyExeKhXoMFtd1Gc', // this will be hashed by the model hook
       role: 'admin'
     };
     

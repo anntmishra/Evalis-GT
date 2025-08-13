@@ -6,8 +6,10 @@
  */
 
 const requestCounts = new Map();
+const authRequestCounts = new Map();
 const WINDOW_MS = 60 * 1000; // 1 minute window
 const MAX_REQUESTS_PER_WINDOW = 100; // Adjust as needed
+const AUTH_MAX_REQUESTS_PER_WINDOW = 5; // Stricter limit for auth endpoints
 
 // Clean up old entries periodically
 setInterval(() => {
@@ -15,6 +17,11 @@ setInterval(() => {
   for (const [key, data] of requestCounts.entries()) {
     if (now - data.startTime > WINDOW_MS) {
       requestCounts.delete(key);
+    }
+  }
+  for (const [key, data] of authRequestCounts.entries()) {
+    if (now - data.startTime > WINDOW_MS) {
+      authRequestCounts.delete(key);
     }
   }
 }, 5 * 60 * 1000); // Clean every 5 minutes
@@ -68,4 +75,39 @@ const rateLimit = (req, res, next) => {
   next();
 };
 
-module.exports = rateLimit; 
+// Strict rate limiting for authentication endpoints
+const authRateLimit = (req, res, next) => {
+  const key = req.ip || req.connection.remoteAddress;
+  const now = Date.now();
+  
+  if (!authRequestCounts.has(key)) {
+    authRequestCounts.set(key, {
+      count: 1,
+      startTime: now
+    });
+    return next();
+  }
+  
+  const clientData = authRequestCounts.get(key);
+  
+  // Reset counter if window has passed
+  if (now - clientData.startTime > WINDOW_MS) {
+    clientData.count = 1;
+    clientData.startTime = now;
+    return next();
+  }
+  
+  // Increment and check
+  clientData.count++;
+  
+  if (clientData.count > AUTH_MAX_REQUESTS_PER_WINDOW) {
+    return res.status(429).json({ 
+      success: false,
+      message: 'Too many authentication attempts, please try again later.'
+    });
+  }
+  
+  next();
+};
+
+module.exports = { rateLimit, authRateLimit }; 

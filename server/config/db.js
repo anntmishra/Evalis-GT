@@ -1,8 +1,12 @@
 const { Sequelize } = require('sequelize');
 const colors = require('colors');
+const dotenv = require('dotenv');
+
+// Load environment variables
+dotenv.config();
 
  // NeonDB connection string
-const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://neondb_owner:npg_OmpMql4AR0cs@ep-super-smoke-a1vkw609-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require';
+const DATABASE_URL = process.env.DATABASE_URL;
 
 // Log database connection info
 console.log('Database configuration:'.yellow);
@@ -29,6 +33,9 @@ const sequelize = new Sequelize(DATABASE_URL, {
 
 const connectDB = async () => {
   try {
+    if (!DATABASE_URL) {
+      throw new Error('DATABASE_URL environment variable is required');
+    }
     console.log('Connecting to NeonDB PostgreSQL...'.yellow);
     await sequelize.authenticate();
     console.log(`NeonDB PostgreSQL Connected`.cyan.underline);
@@ -37,7 +44,7 @@ const connectDB = async () => {
     console.error(`Error connecting to NeonDB PostgreSQL: ${error.message}`.red.bold);
     console.error('Please check:');
     console.error('1. Your network connection');
-    console.error('2. NeonDB connection string is correct');
+    console.error('2. DATABASE_URL environment variable is set');
     console.error('3. Database exists and is accessible');
     process.exit(1);
   }

@@ -2,9 +2,11 @@ const jwt = require('jsonwebtoken');
 const asyncHandler = require('express-async-handler');
 const { Student, Teacher, Admin } = require('../models');
 const firebaseAdmin = require('firebase-admin');
+const { validateSession } = require('../utils/sessionManager');
+const { logger } = require('../utils/logger');
 
-// Simple in-memory cache for authenticated tokens (lasts until server restart)
-// WARNING: This is a simple solution - for production consider using Redis or similar
+// Enhanced token cache with user role separation to prevent conflicts
+// Key format: "token:role" to ensure different user types don't conflict
 const tokenCache = new Map();
 const CACHE_TTL = 15 * 60 * 1000; // 15 minutes in milliseconds
 
@@ -25,8 +27,8 @@ const protect = asyncHandler(async (req, res, next) => {
   // Skip detailed logging in production to improve performance
   const isDev = process.env.NODE_ENV === 'development';
   if (isDev) {
-    console.log('Auth middleware checking token...');
-    console.log('Headers:', req.headers.authorization ? 'Authorization header present' : 'No authorization header');
+    logger.debug('Auth middleware checking token...');
+    logger.debug('Headers:', req.headers.authorization ? 'Authorization header present' : 'No authorization header');
   }
   
   // Check for token in headers
@@ -36,13 +38,25 @@ const protect = asyncHandler(async (req, res, next) => {
       token = req.headers.authorization.split(' ')[1];
       
       if (!token) {
-        console.log('Token is empty or invalid');
+        logger.warn('Token is empty or invalid');
         res.status(401);
         throw new Error('Not authorized, invalid token');
       }
 
-      // Check cache first
-      const cachedUser = tokenCache.get(token);
+      // Check cache first - but with role-specific key to prevent conflicts
+      let cachedUser = null;
+      let userRole = null;
+      
+      // Try to decode token first to get role information
+      try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        userRole = decoded.role;
+        const cacheKey = `${token}:${userRole}`;
+        cachedUser = tokenCache.get(cacheKey);
+      } catch (err) {
+        // Token invalid, will be handled below
+      }
+      
       if (cachedUser && cachedUser.expiresAt > Date.now()) {
         // Use cached user info
         req.user = cachedUser.user;
@@ -53,11 +67,11 @@ const protect = asyncHandler(async (req, res, next) => {
         if (cachedUser.role === 'teacher') req.teacher = cachedUser.user;
         if (cachedUser.role === 'admin') req.admin = cachedUser.user;
         
-        if (isDev) console.log(`User authenticated from cache: ${req.user.id}, role: ${req.user.role}`);
+        if (isDev) logger.debug(`User authenticated from cache: ${req.user.id}, role: ${req.user.role}`);
         return next();
       }
       
-      if (isDev) console.log('Token extracted from header:', token.substring(0, 15) + '...');
+      if (isDev) console.log('Token extracted from header: [REDACTED]');
       
       // First try to verify as a Firebase token
       try {
@@ -97,10 +111,11 @@ const protect = asyncHandler(async (req, res, next) => {
           req.user = user;
           req.user.role = 'student';
           req.student = user;
-          console.log('Firebase user authenticated as student:', user.id);
+          logger.info('Firebase user authenticated as student:', user.id);
           
-          // Cache the user
-          tokenCache.set(token, {
+          // Cache the user with role-specific key
+          const cacheKey = `${token}:student`;
+          tokenCache.set(cacheKey, {
             user,
             role: 'student',
             expiresAt: Date.now() + CACHE_TTL
@@ -120,10 +135,11 @@ const protect = asyncHandler(async (req, res, next) => {
           req.user = user;
           req.user.role = 'teacher';
           req.teacher = user;
-          console.log('Firebase user authenticated as teacher:', user.id);
+          logger.info('Firebase user authenticated as teacher:', user.id);
           
-          // Cache the user
-          tokenCache.set(token, {
+          // Cache the user with role-specific key
+          const cacheKey = `${token}:teacher`;
+          tokenCache.set(cacheKey, {
             user,
             role: 'teacher',
             expiresAt: Date.now() + CACHE_TTL
@@ -176,10 +192,11 @@ const protect = asyncHandler(async (req, res, next) => {
               req.user = user;
               req.user.role = 'student';
               req.student = user;
-              console.log('User authenticated as student:', req.user.id);
+              logger.info('User authenticated as student:', req.user.id);
               
-              // Cache the user
-              tokenCache.set(token, {
+              // Cache the user with role-specific key
+              const cacheKey = `${token}:student`;
+              tokenCache.set(cacheKey, {
                 user,
                 role: 'student',
                 expiresAt: Date.now() + CACHE_TTL
@@ -197,10 +214,11 @@ const protect = asyncHandler(async (req, res, next) => {
               req.user = user;
               req.user.role = 'teacher';
               req.teacher = user;
-              console.log('User authenticated as teacher:', req.user.id);
+              logger.info('User authenticated as teacher:', req.user.id);
               
-              // Cache the user
-              tokenCache.set(token, {
+              // Cache the user with role-specific key
+              const cacheKey = `${token}:teacher`;
+              tokenCache.set(cacheKey, {
                 user,
                 role: 'teacher',
                 expiresAt: Date.now() + CACHE_TTL
@@ -218,10 +236,11 @@ const protect = asyncHandler(async (req, res, next) => {
               req.user = user;
               req.user.role = 'admin';
               req.admin = user;
-              console.log('User authenticated as admin:', req.user.username);
+              logger.info('User authenticated as admin:', req.user.username);
               
-              // Cache the user
-              tokenCache.set(token, {
+              // Cache the user with role-specific key
+              const cacheKey = `${token}:admin`;
+              tokenCache.set(cacheKey, {
                 user,
                 role: 'admin',
                 expiresAt: Date.now() + CACHE_TTL
@@ -231,7 +250,7 @@ const protect = asyncHandler(async (req, res, next) => {
             }
           } else {
             // If no role or unrecognized role, try all models
-            console.log('No specific role found in token, trying all models...');
+            logger.debug('No specific role found in token, trying all models...');
             
             // First try student model
             user = await Student.findOne({ 
@@ -243,10 +262,11 @@ const protect = asyncHandler(async (req, res, next) => {
               req.user = user;
               req.user.role = 'student';
               req.student = user;
-              console.log('User authenticated as student:', req.user.id);
+              logger.info('User authenticated as student:', req.user.id);
               
-              // Cache the user
-              tokenCache.set(token, {
+              // Cache the user with role-specific key
+              const cacheKey = `${token}:student`;
+              tokenCache.set(cacheKey, {
                 user,
                 role: 'student',
                 expiresAt: Date.now() + CACHE_TTL
@@ -265,10 +285,11 @@ const protect = asyncHandler(async (req, res, next) => {
               req.user = user;
               req.user.role = 'teacher';
               req.teacher = user;
-              console.log('User authenticated as teacher:', req.user.id);
+              logger.info('User authenticated as teacher:', req.user.id);
               
-              // Cache the user
-              tokenCache.set(token, {
+              // Cache the user with role-specific key
+              const cacheKey = `${token}:teacher`;
+              tokenCache.set(cacheKey, {
                 user,
                 role: 'teacher',
                 expiresAt: Date.now() + CACHE_TTL
@@ -287,10 +308,11 @@ const protect = asyncHandler(async (req, res, next) => {
               req.user = user;
               req.user.role = 'admin';
               req.admin = user;
-              console.log('User authenticated as admin:', req.user.username);
+              logger.info('User authenticated as admin:', req.user.username);
               
-              // Cache the user
-              tokenCache.set(token, {
+              // Cache the user with role-specific key
+              const cacheKey = `${token}:admin`;
+              tokenCache.set(cacheKey, {
                 user,
                 role: 'admin',
                 expiresAt: Date.now() + CACHE_TTL

@@ -1,6 +1,8 @@
 const asyncHandler = require('express-async-handler');
 const jwt = require('jsonwebtoken');
 const { Student, Teacher, Admin, Subject, Batch } = require('../models');
+const { generateTokenWithSession, logout } = require('../utils/sessionManager');
+const { logger } = require('../utils/logger');
 
 /**
  * @desc    Auth student & get token
@@ -10,10 +12,16 @@ const { Student, Teacher, Admin, Subject, Batch } = require('../models');
 const authStudent = asyncHandler(async (req, res) => {
   const { id, password } = req.body;
 
+  logger.info(`Student login attempt for ID: ${id}`);
+
   // Check for student
   const student = await Student.findOne({ where: { id } });
 
   if (student && (await student.matchPassword(password))) {
+    const { token, sessionId } = generateTokenWithSession(student, 'student');
+    
+    logger.info(`Student login successful: ${student.id}`);
+    
     res.json({
       id: student.id,
       name: student.name,
@@ -21,9 +29,11 @@ const authStudent = asyncHandler(async (req, res) => {
       batch: student.batch,
       email: student.email,
       role: 'student',
-      token: generateToken(student.id, 'student'),
+      token: token,
+      sessionId: sessionId,
     });
   } else {
+    logger.warn(`Student login failed for ID: ${id}`);
     res.status(401);
     throw new Error('Invalid ID or password');
   }
@@ -37,14 +47,10 @@ const authStudent = asyncHandler(async (req, res) => {
 const authTeacher = asyncHandler(async (req, res) => {
   const { email, password, id } = req.body;
   
-  console.log(`===== TEACHER LOGIN ATTEMPT =====`);
-  console.log(`Email:`, email);
-  console.log(`ID:`, id);
-  console.log(`Password provided:`, !!password);
-  console.log(`===================================`);
+  logger.info(`Teacher login attempt with email: ${email}, ID: ${id}`);
   
   if ((!email && !id) || !password) {
-    console.log('Login rejected: Missing email/ID or password');
+    logger.warn('Teacher login rejected: Missing email/ID or password');
     res.status(400);
     throw new Error('Please provide email/ID and password');
   }
@@ -52,7 +58,7 @@ const authTeacher = asyncHandler(async (req, res) => {
   try {
     // Check for teacher by email (primary login method) or ID (secondary method)
     const whereClause = email ? { email } : { id };
-    console.log(`Searching for teacher with:`, whereClause);
+    logger.debug(`Searching for teacher with:`, whereClause);
     
     const teacher = await Teacher.findOne({ 
       where: whereClause,
@@ -65,17 +71,17 @@ const authTeacher = asyncHandler(async (req, res) => {
       }]
     });
 
-    console.log(`Teacher found: ${teacher ? 'Yes' : 'No'}`);
+    logger.debug(`Teacher found: ${teacher ? 'Yes' : 'No'}`);
     
     if (teacher) {
-      console.log(`Teacher ID: ${teacher.id}, Name: ${teacher.name}, Email: ${teacher.email}`);
+      logger.debug(`Teacher ID: ${teacher.id}, Name: ${teacher.name}, Email: ${teacher.email}`);
       const isMatch = await teacher.matchPassword(password);
-      console.log(`Password match result: ${isMatch}`);
+      logger.debug(`Password match result: ${isMatch}`);
       
       if (isMatch) {
-        // Generate token and send response
-        const token = generateToken(teacher.id, 'teacher');
-        console.log('Authentication successful, sending response');
+        // Generate token with session management
+        const { token, sessionId } = generateTokenWithSession(teacher, 'teacher');
+        logger.info(`Teacher authentication successful: ${teacher.id}`);
         
         // Extract batch IDs from subjects
         const batchIds = [...new Set(
@@ -92,10 +98,11 @@ const authTeacher = asyncHandler(async (req, res) => {
           batchIds: batchIds,
           role: 'teacher',
           token: token,
+          sessionId: sessionId,
         });
         return;
       } else {
-        console.log('Password does not match');
+        logger.warn(`Teacher password mismatch for ${email || id}`);
         res.status(401);
         throw new Error('Invalid password');
       }
@@ -121,32 +128,35 @@ const authTeacher = asyncHandler(async (req, res) => {
 const authAdmin = asyncHandler(async (req, res) => {
   const { username, password } = req.body;
 
-  console.log(`Admin login attempt for username: ${username}`);
+  logger.info(`Admin login attempt for username: ${username}`);
 
   // Check for admin
   const admin = await Admin.findOne({ where: { username } });
 
   if (!admin) {
-    console.log(`Admin login failed: No admin found with username ${username}`);
+    logger.warn(`Admin login failed: No admin found with username ${username}`);
     res.status(401);
     throw new Error('Invalid username or password');
   }
 
   const isMatch = await admin.matchPassword(password);
-  console.log(`Admin password match result: ${isMatch}`);
+  logger.debug(`Admin password match result: ${isMatch}`);
 
   if (admin && isMatch) {
-    console.log(`Admin login successful for: ${admin.username}`);
+    logger.info(`Admin login successful for: ${admin.username}`);
+    const { token, sessionId } = generateTokenWithSession(admin, 'admin');
+    
     res.json({
       id: admin.id,
       username: admin.username,
       name: admin.name,
       email: admin.email,
       role: 'admin',
-      token: generateToken(admin.username, 'admin'),
+      token: token,
+      sessionId: sessionId,
     });
   } else {
-    console.log(`Admin login failed: Invalid password for ${username}`);
+    logger.warn(`Admin login failed: Invalid password for ${username}`);
     res.status(401);
     throw new Error('Invalid username or password');
   }
@@ -314,7 +324,38 @@ const bulkPasswordReset = asyncHandler(async (req, res) => {
   });
 });
 
-// Generate JWT
+/**
+ * @desc    Logout user
+ * @route   POST /api/auth/logout
+ * @access  Private
+ */
+const logoutUser = asyncHandler(async (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  const userId = req.user.id || req.user.username;
+  
+  if (token) {
+    logout(userId, token);
+    logger.info(`User logged out: ${userId}`);
+  }
+  
+  res.json({ message: 'Logged out successfully' });
+});
+
+/**
+ * @desc    Logout all sessions for user
+ * @route   POST /api/auth/logout-all
+ * @access  Private
+ */
+const logoutAllSessions = asyncHandler(async (req, res) => {
+  const userId = req.user.id || req.user.username;
+  
+  logout(userId); // This will invalidate all sessions for the user
+  logger.info(`All sessions logged out for user: ${userId}`);
+  
+  res.json({ message: 'All sessions logged out successfully' });
+});
+
+// Generate JWT (keeping for backward compatibility)
 const generateToken = (id, role) => {
   return jwt.sign({ id, role }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRE,
@@ -329,4 +370,6 @@ module.exports = {
   setupTeacherPassword,
   resetStudentPassword,
   bulkPasswordReset,
+  logoutUser,
+  logoutAllSessions,
 }; 

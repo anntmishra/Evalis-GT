@@ -2,10 +2,8 @@ import axios from 'axios';
 import config from '../config/environment';
 import { getStudentProfile, getStudentSubmissions } from '../api';
 
-// API key for AI Analyzer - Get from environment variable
-const AI_API_KEY = import.meta.env.VITE_AI_ANALYZER_API_KEY;
-// OpenAI API key - using the provided key from environment variable
-const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
+// Note: API keys should be handled by the backend, not exposed in client code
+// These are kept for backward compatibility but should be moved to server-side
 
 // Track which responses have been used to avoid repetition
 let lastResponseTemplate = '';
@@ -17,14 +15,13 @@ const getToken = (): string | null => {
   return token;
 };
 
-// Get auth header configuration with AI API key
+// Get auth header configuration
 const getAuthConfig = () => {
   const token = getToken();
   return {
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': token ? `Bearer ${token}` : '',
-      'X-API-Key': AI_API_KEY
+      'Authorization': token ? `Bearer ${token}` : ''
     }
   };
 };
