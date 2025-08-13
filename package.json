@@ -6,10 +6,10 @@
   "scripts": {
     "dev": "concurrently \"npm run server:dev\" \"npm run frontend\"",
     "frontend": "vite",
-    "build": "tsc -b && vite build",
+    "build": "vite build",
     "build:server": "cd server && npm install --production",
     "start": "NODE_ENV=production node server/server.js",
-    "vercel-build": "tsc -b && vite build",
+    "vercel-build": "vite build",
     "start:dev": "NODE_ENV=development nodemon server/server.js",
     "lint": "echo 'Linting temporarily disabled'",
     "preview": "vite preview",
@@ -77,6 +77,7 @@
     "react-redux": "^9.1.0",
     "react-router-dom": "^6.22.0",
     "sequelize": "^6.37.7",
+    "typescript": "^5.3.3",
     "winston": "^3.17.0",
     "xlsx": "^0.18.5"
   },
@@ -99,7 +100,6 @@
     "postcss": "^8.4.33",
     "tailwindcss": "^3.4.1",
     "terser": "^5.39.0",
-    "typescript": "^5.3.3",
     "vite": "^5.0.12"
   },
   "description": "Evalis - University Grading and Submission Portal",
