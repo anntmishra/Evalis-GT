@@ -31,7 +31,7 @@ let detectedDevPort = '3000';
 if (typeof window !== 'undefined') {
   const lp = window.location.port;
   if (['5173','5174','5175'].includes(lp)) {
-    detectedDevPort = '3000'; // Changed from 3001 to 3000 to match our server
+    detectedDevPort = '3000'; // Development server port
   }
 }
 

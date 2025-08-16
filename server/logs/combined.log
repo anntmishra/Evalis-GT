@@ -23966,3 +23966,182 @@
 {"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mFailed to bind candidate port 3000: EADDRINUSE\u001b[39m","timestamp":"2025-08-17 02:30:42:3042"}
 {"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mPort 3000 is in use (single-attempt mode); moving to next candidate if available.\u001b[39m","timestamp":"2025-08-17 02:33:17:3317"}
 {"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mFailed to bind candidate port 3000: EADDRINUSE\u001b[39m","timestamp":"2025-08-17 02:33:17:3317"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mPort 3000 is in use (single-attempt mode); moving to next candidate if available.\u001b[39m","timestamp":"2025-08-17 02:46:49:4649"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mFailed to bind candidate port 3000: EADDRINUSE\u001b[39m","timestamp":"2025-08-17 02:46:49:4649"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mPort 3001 is in use (single-attempt mode); moving to next candidate if available.\u001b[39m","timestamp":"2025-08-17 02:46:49:4649"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mFailed to bind candidate port 3001: EADDRINUSE\u001b[39m","timestamp":"2025-08-17 02:46:49:4649"}
+{"code":"ERR_SERVER_NOT_RUNNING","level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError during server shutdown: Server is not running.\u001b[39m","stack":"Error [ERR_SERVER_NOT_RUNNING]: Server is not running.\n    at Server.close (node:net:2359:12)\n    at Object.onceWrapper (node:events:621:28)\n    at Server.emit (node:events:507:28)\n    at emitCloseNT (node:net:2419:8)\n    at process.processTicksAndRejections (node:internal/process/task_queues:89:21)","timestamp":"2025-08-17 02:48:49:4849"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mAdmin password mismatch for username=admin. Provided length=8 hashLen=60\u001b[39m","timestamp":"2025-08-17 03:14:08:148"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mAdmin authentication failed for admin\u001b[39m","timestamp":"2025-08-17 03:14:08:148"}
+{"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mAdmin auth exception: Invalid username/email or password\u001b[39m","timestamp":"2025-08-17 03:14:08:148"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mAdmin password mismatch for username=admin. Provided length=8 hashLen=60\u001b[39m","timestamp":"2025-08-17 03:22:19:2219"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mAdmin authentication failed for admin\u001b[39m","timestamp":"2025-08-17 03:22:19:2219"}
+{"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mAdmin auth exception: Invalid username/email or password\u001b[39m","timestamp":"2025-08-17 03:22:19:2219"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mAdmin password mismatch for username=admin. Provided length=8 hashLen=60\u001b[39m","timestamp":"2025-08-17 03:22:23:2223"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mAdmin authentication failed for admin\u001b[39m","timestamp":"2025-08-17 03:22:23:2223"}
+{"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mAdmin auth exception: Invalid username/email or password\u001b[39m","timestamp":"2025-08-17 03:22:23:2223"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mAdmin password mismatch for username=admin. Provided length=8 hashLen=60\u001b[39m","timestamp":"2025-08-17 03:22:39:2239"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mAdmin authentication failed for admin\u001b[39m","timestamp":"2025-08-17 03:22:39:2239"}
+{"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mAdmin auth exception: Invalid username/email or password\u001b[39m","timestamp":"2025-08-17 03:22:39:2239"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mAdmin password mismatch for username=admin. Provided length=8 hashLen=60\u001b[39m","timestamp":"2025-08-17 03:23:06:236"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mAdmin authentication failed for admin\u001b[39m","timestamp":"2025-08-17 03:23:06:236"}
+{"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mAdmin auth exception: Invalid username/email or password\u001b[39m","timestamp":"2025-08-17 03:23:06:236"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mPort 3000 is in use (single-attempt mode); moving to next candidate if available.\u001b[39m","timestamp":"2025-08-17 03:23:13:2313"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mFailed to bind candidate port 3000: EADDRINUSE\u001b[39m","timestamp":"2025-08-17 03:23:13:2313"}
+{"code":"ERR_SERVER_NOT_RUNNING","level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError during server shutdown: Server is not running.\u001b[39m","stack":"Error [ERR_SERVER_NOT_RUNNING]: Server is not running.\n    at Server.close (node:net:2359:12)\n    at Object.onceWrapper (node:events:621:28)\n    at Server.emit (node:events:507:28)\n    at emitCloseNT (node:net:2419:8)\n    at process.processTicksAndRejections (node:internal/process/task_queues:89:21)","timestamp":"2025-08-17 03:23:27:2327"}
+{"code":"ERR_SERVER_NOT_RUNNING","level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError during server shutdown: Server is not running.\u001b[39m","stack":"Error [ERR_SERVER_NOT_RUNNING]: Server is not running.\n    at Server.close (node:net:2359:12)\n    at Object.onceWrapper (node:events:621:28)\n    at Server.emit (node:events:507:28)\n    at emitCloseNT (node:net:2419:8)\n    at process.processTicksAndRejections (node:internal/process/task_queues:89:21)","timestamp":"2025-08-17 03:25:10:2510"}
+{"code":"ERR_SERVER_NOT_RUNNING","level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError during server shutdown: Server is not running.\u001b[39m","stack":"Error [ERR_SERVER_NOT_RUNNING]: Server is not running.\n    at Server.close (node:net:2359:12)\n    at Object.onceWrapper (node:events:621:28)\n    at Server.emit (node:events:507:28)\n    at emitCloseNT (node:net:2419:8)\n    at process.processTicksAndRejections (node:internal/process/task_queues:89:21)","timestamp":"2025-08-17 03:27:22:2722"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mStarting Evalis Server...\u001b[39m","timestamp":"2025-08-17 03:28:03:283"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mEnvironment: development\u001b[39m","timestamp":"2025-08-17 03:28:03:283"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mDatabase configured: Yes\u001b[39m","timestamp":"2025-08-17 03:28:03:283"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mPort: 3000\u001b[39m","timestamp":"2025-08-17 03:28:03:283"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mSyncing database in development mode...\u001b[39m","timestamp":"2025-08-17 03:28:04:284"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mDatabase synced successfully\u001b[39m","timestamp":"2025-08-17 03:28:18:2818"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mCORS allowed (base) origins: http://localhost:3000, http://localhost:5173, http://localhost:5174, http://localhost:5175\u001b[39m","timestamp":"2025-08-17 03:28:18:2818"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mServing uploads from:\u001b[39m","timestamp":"2025-08-17 03:28:18:2818"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mAlso serving uploads from: server/uploads (relative path)\u001b[39m","timestamp":"2025-08-17 03:28:18:2818"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mAttempting candidate ports (PORT_CANDIDATES): 3000, 3001, 3002\u001b[39m","timestamp":"2025-08-17 03:28:18:2818"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mServer running in development mode on port 3000\u001b[39m","timestamp":"2025-08-17 03:28:18:2818"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mServer started on one of the candidate ports successfully.\u001b[39m","timestamp":"2025-08-17 03:28:18:2818"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mPort 3000 is in use (single-attempt mode); moving to next candidate if available.\u001b[39m","timestamp":"2025-08-17 03:30:25:3025"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mFailed to bind candidate port 3000: EADDRINUSE\u001b[39m","timestamp":"2025-08-17 03:30:25:3025"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mPort 3000 is in use (single-attempt mode); moving to next candidate if available.\u001b[39m","timestamp":"2025-08-17 03:31:34:3134"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mFailed to bind candidate port 3000: EADDRINUSE\u001b[39m","timestamp":"2025-08-17 03:31:34:3134"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mPort 3000 is in use (single-attempt mode); moving to next candidate if available.\u001b[39m","timestamp":"2025-08-17 03:32:54:3254"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mFailed to bind candidate port 3000: EADDRINUSE\u001b[39m","timestamp":"2025-08-17 03:32:54:3254"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 1\u001b[39m","timestamp":"2025-08-17 03:33:09:339"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/admin/login - ::1\u001b[39m","timestamp":"2025-08-17 03:33:09:339"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/admin/login - 204 - 3ms - ::1\u001b[39m","timestamp":"2025-08-17 03:33:09:339"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mPOST /api/auth/admin/login - ::1\u001b[39m","timestamp":"2025-08-17 03:33:09:339"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mAdmin login attempt for username: admin, email: undefined, Firebase token: absent\u001b[39m","timestamp":"2025-08-17 03:33:09:339"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mAdmin lookup criteria: {\"username\":\"admin\"}\u001b[39m","timestamp":"2025-08-17 03:33:09:339"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mAdmin lookup duration: 747ms\u001b[39m","timestamp":"2025-08-17 03:33:10:3310"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mAdmin ID: 2, Username: admin, Email: admin@university.edu\u001b[39m","timestamp":"2025-08-17 03:33:10:3310"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mDatabase password match result: false (duration 91ms)\u001b[39m","timestamp":"2025-08-17 03:33:10:3310"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mAdmin password mismatch for username=admin. Provided length=8 hashLen=60\u001b[39m","timestamp":"2025-08-17 03:33:10:3310"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mAdmin authentication failed for admin\u001b[39m","timestamp":"2025-08-17 03:33:10:3310"}
+{"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mAdmin auth exception: Invalid username/email or password\u001b[39m","timestamp":"2025-08-17 03:33:10:3310"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mPOST /api/auth/admin/login - 401 - 854ms - ::1\u001b[39m","timestamp":"2025-08-17 03:33:10:3310"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mPOST /api/auth/admin/login - ::1\u001b[39m","timestamp":"2025-08-17 03:33:36:3336"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mAdmin login attempt for username: admin, email: undefined, Firebase token: absent\u001b[39m","timestamp":"2025-08-17 03:33:36:3336"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mAdmin lookup criteria: {\"username\":\"admin\"}\u001b[39m","timestamp":"2025-08-17 03:33:36:3336"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mAdmin lookup duration: 722ms\u001b[39m","timestamp":"2025-08-17 03:33:37:3337"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mAdmin ID: 2, Username: admin, Email: admin@university.edu\u001b[39m","timestamp":"2025-08-17 03:33:37:3337"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mDatabase password match result: true (duration 95ms)\u001b[39m","timestamp":"2025-08-17 03:33:37:3337"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mAdmin authentication successful via database: admin\u001b[39m","timestamp":"2025-08-17 03:33:37:3337"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mCreated new session for user admin with role admin\u001b[39m","timestamp":"2025-08-17 03:33:37:3337"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mPOST /admin/login - 200 - 840ms - ::1\u001b[39m","timestamp":"2025-08-17 03:33:37:3337"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-17 03:33:37:3337"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - 204 - 0ms - ::1\u001b[39m","timestamp":"2025-08-17 03:33:37:3337"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-17 03:33:37:3337"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 2\u001b[39m","timestamp":"2025-08-17 03:33:37:3337"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 3\u001b[39m","timestamp":"2025-08-17 03:33:37:3337"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/teachers - ::1\u001b[39m","timestamp":"2025-08-17 03:33:37:3337"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/teachers - 204 - 0ms - ::1\u001b[39m","timestamp":"2025-08-17 03:33:37:3337"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 4\u001b[39m","timestamp":"2025-08-17 03:33:37:3337"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/subjects - ::1\u001b[39m","timestamp":"2025-08-17 03:33:37:3337"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/subjects - 204 - 1ms - ::1\u001b[39m","timestamp":"2025-08-17 03:33:37:3337"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /api/teachers - ::1\u001b[39m","timestamp":"2025-08-17 03:33:37:3337"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mAuth middleware checking token...\u001b[39m","timestamp":"2025-08-17 03:33:37:3337"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mHeaders:\u001b[39m","timestamp":"2025-08-17 03:33:37:3337"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/batches - ::1\u001b[39m","timestamp":"2025-08-17 03:33:37:3337"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/batches - 204 - 0ms - ::1\u001b[39m","timestamp":"2025-08-17 03:33:37:3337"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /api/subjects - ::1\u001b[39m","timestamp":"2025-08-17 03:33:37:3337"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mAuth middleware checking token...\u001b[39m","timestamp":"2025-08-17 03:33:37:3337"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mHeaders:\u001b[39m","timestamp":"2025-08-17 03:33:37:3337"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /api/batches - ::1\u001b[39m","timestamp":"2025-08-17 03:33:37:3337"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mAuth middleware checking token...\u001b[39m","timestamp":"2025-08-17 03:33:37:3337"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mHeaders:\u001b[39m","timestamp":"2025-08-17 03:33:37:3337"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /status - 200 - 93ms - ::1\u001b[39m","timestamp":"2025-08-17 03:33:37:3337"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mUser authenticated as admin:\u001b[39m","timestamp":"2025-08-17 03:33:37:3337"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mUser authenticated as admin:\u001b[39m","timestamp":"2025-08-17 03:33:37:3337"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mUser authenticated as admin:\u001b[39m","timestamp":"2025-08-17 03:33:37:3337"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET / - 200 - 434ms - ::1\u001b[39m","timestamp":"2025-08-17 03:33:37:3337"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET / - 200 - 517ms - ::1\u001b[39m","timestamp":"2025-08-17 03:33:37:3337"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET / - 200 - 601ms - ::1\u001b[39m","timestamp":"2025-08-17 03:33:37:3337"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/batches/BTech2025/students - ::1\u001b[39m","timestamp":"2025-08-17 03:33:37:3337"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/batches/BTech2025/students - 204 - 0ms - ::1\u001b[39m","timestamp":"2025-08-17 03:33:37:3337"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /api/batches/BTech2025/students - ::1\u001b[39m","timestamp":"2025-08-17 03:33:37:3337"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mAuth middleware checking token...\u001b[39m","timestamp":"2025-08-17 03:33:37:3337"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mHeaders:\u001b[39m","timestamp":"2025-08-17 03:33:37:3337"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mUser authenticated from cache: 2, role: admin\u001b[39m","timestamp":"2025-08-17 03:33:37:3337"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /BTech2025/students - 200 - 181ms - ::1\u001b[39m","timestamp":"2025-08-17 03:33:38:3338"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 5\u001b[39m","timestamp":"2025-08-17 03:34:57:3457"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-17 03:34:57:3457"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-bhee23du5-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 03:34:57:3457"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - 500 - 17ms - ::1\u001b[39m","timestamp":"2025-08-17 03:34:57:3457"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mPort 3000 is in use (single-attempt mode); moving to next candidate if available.\u001b[39m","timestamp":"2025-08-17 03:37:56:3756"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mFailed to bind candidate port 3000: EADDRINUSE\u001b[39m","timestamp":"2025-08-17 03:37:56:3756"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mPort 3000 is in use (single-attempt mode); moving to next candidate if available.\u001b[39m","timestamp":"2025-08-17 03:38:26:3826"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mFailed to bind candidate port 3000: EADDRINUSE\u001b[39m","timestamp":"2025-08-17 03:38:26:3826"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 6\u001b[39m","timestamp":"2025-08-17 03:46:41:4641"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 7\u001b[39m","timestamp":"2025-08-17 03:46:41:4641"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/teachers - ::1\u001b[39m","timestamp":"2025-08-17 03:46:41:4641"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/teachers - 204 - 11ms - ::1\u001b[39m","timestamp":"2025-08-17 03:46:41:4641"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 8\u001b[39m","timestamp":"2025-08-17 03:46:41:4641"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/batches - ::1\u001b[39m","timestamp":"2025-08-17 03:46:41:4641"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/batches - 204 - 3ms - ::1\u001b[39m","timestamp":"2025-08-17 03:46:41:4641"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/subjects - ::1\u001b[39m","timestamp":"2025-08-17 03:46:41:4641"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/subjects - 204 - 5ms - ::1\u001b[39m","timestamp":"2025-08-17 03:46:41:4641"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 9\u001b[39m","timestamp":"2025-08-17 03:46:41:4641"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-17 03:46:41:4641"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - 204 - 0ms - ::1\u001b[39m","timestamp":"2025-08-17 03:46:41:4641"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /api/teachers - ::1\u001b[39m","timestamp":"2025-08-17 03:46:41:4641"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mAuth middleware checking token...\u001b[39m","timestamp":"2025-08-17 03:46:41:4641"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mHeaders:\u001b[39m","timestamp":"2025-08-17 03:46:41:4641"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mUser authenticated from cache: 2, role: admin\u001b[39m","timestamp":"2025-08-17 03:46:41:4641"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/batches - ::1\u001b[39m","timestamp":"2025-08-17 03:46:41:4641"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/batches - 204 - 0ms - ::1\u001b[39m","timestamp":"2025-08-17 03:46:41:4641"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 10\u001b[39m","timestamp":"2025-08-17 03:46:41:4641"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /api/batches - ::1\u001b[39m","timestamp":"2025-08-17 03:46:41:4641"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mAuth middleware checking token...\u001b[39m","timestamp":"2025-08-17 03:46:41:4641"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mHeaders:\u001b[39m","timestamp":"2025-08-17 03:46:41:4641"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mUser authenticated from cache: 2, role: admin\u001b[39m","timestamp":"2025-08-17 03:46:41:4641"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-17 03:46:41:4641"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - 204 - 0ms - ::1\u001b[39m","timestamp":"2025-08-17 03:46:41:4641"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 11\u001b[39m","timestamp":"2025-08-17 03:46:41:4641"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /api/subjects - ::1\u001b[39m","timestamp":"2025-08-17 03:46:41:4641"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mAuth middleware checking token...\u001b[39m","timestamp":"2025-08-17 03:46:41:4641"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mHeaders:\u001b[39m","timestamp":"2025-08-17 03:46:41:4641"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mUser authenticated from cache: 2, role: admin\u001b[39m","timestamp":"2025-08-17 03:46:41:4641"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/teachers - ::1\u001b[39m","timestamp":"2025-08-17 03:46:41:4641"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/teachers - 204 - 0ms - ::1\u001b[39m","timestamp":"2025-08-17 03:46:41:4641"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /api/batches - ::1\u001b[39m","timestamp":"2025-08-17 03:46:41:4641"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mAuth middleware checking token...\u001b[39m","timestamp":"2025-08-17 03:46:41:4641"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mHeaders:\u001b[39m","timestamp":"2025-08-17 03:46:41:4641"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mUser authenticated from cache: 2, role: admin\u001b[39m","timestamp":"2025-08-17 03:46:41:4641"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-17 03:46:41:4641"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/subjects - ::1\u001b[39m","timestamp":"2025-08-17 03:46:41:4641"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/subjects - 204 - 0ms - ::1\u001b[39m","timestamp":"2025-08-17 03:46:41:4641"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-17 03:46:41:4641"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET / - 304 - 1689ms - ::1\u001b[39m","timestamp":"2025-08-17 03:46:43:4643"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /api/teachers - ::1\u001b[39m","timestamp":"2025-08-17 03:46:43:4643"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mAuth middleware checking token...\u001b[39m","timestamp":"2025-08-17 03:46:43:4643"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mHeaders:\u001b[39m","timestamp":"2025-08-17 03:46:43:4643"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mUser authenticated from cache: 2, role: admin\u001b[39m","timestamp":"2025-08-17 03:46:43:4643"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET / - 304 - 1644ms - ::1\u001b[39m","timestamp":"2025-08-17 03:46:43:4643"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /api/subjects - ::1\u001b[39m","timestamp":"2025-08-17 03:46:43:4643"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mAuth middleware checking token...\u001b[39m","timestamp":"2025-08-17 03:46:43:4643"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mHeaders:\u001b[39m","timestamp":"2025-08-17 03:46:43:4643"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mUser authenticated from cache: 2, role: admin\u001b[39m","timestamp":"2025-08-17 03:46:43:4643"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET / - 304 - 1699ms - ::1\u001b[39m","timestamp":"2025-08-17 03:46:43:4643"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET / - 304 - 1698ms - ::1\u001b[39m","timestamp":"2025-08-17 03:46:43:4643"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET / - 304 - 197ms - ::1\u001b[39m","timestamp":"2025-08-17 03:46:43:4643"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET / - 304 - 145ms - ::1\u001b[39m","timestamp":"2025-08-17 03:46:43:4643"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/batches/BTech2025/students - ::1\u001b[39m","timestamp":"2025-08-17 03:46:43:4643"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/batches/BTech2025/students - 204 - 1ms - ::1\u001b[39m","timestamp":"2025-08-17 03:46:43:4643"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /api/batches/BTech2025/students - ::1\u001b[39m","timestamp":"2025-08-17 03:46:43:4643"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mAuth middleware checking token...\u001b[39m","timestamp":"2025-08-17 03:46:43:4643"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mHeaders:\u001b[39m","timestamp":"2025-08-17 03:46:43:4643"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mUser authenticated from cache: 2, role: admin\u001b[39m","timestamp":"2025-08-17 03:46:43:4643"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /status - 200 - 2381ms - ::1\u001b[39m","timestamp":"2025-08-17 03:46:44:4644"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /status - 200 - 2387ms - ::1\u001b[39m","timestamp":"2025-08-17 03:46:44:4644"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /BTech2025/students - 304 - 616ms - ::1\u001b[39m","timestamp":"2025-08-17 03:46:44:4644"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 12\u001b[39m","timestamp":"2025-08-17 03:49:56:4956"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-17 03:49:56:4956"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-bhee23du5-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 03:49:56:4956"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - 500 - 15ms - ::1\u001b[39m","timestamp":"2025-08-17 03:49:56:4956"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 13\u001b[39m","timestamp":"2025-08-17 04:04:56:456"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-17 04:04:56:456"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-bhee23du5-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 04:04:56:456"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - 500 - 17ms - ::1\u001b[39m","timestamp":"2025-08-17 04:04:56:456"}

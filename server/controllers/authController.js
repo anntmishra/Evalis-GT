@@ -348,12 +348,29 @@ const authAdmin = asyncHandler(async (req, res) => {
       throw new Error('Invalid username/email or password');
     }
   } catch (error) {
-  console.error('Error in admin authentication:', error);
-  logger.error(`Admin auth exception: ${error.message}`);
+    console.error('❌ Error in admin authentication:', error);
+    console.error('❌ Error stack:', error.stack);
+    logger.error(`Admin auth exception: ${error.message}`);
+    logger.error(`Admin auth error stack: ${error.stack}`);
+    
+    // More detailed error response for debugging
+    const errorResponse = {
+      message: error.message || 'Internal server error',
+      code: 'ADMIN_AUTH_ERROR',
+      timestamp: new Date().toISOString()
+    };
+    
+    // Include more details in development
+    if (process.env.NODE_ENV === 'development') {
+      errorResponse.stack = error.stack;
+    }
+    
     if (!res.statusCode || res.statusCode === 200) {
       res.status(500);
     }
-    throw error;
+    
+    res.json(errorResponse);
+    return;
   }
 });
 

@@ -2331,3 +2331,52 @@
   fields: undefined,
   table: 'Students'
 }
+2025-08-17 02:59:30 +05:30: [31mPort 3000 is already in use. Please choose a different port.[39m
+2025-08-17 02:59:32 +05:30: [31mPort 3000 is already in use. Please choose a different port.[39m
+2025-08-17 02:59:42 +05:30: [31mPort 3000 is already in use. Please choose a different port.[39m
+2025-08-17 02:59:44 +05:30: [31mPort 3000 is already in use. Please choose a different port.[39m
+2025-08-17 02:59:54 +05:30: [31mPort 3000 is already in use. Please choose a different port.[39m
+2025-08-17 02:59:56 +05:30: [31mPort 3000 is already in use. Please choose a different port.[39m
+2025-08-17 03:13:59 +05:30: [31m[ERROR] 2025-08-16T21:43:59.172Z - Not authorized, no token[39m
+2025-08-17 03:13:59 +05:30: [31m[ERROR] Route: GET /api/batches[39m
+2025-08-17 03:13:59 +05:30: [31m[ERROR] Stack: Error: Not authorized, no token
+    at /Users/anantmishra/Documents/GitHub/Evalis-GT/server/middleware/authMiddleware.js:378:11
+    at asyncUtilWrap (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/express-async-handler/index.js:3:20)
+    at Layer.handle [as handle_request] (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/node_modules/express/lib/router/layer.js:95:5)
+    at next (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/node_modules/express/lib/router/layer.js:95:5)
+    at /Users/anantmishra/Documents/GitHub/Evalis-GT/server/node_modules/express/lib/router/index.js:284:15
+    at router.process_params (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/node_modules/express/lib/router/index.js:346:12)
+    at next (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/node_modules/express/lib/router/index.js:280:10)
+    at router.handle (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/node_modules/express/lib/router/index.js:175:3)[39m
+2025-08-17 03:14:08 +05:30: Error in admin authentication: Error: Invalid username/email or password
+    at /Users/anantmishra/Documents/GitHub/Evalis-GT/server/controllers/authController.js:348:13
+2025-08-17 03:14:08 +05:30: [31m[ERROR] 2025-08-16T21:44:08.094Z - Invalid username/email or password[39m
+2025-08-17 03:14:08 +05:30: [31m[ERROR] Route: POST /api/auth/admin/login[39m
+2025-08-17 03:14:08 +05:30: [31m[ERROR] Stack: Error: Invalid username/email or password
+    at /Users/anantmishra/Documents/GitHub/Evalis-GT/server/controllers/authController.js:348:13[39m
+2025-08-17 03:22:19 +05:30: Error in admin authentication: Error: Invalid username/email or password
+    at /Users/anantmishra/Documents/GitHub/Evalis-GT/server/controllers/authController.js:348:13
+2025-08-17 03:22:19 +05:30: [31m[ERROR] 2025-08-16T21:52:19.408Z - Invalid username/email or password[39m
+2025-08-17 03:22:19 +05:30: [31m[ERROR] Route: POST /api/auth/admin/login[39m
+2025-08-17 03:22:19 +05:30: [31m[ERROR] Stack: Error: Invalid username/email or password
+    at /Users/anantmishra/Documents/GitHub/Evalis-GT/server/controllers/authController.js:348:13[39m
+2025-08-17 03:22:23 +05:30: Error in admin authentication: Error: Invalid username/email or password
+    at /Users/anantmishra/Documents/GitHub/Evalis-GT/server/controllers/authController.js:348:13
+2025-08-17 03:22:23 +05:30: [31m[ERROR] 2025-08-16T21:52:23.272Z - Invalid username/email or password[39m
+2025-08-17 03:22:23 +05:30: [31m[ERROR] Route: POST /api/auth/admin/login[39m
+2025-08-17 03:22:23 +05:30: [31m[ERROR] Stack: Error: Invalid username/email or password
+    at /Users/anantmishra/Documents/GitHub/Evalis-GT/server/controllers/authController.js:348:13[39m
+2025-08-17 03:22:39 +05:30: Error in admin authentication: Error: Invalid username/email or password
+    at /Users/anantmishra/Documents/GitHub/Evalis-GT/server/controllers/authController.js:348:13
+2025-08-17 03:22:39 +05:30: [31m[ERROR] 2025-08-16T21:52:39.059Z - Invalid username/email or password[39m
+2025-08-17 03:22:39 +05:30: [31m[ERROR] Route: POST /api/auth/admin/login[39m
+2025-08-17 03:22:39 +05:30: [31m[ERROR] Stack: Error: Invalid username/email or password
+    at /Users/anantmishra/Documents/GitHub/Evalis-GT/server/controllers/authController.js:348:13[39m
+2025-08-17 03:23:06 +05:30: Error in admin authentication: Error: Invalid username/email or password
+    at /Users/anantmishra/Documents/GitHub/Evalis-GT/server/controllers/authController.js:348:13
+2025-08-17 03:23:06 +05:30: [31m[ERROR] 2025-08-16T21:53:06.144Z - Invalid username/email or password[39m
+2025-08-17 03:23:06 +05:30: [31m[ERROR] Route: POST /api/auth/admin/login[39m
+2025-08-17 03:23:06 +05:30: [31m[ERROR] Stack: Error: Invalid username/email or password
+    at /Users/anantmishra/Documents/GitHub/Evalis-GT/server/controllers/authController.js:348:13[39m
