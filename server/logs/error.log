@@ -312,3 +312,7 @@
 {"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError starting server: Unknown constraint error\u001b[39m","timestamp":"2025-08-17 01:08:04:84"}
 {"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError starting server: Unknown constraint error\u001b[39m","timestamp":"2025-08-17 01:08:36:836"}
 {"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError starting server: Unknown constraint error\u001b[39m","timestamp":"2025-08-17 01:09:02:92"}
+{"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError starting server: Unknown constraint error\u001b[39m","timestamp":"2025-08-17 01:11:35:1135"}
+{"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError starting server: Unknown constraint error\u001b[39m","timestamp":"2025-08-17 01:11:49:1149"}
+{"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError starting server: Unknown constraint error\u001b[39m","timestamp":"2025-08-17 01:12:32:1232"}
+{"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError starting server: Unknown constraint error\u001b[39m","timestamp":"2025-08-17 01:13:14:1314"}

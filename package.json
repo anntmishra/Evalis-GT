@@ -5,15 +5,15 @@
   "type": "commonjs",
   "scripts": {
     "dev": "concurrently \"npm run server:dev\" \"npm run frontend\"",
-    "frontend": "npx vite",
-    "build": "npx vite build",
-    "build:check": "npx tsc -b && npx vite build",
-    "type-check": "npx tsc --noEmit",
+    "frontend": "vite",
+    "build": "vite build",
+    "build:check": "tsc -b && vite build",
+    "type-check": "tsc --noEmit",
     "build:server": "cd server && npm install --production",
     "start": "NODE_ENV=production node server/server.js",
     "start:dev": "NODE_ENV=development nodemon server/server.js",
     "lint": "eslint .",
-    "preview": "npx vite preview",
+    "preview": "vite preview",
     "server": "node server/server.js",
     "server:dev": "nodemon server/server.js",
     "server:prod": "NODE_ENV=production node server/server.js",
@@ -63,6 +63,7 @@
     "@radix-ui/react-tooltip": "^1.2.8",
     "@reduxjs/toolkit": "^2.1.0",
     "@tanstack/react-query": "^5.17.19",
+    "@vitejs/plugin-react": "^4.7.0",
     "axios": "^1.6.7",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.2",
@@ -99,7 +100,9 @@
     "react-router-dom": "^6.22.0",
     "sequelize": "^6.37.7",
     "tailwind-merge": "^3.3.1",
+    "tailwindcss": "^3.4.1",
     "tailwindcss-animate": "^1.0.7",
+    "vite": "^5.4.19",
     "winston": "^3.17.0",
     "xlsx": "^0.18.5"
   },
@@ -110,7 +113,6 @@
     "@types/react-dom": "^18.3.6",
     "@typescript-eslint/eslint-plugin": "^6.19.1",
     "@typescript-eslint/parser": "^6.19.1",
-    "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.4.17",
     "concurrently": "^8.2.2",
     "eslint": "^8.56.0",
@@ -120,17 +122,15 @@
     "nodemon": "^3.0.3",
     "pm2": "^6.0.8",
     "postcss": "^8.4.33",
-    "tailwindcss": "^3.4.1",
     "terser": "^5.39.0",
     "typescript": "^5.3.3",
-    "typescript-eslint": "^8.39.1",
-    "vite": "^5.0.12"
+    "typescript-eslint": "^8.39.1"
   },
   "optionalDependencies": {
-    "@rollup/rollup-linux-x64-gnu": "^4.0.0",
-    "@rollup/rollup-win32-x64-msvc": "^4.0.0",
+    "@rollup/rollup-darwin-arm64": "^4.0.0",
     "@rollup/rollup-darwin-x64": "^4.0.0",
-    "@rollup/rollup-darwin-arm64": "^4.0.0"
+    "@rollup/rollup-linux-x64-gnu": "^4.0.0",
+    "@rollup/rollup-win32-x64-msvc": "^4.0.0"
   },
   "description": "Evalis - University Grading and Submission Portal",
   "main": "server/server.js",
@@ -143,6 +143,5 @@
     "react",
     "node"
   ],
-  "author": "",
   "license": "ISC"
 }
