@@ -23266,3 +23266,261 @@
 {"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/submissions/teacher/52nzXbQ3pKemHH9XJ0btX9LhDDh2 - ::1\u001b[39m","timestamp":"2025-08-16 23:03:38:338"}
 {"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-gm1x4bnie-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-16 23:03:38:338"}
 {"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/submissions/teacher/52nzXbQ3pKemHH9XJ0btX9LhDDh2 - 500 - 1ms - ::1\u001b[39m","timestamp":"2025-08-16 23:03:38:338"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mStarting Evalis Server...\u001b[39m","timestamp":"2025-08-16 23:05:25:525"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mEnvironment: development\u001b[39m","timestamp":"2025-08-16 23:05:25:525"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mDatabase configured: Yes\u001b[39m","timestamp":"2025-08-16 23:05:25:525"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mPort: 3000\u001b[39m","timestamp":"2025-08-16 23:05:25:525"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mSyncing database in development mode...\u001b[39m","timestamp":"2025-08-16 23:05:27:527"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mStarting Evalis Server...\u001b[39m","timestamp":"2025-08-16 23:05:36:536"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mEnvironment: development\u001b[39m","timestamp":"2025-08-16 23:05:36:536"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mDatabase configured: Yes\u001b[39m","timestamp":"2025-08-16 23:05:36:536"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mPort: 3000\u001b[39m","timestamp":"2025-08-16 23:05:36:536"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mSyncing database in development mode...\u001b[39m","timestamp":"2025-08-16 23:05:38:538"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mDatabase synced successfully\u001b[39m","timestamp":"2025-08-16 23:05:52:552"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mCORS allowed (base) origins: http://localhost:3000, http://localhost:5173, http://localhost:5174, http://localhost:5175\u001b[39m","timestamp":"2025-08-16 23:05:52:552"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mServing uploads from:\u001b[39m","timestamp":"2025-08-16 23:05:52:552"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mAlso serving uploads from: server/uploads (relative path)\u001b[39m","timestamp":"2025-08-16 23:05:52:552"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mAttempting candidate ports (PORT_CANDIDATES): 3000, 3001, 3002\u001b[39m","timestamp":"2025-08-16 23:05:52:552"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mPort 3000 is in use (single-attempt mode); moving to next candidate if available.\u001b[39m","timestamp":"2025-08-16 23:05:52:552"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mConnection closed. Total connections: -1\u001b[39m","timestamp":"2025-08-16 23:05:52:552"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mFailed to bind candidate port 3000: EADDRINUSE\u001b[39m","timestamp":"2025-08-16 23:05:52:552"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mServer running in development mode on port 3001\u001b[39m","timestamp":"2025-08-16 23:05:52:552"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mServer started on one of the candidate ports successfully.\u001b[39m","timestamp":"2025-08-16 23:05:52:552"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mStarting Evalis Server...\u001b[39m","timestamp":"2025-08-16 23:06:01:61"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mEnvironment: development\u001b[39m","timestamp":"2025-08-16 23:06:01:61"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mDatabase configured: Yes\u001b[39m","timestamp":"2025-08-16 23:06:01:61"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mPort: 3000\u001b[39m","timestamp":"2025-08-16 23:06:01:61"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mSyncing database in development mode...\u001b[39m","timestamp":"2025-08-16 23:06:03:63"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mDatabase synced successfully\u001b[39m","timestamp":"2025-08-16 23:06:16:616"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mCORS allowed (base) origins: http://localhost:3000, http://localhost:5173, http://localhost:5174, http://localhost:5175\u001b[39m","timestamp":"2025-08-16 23:06:16:616"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mServing uploads from:\u001b[39m","timestamp":"2025-08-16 23:06:16:616"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mAlso serving uploads from: server/uploads (relative path)\u001b[39m","timestamp":"2025-08-16 23:06:16:616"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mAttempting candidate ports (PORT_CANDIDATES): 3000, 3001, 3002\u001b[39m","timestamp":"2025-08-16 23:06:16:616"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mPort 3000 is in use (single-attempt mode); moving to next candidate if available.\u001b[39m","timestamp":"2025-08-16 23:06:16:616"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mConnection closed. Total connections: -1\u001b[39m","timestamp":"2025-08-16 23:06:16:616"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mFailed to bind candidate port 3000: EADDRINUSE\u001b[39m","timestamp":"2025-08-16 23:06:16:616"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mServer running in development mode on port 3001\u001b[39m","timestamp":"2025-08-16 23:06:16:616"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mServer started on one of the candidate ports successfully.\u001b[39m","timestamp":"2025-08-16 23:06:16:616"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 103\u001b[39m","timestamp":"2025-08-16 23:06:33:633"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 104\u001b[39m","timestamp":"2025-08-16 23:06:33:633"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-16 23:06:33:633"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-gt.vercel.app\u001b[39m","timestamp":"2025-08-16 23:06:33:633"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - 500 - 7ms - ::1\u001b[39m","timestamp":"2025-08-16 23:06:33:633"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-16 23:06:33:633"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-gt.vercel.app\u001b[39m","timestamp":"2025-08-16 23:06:33:633"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - 500 - 1ms - ::1\u001b[39m","timestamp":"2025-08-16 23:06:33:633"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-16 23:06:33:633"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-gt.vercel.app\u001b[39m","timestamp":"2025-08-16 23:06:33:633"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - 500 - 1ms - ::1\u001b[39m","timestamp":"2025-08-16 23:06:33:633"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 105\u001b[39m","timestamp":"2025-08-16 23:06:37:637"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/student/login - ::1\u001b[39m","timestamp":"2025-08-16 23:06:37:637"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-gt.vercel.app\u001b[39m","timestamp":"2025-08-16 23:06:37:637"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/student/login - 500 - 2ms - ::1\u001b[39m","timestamp":"2025-08-16 23:06:37:637"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/sync-firebase-password - ::1\u001b[39m","timestamp":"2025-08-16 23:06:38:638"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-gt.vercel.app\u001b[39m","timestamp":"2025-08-16 23:06:38:638"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/sync-firebase-password - 500 - 2ms - ::1\u001b[39m","timestamp":"2025-08-16 23:06:38:638"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 106\u001b[39m","timestamp":"2025-08-16 23:06:38:638"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 107\u001b[39m","timestamp":"2025-08-16 23:06:38:638"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-16 23:06:38:638"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-gt.vercel.app\u001b[39m","timestamp":"2025-08-16 23:06:38:638"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - 500 - 3ms - ::1\u001b[39m","timestamp":"2025-08-16 23:06:38:638"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 108\u001b[39m","timestamp":"2025-08-16 23:06:38:638"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/students/submissions - ::1\u001b[39m","timestamp":"2025-08-16 23:06:38:638"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-gt.vercel.app\u001b[39m","timestamp":"2025-08-16 23:06:38:638"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/students/submissions - 500 - 1ms - ::1\u001b[39m","timestamp":"2025-08-16 23:06:38:638"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/students/profile - ::1\u001b[39m","timestamp":"2025-08-16 23:06:38:638"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-gt.vercel.app\u001b[39m","timestamp":"2025-08-16 23:06:38:638"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/students/profile - 500 - 1ms - ::1\u001b[39m","timestamp":"2025-08-16 23:06:38:638"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/students/subjects - ::1\u001b[39m","timestamp":"2025-08-16 23:06:38:638"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-gt.vercel.app\u001b[39m","timestamp":"2025-08-16 23:06:38:638"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/students/subjects - 500 - 4ms - ::1\u001b[39m","timestamp":"2025-08-16 23:06:38:638"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 109\u001b[39m","timestamp":"2025-08-16 23:06:38:638"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/students/profile - ::1\u001b[39m","timestamp":"2025-08-16 23:06:38:638"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-gt.vercel.app\u001b[39m","timestamp":"2025-08-16 23:06:38:638"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/students/profile - 500 - 0ms - ::1\u001b[39m","timestamp":"2025-08-16 23:06:38:638"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/students/submissions - ::1\u001b[39m","timestamp":"2025-08-16 23:06:38:638"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-gt.vercel.app\u001b[39m","timestamp":"2025-08-16 23:06:38:638"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/students/submissions - 500 - 1ms - ::1\u001b[39m","timestamp":"2025-08-16 23:06:38:638"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/assignments/student - ::1\u001b[39m","timestamp":"2025-08-16 23:06:38:638"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-gt.vercel.app\u001b[39m","timestamp":"2025-08-16 23:06:38:638"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/assignments/student - 500 - 0ms - ::1\u001b[39m","timestamp":"2025-08-16 23:06:38:638"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 110\u001b[39m","timestamp":"2025-08-16 23:06:38:638"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/students/subjects - ::1\u001b[39m","timestamp":"2025-08-16 23:06:38:638"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-gt.vercel.app\u001b[39m","timestamp":"2025-08-16 23:06:38:638"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/students/subjects - 500 - 0ms - ::1\u001b[39m","timestamp":"2025-08-16 23:06:38:638"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/assignments/student - ::1\u001b[39m","timestamp":"2025-08-16 23:06:38:638"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-gt.vercel.app\u001b[39m","timestamp":"2025-08-16 23:06:38:638"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/assignments/student - 500 - 0ms - ::1\u001b[39m","timestamp":"2025-08-16 23:06:38:638"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 111\u001b[39m","timestamp":"2025-08-16 23:07:43:743"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/student/login - ::1\u001b[39m","timestamp":"2025-08-16 23:07:43:743"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-gt.vercel.app\u001b[39m","timestamp":"2025-08-16 23:07:43:743"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/student/login - 500 - 15ms - ::1\u001b[39m","timestamp":"2025-08-16 23:07:43:743"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/sync-firebase-password - ::1\u001b[39m","timestamp":"2025-08-16 23:07:44:744"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-gt.vercel.app\u001b[39m","timestamp":"2025-08-16 23:07:44:744"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/sync-firebase-password - 500 - 3ms - ::1\u001b[39m","timestamp":"2025-08-16 23:07:44:744"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-16 23:07:44:744"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-gt.vercel.app\u001b[39m","timestamp":"2025-08-16 23:07:44:744"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - 500 - 2ms - ::1\u001b[39m","timestamp":"2025-08-16 23:07:44:744"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 112\u001b[39m","timestamp":"2025-08-16 23:07:44:744"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 113\u001b[39m","timestamp":"2025-08-16 23:07:44:744"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 114\u001b[39m","timestamp":"2025-08-16 23:07:44:744"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/assignments/student - ::1\u001b[39m","timestamp":"2025-08-16 23:07:44:744"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-gt.vercel.app\u001b[39m","timestamp":"2025-08-16 23:07:44:744"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/assignments/student - 500 - 1ms - ::1\u001b[39m","timestamp":"2025-08-16 23:07:44:744"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/students/submissions - ::1\u001b[39m","timestamp":"2025-08-16 23:07:44:744"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-gt.vercel.app\u001b[39m","timestamp":"2025-08-16 23:07:44:744"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/students/submissions - 500 - 1ms - ::1\u001b[39m","timestamp":"2025-08-16 23:07:44:744"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/students/subjects - ::1\u001b[39m","timestamp":"2025-08-16 23:07:44:744"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-gt.vercel.app\u001b[39m","timestamp":"2025-08-16 23:07:44:744"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/students/subjects - 500 - 1ms - ::1\u001b[39m","timestamp":"2025-08-16 23:07:44:744"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 115\u001b[39m","timestamp":"2025-08-16 23:07:44:744"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/students/profile - ::1\u001b[39m","timestamp":"2025-08-16 23:07:44:744"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-gt.vercel.app\u001b[39m","timestamp":"2025-08-16 23:07:44:744"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/students/profile - 500 - 2ms - ::1\u001b[39m","timestamp":"2025-08-16 23:07:44:744"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/students/submissions - ::1\u001b[39m","timestamp":"2025-08-16 23:07:44:744"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-gt.vercel.app\u001b[39m","timestamp":"2025-08-16 23:07:44:744"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/students/submissions - 500 - 1ms - ::1\u001b[39m","timestamp":"2025-08-16 23:07:44:744"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/assignments/student - ::1\u001b[39m","timestamp":"2025-08-16 23:07:44:744"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-gt.vercel.app\u001b[39m","timestamp":"2025-08-16 23:07:44:744"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/assignments/student - 500 - 0ms - ::1\u001b[39m","timestamp":"2025-08-16 23:07:44:744"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 116\u001b[39m","timestamp":"2025-08-16 23:07:44:744"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/students/subjects - ::1\u001b[39m","timestamp":"2025-08-16 23:07:44:744"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-gt.vercel.app\u001b[39m","timestamp":"2025-08-16 23:07:44:744"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/students/subjects - 500 - 1ms - ::1\u001b[39m","timestamp":"2025-08-16 23:07:44:744"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/students/profile - ::1\u001b[39m","timestamp":"2025-08-16 23:07:44:744"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-gt.vercel.app\u001b[39m","timestamp":"2025-08-16 23:07:44:744"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/students/profile - 500 - 0ms - ::1\u001b[39m","timestamp":"2025-08-16 23:07:44:744"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mStarting Evalis Server...\u001b[39m","timestamp":"2025-08-16 23:08:50:850"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mEnvironment: development\u001b[39m","timestamp":"2025-08-16 23:08:50:850"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mDatabase configured: Yes\u001b[39m","timestamp":"2025-08-16 23:08:50:850"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mPort: 3000\u001b[39m","timestamp":"2025-08-16 23:08:50:850"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mSyncing database in development mode...\u001b[39m","timestamp":"2025-08-16 23:08:52:852"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 117\u001b[39m","timestamp":"2025-08-16 23:08:56:856"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-16 23:08:56:856"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - 204 - 12ms - ::1\u001b[39m","timestamp":"2025-08-16 23:08:56:856"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-16 23:08:56:856"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mSession ID mismatch for user T001. Expected different session. Enforcing single session.\u001b[39m","timestamp":"2025-08-16 23:08:56:856"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /api/auth/status - 401 - 24ms - ::1\u001b[39m","timestamp":"2025-08-16 23:08:56:856"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-16 23:08:56:856"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mSession ID mismatch for user T001. Expected different session. Enforcing single session.\u001b[39m","timestamp":"2025-08-16 23:08:56:856"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /api/auth/status - 401 - 1ms - ::1\u001b[39m","timestamp":"2025-08-16 23:08:56:856"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 118\u001b[39m","timestamp":"2025-08-16 23:08:56:856"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-16 23:08:56:856"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mSession ID mismatch for user T001. Expected different session. Enforcing single session.\u001b[39m","timestamp":"2025-08-16 23:08:56:856"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /api/auth/status - 401 - 0ms - ::1\u001b[39m","timestamp":"2025-08-16 23:08:56:856"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-16 23:08:56:856"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mSession ID mismatch for user T001. Expected different session. Enforcing single session.\u001b[39m","timestamp":"2025-08-16 23:08:56:856"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /api/auth/status - 401 - 1ms - ::1\u001b[39m","timestamp":"2025-08-16 23:08:56:856"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-16 23:09:00:90"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mSession ID mismatch for user T001. Expected different session. Enforcing single session.\u001b[39m","timestamp":"2025-08-16 23:09:00:90"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /api/auth/status - 401 - 9ms - ::1\u001b[39m","timestamp":"2025-08-16 23:09:00:90"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-16 23:09:00:90"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mSession ID mismatch for user T001. Expected different session. Enforcing single session.\u001b[39m","timestamp":"2025-08-16 23:09:00:90"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /api/auth/status - 401 - 1ms - ::1\u001b[39m","timestamp":"2025-08-16 23:09:00:90"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/teacher/login - ::1\u001b[39m","timestamp":"2025-08-16 23:09:03:93"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/teacher/login - 204 - 3ms - ::1\u001b[39m","timestamp":"2025-08-16 23:09:03:93"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mPOST /api/auth/teacher/login - ::1\u001b[39m","timestamp":"2025-08-16 23:09:03:93"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mTeacher login attempt with email: anantmishra249@gmail.com, ID: undefined, Firebase token: No\u001b[39m","timestamp":"2025-08-16 23:09:03:93"}
+{"email":"anantmishra249@gmail.com","level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mSearching for teacher with:\u001b[39m","timestamp":"2025-08-16 23:09:03:93"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mTeacher found: Yes\u001b[39m","timestamp":"2025-08-16 23:09:04:94"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mTeacher ID: T001, Name: Anant Mishra, Email: anantmishra249@gmail.com\u001b[39m","timestamp":"2025-08-16 23:09:04:94"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mFirebase authentication successful for teacher: anantmishra249@gmail.com\u001b[39m","timestamp":"2025-08-16 23:09:05:95"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mUser T001 already has an active session, invalidating previous session\u001b[39m","timestamp":"2025-08-16 23:09:05:95"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mCreated new session for user T001 with role teacher\u001b[39m","timestamp":"2025-08-16 23:09:05:95"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mTeacher authentication successful via firebase: T001\u001b[39m","timestamp":"2025-08-16 23:09:05:95"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mPOST /teacher/login - 200 - 1544ms - ::1\u001b[39m","timestamp":"2025-08-16 23:09:05:95"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-16 23:09:05:95"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/teachers/subjects - ::1\u001b[39m","timestamp":"2025-08-16 23:09:05:95"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/teachers/subjects - 204 - 1ms - ::1\u001b[39m","timestamp":"2025-08-16 23:09:05:95"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 119\u001b[39m","timestamp":"2025-08-16 23:09:05:95"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 120\u001b[39m","timestamp":"2025-08-16 23:09:05:95"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/teachers/batches - ::1\u001b[39m","timestamp":"2025-08-16 23:09:05:95"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/teachers/batches - 204 - 0ms - ::1\u001b[39m","timestamp":"2025-08-16 23:09:05:95"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 121\u001b[39m","timestamp":"2025-08-16 23:09:05:95"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/teachers/T001/students - ::1\u001b[39m","timestamp":"2025-08-16 23:09:05:95"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/teachers/T001/students - 204 - 0ms - ::1\u001b[39m","timestamp":"2025-08-16 23:09:05:95"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 122\u001b[39m","timestamp":"2025-08-16 23:09:05:95"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/assignments/teacher - ::1\u001b[39m","timestamp":"2025-08-16 23:09:05:95"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/assignments/teacher - 204 - 0ms - ::1\u001b[39m","timestamp":"2025-08-16 23:09:05:95"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /api/teachers/subjects - ::1\u001b[39m","timestamp":"2025-08-16 23:09:05:95"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mAuth middleware checking token...\u001b[39m","timestamp":"2025-08-16 23:09:05:95"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mHeaders:\u001b[39m","timestamp":"2025-08-16 23:09:05:95"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/submissions/teacher/T001 - ::1\u001b[39m","timestamp":"2025-08-16 23:09:05:95"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/submissions/teacher/T001 - 204 - 0ms - ::1\u001b[39m","timestamp":"2025-08-16 23:09:05:95"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /api/teachers/batches - ::1\u001b[39m","timestamp":"2025-08-16 23:09:05:95"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mAuth middleware checking token...\u001b[39m","timestamp":"2025-08-16 23:09:05:95"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mHeaders:\u001b[39m","timestamp":"2025-08-16 23:09:05:95"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /api/teachers/T001/students - ::1\u001b[39m","timestamp":"2025-08-16 23:09:05:95"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mAuth middleware checking token...\u001b[39m","timestamp":"2025-08-16 23:09:05:95"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mHeaders:\u001b[39m","timestamp":"2025-08-16 23:09:05:95"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /api/assignments/teacher - ::1\u001b[39m","timestamp":"2025-08-16 23:09:05:95"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mAuth middleware checking token...\u001b[39m","timestamp":"2025-08-16 23:09:05:95"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mHeaders:\u001b[39m","timestamp":"2025-08-16 23:09:05:95"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /api/submissions/teacher/T001 - ::1\u001b[39m","timestamp":"2025-08-16 23:09:05:95"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mAuth middleware checking token...\u001b[39m","timestamp":"2025-08-16 23:09:05:95"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mHeaders:\u001b[39m","timestamp":"2025-08-16 23:09:05:95"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /status - 200 - 96ms - ::1\u001b[39m","timestamp":"2025-08-16 23:09:05:95"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mUser authenticated as teacher:\u001b[39m","timestamp":"2025-08-16 23:09:05:95"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mUser authenticated as teacher:\u001b[39m","timestamp":"2025-08-16 23:09:05:95"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mUser authenticated as teacher:\u001b[39m","timestamp":"2025-08-16 23:09:05:95"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mUser authenticated as teacher:\u001b[39m","timestamp":"2025-08-16 23:09:05:95"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mUser authenticated as teacher:\u001b[39m","timestamp":"2025-08-16 23:09:05:95"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mDatabase synced successfully\u001b[39m","timestamp":"2025-08-16 23:09:05:95"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mCORS allowed (base) origins: http://localhost:3000, http://localhost:5173, http://localhost:5174, http://localhost:5175\u001b[39m","timestamp":"2025-08-16 23:09:05:95"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mServing uploads from:\u001b[39m","timestamp":"2025-08-16 23:09:05:95"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mAlso serving uploads from: server/uploads (relative path)\u001b[39m","timestamp":"2025-08-16 23:09:05:95"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mAttempting candidate ports (PORT_CANDIDATES): 3000, 3001, 3002\u001b[39m","timestamp":"2025-08-16 23:09:05:95"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mPort 3000 is in use (single-attempt mode); moving to next candidate if available.\u001b[39m","timestamp":"2025-08-16 23:09:05:95"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mConnection closed. Total connections: -1\u001b[39m","timestamp":"2025-08-16 23:09:05:95"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mFailed to bind candidate port 3000: EADDRINUSE\u001b[39m","timestamp":"2025-08-16 23:09:05:95"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mPort 3001 is in use (single-attempt mode); moving to next candidate if available.\u001b[39m","timestamp":"2025-08-16 23:09:05:95"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mConnection closed. Total connections: -1\u001b[39m","timestamp":"2025-08-16 23:09:05:95"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mFailed to bind candidate port 3001: EADDRINUSE\u001b[39m","timestamp":"2025-08-16 23:09:05:95"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mServer running in development mode on port 3002\u001b[39m","timestamp":"2025-08-16 23:09:05:95"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mServer started on one of the candidate ports successfully.\u001b[39m","timestamp":"2025-08-16 23:09:05:95"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /subjects - 304 - 595ms - ::1\u001b[39m","timestamp":"2025-08-16 23:09:05:95"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /teacher - 200 - 704ms - ::1\u001b[39m","timestamp":"2025-08-16 23:09:05:95"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /teacher/T001 - 200 - 822ms - ::1\u001b[39m","timestamp":"2025-08-16 23:09:06:96"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /batches - 304 - 852ms - ::1\u001b[39m","timestamp":"2025-08-16 23:09:06:96"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /T001/students - 304 - 966ms - ::1\u001b[39m","timestamp":"2025-08-16 23:09:06:96"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/batches/BTech2025/students - ::1\u001b[39m","timestamp":"2025-08-16 23:09:10:910"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/batches/BTech2025/students - 204 - 2ms - ::1\u001b[39m","timestamp":"2025-08-16 23:09:10:910"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /api/batches/BTech2025/students - ::1\u001b[39m","timestamp":"2025-08-16 23:09:10:910"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mAuth middleware checking token...\u001b[39m","timestamp":"2025-08-16 23:09:10:910"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mHeaders:\u001b[39m","timestamp":"2025-08-16 23:09:10:910"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mUser authenticated from cache: T001, role: teacher\u001b[39m","timestamp":"2025-08-16 23:09:10:910"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /BTech2025/students - 200 - 182ms - ::1\u001b[39m","timestamp":"2025-08-16 23:09:10:910"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /api/teachers/T001/students - ::1\u001b[39m","timestamp":"2025-08-16 23:09:11:911"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mAuth middleware checking token...\u001b[39m","timestamp":"2025-08-16 23:09:11:911"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mHeaders:\u001b[39m","timestamp":"2025-08-16 23:09:11:911"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mUser authenticated from cache: T001, role: teacher\u001b[39m","timestamp":"2025-08-16 23:09:11:911"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /T001/students - 304 - 365ms - ::1\u001b[39m","timestamp":"2025-08-16 23:09:11:911"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mStarting Evalis Server...\u001b[39m","timestamp":"2025-08-16 23:11:47:1147"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mStarting Evalis Server...\u001b[39m","timestamp":"2025-08-16 23:11:47:1147"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mEnvironment: development\u001b[39m","timestamp":"2025-08-16 23:11:47:1147"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mDatabase configured: Yes\u001b[39m","timestamp":"2025-08-16 23:11:47:1147"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mPort: 3000\u001b[39m","timestamp":"2025-08-16 23:11:47:1147"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mEnvironment: development\u001b[39m","timestamp":"2025-08-16 23:11:47:1147"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mDatabase configured: Yes\u001b[39m","timestamp":"2025-08-16 23:11:47:1147"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mPort: 3000\u001b[39m","timestamp":"2025-08-16 23:11:47:1147"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mStarting Evalis Server...\u001b[39m","timestamp":"2025-08-16 23:11:49:1149"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mEnvironment: development\u001b[39m","timestamp":"2025-08-16 23:11:49:1149"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mDatabase configured: Yes\u001b[39m","timestamp":"2025-08-16 23:11:49:1149"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mPort: 3000\u001b[39m","timestamp":"2025-08-16 23:11:49:1149"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mStarting Evalis Server...\u001b[39m","timestamp":"2025-08-16 23:11:49:1149"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mEnvironment: development\u001b[39m","timestamp":"2025-08-16 23:11:49:1149"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mDatabase configured: Yes\u001b[39m","timestamp":"2025-08-16 23:11:49:1149"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mPort: 3000\u001b[39m","timestamp":"2025-08-16 23:11:49:1149"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mSyncing database in development mode...\u001b[39m","timestamp":"2025-08-16 23:11:50:1150"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mSyncing database in development mode...\u001b[39m","timestamp":"2025-08-16 23:11:50:1150"}
+{"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError starting server: Unknown constraint error\u001b[39m","timestamp":"2025-08-16 23:11:52:1152"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mDatabase synced successfully\u001b[39m","timestamp":"2025-08-16 23:12:04:124"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mCORS allowed (base) origins: http://localhost:3000, http://localhost:5173, http://localhost:5174, http://localhost:5175\u001b[39m","timestamp":"2025-08-16 23:12:04:124"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mServing uploads from:\u001b[39m","timestamp":"2025-08-16 23:12:04:124"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mAlso serving uploads from: server/uploads (relative path)\u001b[39m","timestamp":"2025-08-16 23:12:04:124"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mAttempting candidate ports (PORT_CANDIDATES): 3000, 3001, 3002\u001b[39m","timestamp":"2025-08-16 23:12:04:124"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mPort 3000 is in use (single-attempt mode); moving to next candidate if available.\u001b[39m","timestamp":"2025-08-16 23:12:04:124"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mConnection closed. Total connections: -1\u001b[39m","timestamp":"2025-08-16 23:12:04:124"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mFailed to bind candidate port 3000: EADDRINUSE\u001b[39m","timestamp":"2025-08-16 23:12:04:124"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mServer running in development mode on port 3001\u001b[39m","timestamp":"2025-08-16 23:12:04:124"}
+{"level":"\u001b[32minfo\u001b[39m","message":"\u001b[32mServer started on one of the candidate ports successfully.\u001b[39m","timestamp":"2025-08-16 23:12:04:124"}

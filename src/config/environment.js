@@ -44,8 +44,16 @@ const getApiBaseUrl = () => ({
   production: '/api'
 }[NODE_ENV]);
 
+// Function to get the correct base URL for files and static assets
+const getFileBaseUrl = () => ({
+  development: explicitBase || `http://localhost:${devPort}`,
+  test: explicitBase || `http://localhost:${devPort}`,
+  production: '' // Use relative URLs in production (same domain)
+}[NODE_ENV]);
+
 // API URLs based on environment (runtime-friendly for dev)
 const API_BASE_URL = getApiBaseUrl();
+const FILE_BASE_URL = getFileBaseUrl();
 
 // Admin API now unified with main API (previous separate 5003 server disabled)
 const ADMIN_API_BASE_URL = API_BASE_URL;
@@ -53,6 +61,7 @@ const ADMIN_API_BASE_URL = API_BASE_URL;
 // Export environment configuration
 const config = {
   API_BASE_URL,
+  FILE_BASE_URL,
   ADMIN_API_BASE_URL,
   API_ENDPOINTS: {
     AUTH: {
@@ -88,6 +97,16 @@ const config = {
     TOKEN_STORAGE_KEY: 'userToken',
     USER_STORAGE_KEY: 'user',
     CURRENT_USER_KEY: 'currentUser',
+  },
+  // Helper function to get file URLs with correct base
+  getFileUrl: (fileUrl) => {
+    if (!fileUrl) return '';
+    // If fileUrl is already absolute, use as-is
+    if (fileUrl.startsWith('http://') || fileUrl.startsWith('https://')) {
+      return fileUrl;
+    }
+    // Otherwise, prepend the appropriate base URL
+    return `${FILE_BASE_URL}${fileUrl}`;
   }
 };
 

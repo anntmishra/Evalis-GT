@@ -246,7 +246,7 @@ const StudentPortal: React.FC = () => {
             if (submission) {
                 // If submission has a file, open it
                 if (submission.fileUrl) {
-                    window.open(`http://localhost:3000${submission.fileUrl}`, '_blank');
+                    window.open(config.getFileUrl(submission.fileUrl), '_blank');
                     showNotification("Opening your submission file...", "success");
                 } else {
                     // Show submission details in modal
@@ -280,7 +280,7 @@ const StudentPortal: React.FC = () => {
                 // Construct full URL for graded PDF
                 const fullUrl = submission.gradedFileUrl.startsWith('http') 
                     ? submission.gradedFileUrl 
-                    : `http://localhost:3000${submission.gradedFileUrl}`;
+                    : config.getFileUrl(submission.gradedFileUrl);
                 
                 console.log('Opening graded file URL:', fullUrl);
                 // Open graded PDF with annotations in a new tab
@@ -851,7 +851,7 @@ const StudentPortal: React.FC = () => {
                                                                             variant="outline"
                                                                             size="sm"
                                                                             className="border-blue-300 text-blue-700 hover:bg-blue-100"
-                                                                            onClick={() => window.open(`http://localhost:3000${assignment.fileUrl}`, '_blank')}
+                                                                            onClick={() => window.open(config.getFileUrl(assignment.fileUrl), '_blank')}
                                                                         >
                                                                             <Download className="h-4 w-4 mr-1" />
                                                                             Download Question Paper
@@ -1133,7 +1133,7 @@ const StudentPortal: React.FC = () => {
                                                                         variant="outline"
                                                                         size="sm"
                                                                         className="border-blue-300 text-blue-700 hover:bg-blue-100"
-                                                                        onClick={() => window.open(`http://localhost:3000${submission.fileUrl}`, '_blank')}
+                                                                        onClick={() => window.open(config.getFileUrl(submission.fileUrl || ''), '_blank')}
                                                                     >
                                                                         <Download className="h-4 w-4 mr-1" />
                                                                         Download
@@ -1490,7 +1490,7 @@ const StudentPortal: React.FC = () => {
                                                 variant="outline"
                                                 size="sm"
                                                 className="border-blue-300 text-blue-700 hover:bg-blue-100"
-                                                onClick={() => window.open(`http://localhost:3000${viewSubmissionModal.submission?.fileUrl}`, '_blank')}
+                                                onClick={() => window.open(config.getFileUrl(viewSubmissionModal.submission?.fileUrl || ''), '_blank')}
                                             >
                                                 <Eye className="h-4 w-4 mr-1" />
                                                 Open File
