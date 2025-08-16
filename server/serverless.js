@@ -9,23 +9,50 @@ const { rateLimit } = require('./middleware/rateLimitMiddleware');
 // Load environment variables
 dotenv.config({ path: path.join(__dirname, '../.env') });
 
-// Import routes
-const authRoutes = require('./routes/authRoutes');
-const studentRoutes = require('./routes/studentRoutes');
-const teacherRoutes = require('./routes/teacherRoutes');
-const subjectRoutes = require('./routes/subjectRoutes');
-const batchRoutes = require('./routes/batchRoutes');
-const submissionRoutes = require('./routes/submissionRoutes');
-const adminRoutes = require('./routes/adminRoutes');
-const semesterRoutes = require('./routes/semesterRoutes');
-const assignmentRoutes = require('./routes/assignmentRoutes');
-const healthRoutes = require('./routes/healthRoutes');
+// Import routes with error handling
+let authRoutes, studentRoutes, teacherRoutes, subjectRoutes, batchRoutes;
+let submissionRoutes, adminRoutes, semesterRoutes, assignmentRoutes, healthRoutes;
+
+try {
+  authRoutes = require('./routes/authRoutes');
+  studentRoutes = require('./routes/studentRoutes');
+  teacherRoutes = require('./routes/teacherRoutes');
+  subjectRoutes = require('./routes/subjectRoutes');
+  batchRoutes = require('./routes/batchRoutes');
+  submissionRoutes = require('./routes/submissionRoutes');
+  adminRoutes = require('./routes/adminRoutes');
+  semesterRoutes = require('./routes/semesterRoutes');
+  assignmentRoutes = require('./routes/assignmentRoutes');
+  healthRoutes = require('./routes/healthRoutes');
+  console.log('✅ All route modules imported successfully');
+} catch (error) {
+  console.error('❌ Error importing route modules:', error.message);
+  // Create fallback routes
+  const fallbackRouter = express.Router();
+  fallbackRouter.use('*', (req, res) => {
+    res.status(500).json({
+      error: 'Route import failed',
+      message: error.message,
+      path: req.originalUrl
+    });
+  });
+  
+  authRoutes = studentRoutes = teacherRoutes = subjectRoutes = batchRoutes = 
+  submissionRoutes = adminRoutes = semesterRoutes = assignmentRoutes = healthRoutes = fallbackRouter;
+}
 
 // Create Express app
 const app = express();
 
-// Connect to database
-connectDB();
+// Connect to database with error handling
+let dbConnected = false;
+try {
+  connectDB();
+  dbConnected = true;
+  console.log('✅ Database connection initiated');
+} catch (error) {
+  console.error('❌ Database connection failed:', error.message);
+}
 
 // CORS configuration for Vercel
 const corsOptions = {
@@ -72,17 +99,31 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// API Routes
-app.use('/api/health', healthRoutes);
-app.use('/api/auth', authRoutes);
-app.use('/api/students', studentRoutes);
-app.use('/api/teachers', teacherRoutes);
-app.use('/api/subjects', subjectRoutes);
-app.use('/api/batches', batchRoutes);
-app.use('/api/submissions', submissionRoutes);
-app.use('/api/admin', adminRoutes);
-app.use('/api/semesters', semesterRoutes);
-app.use('/api/assignments', assignmentRoutes);
+// API Routes with error handling
+try {
+  app.use('/api/health', healthRoutes);
+  app.use('/api/auth', authRoutes);
+  app.use('/api/students', studentRoutes);
+  app.use('/api/teachers', teacherRoutes);
+  app.use('/api/subjects', subjectRoutes);
+  app.use('/api/batches', batchRoutes);
+  app.use('/api/submissions', submissionRoutes);
+  app.use('/api/admin', adminRoutes);
+  app.use('/api/semesters', semesterRoutes);
+  app.use('/api/assignments', assignmentRoutes);
+  console.log('✅ All routes loaded successfully');
+} catch (error) {
+  console.error('❌ Error loading routes:', error.message);
+  
+  // Fallback route for when main routes fail
+  app.use('/api/*', (req, res) => {
+    res.status(500).json({
+      error: 'Server configuration error',
+      message: error.message,
+      path: req.originalUrl
+    });
+  });
+}
 
 // Error handling middleware
 app.use(notFound);
