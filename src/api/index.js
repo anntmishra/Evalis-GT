@@ -12,6 +12,20 @@ const api = axios.create({
   timeout: 10000, // 10 second timeout
 });
 
+// Runtime safety: if we are on a deployed (non-localhost) origin but the baseURL still points to localhost, override to relative /api
+if (typeof window !== 'undefined') {
+  const hostIsLocal = /localhost|127\.0\.0\.1/.test(window.location.host);
+  const baseIsLocal = /localhost|127\.0\.0\.1/.test(api.defaults.baseURL || '');
+  if (!hostIsLocal && baseIsLocal) {
+    // eslint-disable-next-line no-console
+    console.warn('[api] Overriding localhost API base in deployed environment -> /api');
+    api.defaults.baseURL = '/api';
+  }
+  // Log final base for debugging (only once)
+  // eslint-disable-next-line no-console
+  console.log('[api] Effective baseURL:', api.defaults.baseURL);
+}
+
 // Get the latest token from storage
 const getAuthToken = () => {
   // First try to get Firebase token since that's more likely to be valid
