@@ -3,13 +3,10 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "framework": "vite",
-  "functions": {
-    "server/api/*.js": {}
-  },
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "/server/serverless.js"
+      "destination": "/api/index.js"
     },
     {
       "source": "/(.*)",

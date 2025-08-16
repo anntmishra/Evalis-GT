@@ -23600,3 +23600,16 @@
 {"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError starting server: Unknown constraint error\u001b[39m","timestamp":"2025-08-17 00:56:50:5650"}
 {"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mPort 3000 is in use (single-attempt mode); moving to next candidate if available.\u001b[39m","timestamp":"2025-08-17 00:57:01:571"}
 {"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mFailed to bind candidate port 3000: EADDRINUSE\u001b[39m","timestamp":"2025-08-17 00:57:01:571"}
+{"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError starting server: Unknown constraint error\u001b[39m","timestamp":"2025-08-17 01:00:18:018"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mPort 3000 is in use (single-attempt mode); moving to next candidate if available.\u001b[39m","timestamp":"2025-08-17 01:00:18:018"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mFailed to bind candidate port 3000: EADDRINUSE\u001b[39m","timestamp":"2025-08-17 01:00:18:018"}
+{"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError starting server: Unknown constraint error\u001b[39m","timestamp":"2025-08-17 01:00:31:031"}
+{"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError starting server: Unknown constraint error\u001b[39m","timestamp":"2025-08-17 01:00:40:040"}
+{"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError starting server: Unknown constraint error\u001b[39m","timestamp":"2025-08-17 01:00:53:053"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mPort 3000 is in use (single-attempt mode); moving to next candidate if available.\u001b[39m","timestamp":"2025-08-17 01:01:05:15"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mFailed to bind candidate port 3000: EADDRINUSE\u001b[39m","timestamp":"2025-08-17 01:01:05:15"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 132\u001b[39m","timestamp":"2025-08-17 01:01:13:113"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-17 01:01:13:113"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-gm1x4bnie-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:01:13:113"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - 500 - 10ms - ::1\u001b[39m","timestamp":"2025-08-17 01:01:13:113"}
+{"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError starting server: Unknown constraint error\u001b[39m","timestamp":"2025-08-17 01:01:20:120"}
