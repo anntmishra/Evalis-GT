@@ -21,7 +21,7 @@ try {
     viteEnv = process.env || {};
   }
 }
-const explicitBase = viteEnv?.VITE_API_BASE_URL || null;
+let explicitBase = viteEnv?.VITE_API_BASE_URL || null;
 const explicitPort = viteEnv?.VITE_API_PORT || null;
 
 // Detect dev API port dynamically: if running Vite (5173/5174 etc.) prefer 3000 (our server port)
@@ -38,10 +38,28 @@ const devPort = explicitPort || detectedDevPort;
 // Function to get the appropriate API base URL.
 // Removed legacy override that forced admins to port 5003 (no server listening -> Network Error).
 // All roles now share the same API in dev unless explicitly overridden via VITE_API_BASE_URL.
+// In production builds, ignore explicitly configured localhost API base (common misconfig during build)
+if (NODE_ENV === 'production' && explicitBase && /localhost|127\.0\.0\.1/i.test(explicitBase)) {
+  // eslint-disable-next-line no-console
+  console.warn('[environment] Ignoring VITE_API_BASE_URL pointing to localhost in production build:', explicitBase);
+  explicitBase = null;
+}
+
+// Derive production base dynamically to work on any Vercel preview/custom domain when no explicit base
+const resolveProdBase = () => {
+  if (explicitBase) return explicitBase.endsWith('/api') ? explicitBase : `${explicitBase.replace(/\/$/, '')}/api`;
+  try {
+    if (typeof window !== 'undefined' && window.location) {
+      return '/api'; // relative keeps same origin (works with rewrites)
+    }
+  } catch (_) { /* ignore */ }
+  return '/api';
+};
+
 const getApiBaseUrl = () => ({
   development: explicitBase || `http://localhost:${devPort}/api`,
   test: explicitBase || `http://localhost:${devPort}/api`,
-  production: '/api'
+  production: resolveProdBase()
 }[NODE_ENV]);
 
 // Function to get the correct base URL for files and static assets
