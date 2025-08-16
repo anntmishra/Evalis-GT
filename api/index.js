@@ -1,6 +1,7 @@
 // Vercel serverless function handler
 // This file routes all API requests to our Express serverless handler
 
-const app = require('../server/serverless');
+// Try the simple version first for debugging
+const app = require('../server/serverless-simple');
 
 module.exports = app;

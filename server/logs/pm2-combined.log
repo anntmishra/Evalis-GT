@@ -3898,3 +3898,371 @@
 2025-08-14 02:31:15 +05:30: 2025-08-14 02:31:15:3115 [33m[33mwarn[33m[39m: [33m[33mPort 3000 is in use, trying port 3001...[33m[39m
 2025-08-14 02:31:16 +05:30: 2025-08-14 02:31:16:3116 [33m[33mwarn[33m[39m: [33m[33mPort 3000 is in use, trying port 3001...[33m[39m
 2025-08-14 02:31:17 +05:30: 2025-08-14 02:31:17:3117 [33m[33mwarn[33m[39m: [33m[33mPort 3000 is in use, trying port 3001...[33m[39m
+2025-08-17 02:59:28 +05:30: [90m[DB] Initializing Sequelize (serverless=false)[39m
+2025-08-17 02:59:28 +05:30: [36m==================================================[39m
+2025-08-17 02:59:28 +05:30: [1m[36m🚀 Evalis-GT Production Server Starting[39m[22m
+2025-08-17 02:59:28 +05:30: [36m==================================================[39m
+2025-08-17 02:59:28 +05:30: [33mEnvironment: PRODUCTION[39m
+2025-08-17 02:59:28 +05:30: [33mPort: 3000[39m
+2025-08-17 02:59:28 +05:30: [90mProcess ID: 1070[39m
+2025-08-17 02:59:28 +05:30: [90mNode Version: v24.5.0[39m
+2025-08-17 02:59:28 +05:30: [90mPlatform: darwin arm64[39m
+2025-08-17 02:59:28 +05:30: [90mStarted at: 2025-08-16T21:29:28.943Z[39m
+2025-08-17 02:59:28 +05:30: [36m==================================================[39m
+2025-08-17 02:59:28 +05:30: [33mInitializing database connection...[39m
+2025-08-17 02:59:28 +05:30: [33mDatabase configuration:[39m
+2025-08-17 02:59:28 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-17 02:59:28 +05:30: [90mConnecting with URL (redacted): postgresql://neondb_owner:********@ep-autumn-bonus-a15zt06x-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require[39m
+2025-08-17 02:59:28 +05:30: [90m[DB] Attempting to connect to database...[39m
+2025-08-17 02:59:29 +05:30: [32m[DB] Successfully connected to database[39m
+2025-08-17 02:59:29 +05:30: [33m[DB] Disconnecting from database...[39m
+2025-08-17 02:59:29 +05:30: [90m[DB] Attempting to connect to database...[39m
+2025-08-17 02:59:30 +05:30: [32m[DB] Successfully connected to database[39m
+2025-08-17 02:59:30 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-17 02:59:30 +05:30: [90m[DB] Pool monitoring not available for this Sequelize version[39m
+2025-08-17 02:59:30 +05:30: [32mHealth monitoring endpoints configured:[39m
+2025-08-17 02:59:30 +05:30: [90m  GET /api/health - Basic health check[39m
+2025-08-17 02:59:30 +05:30: [90m  GET /api/health/detailed - Detailed health with metrics[39m
+2025-08-17 02:59:30 +05:30: [90m  GET /api/ready - Readiness check for load balancers[39m
+2025-08-17 02:59:30 +05:30: [90m  GET /api/live - Liveness check for containers[39m
+2025-08-17 02:59:30 +05:30: [32mDatabase connection established successfully[39m
+2025-08-17 02:59:30 +05:30: [31mPort 3000 is already in use. Please choose a different port.[39m
+2025-08-17 02:59:30 +05:30: [90m[DB] Initializing Sequelize (serverless=false)[39m
+2025-08-17 02:59:30 +05:30: [36m==================================================[39m
+2025-08-17 02:59:30 +05:30: [1m[36m🚀 Evalis-GT Production Server Starting[39m[22m
+2025-08-17 02:59:30 +05:30: [36m==================================================[39m
+2025-08-17 02:59:30 +05:30: [33mEnvironment: PRODUCTION[39m
+2025-08-17 02:59:30 +05:30: [33mPort: 3000[39m
+2025-08-17 02:59:30 +05:30: [90mProcess ID: 1083[39m
+2025-08-17 02:59:30 +05:30: [90mNode Version: v24.5.0[39m
+2025-08-17 02:59:30 +05:30: [90mPlatform: darwin arm64[39m
+2025-08-17 02:59:30 +05:30: [90mStarted at: 2025-08-16T21:29:30.818Z[39m
+2025-08-17 02:59:30 +05:30: [36m==================================================[39m
+2025-08-17 02:59:30 +05:30: [33mInitializing database connection...[39m
+2025-08-17 02:59:30 +05:30: [33mDatabase configuration:[39m
+2025-08-17 02:59:30 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-17 02:59:30 +05:30: [90mConnecting with URL (redacted): postgresql://neondb_owner:********@ep-autumn-bonus-a15zt06x-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require[39m
+2025-08-17 02:59:30 +05:30: [90m[DB] Attempting to connect to database...[39m
+2025-08-17 02:59:31 +05:30: [32m[DB] Successfully connected to database[39m
+2025-08-17 02:59:31 +05:30: [33m[DB] Disconnecting from database...[39m
+2025-08-17 02:59:31 +05:30: [90m[DB] Attempting to connect to database...[39m
+2025-08-17 02:59:32 +05:30: [32m[DB] Successfully connected to database[39m
+2025-08-17 02:59:32 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-17 02:59:32 +05:30: [90m[DB] Pool monitoring not available for this Sequelize version[39m
+2025-08-17 02:59:32 +05:30: [32mHealth monitoring endpoints configured:[39m
+2025-08-17 02:59:32 +05:30: [90m  GET /api/health - Basic health check[39m
+2025-08-17 02:59:32 +05:30: [90m  GET /api/health/detailed - Detailed health with metrics[39m
+2025-08-17 02:59:32 +05:30: [90m  GET /api/ready - Readiness check for load balancers[39m
+2025-08-17 02:59:32 +05:30: [90m  GET /api/live - Liveness check for containers[39m
+2025-08-17 02:59:32 +05:30: [32mDatabase connection established successfully[39m
+2025-08-17 02:59:32 +05:30: [31mPort 3000 is already in use. Please choose a different port.[39m
+2025-08-17 02:59:40 +05:30: [90m[DB] Initializing Sequelize (serverless=false)[39m
+2025-08-17 02:59:41 +05:30: [36m==================================================[39m
+2025-08-17 02:59:41 +05:30: [1m[36m🚀 Evalis-GT Production Server Starting[39m[22m
+2025-08-17 02:59:41 +05:30: [36m==================================================[39m
+2025-08-17 02:59:41 +05:30: [33mEnvironment: PRODUCTION[39m
+2025-08-17 02:59:41 +05:30: [33mPort: 3000[39m
+2025-08-17 02:59:41 +05:30: [90mProcess ID: 1176[39m
+2025-08-17 02:59:41 +05:30: [90mNode Version: v24.5.0[39m
+2025-08-17 02:59:41 +05:30: [90mPlatform: darwin arm64[39m
+2025-08-17 02:59:41 +05:30: [90mStarted at: 2025-08-16T21:29:41.037Z[39m
+2025-08-17 02:59:41 +05:30: [36m==================================================[39m
+2025-08-17 02:59:41 +05:30: [33mInitializing database connection...[39m
+2025-08-17 02:59:41 +05:30: [33mDatabase configuration:[39m
+2025-08-17 02:59:41 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-17 02:59:41 +05:30: [90mConnecting with URL (redacted): postgresql://neondb_owner:********@ep-autumn-bonus-a15zt06x-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require[39m
+2025-08-17 02:59:41 +05:30: [90m[DB] Attempting to connect to database...[39m
+2025-08-17 02:59:41 +05:30: [32m[DB] Successfully connected to database[39m
+2025-08-17 02:59:41 +05:30: [33m[DB] Disconnecting from database...[39m
+2025-08-17 02:59:41 +05:30: [90m[DB] Attempting to connect to database...[39m
+2025-08-17 02:59:42 +05:30: [90m[DB] Initializing Sequelize (serverless=false)[39m
+2025-08-17 02:59:42 +05:30: [32m[DB] Successfully connected to database[39m
+2025-08-17 02:59:42 +05:30: [36m==================================================[39m
+2025-08-17 02:59:42 +05:30: [1m[36m🚀 Evalis-GT Production Server Starting[39m[22m
+2025-08-17 02:59:42 +05:30: [36m==================================================[39m
+2025-08-17 02:59:42 +05:30: [33mEnvironment: PRODUCTION[39m
+2025-08-17 02:59:42 +05:30: [33mPort: 3000[39m
+2025-08-17 02:59:42 +05:30: [90mProcess ID: 1190[39m
+2025-08-17 02:59:42 +05:30: [90mNode Version: v24.5.0[39m
+2025-08-17 02:59:42 +05:30: [90mPlatform: darwin arm64[39m
+2025-08-17 02:59:42 +05:30: [90mStarted at: 2025-08-16T21:29:42.650Z[39m
+2025-08-17 02:59:42 +05:30: [36m==================================================[39m
+2025-08-17 02:59:42 +05:30: [33mInitializing database connection...[39m
+2025-08-17 02:59:42 +05:30: [33mDatabase configuration:[39m
+2025-08-17 02:59:42 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-17 02:59:42 +05:30: [90mConnecting with URL (redacted): postgresql://neondb_owner:********@ep-autumn-bonus-a15zt06x-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require[39m
+2025-08-17 02:59:42 +05:30: [90m[DB] Attempting to connect to database...[39m
+2025-08-17 02:59:42 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-17 02:59:42 +05:30: [90m[DB] Pool monitoring not available for this Sequelize version[39m
+2025-08-17 02:59:42 +05:30: [32mHealth monitoring endpoints configured:[39m
+2025-08-17 02:59:42 +05:30: [90m  GET /api/health - Basic health check[39m
+2025-08-17 02:59:42 +05:30: [90m  GET /api/health/detailed - Detailed health with metrics[39m
+2025-08-17 02:59:42 +05:30: [90m  GET /api/ready - Readiness check for load balancers[39m
+2025-08-17 02:59:42 +05:30: [90m  GET /api/live - Liveness check for containers[39m
+2025-08-17 02:59:42 +05:30: [32mDatabase connection established successfully[39m
+2025-08-17 02:59:42 +05:30: [31mPort 3000 is already in use. Please choose a different port.[39m
+2025-08-17 02:59:43 +05:30: [32m[DB] Successfully connected to database[39m
+2025-08-17 02:59:43 +05:30: [33m[DB] Disconnecting from database...[39m
+2025-08-17 02:59:43 +05:30: [90m[DB] Attempting to connect to database...[39m
+2025-08-17 02:59:44 +05:30: [32m[DB] Successfully connected to database[39m
+2025-08-17 02:59:44 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-17 02:59:44 +05:30: [90m[DB] Pool monitoring not available for this Sequelize version[39m
+2025-08-17 02:59:44 +05:30: [32mHealth monitoring endpoints configured:[39m
+2025-08-17 02:59:44 +05:30: [90m  GET /api/health - Basic health check[39m
+2025-08-17 02:59:44 +05:30: [90m  GET /api/health/detailed - Detailed health with metrics[39m
+2025-08-17 02:59:44 +05:30: [90m  GET /api/ready - Readiness check for load balancers[39m
+2025-08-17 02:59:44 +05:30: [90m  GET /api/live - Liveness check for containers[39m
+2025-08-17 02:59:44 +05:30: [32mDatabase connection established successfully[39m
+2025-08-17 02:59:44 +05:30: [31mPort 3000 is already in use. Please choose a different port.[39m
+2025-08-17 02:59:52 +05:30: [90m[DB] Initializing Sequelize (serverless=false)[39m
+2025-08-17 02:59:53 +05:30: [36m==================================================[39m
+2025-08-17 02:59:53 +05:30: [1m[36m🚀 Evalis-GT Production Server Starting[39m[22m
+2025-08-17 02:59:53 +05:30: [36m==================================================[39m
+2025-08-17 02:59:53 +05:30: [33mEnvironment: PRODUCTION[39m
+2025-08-17 02:59:53 +05:30: [33mPort: 3000[39m
+2025-08-17 02:59:53 +05:30: [90mProcess ID: 1330[39m
+2025-08-17 02:59:53 +05:30: [90mNode Version: v24.5.0[39m
+2025-08-17 02:59:53 +05:30: [90mPlatform: darwin arm64[39m
+2025-08-17 02:59:53 +05:30: [90mStarted at: 2025-08-16T21:29:53.124Z[39m
+2025-08-17 02:59:53 +05:30: [36m==================================================[39m
+2025-08-17 02:59:53 +05:30: [33mInitializing database connection...[39m
+2025-08-17 02:59:53 +05:30: [33mDatabase configuration:[39m
+2025-08-17 02:59:53 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-17 02:59:53 +05:30: [90mConnecting with URL (redacted): postgresql://neondb_owner:********@ep-autumn-bonus-a15zt06x-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require[39m
+2025-08-17 02:59:53 +05:30: [90m[DB] Attempting to connect to database...[39m
+2025-08-17 02:59:53 +05:30: [32m[DB] Successfully connected to database[39m
+2025-08-17 02:59:53 +05:30: [33m[DB] Disconnecting from database...[39m
+2025-08-17 02:59:54 +05:30: [90m[DB] Attempting to connect to database...[39m
+2025-08-17 02:59:54 +05:30: [90m[DB] Initializing Sequelize (serverless=false)[39m
+2025-08-17 02:59:54 +05:30: [36m==================================================[39m
+2025-08-17 02:59:54 +05:30: [1m[36m🚀 Evalis-GT Production Server Starting[39m[22m
+2025-08-17 02:59:54 +05:30: [36m==================================================[39m
+2025-08-17 02:59:54 +05:30: [33mEnvironment: PRODUCTION[39m
+2025-08-17 02:59:54 +05:30: [33mPort: 3000[39m
+2025-08-17 02:59:54 +05:30: [90mProcess ID: 1340[39m
+2025-08-17 02:59:54 +05:30: [90mNode Version: v24.5.0[39m
+2025-08-17 02:59:54 +05:30: [90mPlatform: darwin arm64[39m
+2025-08-17 02:59:54 +05:30: [90mStarted at: 2025-08-16T21:29:54.598Z[39m
+2025-08-17 02:59:54 +05:30: [36m==================================================[39m
+2025-08-17 02:59:54 +05:30: [33mInitializing database connection...[39m
+2025-08-17 02:59:54 +05:30: [33mDatabase configuration:[39m
+2025-08-17 02:59:54 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-17 02:59:54 +05:30: [90mConnecting with URL (redacted): postgresql://neondb_owner:********@ep-autumn-bonus-a15zt06x-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require[39m
+2025-08-17 02:59:54 +05:30: [90m[DB] Attempting to connect to database...[39m
+2025-08-17 02:59:54 +05:30: [32m[DB] Successfully connected to database[39m
+2025-08-17 02:59:54 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-17 02:59:54 +05:30: [90m[DB] Pool monitoring not available for this Sequelize version[39m
+2025-08-17 02:59:54 +05:30: [32mHealth monitoring endpoints configured:[39m
+2025-08-17 02:59:54 +05:30: [90m  GET /api/health - Basic health check[39m
+2025-08-17 02:59:54 +05:30: [90m  GET /api/health/detailed - Detailed health with metrics[39m
+2025-08-17 02:59:54 +05:30: [90m  GET /api/ready - Readiness check for load balancers[39m
+2025-08-17 02:59:54 +05:30: [90m  GET /api/live - Liveness check for containers[39m
+2025-08-17 02:59:54 +05:30: [32mDatabase connection established successfully[39m
+2025-08-17 02:59:54 +05:30: [31mPort 3000 is already in use. Please choose a different port.[39m
+2025-08-17 02:59:55 +05:30: [32m[DB] Successfully connected to database[39m
+2025-08-17 02:59:55 +05:30: [33m[DB] Disconnecting from database...[39m
+2025-08-17 02:59:55 +05:30: [90m[DB] Attempting to connect to database...[39m
+2025-08-17 02:59:56 +05:30: [32m[DB] Successfully connected to database[39m
+2025-08-17 02:59:56 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-17 02:59:56 +05:30: [90m[DB] Pool monitoring not available for this Sequelize version[39m
+2025-08-17 02:59:56 +05:30: [32mHealth monitoring endpoints configured:[39m
+2025-08-17 02:59:56 +05:30: [90m  GET /api/health - Basic health check[39m
+2025-08-17 02:59:56 +05:30: [90m  GET /api/health/detailed - Detailed health with metrics[39m
+2025-08-17 02:59:56 +05:30: [90m  GET /api/ready - Readiness check for load balancers[39m
+2025-08-17 02:59:56 +05:30: [90m  GET /api/live - Liveness check for containers[39m
+2025-08-17 02:59:56 +05:30: [32mDatabase connection established successfully[39m
+2025-08-17 02:59:56 +05:30: [31mPort 3000 is already in use. Please choose a different port.[39m
+2025-08-17 03:10:22 +05:30: [90m[DB] Initializing Sequelize (serverless=false)[39m
+2025-08-17 03:10:22 +05:30: [36m==================================================[39m
+2025-08-17 03:10:22 +05:30: [1m[36m🚀 Evalis-GT Production Server Starting[39m[22m
+2025-08-17 03:10:22 +05:30: [36m==================================================[39m
+2025-08-17 03:10:22 +05:30: [33mEnvironment: PRODUCTION[39m
+2025-08-17 03:10:22 +05:30: [33mPort: 3001[39m
+2025-08-17 03:10:22 +05:30: [90mProcess ID: 4681[39m
+2025-08-17 03:10:22 +05:30: [90mNode Version: v24.5.0[39m
+2025-08-17 03:10:22 +05:30: [90mPlatform: darwin arm64[39m
+2025-08-17 03:10:22 +05:30: [90mStarted at: 2025-08-16T21:40:22.267Z[39m
+2025-08-17 03:10:22 +05:30: [36m==================================================[39m
+2025-08-17 03:10:22 +05:30: [33mInitializing database connection...[39m
+2025-08-17 03:10:22 +05:30: [33mDatabase configuration:[39m
+2025-08-17 03:10:22 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-17 03:10:22 +05:30: [90mConnecting with URL (redacted): postgresql://neondb_owner:********@ep-autumn-bonus-a15zt06x-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require[39m
+2025-08-17 03:10:22 +05:30: [90m[DB] Attempting to connect to database...[39m
+2025-08-17 03:10:23 +05:30: [32m[DB] Successfully connected to database[39m
+2025-08-17 03:10:23 +05:30: [33m[DB] Disconnecting from database...[39m
+2025-08-17 03:10:23 +05:30: [90m[DB] Attempting to connect to database...[39m
+2025-08-17 03:10:24 +05:30: [32m[DB] Successfully connected to database[39m
+2025-08-17 03:10:24 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-17 03:10:24 +05:30: [90m[DB] Pool monitoring not available for this Sequelize version[39m
+2025-08-17 03:10:24 +05:30: [32mHealth monitoring endpoints configured:[39m
+2025-08-17 03:10:24 +05:30: [90m  GET /api/health - Basic health check[39m
+2025-08-17 03:10:24 +05:30: [90m  GET /api/health/detailed - Detailed health with metrics[39m
+2025-08-17 03:10:24 +05:30: [90m  GET /api/ready - Readiness check for load balancers[39m
+2025-08-17 03:10:24 +05:30: [90m  GET /api/live - Liveness check for containers[39m
+2025-08-17 03:10:24 +05:30: [32mDatabase connection established successfully[39m
+2025-08-17 03:10:24 +05:30: [32m==================================================[39m
+2025-08-17 03:10:24 +05:30: [1m[32m🚀 Evalis-GT Server running in production mode[39m[22m
+2025-08-17 03:10:24 +05:30: [32m📡 Server listening on port 3001[39m
+2025-08-17 03:10:24 +05:30: [36m🌐 Local URL: http://localhost:3001[39m
+2025-08-17 03:10:24 +05:30: [36m❤️  Health check: http://localhost:3001/api/health[39m
+2025-08-17 03:10:24 +05:30: [32m==================================================[39m
+2025-08-17 03:10:24 +05:30: [90m[DB] Initializing Sequelize (serverless=false)[39m
+2025-08-17 03:10:24 +05:30: [36m==================================================[39m
+2025-08-17 03:10:24 +05:30: [1m[36m🚀 Evalis-GT Production Server Starting[39m[22m
+2025-08-17 03:10:24 +05:30: [36m==================================================[39m
+2025-08-17 03:10:24 +05:30: [33mEnvironment: PRODUCTION[39m
+2025-08-17 03:10:24 +05:30: [33mPort: 3001[39m
+2025-08-17 03:10:24 +05:30: [90mProcess ID: 4692[39m
+2025-08-17 03:10:24 +05:30: [90mNode Version: v24.5.0[39m
+2025-08-17 03:10:24 +05:30: [90mPlatform: darwin arm64[39m
+2025-08-17 03:10:24 +05:30: [90mStarted at: 2025-08-16T21:40:24.477Z[39m
+2025-08-17 03:10:24 +05:30: [36m==================================================[39m
+2025-08-17 03:10:24 +05:30: [33mInitializing database connection...[39m
+2025-08-17 03:10:24 +05:30: [33mDatabase configuration:[39m
+2025-08-17 03:10:24 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-17 03:10:24 +05:30: [90mConnecting with URL (redacted): postgresql://neondb_owner:********@ep-autumn-bonus-a15zt06x-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require[39m
+2025-08-17 03:10:24 +05:30: [90m[DB] Attempting to connect to database...[39m
+2025-08-17 03:10:25 +05:30: [32m[DB] Successfully connected to database[39m
+2025-08-17 03:10:25 +05:30: [33m[DB] Disconnecting from database...[39m
+2025-08-17 03:10:25 +05:30: [90m[DB] Attempting to connect to database...[39m
+2025-08-17 03:10:26 +05:30: [32m[DB] Successfully connected to database[39m
+2025-08-17 03:10:26 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-17 03:10:26 +05:30: [90m[DB] Pool monitoring not available for this Sequelize version[39m
+2025-08-17 03:10:26 +05:30: [32mHealth monitoring endpoints configured:[39m
+2025-08-17 03:10:26 +05:30: [90m  GET /api/health - Basic health check[39m
+2025-08-17 03:10:26 +05:30: [90m  GET /api/health/detailed - Detailed health with metrics[39m
+2025-08-17 03:10:26 +05:30: [90m  GET /api/ready - Readiness check for load balancers[39m
+2025-08-17 03:10:26 +05:30: [90m  GET /api/live - Liveness check for containers[39m
+2025-08-17 03:10:26 +05:30: [32mDatabase connection established successfully[39m
+2025-08-17 03:10:26 +05:30: [32m==================================================[39m
+2025-08-17 03:10:26 +05:30: [1m[32m🚀 Evalis-GT Server running in production mode[39m[22m
+2025-08-17 03:10:26 +05:30: [32m📡 Server listening on port 3001[39m
+2025-08-17 03:10:26 +05:30: [36m🌐 Local URL: http://localhost:3001[39m
+2025-08-17 03:10:26 +05:30: [36m❤️  Health check: http://localhost:3001/api/health[39m
+2025-08-17 03:10:26 +05:30: [32m==================================================[39m
+2025-08-17 03:13:58 +05:30: [33mCORS blocked origin: http://localhost:3001[39m
+2025-08-17 03:13:58 +05:30: [33mCORS blocked origin: http://localhost:3001[39m
+2025-08-17 03:13:58 +05:30: [33mCORS blocked origin: http://localhost:3001[39m
+2025-08-17 03:13:58 +05:30: [33mCORS blocked origin: http://localhost:3001[39m
+2025-08-17 03:13:58 +05:30: [33mCORS blocked origin: http://localhost:3001[39m
+2025-08-17 03:13:59 +05:30: No token provided in Authorization header
+2025-08-17 03:13:59 +05:30: [31m[ERROR] 2025-08-16T21:43:59.172Z - Not authorized, no token[39m
+2025-08-17 03:13:59 +05:30: [31m[ERROR] Route: GET /api/batches[39m
+2025-08-17 03:13:59 +05:30: [31m[ERROR] Stack: Error: Not authorized, no token
+    at /Users/anantmishra/Documents/GitHub/Evalis-GT/server/middleware/authMiddleware.js:378:11
+    at asyncUtilWrap (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/express-async-handler/index.js:3:20)
+    at Layer.handle [as handle_request] (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/node_modules/express/lib/router/layer.js:95:5)
+    at next (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/node_modules/express/lib/router/layer.js:95:5)
+    at /Users/anantmishra/Documents/GitHub/Evalis-GT/server/node_modules/express/lib/router/index.js:284:15
+    at router.process_params (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/node_modules/express/lib/router/index.js:346:12)
+    at next (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/node_modules/express/lib/router/index.js:280:10)
+    at router.handle (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/node_modules/express/lib/router/index.js:175:3)[39m
+2025-08-17 03:14:07 +05:30: [33mCORS blocked origin: http://localhost:3001[39m
+2025-08-17 03:14:07 +05:30: Comparing password for admin: admin
+2025-08-17 03:14:07 +05:30: Entered password length: 8
+2025-08-17 03:14:07 +05:30: Stored password hash length: 60
+2025-08-17 03:14:08 +05:30: Password match result: false
+2025-08-17 03:14:08 +05:30: 2025-08-17 03:14:08:148 [33m[33mwarn[33m[39m: [33m[33mAdmin password mismatch for username=admin. Provided length=8 hashLen=60[33m[39m
+2025-08-17 03:14:08 +05:30: 2025-08-17 03:14:08:148 [33m[33mwarn[33m[39m: [33m[33mAdmin authentication failed for admin[33m[39m
+2025-08-17 03:14:08 +05:30: Error in admin authentication: Error: Invalid username/email or password
+    at /Users/anantmishra/Documents/GitHub/Evalis-GT/server/controllers/authController.js:348:13
+2025-08-17 03:14:08 +05:30: 2025-08-17 03:14:08:148 [31m[31merror[31m[39m: [31m[31mAdmin auth exception: Invalid username/email or password[31m[39m
+2025-08-17 03:14:08 +05:30: [31m[ERROR] 2025-08-16T21:44:08.094Z - Invalid username/email or password[39m
+2025-08-17 03:14:08 +05:30: [31m[ERROR] Route: POST /api/auth/admin/login[39m
+2025-08-17 03:14:08 +05:30: [31m[ERROR] Stack: Error: Invalid username/email or password
+    at /Users/anantmishra/Documents/GitHub/Evalis-GT/server/controllers/authController.js:348:13[39m
+2025-08-17 03:21:06 +05:30: [33mCORS blocked origin: http://localhost:3001[39m
+2025-08-17 03:21:06 +05:30: [33mCORS blocked origin: http://localhost:3001[39m
+2025-08-17 03:21:06 +05:30: [33mCORS blocked origin: http://localhost:3001[39m
+2025-08-17 03:21:06 +05:30: [33mCORS blocked origin: http://localhost:3001[39m
+2025-08-17 03:21:06 +05:30: [33mCORS blocked origin: http://localhost:3001[39m
+2025-08-17 03:21:12 +05:30: [33mCORS blocked origin: http://localhost:3001[39m
+2025-08-17 03:21:26 +05:30: [33mCORS blocked origin: http://localhost:3001[39m
+2025-08-17 03:21:26 +05:30: [33mCORS blocked origin: http://localhost:3001[39m
+2025-08-17 03:21:26 +05:30: [33mCORS blocked origin: http://localhost:3001[39m
+2025-08-17 03:21:26 +05:30: [33mCORS blocked origin: http://localhost:3001[39m
+2025-08-17 03:21:26 +05:30: [33mCORS blocked origin: http://localhost:3001[39m
+2025-08-17 03:21:32 +05:30: [33mCORS blocked origin: http://localhost:3001[39m
+2025-08-17 03:22:12 +05:30: [33mCORS blocked origin: http://localhost:3001[39m
+2025-08-17 03:22:12 +05:30: [33mCORS blocked origin: http://localhost:3001[39m
+2025-08-17 03:22:12 +05:30: [33mCORS blocked origin: http://localhost:3001[39m
+2025-08-17 03:22:12 +05:30: [33mCORS blocked origin: http://localhost:3001[39m
+2025-08-17 03:22:12 +05:30: [33mCORS blocked origin: http://localhost:3001[39m
+2025-08-17 03:22:18 +05:30: [33mCORS blocked origin: http://localhost:3001[39m
+2025-08-17 03:22:18 +05:30: [90m[DB] Attempting to connect to database...[39m
+2025-08-17 03:22:18 +05:30: [32m[DB] Successfully connected to database[39m
+2025-08-17 03:22:19 +05:30: Comparing password for admin: admin
+2025-08-17 03:22:19 +05:30: Entered password length: 8
+2025-08-17 03:22:19 +05:30: Stored password hash length: 60
+2025-08-17 03:22:19 +05:30: Password match result: false
+2025-08-17 03:22:19 +05:30: 2025-08-17 03:22:19:2219 [33m[33mwarn[33m[39m: [33m[33mAdmin password mismatch for username=admin. Provided length=8 hashLen=60[33m[39m
+2025-08-17 03:22:19 +05:30: 2025-08-17 03:22:19:2219 [33m[33mwarn[33m[39m: [33m[33mAdmin authentication failed for admin[33m[39m
+2025-08-17 03:22:19 +05:30: Error in admin authentication: Error: Invalid username/email or password
+    at /Users/anantmishra/Documents/GitHub/Evalis-GT/server/controllers/authController.js:348:13
+2025-08-17 03:22:19 +05:30: 2025-08-17 03:22:19:2219 [31m[31merror[31m[39m: [31m[31mAdmin auth exception: Invalid username/email or password[31m[39m
+2025-08-17 03:22:19 +05:30: [31m[ERROR] 2025-08-16T21:52:19.408Z - Invalid username/email or password[39m
+2025-08-17 03:22:19 +05:30: [31m[ERROR] Route: POST /api/auth/admin/login[39m
+2025-08-17 03:22:19 +05:30: [31m[ERROR] Stack: Error: Invalid username/email or password
+    at /Users/anantmishra/Documents/GitHub/Evalis-GT/server/controllers/authController.js:348:13[39m
+2025-08-17 03:22:22 +05:30: [33m[DB] Disconnecting from database...[39m
+2025-08-17 03:22:22 +05:30: [90m[DB] Attempting to connect to database...[39m
+2025-08-17 03:22:22 +05:30: [90m[DB] Attempting to connect to database...[39m
+2025-08-17 03:22:22 +05:30: [90m[DB] Attempting to connect to database...[39m
+2025-08-17 03:22:22 +05:30: [90m[DB] Attempting to connect to database...[39m
+2025-08-17 03:22:22 +05:30: [90m[DB] Attempting to connect to database...[39m
+2025-08-17 03:22:22 +05:30: [32m[DB] Successfully connected to database[39m
+2025-08-17 03:22:22 +05:30: [32m[DB] Successfully connected to database[39m
+2025-08-17 03:22:22 +05:30: [32m[DB] Successfully connected to database[39m
+2025-08-17 03:22:22 +05:30: [32m[DB] Successfully connected to database[39m
+2025-08-17 03:22:22 +05:30: [32m[DB] Successfully connected to database[39m
+2025-08-17 03:22:23 +05:30: Comparing password for admin: admin
+2025-08-17 03:22:23 +05:30: Entered password length: 8
+2025-08-17 03:22:23 +05:30: Stored password hash length: 60
+2025-08-17 03:22:23 +05:30: Password match result: false
+2025-08-17 03:22:23 +05:30: 2025-08-17 03:22:23:2223 [33m[33mwarn[33m[39m: [33m[33mAdmin password mismatch for username=admin. Provided length=8 hashLen=60[33m[39m
+2025-08-17 03:22:23 +05:30: 2025-08-17 03:22:23:2223 [33m[33mwarn[33m[39m: [33m[33mAdmin authentication failed for admin[33m[39m
+2025-08-17 03:22:23 +05:30: Error in admin authentication: Error: Invalid username/email or password
+    at /Users/anantmishra/Documents/GitHub/Evalis-GT/server/controllers/authController.js:348:13
+2025-08-17 03:22:23 +05:30: 2025-08-17 03:22:23:2223 [31m[31merror[31m[39m: [31m[31mAdmin auth exception: Invalid username/email or password[31m[39m
+2025-08-17 03:22:23 +05:30: [31m[ERROR] 2025-08-16T21:52:23.272Z - Invalid username/email or password[39m
+2025-08-17 03:22:23 +05:30: [31m[ERROR] Route: POST /api/auth/admin/login[39m
+2025-08-17 03:22:23 +05:30: [31m[ERROR] Stack: Error: Invalid username/email or password
+    at /Users/anantmishra/Documents/GitHub/Evalis-GT/server/controllers/authController.js:348:13[39m
+2025-08-17 03:22:37 +05:30: [33m[DB] Disconnecting from database...[39m
+2025-08-17 03:22:37 +05:30: [90m[DB] Attempting to connect to database...[39m
+2025-08-17 03:22:37 +05:30: [90m[DB] Attempting to connect to database...[39m
+2025-08-17 03:22:37 +05:30: [90m[DB] Attempting to connect to database...[39m
+2025-08-17 03:22:37 +05:30: [90m[DB] Attempting to connect to database...[39m
+2025-08-17 03:22:38 +05:30: [32m[DB] Successfully connected to database[39m
+2025-08-17 03:22:38 +05:30: [32m[DB] Successfully connected to database[39m
+2025-08-17 03:22:38 +05:30: [32m[DB] Successfully connected to database[39m
+2025-08-17 03:22:38 +05:30: [32m[DB] Successfully connected to database[39m
+2025-08-17 03:22:38 +05:30: Comparing password for admin: admin
+2025-08-17 03:22:38 +05:30: Entered password length: 8
+2025-08-17 03:22:38 +05:30: Stored password hash length: 60
+2025-08-17 03:22:39 +05:30: Password match result: false
+2025-08-17 03:22:39 +05:30: 2025-08-17 03:22:39:2239 [33m[33mwarn[33m[39m: [33m[33mAdmin password mismatch for username=admin. Provided length=8 hashLen=60[33m[39m
+2025-08-17 03:22:39 +05:30: 2025-08-17 03:22:39:2239 [33m[33mwarn[33m[39m: [33m[33mAdmin authentication failed for admin[33m[39m
+2025-08-17 03:22:39 +05:30: Error in admin authentication: Error: Invalid username/email or password
+    at /Users/anantmishra/Documents/GitHub/Evalis-GT/server/controllers/authController.js:348:13
+2025-08-17 03:22:39 +05:30: 2025-08-17 03:22:39:2239 [31m[31merror[31m[39m: [31m[31mAdmin auth exception: Invalid username/email or password[31m[39m
+2025-08-17 03:22:39 +05:30: [31m[ERROR] 2025-08-16T21:52:39.059Z - Invalid username/email or password[39m
+2025-08-17 03:22:39 +05:30: [31m[ERROR] Route: POST /api/auth/admin/login[39m
+2025-08-17 03:22:39 +05:30: [31m[ERROR] Stack: Error: Invalid username/email or password
+    at /Users/anantmishra/Documents/GitHub/Evalis-GT/server/controllers/authController.js:348:13[39m
+2025-08-17 03:23:05 +05:30: [33mCORS blocked origin: http://localhost:3001[39m
+2025-08-17 03:23:06 +05:30: Comparing password for admin: admin
+2025-08-17 03:23:06 +05:30: Entered password length: 8
+2025-08-17 03:23:06 +05:30: Stored password hash length: 60
+2025-08-17 03:23:06 +05:30: Password match result: false
+2025-08-17 03:23:06 +05:30: 2025-08-17 03:23:06:236 [33m[33mwarn[33m[39m: [33m[33mAdmin password mismatch for username=admin. Provided length=8 hashLen=60[33m[39m
+2025-08-17 03:23:06 +05:30: 2025-08-17 03:23:06:236 [33m[33mwarn[33m[39m: [33m[33mAdmin authentication failed for admin[33m[39m
+2025-08-17 03:23:06 +05:30: Error in admin authentication: Error: Invalid username/email or password
+    at /Users/anantmishra/Documents/GitHub/Evalis-GT/server/controllers/authController.js:348:13
+2025-08-17 03:23:06 +05:30: 2025-08-17 03:23:06:236 [31m[31merror[31m[39m: [31m[31mAdmin auth exception: Invalid username/email or password[31m[39m
+2025-08-17 03:23:06 +05:30: [31m[ERROR] 2025-08-16T21:53:06.144Z - Invalid username/email or password[39m
+2025-08-17 03:23:06 +05:30: [31m[ERROR] Route: POST /api/auth/admin/login[39m
+2025-08-17 03:23:06 +05:30: [31m[ERROR] Stack: Error: Invalid username/email or password
+    at /Users/anantmishra/Documents/GitHub/Evalis-GT/server/controllers/authController.js:348:13[39m
