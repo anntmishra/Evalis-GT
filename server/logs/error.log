@@ -292,3 +292,7 @@
 {"code":"ERR_SERVER_NOT_RUNNING","level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError during server shutdown: Server is not running.\u001b[39m","stack":"Error [ERR_SERVER_NOT_RUNNING]: Server is not running.\n    at Server.close (node:net:2359:12)\n    at Object.onceWrapper (node:events:621:28)\n    at Server.emit (node:events:519:35)\n    at emitCloseNT (node:net:2419:8)\n    at process.processTicksAndRejections (node:internal/process/task_queues:89:21)","timestamp":"2025-08-16 22:28:52:2852"}
 {"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError starting server: Unknown constraint error\u001b[39m","timestamp":"2025-08-16 23:11:52:1152"}
 {"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError starting server: Unknown constraint error\u001b[39m","timestamp":"2025-08-16 23:14:59:1459"}
+{"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError starting server: Unknown constraint error\u001b[39m","timestamp":"2025-08-16 23:16:29:1629"}
+{"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError starting server: Unknown constraint error\u001b[39m","timestamp":"2025-08-16 23:20:01:201"}
+{"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError starting server: Unknown constraint error\u001b[39m","timestamp":"2025-08-16 23:20:43:2043"}
+{"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError starting server: Unknown constraint error\u001b[39m","timestamp":"2025-08-16 23:21:02:212"}
