@@ -42,6 +42,14 @@ app.post('/api/auth/admin/login', async (req, res) => {
     
     // Try to load database models
     try {
+      // Ensure database connection
+      if (!dbConnected) {
+        const { connectDB } = require('./config/db');
+        await connectDB();
+        dbConnected = true;
+        console.log('✅ Database connected for login');
+      }
+      
       const { Admin } = require('./models');
       
       // Look up admin
@@ -169,9 +177,25 @@ try {
 // Basic teachers endpoint for compatibility
 app.get('/api/teachers', async (req, res) => {
   try {
+    // Ensure database connection
+    if (!dbConnected) {
+      try {
+        const { connectDB } = require('./config/db');
+        await connectDB();
+        dbConnected = true;
+      } catch (dbError) {
+        console.error('DB connection failed:', dbError);
+        return res.status(500).json({
+          message: 'Database connection failed',
+          error: dbError.message
+        });
+      }
+    }
+    
     const { Teacher } = require('./models');
     const teachers = await Teacher.findAll({
-      attributes: ['id', 'name', 'email', 'phone', 'department']
+      attributes: ['id', 'name', 'email', 'phone', 'department'],
+      order: [['name', 'ASC']]
     });
     
     res.json(teachers);
@@ -179,7 +203,8 @@ app.get('/api/teachers', async (req, res) => {
     console.error('Teachers fetch error:', error);
     res.status(500).json({
       message: 'Error fetching teachers',
-      error: error.message
+      error: error.message,
+      details: 'Please check database connection and models'
     });
   }
 });
@@ -187,9 +212,25 @@ app.get('/api/teachers', async (req, res) => {
 // Basic students endpoint for compatibility  
 app.get('/api/students', async (req, res) => {
   try {
+    // Ensure database connection
+    if (!dbConnected) {
+      try {
+        const { connectDB } = require('./config/db');
+        await connectDB();
+        dbConnected = true;
+      } catch (dbError) {
+        console.error('DB connection failed:', dbError);
+        return res.status(500).json({
+          message: 'Database connection failed',
+          error: dbError.message
+        });
+      }
+    }
+    
     const { Student } = require('./models');
     const students = await Student.findAll({
-      attributes: ['id', 'name', 'email', 'phone', 'batchId']
+      attributes: ['id', 'name', 'email', 'phone', 'batchId'],
+      order: [['name', 'ASC']]
     });
     
     res.json(students);
@@ -197,7 +238,8 @@ app.get('/api/students', async (req, res) => {
     console.error('Students fetch error:', error);
     res.status(500).json({
       message: 'Error fetching students',
-      error: error.message
+      error: error.message,
+      details: 'Please check database connection and models'
     });
   }
 });
@@ -205,9 +247,25 @@ app.get('/api/students', async (req, res) => {
 // Basic batches endpoint
 app.get('/api/batches', async (req, res) => {
   try {
+    // Ensure database connection
+    if (!dbConnected) {
+      try {
+        const { connectDB } = require('./config/db');
+        await connectDB();
+        dbConnected = true;
+      } catch (dbError) {
+        console.error('DB connection failed:', dbError);
+        return res.status(500).json({
+          message: 'Database connection failed',
+          error: dbError.message
+        });
+      }
+    }
+    
     const { Batch } = require('./models');
     const batches = await Batch.findAll({
-      attributes: ['id', 'name', 'description', 'year', 'semester']
+      attributes: ['id', 'name', 'description', 'year', 'semester'],
+      order: [['name', 'ASC']]
     });
     
     res.json(batches);
@@ -215,7 +273,8 @@ app.get('/api/batches', async (req, res) => {
     console.error('Batches fetch error:', error);
     res.status(500).json({
       message: 'Error fetching batches',
-      error: error.message
+      error: error.message,
+      details: 'Please check database connection and models'
     });
   }
 });
@@ -223,9 +282,25 @@ app.get('/api/batches', async (req, res) => {
 // Basic subjects endpoint
 app.get('/api/subjects', async (req, res) => {
   try {
+    // Ensure database connection
+    if (!dbConnected) {
+      try {
+        const { connectDB } = require('./config/db');
+        await connectDB();
+        dbConnected = true;
+      } catch (dbError) {
+        console.error('DB connection failed:', dbError);
+        return res.status(500).json({
+          message: 'Database connection failed',
+          error: dbError.message
+        });
+      }
+    }
+    
     const { Subject } = require('./models');
     const subjects = await Subject.findAll({
-      attributes: ['id', 'name', 'code', 'description', 'credits']
+      attributes: ['id', 'name', 'code', 'description', 'credits'],
+      order: [['name', 'ASC']]
     });
     
     res.json(subjects);
@@ -233,7 +308,8 @@ app.get('/api/subjects', async (req, res) => {
     console.error('Subjects fetch error:', error);
     res.status(500).json({
       message: 'Error fetching subjects',
-      error: error.message
+      error: error.message,
+      details: 'Please check database connection and models'
     });
   }
 });
