@@ -18,7 +18,8 @@ const fs = require('fs');
 // Priority:
 // 1. FIREBASE_SERVICE_ACCOUNT_JSON (raw JSON string)
 // 2. FIREBASE_SERVICE_ACCOUNT_B64 (base64 string of JSON)
-// 3. Local file (Firebase Admin SDK.json) – dev only
+// 3. FIREBASE_PRIVATE_KEY_B64 (base64 string of JSON - alternative name)
+// 4. Local file (Firebase Admin SDK.json) – dev only
 let serviceAccount = null;
 try {
   if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
@@ -28,6 +29,10 @@ try {
     const decoded = Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT_B64, 'base64').toString('utf8');
     serviceAccount = JSON.parse(decoded);
     console.log('✓ Firebase service account loaded from FIREBASE_SERVICE_ACCOUNT_B64');
+  } else if (process.env.FIREBASE_PRIVATE_KEY_B64) {
+    const decoded = Buffer.from(process.env.FIREBASE_PRIVATE_KEY_B64, 'base64').toString('utf8');
+    serviceAccount = JSON.parse(decoded);
+    console.log('✓ Firebase service account loaded from FIREBASE_PRIVATE_KEY_B64');
   } else {
     const serviceAccountPath = path.join(__dirname, '../../Firebase Admin SDK.json');
     if (fs.existsSync(serviceAccountPath)) {
