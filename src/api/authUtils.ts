@@ -68,7 +68,7 @@ export const refreshFirebaseToken = async (): Promise<string | null> => {
 // Function to get current token or refresh if needed
 export const getAuthToken = async (): Promise<string | null> => {
   // Prefer app token first (could hold admin role)
-  let token = localStorage.getItem(config.AUTH.TOKEN_STORAGE_KEY) || localStorage.getItem('firebaseToken');
+  const token = localStorage.getItem(config.AUTH.TOKEN_STORAGE_KEY) || localStorage.getItem('firebaseToken');
   
   // If we have a Firebase user but token is missing or potentially expired, refresh it
   if (auth.currentUser) {

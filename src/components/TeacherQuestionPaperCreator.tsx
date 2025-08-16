@@ -364,7 +364,7 @@ const TeacherQuestionPaperCreator: React.FC<QuestionPaperCreatorProps> = ({
     }
   };
 
-  const useSuggestion = (suggestion: string) => {
+  const handleSuggestionClick = (suggestion: string) => {
     setCurrentQuestion(suggestion);
   };
 
@@ -404,7 +404,7 @@ const TeacherQuestionPaperCreator: React.FC<QuestionPaperCreatorProps> = ({
     }
   };
 
-  const usePromptQuestion = (question: string) => {
+  const handlePromptQuestionClick = (question: string) => {
     setCurrentQuestion(question);
   };
 
@@ -734,7 +734,10 @@ const TeacherQuestionPaperCreator: React.FC<QuestionPaperCreatorProps> = ({
                             key={index}
                             variant="outlined"
                             size="small"
-                            onClick={() => useSuggestion(suggestion)}
+                            onClick={() => {
+                              // Handle suggestion click without violating hook rules
+                              handleSuggestionClick(suggestion);
+                            }}
                             sx={{ mr: 1, mb: 1 }}
                             startIcon={<Add />}
                           >
@@ -804,7 +807,10 @@ const TeacherQuestionPaperCreator: React.FC<QuestionPaperCreatorProps> = ({
                                 variant="text"
                                 color="secondary"
                                 startIcon={<Add />}
-                                onClick={() => usePromptQuestion(question)}
+                                onClick={() => {
+                                  // Handle prompt question click without violating hook rules
+                                  handlePromptQuestionClick(question);
+                                }}
                               >
                                 Use This Question
                               </Button>
