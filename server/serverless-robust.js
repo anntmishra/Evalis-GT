@@ -51,13 +51,26 @@ try {
 }
 
 // Load routes conditionally
-const loadRoute = (routePath, routeName) => {
+const loadRoute = (routePath, routeName, fallbackPath = null) => {
   try {
     const route = require(routePath);
     console.log(`✅ ${routeName} route loaded`);
     return route;
   } catch (error) {
     console.error(`❌ ${routeName} route failed:`, error.message);
+    
+    // Try fallback if provided
+    if (fallbackPath) {
+      try {
+        const fallbackRoute = require(fallbackPath);
+        console.log(`✅ ${routeName} fallback route loaded`);
+        return fallbackRoute;
+      } catch (fallbackError) {
+        console.error(`❌ ${routeName} fallback failed:`, fallbackError.message);
+      }
+    }
+    
+    // Create error route
     const fallbackRouter = express.Router();
     fallbackRouter.use('*', (req, res) => {
       res.status(500).json({
@@ -69,8 +82,8 @@ const loadRoute = (routePath, routeName) => {
   }
 };
 
-// Load all routes
-const authRoutes = loadRoute('./routes/authRoutes', 'Auth');
+// Load all routes with fallbacks where available
+const authRoutes = loadRoute('./routes/authRoutes', 'Auth', './routes/authRoutesSimple');
 const studentRoutes = loadRoute('./routes/studentRoutes', 'Student');
 const teacherRoutes = loadRoute('./routes/teacherRoutes', 'Teacher');
 const subjectRoutes = loadRoute('./routes/subjectRoutes', 'Subject');
