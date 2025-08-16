@@ -83,7 +83,7 @@ const loadRoute = (routePath, routeName, fallbackPath = null) => {
 };
 
 // Load all routes with fallbacks where available
-const authRoutes = loadRoute('./routes/authRoutes', 'Auth', './routes/authRoutesSimple');
+const authRoutes = loadRoute('./routes/authRoutesSimple', 'Auth');
 const studentRoutes = loadRoute('./routes/studentRoutes', 'Student');
 const teacherRoutes = loadRoute('./routes/teacherRoutes', 'Teacher');
 const subjectRoutes = loadRoute('./routes/subjectRoutes', 'Subject');
