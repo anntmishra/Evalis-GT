@@ -348,30 +348,30 @@ function generateMockResponse(
   let mockResponse = "";
   
   // Get greeting with name
-  let greeting = getRandomResponse('greeting')
+  const greeting = getRandomResponse('greeting')
     .replace("{{name}}", studentData.name || "Student");
   mockResponse += greeting + "\n\n";
   
   // Add grades information
-  let gradesText = getRandomResponse('grades')
+  const gradesText = getRandomResponse('grades')
     .replace("{{overall}}", overallGrade.toString())
     .replace("{{subject}}", randomSubjectName)
     .replace("{{grade}}", subjectGrade.toString());
   mockResponse += gradesText + "\n\n";
   
   // Add submissions information
-  let submissionsText = getRandomResponse('submissions')
+  const submissionsText = getRandomResponse('submissions')
     .replace("{{onTime}}", onTime.toString())
     .replace("{{late}}", late.toString());
   mockResponse += submissionsText + "\n\n";
   
   // Add trend information
-  let trendText = getRandomResponse('trend')
+  const trendText = getRandomResponse('trend')
     .replace("{{trend}}", trend);
   mockResponse += trendText + "\n\n";
   
   // Add advice
-  let adviceText = getRandomResponse('advice')
+  const adviceText = getRandomResponse('advice')
     .replace("{{subject}}", randomSubjectName);
   mockResponse += adviceText;
   
