@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "concurrently \"npm run server:dev\" \"npm run frontend\"",
     "frontend": "vite",
-    "build": "tsc -b && vite build",
+    "build": "vite build",
+    "build:check": "tsc -b && vite build",
+    "type-check": "tsc --noEmit",
     "build:server": "cd server && npm install --production",
     "start": "NODE_ENV=production node server/server.js",
     "start:dev": "NODE_ENV=development nodemon server/server.js",

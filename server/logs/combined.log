@@ -23613,3 +23613,19 @@
 {"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-gm1x4bnie-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:01:13:113"}
 {"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - 500 - 10ms - ::1\u001b[39m","timestamp":"2025-08-17 01:01:13:113"}
 {"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError starting server: Unknown constraint error\u001b[39m","timestamp":"2025-08-17 01:01:20:120"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mPort 3000 is in use (single-attempt mode); moving to next candidate if available.\u001b[39m","timestamp":"2025-08-17 01:01:31:131"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mFailed to bind candidate port 3000: EADDRINUSE\u001b[39m","timestamp":"2025-08-17 01:01:31:131"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 133\u001b[39m","timestamp":"2025-08-17 01:02:46:246"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-17 01:02:46:246"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mSession ID mismatch for user T001. Expected different session. Enforcing single session.\u001b[39m","timestamp":"2025-08-17 01:02:46:246"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /api/auth/status - 401 - 26ms - ::1\u001b[39m","timestamp":"2025-08-17 01:02:46:246"}
+{"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError starting server: Unknown constraint error\u001b[39m","timestamp":"2025-08-17 01:03:56:356"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mPort 3000 is in use (single-attempt mode); moving to next candidate if available.\u001b[39m","timestamp":"2025-08-17 01:04:00:40"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mFailed to bind candidate port 3000: EADDRINUSE\u001b[39m","timestamp":"2025-08-17 01:04:00:40"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mPort 3000 is in use (single-attempt mode); moving to next candidate if available.\u001b[39m","timestamp":"2025-08-17 01:04:32:432"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mFailed to bind candidate port 3000: EADDRINUSE\u001b[39m","timestamp":"2025-08-17 01:04:32:432"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mPort 3000 is in use (single-attempt mode); moving to next candidate if available.\u001b[39m","timestamp":"2025-08-17 01:04:32:432"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mFailed to bind candidate port 3000: EADDRINUSE\u001b[39m","timestamp":"2025-08-17 01:04:32:432"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mPort 3001 is in use (single-attempt mode); moving to next candidate if available.\u001b[39m","timestamp":"2025-08-17 01:04:32:432"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mFailed to bind candidate port 3001: EADDRINUSE\u001b[39m","timestamp":"2025-08-17 01:04:32:432"}
+{"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError starting server: Unknown constraint error\u001b[39m","timestamp":"2025-08-17 01:04:49:449"}
