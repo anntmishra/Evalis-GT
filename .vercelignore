@@ -1,6 +1,4 @@
-server/
 node_modules/
-.env
 .env.local
 .env.development
 .env.production
@@ -12,3 +10,12 @@ coverage/
 dist/assets/*.map
 src/**/*.test.*
 src/**/*.spec.*
+server/logs/
+server/uploads/
+server/node_modules/
+server/*.log
+server/.env
+.git/
+README.md
+*.md
+!DEPLOYMENT.md
