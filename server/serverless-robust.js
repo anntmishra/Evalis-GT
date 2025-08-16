@@ -111,6 +111,35 @@ app.get('/api/auth/health', (req, res) => {
   });
 });
 
+// Auth status endpoint
+app.get('/api/auth/status', (req, res) => {
+  try {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    
+    if (!token) {
+      return res.status(401).json({
+        message: 'No token provided'
+      });
+    }
+    
+    const jwt = require('jsonwebtoken');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    
+    res.json({
+      valid: true,
+      user: decoded,
+      timestamp: new Date().toISOString()
+    });
+    
+  } catch (error) {
+    res.status(401).json({
+      valid: false,
+      message: 'Invalid token',
+      error: error.message
+    });
+  }
+});
+
 // Load environment variables
 try {
   const dotenv = require('dotenv');
@@ -138,21 +167,75 @@ try {
 // We'll inline critical routes above
 
 // Basic teachers endpoint for compatibility
-app.get('/api/teachers', (req, res) => {
-  res.json({
-    message: 'Teachers endpoint available',
-    note: 'Full functionality being restored',
-    timestamp: new Date().toISOString()
-  });
+app.get('/api/teachers', async (req, res) => {
+  try {
+    const { Teacher } = require('./models');
+    const teachers = await Teacher.findAll({
+      attributes: ['id', 'name', 'email', 'phone', 'department']
+    });
+    
+    res.json(teachers);
+  } catch (error) {
+    console.error('Teachers fetch error:', error);
+    res.status(500).json({
+      message: 'Error fetching teachers',
+      error: error.message
+    });
+  }
 });
 
 // Basic students endpoint for compatibility  
-app.get('/api/students', (req, res) => {
-  res.json({
-    message: 'Students endpoint available', 
-    note: 'Full functionality being restored',
-    timestamp: new Date().toISOString()
-  });
+app.get('/api/students', async (req, res) => {
+  try {
+    const { Student } = require('./models');
+    const students = await Student.findAll({
+      attributes: ['id', 'name', 'email', 'phone', 'batchId']
+    });
+    
+    res.json(students);
+  } catch (error) {
+    console.error('Students fetch error:', error);
+    res.status(500).json({
+      message: 'Error fetching students',
+      error: error.message
+    });
+  }
+});
+
+// Basic batches endpoint
+app.get('/api/batches', async (req, res) => {
+  try {
+    const { Batch } = require('./models');
+    const batches = await Batch.findAll({
+      attributes: ['id', 'name', 'description', 'year', 'semester']
+    });
+    
+    res.json(batches);
+  } catch (error) {
+    console.error('Batches fetch error:', error);
+    res.status(500).json({
+      message: 'Error fetching batches',
+      error: error.message
+    });
+  }
+});
+
+// Basic subjects endpoint
+app.get('/api/subjects', async (req, res) => {
+  try {
+    const { Subject } = require('./models');
+    const subjects = await Subject.findAll({
+      attributes: ['id', 'name', 'code', 'description', 'credits']
+    });
+    
+    res.json(subjects);
+  } catch (error) {
+    console.error('Subjects fetch error:', error);
+    res.status(500).json({
+      message: 'Error fetching subjects',
+      error: error.message
+    });
+  }
 });
 
 // Error handling
