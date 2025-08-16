@@ -5,8 +5,8 @@
  * to avoid hardcoded values throughout the application.
  */
 
-// Default to development environment if not specified
-const NODE_ENV = import.meta.env.NODE_ENV || 'development';
+// Will determine MODE / NODE_ENV after capturing viteEnv below
+let NODE_ENV = 'development';
 
 // Allow explicit override via Vite env (safe access)
 let viteEnv = {};
@@ -14,11 +14,13 @@ try {
   // In Vite / ESM this will succeed
   // eslint-disable-next-line no-undef
   viteEnv = import.meta.env || {};
+  NODE_ENV = viteEnv.MODE || (viteEnv.PROD ? 'production' : NODE_ENV);
 } catch (e) {
   // Fallback for non-Vite contexts (tests, SSR) if ever needed
-  if (typeof process !== 'undefined') {
+  if (typeof process !== 'undefined' && process.env) {
     // eslint-disable-next-line no-undef
-    viteEnv = process.env || {};
+    viteEnv = process.env;
+    NODE_ENV = viteEnv.NODE_ENV || NODE_ENV;
   }
 }
 let explicitBase = viteEnv?.VITE_API_BASE_URL || null;
@@ -70,13 +72,20 @@ const getFileBaseUrl = () => ({
 }[NODE_ENV]);
 
 // API URLs based on environment (runtime-friendly for dev)
-const API_BASE_URL = getApiBaseUrl();
+let API_BASE_URL = getApiBaseUrl();
 const FILE_BASE_URL = getFileBaseUrl();
 
 // Admin API now unified with main API (previous separate 5003 server disabled)
 const ADMIN_API_BASE_URL = API_BASE_URL;
 
 // Export environment configuration
+// Safety fallback: if we ended up with a localhost API in a non-local host (e.g. Vercel preview/prod), switch to relative /api
+if (NODE_ENV === 'production' && /localhost|127\.0\.0\.1/.test(API_BASE_URL) && typeof window !== 'undefined' && window.location && !/localhost|127\.0\.0\.1/.test(window.location.host)) {
+  // eslint-disable-next-line no-console
+  console.warn('[environment] Overriding localhost API_BASE_URL to relative /api for deployed host');
+  API_BASE_URL = '/api';
+}
+
 const config = {
   API_BASE_URL,
   FILE_BASE_URL,
