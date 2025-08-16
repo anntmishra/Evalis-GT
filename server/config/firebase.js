@@ -1,12 +1,12 @@
-// Server-side Firebase configuration for authentication
+// Server-side & client Firebase configuration that works locally and on Vercel.
+// Supports providing service account via environment variable (JSON or base64) to avoid bundling file.
 const { initializeApp, cert } = require('firebase-admin/app');
 const { getAuth } = require('firebase-admin/auth');
-const { 
+const {
   initializeApp: initializeClientApp,
-  cert: clientCert
 } = require('firebase/app');
-const { 
-  getAuth: getClientAuth, 
+const {
+  getAuth: getClientAuth,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   sendPasswordResetEmail
@@ -14,50 +14,73 @@ const {
 const path = require('path');
 const fs = require('fs');
 
-// Load Firebase Admin SDK service account key
-const serviceAccountPath = path.join(__dirname, '../../Firebase Admin SDK.json');
-let serviceAccount;
-
+// --- Service Account Loading Strategy ---
+// Priority:
+// 1. FIREBASE_SERVICE_ACCOUNT_JSON (raw JSON string)
+// 2. FIREBASE_SERVICE_ACCOUNT_B64 (base64 string of JSON)
+// 3. Local file (Firebase Admin SDK.json) – dev only
+let serviceAccount = null;
 try {
-  serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
-  console.log('✓ Firebase Admin SDK service account loaded successfully');
-} catch (error) {
-  console.error('Error loading Firebase Admin SDK service account:', error);
-  console.log('Service account path:', serviceAccountPath);
+  if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
+    serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
+    console.log('✓ Firebase service account loaded from FIREBASE_SERVICE_ACCOUNT_JSON');
+  } else if (process.env.FIREBASE_SERVICE_ACCOUNT_B64) {
+    const decoded = Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT_B64, 'base64').toString('utf8');
+    serviceAccount = JSON.parse(decoded);
+    console.log('✓ Firebase service account loaded from FIREBASE_SERVICE_ACCOUNT_B64');
+  } else {
+    const serviceAccountPath = path.join(__dirname, '../../Firebase Admin SDK.json');
+    if (fs.existsSync(serviceAccountPath)) {
+      serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
+      console.log('✓ Firebase service account loaded from local file');
+    } else {
+      console.warn('⚠ No Firebase service account provided (env or file). Admin features limited.');
+    }
+  }
+} catch (e) {
+  console.error('❌ Failed to parse Firebase service account:', e.message);
 }
 
-// Initialize Firebase Admin SDK (for server-side operations like creating users)
+// --- Admin SDK Initialization ---
 let adminApp, adminAuth;
 try {
-  adminApp = initializeApp({
-    credential: cert(serviceAccount),
-    projectId: "evalis-d16f2"
-  });
-  adminAuth = getAuth(adminApp);
-  console.log('✓ Firebase Admin SDK initialized successfully');
-} catch (error) {
-  console.error('Error initializing Firebase Admin SDK:', error);
+  if (serviceAccount) {
+    adminApp = initializeApp({
+      credential: cert(serviceAccount),
+      projectId: serviceAccount.project_id || process.env.FIREBASE_PROJECT_ID,
+    });
+    adminAuth = getAuth(adminApp);
+    console.log('✓ Firebase Admin SDK initialized');
+  }
+} catch (e) {
+  console.error('❌ Error initializing Firebase Admin SDK:', e.message);
 }
 
-// Client Firebase configuration (for client-side auth operations)
+// --- Client SDK Configuration ---
+// Prefer env (so production values can differ). Fallback to previously hard coded dev config.
 const firebaseConfig = {
-  apiKey: "AIzaSyDOyFOhXSYbtWrFCZMBwsF-7upRxYRlE9k",
-  authDomain: "evalis-d16f2.firebaseapp.com",
-  projectId: "evalis-d16f2",
-  storageBucket: "evalis-d16f2.firebasestorage.app",
-  messagingSenderId: "993676113888",
-  appId: "1:993676113888:web:21e93b506a90e0544e5d85",
-  measurementId: "G-CHPDVY165C"
+  apiKey: process.env.FIREBASE_API_KEY || "AIzaSyDOyFOhXSYbtWrFCZMBwsF-7upRxYRlE9k",
+  authDomain: process.env.FIREBASE_AUTH_DOMAIN || "evalis-d16f2.firebaseapp.com",
+  projectId: process.env.FIREBASE_PROJECT_ID || "evalis-d16f2",
+  storageBucket: process.env.FIREBASE_STORAGE_BUCKET || "evalis-d16f2.firebasestorage.app",
+  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID || "993676113888",
+  appId: process.env.FIREBASE_APP_ID || "1:993676113888:web:21e93b506a90e0544e5d85",
+  measurementId: process.env.FIREBASE_MEASUREMENT_ID || "G-CHPDVY165C"
 };
 
-// Initialize Client Firebase (for client-side auth operations)
-const clientApp = initializeClientApp(firebaseConfig);
-const clientAuth = getClientAuth(clientApp);
+let clientApp, clientAuth;
+try {
+  clientApp = initializeClientApp(firebaseConfig);
+  clientAuth = getClientAuth(clientApp);
+} catch (e) {
+  console.error('❌ Failed to initialize client Firebase SDK:', e.message);
+}
 
 // Authentication helper functions using client SDK (for verification)
 const loginWithEmailAndPassword = async (email, password) => {
   try {
-    return await signInWithEmailAndPassword(clientAuth, email, password);
+  if (!clientAuth) throw new Error('Client Firebase auth not initialized');
+  return await signInWithEmailAndPassword(clientAuth, email, password);
   } catch (error) {
     console.error("Firebase authentication error:", error.code, error.message);
     
@@ -128,12 +151,14 @@ const generatePasswordResetLink = async (email) => {
 };
 
 const registerWithEmailAndPassword = async (email, password) => {
+  if (!clientAuth) throw new Error('Client Firebase auth not initialized');
   return await createUserWithEmailAndPassword(clientAuth, email, password);
 };
 
 const sendPasswordReset = async (email) => {
   try {
-    await sendPasswordResetEmail(clientAuth, email);
+  if (!clientAuth) throw new Error('Client Firebase auth not initialized');
+  await sendPasswordResetEmail(clientAuth, email);
     return { 
       success: true, 
       message: "Password reset email sent successfully" 

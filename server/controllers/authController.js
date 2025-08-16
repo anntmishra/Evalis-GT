@@ -229,7 +229,7 @@ const authTeacher = asyncHandler(async (req, res) => {
 const authAdmin = asyncHandler(async (req, res) => {
   const { username, password, email, firebaseToken } = req.body;
 
-  logger.info(`Admin login attempt for username: ${username}, email: ${email}, Firebase token: ${firebaseToken ? 'Yes' : 'No'}`);
+  logger.info(`Admin login attempt for username: ${username}, email: ${email}, Firebase token: ${firebaseToken ? 'present' : 'absent'}`);
 
   if ((!username && !email) || !password) {
     logger.warn('Admin login rejected: Missing username/email or password');
@@ -238,11 +238,21 @@ const authAdmin = asyncHandler(async (req, res) => {
   }
 
   try {
+    const startLookup = Date.now();
     // Check for admin by username (primary) or email (secondary)
     const whereClause = username ? { username } : { email };
-    logger.debug(`Searching for admin with:`, whereClause);
+    logger.debug(`Admin lookup criteria: ${JSON.stringify(whereClause)}`);
 
-    const admin = await Admin.findOne({ where: whereClause });
+    let admin;
+    try {
+      admin = await Admin.findOne({ where: whereClause });
+    } catch (dbErr) {
+      logger.error(`Admin lookup DB error: ${dbErr.message}`);
+      logger.error(dbErr.stack);
+      return res.status(500).json({ message: 'Database error locating admin', code: 'ADMIN_LOOKUP_FAILED' });
+    }
+    const lookupDuration = Date.now() - startLookup;
+    logger.debug(`Admin lookup duration: ${lookupDuration}ms`);
 
     if (!admin) {
       logger.warn(`Admin login failed: No admin found with ${username || email}`);
@@ -255,19 +265,47 @@ const authAdmin = asyncHandler(async (req, res) => {
     // Try Firebase authentication first if we have an email
     let isAuthenticated = false;
     let authMethod = 'database';
+    let firebaseUserEmail = null;
+
+    // If a Firebase ID token is provided, verify it using Admin SDK (stronger than email/password attempt)
+    if (firebaseToken) {
+      try {
+        const { adminAuth } = require('../config/firebase');
+        if (adminAuth) {
+          const decoded = await adminAuth.verifyIdToken(firebaseToken);
+          firebaseUserEmail = decoded.email;
+          logger.info(`Firebase ID token verified for email=${firebaseUserEmail}`);
+          // Ensure token email matches admin email if provided
+          if (firebaseUserEmail && admin.email && firebaseUserEmail.toLowerCase() !== admin.email.toLowerCase()) {
+            logger.warn(`Firebase token email mismatch token=${firebaseUserEmail} db=${admin.email}`);
+          } else {
+            isAuthenticated = true; // Accept token-based authentication
+            authMethod = 'firebase-id-token';
+          }
+        } else {
+          logger.warn('Firebase Admin SDK not initialized; cannot verify ID token');
+        }
+      } catch (idErr) {
+        logger.warn(`Firebase ID token verification failed: ${idErr.message}`);
+      }
+    }
     
-    if (admin.email && (email || username.includes('@'))) {
+  // Safe check: username may be undefined when logging in via email only
+  if (admin.email && (email || (typeof username === 'string' && username.includes('@')))) {
       try {
         // Import Firebase auth functions
         const { loginWithEmailAndPassword } = require('../config/firebase');
         
         // Try Firebase authentication
         const loginEmail = email || username;
-        const userCredential = await loginWithEmailAndPassword(loginEmail, password);
-        if (userCredential && userCredential.user) {
-          logger.info(`Firebase authentication successful for admin: ${loginEmail}`);
-          isAuthenticated = true;
-          authMethod = 'firebase';
+        // Skip email/password attempt if already authenticated by token
+        if (!isAuthenticated) {
+          const userCredential = await loginWithEmailAndPassword(loginEmail, password);
+          if (userCredential && userCredential.user) {
+            logger.info(`Firebase authentication successful for admin: ${loginEmail}`);
+            isAuthenticated = true;
+            authMethod = 'firebase-email-password';
+          }
         }
       } catch (firebaseError) {
         logger.debug(`Firebase authentication failed: ${firebaseError.message}`);
@@ -277,14 +315,14 @@ const authAdmin = asyncHandler(async (req, res) => {
     
     // If Firebase auth failed or not available, try database password
     if (!isAuthenticated) {
+      const pwStart = Date.now();
       const isMatch = await admin.matchPassword(password);
-      logger.debug(`Database password match result: ${isMatch}`);
-      
+      const pwDuration = Date.now() - pwStart;
+      logger.debug(`Database password match result: ${isMatch} (duration ${pwDuration}ms)`);
       if (isMatch) {
         isAuthenticated = true;
         authMethod = 'database';
       } else {
-        // Extra diagnostics (do not leak sensitive data to client)
         logger.warn(`Admin password mismatch for username=${admin.username}. Provided length=${password ? password.length : 'none'} hashLen=${admin.password ? admin.password.length : 'none'}`);
       }
     }
@@ -310,7 +348,8 @@ const authAdmin = asyncHandler(async (req, res) => {
       throw new Error('Invalid username/email or password');
     }
   } catch (error) {
-    console.error('Error in admin authentication:', error);
+  console.error('Error in admin authentication:', error);
+  logger.error(`Admin auth exception: ${error.message}`);
     if (!res.statusCode || res.statusCode === 200) {
       res.status(500);
     }
