@@ -1,335 +1,325 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Box,
-  Container,
-  Typography,
-  Button,
-  Grid,
-  Card,
-  CardContent,
-  useTheme,
-  Paper,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions
-} from '@mui/material';
-import {
-  Security as SecurityIcon,
-  School as SchoolIconMUI,
-  Grade as GradeIcon,
-  Timeline as TimelineIcon,
-  Login as LoginIcon,
-  PlayArrow as PlayIcon,
-  Person,
-  Code
-} from '@mui/icons-material';
+import { Button } from '../components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
+import { Badge } from '../components/ui/badge';
+import { 
+  GraduationCap, 
+  Shield, 
+  BarChart3, 
+  TrendingUp, 
+  LogIn, 
+  Play, 
+  User, 
+  BookOpen,
+  Code,
+  ArrowRight,
+  CheckCircle,
+  Star,
+  Zap
+} from 'lucide-react';
 import Header from '../components/Header';
 
 const LandingPage: React.FC = () => {
-  const theme = useTheme();
   const navigate = useNavigate();
   const [demoDialogOpen, setDemoDialogOpen] = useState(false);
 
   const features = [
     {
-      icon: <SchoolIconMUI sx={{ fontSize: 40 }} />,
+      icon: <GraduationCap className="h-8 w-8" />,
       title: 'Smart Grading',
-      description: 'Intelligent grading system with automatic CGPA calculation and performance tracking.'
+      description: 'AI-powered grading system with automatic CGPA calculation and intelligent performance tracking.',
+      highlight: 'AI-Powered'
     },
     {
-      icon: <GradeIcon sx={{ fontSize: 40 }} />,
-      title: 'Grade Analysis',
-      description: 'Detailed grade distribution and performance analytics for better insights.'
+      icon: <BarChart3 className="h-8 w-8" />,
+      title: 'Advanced Analytics',
+      description: 'Comprehensive grade distribution and performance analytics with visual insights.',
+      highlight: 'Real-time'
     },
     {
-      icon: <TimelineIcon sx={{ fontSize: 40 }} />,
+      icon: <TrendingUp className="h-8 w-8" />,
       title: 'Progress Tracking',
-      description: 'Visual representation of academic progress over time.'
+      description: 'Visual representation of academic progress with predictive performance indicators.',
+      highlight: 'Predictive'
     },
     {
-      icon: <SecurityIcon sx={{ fontSize: 40 }} />,
+      icon: <Shield className="h-8 w-8" />,
       title: 'Secure Access',
-      description: 'Role-based access control for students and teachers.'
+      description: 'Enterprise-grade security with role-based access control and data encryption.',
+      highlight: 'Enterprise'
     }
   ];
 
   const demoOptions = [
     {
-      title: 'Student Demo',
-      icon: <Person sx={{ fontSize: 40 }} />,
-      description: 'Experience the student portal with demo data',
-      path: '/student'
+      title: 'Student Experience',
+      icon: <User className="h-10 w-10" />,
+      description: 'Explore the student dashboard with sample assignments and grades',
+      path: '/student',
+      color: 'bg-blue-50 hover:bg-blue-100 border-blue-200'
     },
     {
-      title: 'Teacher Demo',
-      icon: <SchoolIconMUI sx={{ fontSize: 40 }} />,
-      description: 'Try out the teacher portal with sample classes',
-      path: '/teacher'
+      title: 'Teacher Portal',
+      icon: <BookOpen className="h-10 w-10" />,
+      description: 'Try the teacher interface with grading tools and class management',
+      path: '/teacher',
+      color: 'bg-green-50 hover:bg-green-100 border-green-200'
     },
     {
-      title: 'Developer Test',
-      icon: <Code sx={{ fontSize: 40 }} />,
-      description: 'Test the system with full access',
-      path: '/teacher'
+      title: 'Admin Dashboard',
+      icon: <Code className="h-10 w-10" />,
+      description: 'Experience the full administrative control panel',
+      path: '/admin',
+      color: 'bg-purple-50 hover:bg-purple-100 border-purple-200'
     }
   ];
 
+  const stats = [
+    { number: '10K+', label: 'Students' },
+    { number: '500+', label: 'Teachers' },
+    { number: '50+', label: 'Institutions' },
+    { number: '99.9%', label: 'Uptime' }
+  ];
+
   const handleDemoClick = (path: string) => {
-    // Here you would typically set up the demo environment
+    setDemoDialogOpen(false);
     navigate(path);
   };
 
   return (
-    <Box sx={{ 
-      minHeight: '100vh',
-      background: 'linear-gradient(45deg, #f3f4f6 30%, #ffffff 90%)'
-    }}>
+    <div className="min-h-screen bg-white">
       {/* Header */}
       <Header showBackButton={false} />
 
       {/* Action Buttons */}
-      <Box sx={{ 
-        position: 'absolute',
-        top: 16,
-        right: 24,
-        zIndex: 1200,
-        display: 'flex',
-        gap: 2
-      }}>
-        <Button 
-          variant="outlined" 
-          onClick={() => setDemoDialogOpen(true)}
-          startIcon={<PlayIcon />}
-        >
-          Try Demo
-        </Button>
-        <Button 
-          variant="contained" 
-          onClick={() => navigate('/login')}
-          startIcon={<LoginIcon />}
-        >
-          Login
-        </Button>
-      </Box>
-
-      {/* Hero Section */}
-      <Container maxWidth="lg" sx={{ pt: 15, pb: 8 }}>
-        <Grid container spacing={4} alignItems="center">
-          <Grid item xs={12} md={6}>
-            <Typography 
-              variant="h2" 
-              component="h1" 
-              gutterBottom
-              sx={{ 
-                fontWeight: 'bold',
-                background: 'linear-gradient(45deg, #1976d2 30%, #42a5f5 90%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent'
-              }}
-            >
-              Smart Grading System
-            </Typography>
-            <Typography variant="h5" color="text.secondary" paragraph>
-              Transform your academic experience with our intelligent grading and performance tracking system.
-            </Typography>
-            <Box sx={{ mt: 4 }}>
-              <Button 
-                variant="contained" 
-                size="large" 
-                onClick={() => navigate('/get-started')}
-                startIcon={<PlayIcon />}
-                sx={{ mr: 2 }}
-              >
-                Get Started
-              </Button>
-              <Button 
-                variant="outlined" 
-                size="large"
-                onClick={() => navigate('/login')}
-                startIcon={<LoginIcon />}
-              >
-                Login
-              </Button>
-            </Box>
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <Box 
-              component="img"
-              src="/src/assets/Evalis-Logo.svg" 
-              alt="Evalis"
-              sx={{ 
-                width: '100%',
-                maxWidth: 400,
-                height: 'auto',
-                display: 'block',
-                margin: 'auto'
-              }}
-            />
-          </Grid>
-        </Grid>
-      </Container>
-
-      {/* Features Section */}
-      <Container maxWidth="lg" sx={{ py: 8 }}>
-        <Typography 
-          variant="h3" 
-          component="h2" 
-          align="center" 
-          gutterBottom
-          sx={{ mb: 6 }}
-        >
-          Features
-        </Typography>
-        <Grid container spacing={4}>
-          {features.map((feature, index) => (
-            <Grid item xs={12} sm={6} md={3} key={index}>
-              <Paper 
-                elevation={2}
-                sx={{ 
-                  height: '100%',
-                  transition: 'transform 0.2s',
-                  '&:hover': {
-                    transform: 'translateY(-4px)',
-                    boxShadow: 4
-                  }
-                }}
-              >
-                <CardContent sx={{ 
-                  textAlign: 'center',
-                  height: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  p: 3
-                }}>
-                  <Box sx={{ 
-                    color: theme.palette.primary.main,
-                    mb: 2
-                  }}>
-                    {feature.icon}
-                  </Box>
-                  <Typography variant="h6" component="h3" gutterBottom>
-                    {feature.title}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {feature.description}
-                  </Typography>
-                </CardContent>
-              </Paper>
-            </Grid>
-          ))}
-        </Grid>
-      </Container>
-
-      {/* Demo Dialog */}
-      <Dialog 
-        open={demoDialogOpen} 
-        onClose={() => setDemoDialogOpen(false)}
-        maxWidth="md"
-        fullWidth
-      >
-        <DialogTitle>
-          <Typography variant="h5" component="div" sx={{ fontWeight: 'bold' }}>
-            Choose Demo Mode
-          </Typography>
-        </DialogTitle>
-        <DialogContent dividers>
-          <Grid container spacing={3}>
-            {demoOptions.map((option, index) => (
-              <Grid item xs={12} md={4} key={index}>
+      <div className="fixed top-4 right-6 z-50 flex gap-3">
+        <Dialog open={demoDialogOpen} onOpenChange={setDemoDialogOpen}>
+          <DialogTrigger asChild>
+            <Button variant="outline" className="bg-white/90 backdrop-blur-sm border-gray-200 hover:bg-gray-50">
+              <Play className="h-4 w-4 mr-2" />
+              Try Demo
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-bold">Choose Your Experience</DialogTitle>
+              <DialogDescription>
+                Select a demo mode to explore Evalis features
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+              {demoOptions.map((option, index) => (
                 <Card 
-                  sx={{ 
-                    height: '100%',
-                    cursor: 'pointer',
-                    transition: 'transform 0.2s',
-                    '&:hover': {
-                      transform: 'translateY(-4px)',
-                      boxShadow: 4
-                    }
-                  }}
+                  key={index}
+                  className={`cursor-pointer transition-all duration-200 hover:shadow-lg ${option.color}`}
                   onClick={() => handleDemoClick(option.path)}
                 >
-                  <CardContent sx={{ 
-                    textAlign: 'center',
-                    height: '100%',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center'
-                  }}>
-                    <Box sx={{ color: theme.palette.primary.main, mb: 2 }}>
+                  <CardContent className="p-6 text-center">
+                    <div className="flex justify-center mb-4 text-gray-700">
                       {option.icon}
-                    </Box>
-                    <Typography variant="h6" gutterBottom>
-                      {option.title}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" paragraph>
-                      {option.description}
-                    </Typography>
+                    </div>
+                    <h3 className="font-semibold text-lg mb-2 text-gray-900">{option.title}</h3>
+                    <p className="text-sm text-gray-600 leading-relaxed">{option.description}</p>
                   </CardContent>
                 </Card>
-              </Grid>
-            ))}
-          </Grid>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDemoDialogOpen(false)}>
-            Close
-          </Button>
-        </DialogActions>
-      </Dialog>
+              ))}
+            </div>
+          </DialogContent>
+        </Dialog>
+        
+        <Button onClick={() => navigate('/login')} className="bg-black hover:bg-gray-800 text-white">
+          <LogIn className="h-4 w-4 mr-2" />
+          Login
+        </Button>
+      </div>
 
-      {/* Call to Action */}
-      <Box sx={{ 
-        bgcolor: theme.palette.primary.main,
-        color: 'white',
-        py: 8,
-        mt: 8
-      }}>
-        <Container maxWidth="md">
-          <Typography variant="h4" align="center" gutterBottom>
-            Ready to Get Started?
-          </Typography>
-          <Typography variant="h6" align="center" paragraph>
-            Join our smart grading system today and transform your academic journey.
-          </Typography>
-          <Box sx={{ textAlign: 'center', mt: 4 }}>
+      {/* Hero Section */}
+      <section className="pt-32 pb-20 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div className="space-y-8">
+              <div className="space-y-4">
+                <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-200">
+                  <Zap className="h-3 w-3 mr-1" />
+                  Next-Gen Education Platform
+                </Badge>
+                <h1 className="text-5xl lg:text-6xl font-bold text-black leading-tight">
+                  Smart Grading
+                  <span className="block text-gray-600">Made Simple</span>
+                </h1>
+                <p className="text-xl text-gray-600 leading-relaxed max-w-lg">
+                  Transform your academic experience with our intelligent grading system. 
+                  Streamlined, secure, and designed for modern education.
+                </p>
+              </div>
+              
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Button 
+                  size="lg" 
+                  onClick={() => navigate('/get-started')}
+                  className="bg-black hover:bg-gray-800 text-white px-8 py-3 text-lg"
+                >
+                  Get Started
+                  <ArrowRight className="h-5 w-5 ml-2" />
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="lg"
+                  onClick={() => navigate('/login')}
+                  className="border-gray-300 hover:bg-gray-50 px-8 py-3 text-lg"
+                >
+                  <LogIn className="h-5 w-5 mr-2" />
+                  Login
+                </Button>
+              </div>
+
+              {/* Stats */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 pt-8 border-t border-gray-100">
+                {stats.map((stat, index) => (
+                  <div key={index} className="text-center">
+                    <div className="text-2xl font-bold text-black">{stat.number}</div>
+                    <div className="text-sm text-gray-600">{stat.label}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-gray-100 to-gray-200 rounded-3xl transform rotate-3"></div>
+              <div className="relative bg-white rounded-3xl p-8 shadow-2xl border border-gray-100">
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-black rounded-full flex items-center justify-center">
+                        <GraduationCap className="h-5 w-5 text-white" />
+                      </div>
+                      <div>
+                        <div className="font-semibold text-black">Evalis Dashboard</div>
+                        <div className="text-sm text-gray-500">Grade Management</div>
+                      </div>
+                    </div>
+                    <Badge className="bg-green-100 text-green-800 border-green-200">Live</Badge>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <span className="text-sm font-medium">Mathematics</span>
+                      <Badge variant="outline">A+</Badge>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <span className="text-sm font-medium">Physics</span>
+                      <Badge variant="outline">A</Badge>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <span className="text-sm font-medium">Chemistry</span>
+                      <Badge variant="outline">B+</Badge>
+                    </div>
+                  </div>
+                  
+                  <div className="pt-4 border-t border-gray-100">
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold text-black">Overall CGPA</span>
+                      <span className="text-2xl font-bold text-black">8.7</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="py-20 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <Badge variant="outline" className="mb-4 bg-white border-gray-200">
+              <Star className="h-3 w-3 mr-1" />
+              Features
+            </Badge>
+            <h2 className="text-4xl font-bold text-black mb-4">
+              Everything you need for modern grading
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Powerful tools designed to streamline academic management and enhance learning outcomes.
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {features.map((feature, index) => (
+              <Card key={index} className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-white">
+                <CardHeader className="pb-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="p-3 bg-gray-100 rounded-lg text-black">
+                      {feature.icon}
+                    </div>
+                    <Badge variant="secondary" className="bg-black text-white">
+                      {feature.highlight}
+                    </Badge>
+                  </div>
+                  <CardTitle className="text-xl text-black">{feature.title}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription className="text-gray-600 leading-relaxed">
+                    {feature.description}
+                  </CardDescription>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20 bg-black text-white">
+        <div className="max-w-4xl mx-auto text-center px-6">
+          <h2 className="text-4xl font-bold mb-6">
+            Ready to transform your grading experience?
+          </h2>
+          <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+            Join thousands of educators and students who trust Evalis for their academic management needs.
+          </p>
+          
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
-              variant="contained" 
-              size="large"
+              size="lg"
               onClick={() => navigate('/get-started')}
-              sx={{ 
-                bgcolor: 'white',
-                color: theme.palette.primary.main,
-                mr: 2,
-                '&:hover': {
-                  bgcolor: '#f3f4f6'
-                }
-              }}
+              className="bg-white text-black hover:bg-gray-100 px-8 py-3 text-lg"
             >
-              Get Started
+              Get Started Free
+              <ArrowRight className="h-5 w-5 ml-2" />
             </Button>
             <Button 
-              variant="outlined" 
-              size="large"
+              variant="outline" 
+              size="lg"
               onClick={() => navigate('/login')}
-              sx={{ 
-                color: 'white',
-                borderColor: 'white',
-                '&:hover': {
-                  borderColor: 'white',
-                  bgcolor: 'rgba(255, 255, 255, 0.1)'
-                }
-              }}
+              className="border-gray-600 text-white hover:bg-gray-900 px-8 py-3 text-lg"
             >
+              <LogIn className="h-5 w-5 mr-2" />
               Login Now
             </Button>
-          </Box>
-        </Container>
-      </Box>
-    </Box>
+          </div>
+          
+          <div className="flex items-center justify-center mt-8 space-x-6 text-sm text-gray-400">
+            <div className="flex items-center">
+              <CheckCircle className="h-4 w-4 mr-2" />
+              Free to start
+            </div>
+            <div className="flex items-center">
+              <CheckCircle className="h-4 w-4 mr-2" />
+              No credit card required
+            </div>
+            <div className="flex items-center">
+              <CheckCircle className="h-4 w-4 mr-2" />
+              Setup in minutes
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
   );
 };
 
-export default LandingPage; 
+export default LandingPage;

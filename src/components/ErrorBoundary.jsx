@@ -17,7 +17,7 @@ class ErrorBoundary extends React.Component {
     console.error('ErrorBoundary caught an error:', error, errorInfo);
     this.setState({
       error: error,
-      errorInfo: errorInfo
+      errorInfo: errorInfo || null
     });
   }
 
@@ -64,9 +64,11 @@ class ErrorBoundary extends React.Component {
               <Typography variant="body2" component="pre" sx={{ mt: 1, fontSize: '0.75rem' }}>
                 {this.state.error && this.state.error.toString()}
               </Typography>
-              <Typography variant="body2" component="pre" sx={{ mt: 1, fontSize: '0.75rem' }}>
-                {this.state.errorInfo.componentStack}
-              </Typography>
+              {this.state.errorInfo && (
+                <Typography variant="body2" component="pre" sx={{ mt: 1, fontSize: '0.75rem' }}>
+                  {this.state.errorInfo.componentStack}
+                </Typography>
+              )}
             </Box>
           )}
         </Box>

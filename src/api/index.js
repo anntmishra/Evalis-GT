@@ -225,7 +225,14 @@ export const resetStudentPassword = (studentId, newPassword) =>
 export const getStudents = (batch = '', page = 1) => 
   api.get('/students', { params: { batch, page } });
 export const getStudentById = (id) => api.get(`/students/${id}`);
-export const getStudentSubmissions = (id) => api.get(`/students/${id}/submissions`);
+export const getStudentSubmissions = (id) => {
+  // If no ID is provided, get current student's submissions
+  if (!id) {
+    return api.get('/students/submissions');
+  }
+  // Otherwise get specific student's submissions (for admin/teacher use)
+  return api.get(`/students/${id}/submissions`);
+};
 export const createStudent = (studentData) => api.post('/students', studentData);
 export const updateStudent = (id, studentData) => api.put(`/students/${id}`, studentData);
 export const deleteStudent = (id) => api.delete(`/students/${id}`);
@@ -306,6 +313,7 @@ export const uploadTeacherSubmission = (formData) => {
 // Student Portal API
 export const getStudentProfile = () => api.get('/students/profile');
 export const getStudentGrades = (studentId) => api.get(`/students/${studentId}/grades`);
+export const getStudentSubjects = (studentId) => api.get(`/students/${studentId}/subjects`);
 
 export const sendBulkPasswordResetEmails = (studentEmails) => api.post('/auth/bulk-password-reset', { emails: studentEmails });
 

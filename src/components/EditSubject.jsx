@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getSubjectById, updateSubject, createSubject } from '../api';
+import { getAllBatches } from '../api/batchService';
+import { getAllSemesters } from '../api/semesterService';
 
 export default function EditSubject({ subjectId, onClose, onSuccess }) {
   const [subject, setSubject] = useState({
@@ -7,26 +9,33 @@ export default function EditSubject({ subjectId, onClose, onSuccess }) {
     name: '',
     section: '',
     description: '',
-    credits: 3
+    credits: 3,
+    batchId: '',
+    semesterId: ''
   });
+  const [batches, setBatches] = useState([]);
+  const [semesters, setSemesters] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!subjectId) {
-        setLoading(false);
-        return;
-      }
-      
+      setLoading(true);
       try {
-        setLoading(true);
-        
-        // Fetch subject data if editing existing subject
-        const subjectResponse = await getSubjectById(subjectId);
-        setSubject(subjectResponse.data);
-        
+        // Fetch batches and semesters for dropdowns
+        const [batchRes, semesterRes] = await Promise.all([
+          getAllBatches(),
+          getAllSemesters()
+        ]);
+        setBatches(batchRes);
+        setSemesters(semesterRes);
+
+        if (subjectId) {
+          // Fetch subject data if editing existing subject
+          const subjectResponse = await getSubjectById(subjectId);
+          setSubject(subjectResponse.data);
+        }
         setError(null);
       } catch (err) {
         console.error('Error fetching data:', err);
@@ -35,7 +44,6 @@ export default function EditSubject({ subjectId, onClose, onSuccess }) {
         setLoading(false);
       }
     };
-
     fetchData();
   }, [subjectId]);
 
@@ -49,28 +57,35 @@ export default function EditSubject({ subjectId, onClose, onSuccess }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+    // Log the subject payload for debugging
+    console.log('Submitting subject:', subject);
+    // Basic validation for required fields
+    if (!subject.name || !subject.section || !subject.batchId) {
+      setError('Name, Section, and Batch are required.');
+      return;
+    }
     try {
       setSaving(true);
-      
+      let response;
       if (subjectId) {
         // Update existing subject
-        await updateSubject(subjectId, subject);
+        response = await updateSubject(subjectId, subject);
       } else {
         // Create new subject
-        await createSubject(subject);
+        response = await createSubject(subject);
       }
-      
+      // Log response for debugging
+      console.log('Subject API response:', response);
       if (onSuccess) {
         onSuccess();
       }
-      
       if (onClose) {
         onClose();
       }
     } catch (err) {
       console.error('Error saving subject:', err);
-      setError(err.response?.data?.message || 'Failed to save subject. Please try again.');
+      // Show detailed error if available
+      setError(err.response?.data?.message || err.message || 'Failed to save subject. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -117,11 +132,11 @@ export default function EditSubject({ subjectId, onClose, onSuccess }) {
               value={subject.id}
               onChange={handleChange}
               required
-              disabled={!!subjectId} // Disable ID field when editing
+              disabled={!!subjectId}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
             />
           </div>
-          
+
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-gray-700">Name</label>
             <input
@@ -134,7 +149,7 @@ export default function EditSubject({ subjectId, onClose, onSuccess }) {
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
             />
           </div>
-          
+
           <div>
             <label htmlFor="section" className="block text-sm font-medium text-gray-700">Section</label>
             <input
@@ -147,7 +162,40 @@ export default function EditSubject({ subjectId, onClose, onSuccess }) {
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
             />
           </div>
-          
+
+          <div>
+            <label htmlFor="batchId" className="block text-sm font-medium text-gray-700">Batch</label>
+            <select
+              id="batchId"
+              name="batchId"
+              value={subject.batchId}
+              onChange={handleChange}
+              required
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+            >
+              <option value="">Select Batch</option>
+              {batches.map(batch => (
+                <option key={batch.id} value={batch.id}>{batch.name || batch.id}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label htmlFor="semesterId" className="block text-sm font-medium text-gray-700">Semester</label>
+            <select
+              id="semesterId"
+              name="semesterId"
+              value={subject.semesterId}
+              onChange={handleChange}
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+            >
+              <option value="">Select Semester (optional)</option>
+              {semesters.map(sem => (
+                <option key={sem.id} value={sem.id}>{sem.name || sem.id}</option>
+              ))}
+            </select>
+          </div>
+
           <div>
             <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description</label>
             <textarea
@@ -159,7 +207,7 @@ export default function EditSubject({ subjectId, onClose, onSuccess }) {
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
             ></textarea>
           </div>
-          
+
           <div>
             <label htmlFor="credits" className="block text-sm font-medium text-gray-700">Credits</label>
             <input
@@ -175,7 +223,7 @@ export default function EditSubject({ subjectId, onClose, onSuccess }) {
             />
           </div>
         </div>
-        
+
         <div className="mt-6 flex justify-end space-x-3">
           {onClose && (
             <button

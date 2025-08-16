@@ -12,6 +12,9 @@ export interface AuthContextType {
   loading: boolean;
   error: string | null;
   login: (identifier: string, password: string) => Promise<User>;
+  studentLogin: (studentId: string, password: string) => Promise<User>;
+  teacherLogin: (email: string, password: string) => Promise<User>;
+  adminLogin: (username: string, password: string) => Promise<User>;
   logout: () => void;
   setupTeacherPassword: (email: string, currentPassword: string, newPassword: string) => Promise<User>;
   requestPasswordReset: (email: string) => Promise<void>;

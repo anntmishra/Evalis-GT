@@ -10,17 +10,29 @@ let firebaseInitialized = false;
 
 if (!admin.apps.length) {
   try {
-    // Check environment variables first
-    if (process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PRIVATE_KEY) {
+    // First try to load from service account JSON file
+    const serviceAccountPath = path.join(__dirname, '../../Firebase Admin SDK.json');
+    
+    if (fs.existsSync(serviceAccountPath)) {
+      console.log('Loading Firebase Admin SDK from service account file...');
+      const serviceAccount = require(serviceAccountPath);
+      
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+        projectId: serviceAccount.project_id
+      });
+      
+      console.log('✓ Firebase Admin SDK initialized successfully with service account file');
+      console.log(`✓ Project: ${serviceAccount.project_id}`);
+      console.log(`✓ Client Email: ${serviceAccount.client_email}`);
+      firebaseInitialized = true;
+    }
+    // Fallback to environment variables
+    else if (process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PRIVATE_KEY) {
       // Skip initialization if using placeholder values
       if (process.env.FIREBASE_CLIENT_EMAIL.includes('your-service-account-email') || 
-          process.env.FIREBASE_CLIENT_EMAIL.includes('firebase-adminsdk-xxxxx') ||
-          process.env.FIREBASE_PRIVATE_KEY.includes('MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC')) {
+          process.env.FIREBASE_CLIENT_EMAIL.includes('firebase-adminsdk-xxxxx')) {
         console.log('⚠️  Placeholder Firebase credentials detected. Skipping Firebase Admin SDK initialization.');
-        console.log('📋 To set up Firebase Admin SDK:');
-        console.log('   1. Download your service account JSON from Firebase Console');
-        console.log('   2. Run: node setup-firebase.js path/to/your/service-account.json');
-        console.log('   3. Or place the JSON file as "firebase-admin-sdk.json" in project root');
       } else {
         console.log('Initializing Firebase Admin SDK with environment variables');
       
@@ -28,15 +40,6 @@ if (!admin.apps.length) {
         const privateKey = process.env.FIREBASE_PRIVATE_KEY ? 
           process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n') : 
           undefined;
-        
-        console.log(`Using Firebase project: ${process.env.FIREBASE_PROJECT_ID}`);
-        console.log(`Using Firebase client email: [CONFIGURED]`);
-        console.log('Private key found: [CONFIGURED]');
-        
-        if (!privateKey) {
-          console.error('Private key is undefined or empty. Check your environment variables.');
-          throw new Error('Firebase private key is missing or invalid');
-        }
         
         try {
           admin.initializeApp({
@@ -47,72 +50,15 @@ if (!admin.apps.length) {
               client_email: process.env.FIREBASE_CLIENT_EMAIL,
             })
           });
-          console.log('Firebase Admin SDK initialized successfully with env variables');
+          console.log('✓ Firebase Admin SDK initialized successfully with env variables');
           firebaseInitialized = true;
         } catch (certError) {
           console.error('Error creating credential certificate:', certError);
           throw certError;
         }
       }
-    } 
-    // If env vars not complete, try service account file
-    else {
-      console.log('Environment variables incomplete, trying service account file');
-      // Check for both naming conventions of the service account JSON file
-      const possibleServiceAccountPaths = [
-        path.join(__dirname, '..', '..', 'Evalis Firebase Admin SDK.json'),
-        path.join(__dirname, '..', '..', 'Firebase Admin SDK.json'),
-        path.join(__dirname, '..', '..', 'evalis-firebase-admin-sdk.json'),
-        path.join(__dirname, '..', '..', 'firebase-admin-sdk.json')
-      ];
-      
-      let serviceAccount;
-      let usedFilePath;
-      for (const filePath of possibleServiceAccountPaths) {
-        if (fs.existsSync(filePath)) {
-          try {
-            const fileContent = fs.readFileSync(filePath, 'utf8');
-            serviceAccount = JSON.parse(fileContent);
-            usedFilePath = filePath;
-            console.log(`Loaded Firebase Admin SDK from: ${filePath}`);
-            
-            // Verify essential fields
-            if (!serviceAccount.project_id || !serviceAccount.client_email || !serviceAccount.private_key) {
-              console.error(`Found service account file at ${filePath} but it's missing required fields`);
-              serviceAccount = null;
-              continue;
-            }
-            
-            break;
-          } catch (err) {
-            console.warn(`Failed to load from ${filePath}:`, err.message);
-          }
-        }
-      }
-      
-      if (serviceAccount) {
-        try {
-          console.log(`Using Firebase project from file: ${serviceAccount.project_id}`);
-          console.log(`Using Firebase client email from file: [CONFIGURED]`);
-          console.log('Private key found in file: [CONFIGURED]');
-            
-          admin.initializeApp({
-            credential: admin.credential.cert(serviceAccount)
-          });
-          console.log('Firebase Admin SDK initialized successfully with JSON file');
-          firebaseInitialized = true;
-        } catch (err) {
-          console.error('Error initializing Firebase with service account:', err);
-          // Check for specific issues with service account
-          if (err.code === 'auth/invalid-credential') {
-            console.error('The credential is invalid or malformed. Check your service account.');
-          } else if (err.code === 'auth/project-not-found') {
-            console.error('The specified Firebase project was not found.');
-          }
-        }
-      } else {
-        console.warn('Could not find Firebase Admin SDK JSON file or environment variables');
-      }
+    } else {
+      console.log('⚠️  Firebase Admin SDK credentials not found');
     }
   } catch (error) {
     console.error('Error initializing Firebase Admin SDK:', error);
@@ -143,7 +89,10 @@ if (!admin.apps.length) {
 const createFirebaseUser = async (email, password, userData = {}) => {
   if (!firebaseInitialized) {
     console.error('Firebase Admin SDK not initialized, cannot create user');
-    throw new Error('Firebase Admin SDK not initialized');
+    return {
+      success: false,
+      error: 'Firebase Admin SDK not initialized'
+    };
   }
   
   try {
@@ -157,41 +106,158 @@ const createFirebaseUser = async (email, password, userData = {}) => {
 
     // Set custom claims if needed (role-based access)
     await admin.auth().setCustomUserClaims(userRecord.uid, {
-      role: 'student',
-      studentId: userData.id
+      role: userData.role || 'student',
+      userId: userData.id
     });
 
-    console.log(`Successfully created Firebase user: ${userRecord.uid}`);
-    return userRecord;
+    console.log(`✓ Firebase user created successfully: ${userRecord.uid} for ${email}`);
+    return {
+      success: true,
+      uid: userRecord.uid,
+      email: userRecord.email
+    };
   } catch (error) {
     console.error('Error creating Firebase user:', error);
+    return {
+      success: false,
+      error: error.message
+    };
+  }
+};
+
+/**
+ * Generate custom password reset link using Admin SDK
+ * @param {string} email - User's email
+ * @returns {Promise<Object>} - Password reset link result
+ */
+const generatePasswordResetLink = async (email) => {
+  if (!firebaseInitialized) {
+    console.error('Firebase Admin SDK not initialized, cannot generate password reset link');
+    return {
+      success: false,
+      error: 'Firebase Admin SDK not initialized'
+    };
+  }
+  
+  try {
+    const link = await admin.auth().generatePasswordResetLink(email);
+    console.log('✓ Password reset link generated successfully for:', email);
+    return {
+      success: true,
+      resetLink: link
+    };
+  } catch (error) {
+    console.error('Error generating password reset link:', error);
+    return {
+      success: false,
+      error: error.message
+    };
+  }
+};
+
+/**
+ * Get Firebase user by email
+ * @param {string} email - User's email
+ * @returns {Promise<Object|null>} - Firebase user record or null if not found
+ */
+const getFirebaseUserByEmail = async (email) => {
+  if (!firebaseInitialized) {
+    console.error('Firebase Admin SDK not initialized, cannot get user');
+    return null;
+  }
+  
+  try {
+    const userRecord = await admin.auth().getUserByEmail(email);
+    console.log(`✓ Found Firebase user by email: ${email} (UID: ${userRecord.uid})`);
+    return userRecord;
+  } catch (error) {
+    if (error.code === 'auth/user-not-found') {
+      console.log(`No Firebase user found with email: ${email}`);
+      return null;
+    }
+    console.error('Error getting Firebase user by email:', error);
     throw error;
   }
 };
 
 /**
- * Send password reset email to user
+ * Delete a Firebase user by email
+ * This function removes the user from Firebase Authentication completely,
+ * preventing them from logging in to the dashboard
  * @param {string} email - User's email
- * @returns {Promise<string>} - Password reset link
+ * @returns {Promise<Object>} - Success status with details
  */
-const sendPasswordResetEmail = async (email) => {
+const deleteFirebaseUserByEmail = async (email) => {
   if (!firebaseInitialized) {
-    console.error('Firebase Admin SDK not initialized, cannot send password reset');
+    console.error('Firebase Admin SDK not initialized, cannot delete user');
+    return { 
+      success: false, 
+      error: 'Firebase Admin SDK not initialized',
+      details: 'User will remain in Firebase Authentication'
+    };
+  }
+  
+  try {
+    console.log(`🔍 Searching for Firebase user with email: ${email}`);
+    
+    // First get the user by email to find their UID
+    const userRecord = await getFirebaseUserByEmail(email);
+    
+    if (!userRecord) {
+      console.log(`ℹ️  No Firebase user found with email ${email} - nothing to delete`);
+      return { 
+        success: true, 
+        message: 'No Firebase user found to delete',
+        details: 'User was not in Firebase Authentication'
+      };
+    }
+    
+    console.log(`🗑️  Deleting Firebase user: ${email} (UID: ${userRecord.uid})`);
+    
+    // Delete the user using their UID - this completely removes them from Firebase Auth
+    await admin.auth().deleteUser(userRecord.uid);
+    
+    console.log(`✅ Successfully deleted Firebase user: ${email} (UID: ${userRecord.uid})`);
+    console.log(`🔒 User ${email} can no longer log in to the dashboard`);
+    
+    return { 
+      success: true, 
+      message: 'Firebase user deleted successfully',
+      details: `User ${email} removed from Firebase Authentication and can no longer log in`,
+      deletedUid: userRecord.uid
+    };
+  } catch (error) {
+    console.error(`❌ Error deleting Firebase user by email (${email}):`, error);
+    return { 
+      success: false, 
+      error: error.message,
+      details: `Failed to remove user from Firebase Authentication - they may still be able to log in`
+    };
+  }
+};
+
+/**
+ * Delete a Firebase user by UID
+ * @param {string} uid - Firebase user ID
+ * @returns {Promise<void>}
+ */
+const deleteFirebaseUser = async (uid) => {
+  if (!firebaseInitialized) {
+    console.error('Firebase Admin SDK not initialized, cannot delete user');
     throw new Error('Firebase Admin SDK not initialized');
   }
   
   try {
-    const resetLink = await admin.auth().generatePasswordResetLink(email);
-    console.log(`Password reset link generated for: ${email}`);
-    return resetLink;
+    await admin.auth().deleteUser(uid);
+    console.log(`✅ Successfully deleted Firebase user with UID: ${uid}`);
   } catch (error) {
-    console.error('Error sending password reset email:', error);
+    console.error('Error deleting Firebase user:', error);
     throw error;
   }
 };
 
 /**
- * Update a Firebase user
+ * Update Firebase user information
  * @param {string} uid - Firebase user ID
  * @param {Object} updateData - Data to update
  * @returns {Promise<Object>} - Updated user record
@@ -203,17 +269,6 @@ const updateFirebaseUser = async (uid, updateData) => {
   }
   
   try {
-    // If uid is not provided but email is, try to find user by email
-    if (!uid && updateData.email) {
-      try {
-        const userRecord = await admin.auth().getUserByEmail(updateData.email);
-        uid = userRecord.uid;
-      } catch (error) {
-        console.error(`User with email ${updateData.email} not found:`, error);
-        throw new Error(`User with email ${updateData.email} not found`);
-      }
-    }
-    
     if (!uid) {
       throw new Error('User ID (uid) is required for update');
     }
@@ -227,30 +282,12 @@ const updateFirebaseUser = async (uid, updateData) => {
   }
 };
 
-/**
- * Delete a Firebase user
- * @param {string} uid - Firebase user ID
- * @returns {Promise<void>}
- */
-const deleteFirebaseUser = async (uid) => {
-  if (!firebaseInitialized) {
-    console.error('Firebase Admin SDK not initialized, cannot delete user');
-    throw new Error('Firebase Admin SDK not initialized');
-  }
-  
-  try {
-    await admin.auth().deleteUser(uid);
-    console.log(`Successfully deleted Firebase user: ${uid}`);
-  } catch (error) {
-    console.error('Error deleting Firebase user:', error);
-    throw error;
-  }
-};
-
 module.exports = {
   createFirebaseUser,
-  sendPasswordResetEmail,
-  updateFirebaseUser,
+  generatePasswordResetLink,
+  getFirebaseUserByEmail,
   deleteFirebaseUser,
+  deleteFirebaseUserByEmail,
+  updateFirebaseUser,
   admin
-}; 
+};

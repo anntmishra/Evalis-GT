@@ -1,0 +1,2333 @@
+2025-08-14 02:00:06 +05:30: Error initializing database models: Error
+    at Query.run (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/dialects/postgres/query.js:50:25)
+    at /Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:315:28
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async Semester.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/model.js:979:17)
+    at async Sequelize.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:377:9)
+    at async Object.initModels (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/models/index.js:73:5)
+    at async startServer (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/server.js:135:5) {
+  name: 'SequelizeUnknownConstraintError',
+  parent: error: constraint "Semesters_batchId_fkey" of relation "Semesters" does not exist
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 144,
+    severity: 'ERROR',
+    code: '42704',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'tablecmds.c',
+    line: '12648',
+    routine: 'ATExecDropConstraint',
+    sql: 'ALTER TABLE "Semesters" DROP CONSTRAINT "Semesters_batchId_fkey"',
+    parameters: undefined
+  },
+  original: error: constraint "Semesters_batchId_fkey" of relation "Semesters" does not exist
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 144,
+    severity: 'ERROR',
+    code: '42704',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'tablecmds.c',
+    line: '12648',
+    routine: 'ATExecDropConstraint',
+    sql: 'ALTER TABLE "Semesters" DROP CONSTRAINT "Semesters_batchId_fkey"',
+    parameters: undefined
+  },
+  sql: 'ALTER TABLE "Semesters" DROP CONSTRAINT "Semesters_batchId_fkey"',
+  parameters: {},
+  constraint: 'Semesters_batchId_fkey',
+  fields: undefined,
+  table: 'Semesters'
+}
+2025-08-14 02:00:06 +05:30: Error initializing database models: Error
+    at Query.run (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/dialects/postgres/query.js:50:25)
+    at /Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:315:28
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async Semester.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/model.js:979:17)
+    at async Sequelize.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:377:9)
+    at async Object.initModels (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/models/index.js:73:5)
+    at async startServer (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/server.js:135:5) {
+  name: 'SequelizeUnknownConstraintError',
+  parent: error: constraint "Semesters_batchId_fkey" of relation "Semesters" does not exist
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 144,
+    severity: 'ERROR',
+    code: '42704',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'tablecmds.c',
+    line: '12648',
+    routine: 'ATExecDropConstraint',
+    sql: 'ALTER TABLE "Semesters" DROP CONSTRAINT "Semesters_batchId_fkey"',
+    parameters: undefined
+  },
+  original: error: constraint "Semesters_batchId_fkey" of relation "Semesters" does not exist
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 144,
+    severity: 'ERROR',
+    code: '42704',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'tablecmds.c',
+    line: '12648',
+    routine: 'ATExecDropConstraint',
+    sql: 'ALTER TABLE "Semesters" DROP CONSTRAINT "Semesters_batchId_fkey"',
+    parameters: undefined
+  },
+  sql: 'ALTER TABLE "Semesters" DROP CONSTRAINT "Semesters_batchId_fkey"',
+  parameters: {},
+  constraint: 'Semesters_batchId_fkey',
+  fields: undefined,
+  table: 'Semesters'
+}
+2025-08-14 02:00:06 +05:30: Error initializing database models: Error
+    at Query.run (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/dialects/postgres/query.js:50:25)
+    at /Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:315:28
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async Semester.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/model.js:979:17)
+    at async Sequelize.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:377:9)
+    at async Object.initModels (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/models/index.js:73:5)
+    at async startServer (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/server.js:135:5) {
+  name: 'SequelizeUnknownConstraintError',
+  parent: error: constraint "Semesters_batchId_fkey" of relation "Semesters" does not exist
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 144,
+    severity: 'ERROR',
+    code: '42704',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'tablecmds.c',
+    line: '12648',
+    routine: 'ATExecDropConstraint',
+    sql: 'ALTER TABLE "Semesters" DROP CONSTRAINT "Semesters_batchId_fkey"',
+    parameters: undefined
+  },
+  original: error: constraint "Semesters_batchId_fkey" of relation "Semesters" does not exist
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 144,
+    severity: 'ERROR',
+    code: '42704',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'tablecmds.c',
+    line: '12648',
+    routine: 'ATExecDropConstraint',
+    sql: 'ALTER TABLE "Semesters" DROP CONSTRAINT "Semesters_batchId_fkey"',
+    parameters: undefined
+  },
+  sql: 'ALTER TABLE "Semesters" DROP CONSTRAINT "Semesters_batchId_fkey"',
+  parameters: {},
+  constraint: 'Semesters_batchId_fkey',
+  fields: undefined,
+  table: 'Semesters'
+}
+2025-08-14 02:00:06 +05:30: Error initializing database models: Error
+    at Query.run (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/dialects/postgres/query.js:50:25)
+    at /Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:315:28
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async Semester.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/model.js:979:17)
+    at async Sequelize.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:377:9)
+    at async Object.initModels (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/models/index.js:73:5)
+    at async startServer (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/server.js:135:5) {
+  name: 'SequelizeUnknownConstraintError',
+  parent: error: constraint "Semesters_batchId_fkey" of relation "Semesters" does not exist
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 144,
+    severity: 'ERROR',
+    code: '42704',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'tablecmds.c',
+    line: '12648',
+    routine: 'ATExecDropConstraint',
+    sql: 'ALTER TABLE "Semesters" DROP CONSTRAINT "Semesters_batchId_fkey"',
+    parameters: undefined
+  },
+  original: error: constraint "Semesters_batchId_fkey" of relation "Semesters" does not exist
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 144,
+    severity: 'ERROR',
+    code: '42704',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'tablecmds.c',
+    line: '12648',
+    routine: 'ATExecDropConstraint',
+    sql: 'ALTER TABLE "Semesters" DROP CONSTRAINT "Semesters_batchId_fkey"',
+    parameters: undefined
+  },
+  sql: 'ALTER TABLE "Semesters" DROP CONSTRAINT "Semesters_batchId_fkey"',
+  parameters: {},
+  constraint: 'Semesters_batchId_fkey',
+  fields: undefined,
+  table: 'Semesters'
+}
+2025-08-14 02:00:06 +05:30: Error initializing database models: Error
+    at Query.run (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/dialects/postgres/query.js:50:25)
+    at /Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:315:28
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async Semester.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/model.js:979:17)
+    at async Sequelize.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:377:9)
+    at async Object.initModels (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/models/index.js:73:5)
+    at async startServer (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/server.js:135:5) {
+  name: 'SequelizeUnknownConstraintError',
+  parent: error: constraint "Semesters_batchId_fkey" of relation "Semesters" does not exist
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 144,
+    severity: 'ERROR',
+    code: '42704',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'tablecmds.c',
+    line: '12648',
+    routine: 'ATExecDropConstraint',
+    sql: 'ALTER TABLE "Semesters" DROP CONSTRAINT "Semesters_batchId_fkey"',
+    parameters: undefined
+  },
+  original: error: constraint "Semesters_batchId_fkey" of relation "Semesters" does not exist
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 144,
+    severity: 'ERROR',
+    code: '42704',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'tablecmds.c',
+    line: '12648',
+    routine: 'ATExecDropConstraint',
+    sql: 'ALTER TABLE "Semesters" DROP CONSTRAINT "Semesters_batchId_fkey"',
+    parameters: undefined
+  },
+  sql: 'ALTER TABLE "Semesters" DROP CONSTRAINT "Semesters_batchId_fkey"',
+  parameters: {},
+  constraint: 'Semesters_batchId_fkey',
+  fields: undefined,
+  table: 'Semesters'
+}
+2025-08-14 02:00:06 +05:30: Error initializing database models: Error
+    at Query.run (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/dialects/postgres/query.js:50:25)
+    at /Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:315:28
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async Semester.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/model.js:979:17)
+    at async Sequelize.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:377:9)
+    at async Object.initModels (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/models/index.js:73:5)
+    at async startServer (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/server.js:135:5) {
+  name: 'SequelizeUnknownConstraintError',
+  parent: error: constraint "Semesters_batchId_fkey" of relation "Semesters" does not exist
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 144,
+    severity: 'ERROR',
+    code: '42704',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'tablecmds.c',
+    line: '12648',
+    routine: 'ATExecDropConstraint',
+    sql: 'ALTER TABLE "Semesters" DROP CONSTRAINT "Semesters_batchId_fkey"',
+    parameters: undefined
+  },
+  original: error: constraint "Semesters_batchId_fkey" of relation "Semesters" does not exist
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 144,
+    severity: 'ERROR',
+    code: '42704',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'tablecmds.c',
+    line: '12648',
+    routine: 'ATExecDropConstraint',
+    sql: 'ALTER TABLE "Semesters" DROP CONSTRAINT "Semesters_batchId_fkey"',
+    parameters: undefined
+  },
+  sql: 'ALTER TABLE "Semesters" DROP CONSTRAINT "Semesters_batchId_fkey"',
+  parameters: {},
+  constraint: 'Semesters_batchId_fkey',
+  fields: undefined,
+  table: 'Semesters'
+}
+2025-08-14 02:00:06 +05:30: Error initializing database models: Error
+    at Query.run (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/dialects/postgres/query.js:50:25)
+    at /Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:315:28
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async Semester.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/model.js:979:17)
+    at async Sequelize.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:377:9)
+    at async Object.initModels (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/models/index.js:73:5)
+    at async startServer (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/server.js:135:5) {
+  name: 'SequelizeUnknownConstraintError',
+  parent: error: constraint "Semesters_batchId_fkey" of relation "Semesters" does not exist
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 144,
+    severity: 'ERROR',
+    code: '42704',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'tablecmds.c',
+    line: '12648',
+    routine: 'ATExecDropConstraint',
+    sql: 'ALTER TABLE "Semesters" DROP CONSTRAINT "Semesters_batchId_fkey"',
+    parameters: undefined
+  },
+  original: error: constraint "Semesters_batchId_fkey" of relation "Semesters" does not exist
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 144,
+    severity: 'ERROR',
+    code: '42704',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'tablecmds.c',
+    line: '12648',
+    routine: 'ATExecDropConstraint',
+    sql: 'ALTER TABLE "Semesters" DROP CONSTRAINT "Semesters_batchId_fkey"',
+    parameters: undefined
+  },
+  sql: 'ALTER TABLE "Semesters" DROP CONSTRAINT "Semesters_batchId_fkey"',
+  parameters: {},
+  constraint: 'Semesters_batchId_fkey',
+  fields: undefined,
+  table: 'Semesters'
+}
+2025-08-14 02:00:14 +05:30: Error initializing database models: Error
+    at Query.run (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/dialects/postgres/query.js:50:25)
+    at /Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:315:28
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async Semester.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/model.js:979:17)
+    at async Sequelize.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:377:9)
+    at async Object.initModels (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/models/index.js:73:5)
+    at async startServer (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/server.js:135:5) {
+  name: 'SequelizeUnknownConstraintError',
+  parent: error: constraint "Semesters_batchId_fkey" of relation "Semesters" does not exist
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 144,
+    severity: 'ERROR',
+    code: '42704',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'tablecmds.c',
+    line: '12648',
+    routine: 'ATExecDropConstraint',
+    sql: 'ALTER TABLE "Semesters" DROP CONSTRAINT "Semesters_batchId_fkey"',
+    parameters: undefined
+  },
+  original: error: constraint "Semesters_batchId_fkey" of relation "Semesters" does not exist
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 144,
+    severity: 'ERROR',
+    code: '42704',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'tablecmds.c',
+    line: '12648',
+    routine: 'ATExecDropConstraint',
+    sql: 'ALTER TABLE "Semesters" DROP CONSTRAINT "Semesters_batchId_fkey"',
+    parameters: undefined
+  },
+  sql: 'ALTER TABLE "Semesters" DROP CONSTRAINT "Semesters_batchId_fkey"',
+  parameters: {},
+  constraint: 'Semesters_batchId_fkey',
+  fields: undefined,
+  table: 'Semesters'
+}
+2025-08-14 02:00:14 +05:30: Error initializing database models: Error
+    at Query.run (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/dialects/postgres/query.js:50:25)
+    at /Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:315:28
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async Semester.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/model.js:979:17)
+    at async Sequelize.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:377:9)
+    at async Object.initModels (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/models/index.js:73:5)
+    at async startServer (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/server.js:135:5) {
+  name: 'SequelizeUnknownConstraintError',
+  parent: error: constraint "Semesters_batchId_fkey" of relation "Semesters" does not exist
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 144,
+    severity: 'ERROR',
+    code: '42704',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'tablecmds.c',
+    line: '12648',
+    routine: 'ATExecDropConstraint',
+    sql: 'ALTER TABLE "Semesters" DROP CONSTRAINT "Semesters_batchId_fkey"',
+    parameters: undefined
+  },
+  original: error: constraint "Semesters_batchId_fkey" of relation "Semesters" does not exist
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 144,
+    severity: 'ERROR',
+    code: '42704',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'tablecmds.c',
+    line: '12648',
+    routine: 'ATExecDropConstraint',
+    sql: 'ALTER TABLE "Semesters" DROP CONSTRAINT "Semesters_batchId_fkey"',
+    parameters: undefined
+  },
+  sql: 'ALTER TABLE "Semesters" DROP CONSTRAINT "Semesters_batchId_fkey"',
+  parameters: {},
+  constraint: 'Semesters_batchId_fkey',
+  fields: undefined,
+  table: 'Semesters'
+}
+2025-08-14 02:00:14 +05:30: Error initializing database models: Error
+    at Query.run (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/dialects/postgres/query.js:50:25)
+    at /Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:315:28
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async Semester.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/model.js:979:17)
+    at async Sequelize.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:377:9)
+    at async Object.initModels (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/models/index.js:73:5)
+    at async startServer (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/server.js:135:5) {
+  name: 'SequelizeUnknownConstraintError',
+  parent: error: constraint "Semesters_batchId_fkey" of relation "Semesters" does not exist
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 144,
+    severity: 'ERROR',
+    code: '42704',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'tablecmds.c',
+    line: '12648',
+    routine: 'ATExecDropConstraint',
+    sql: 'ALTER TABLE "Semesters" DROP CONSTRAINT "Semesters_batchId_fkey"',
+    parameters: undefined
+  },
+  original: error: constraint "Semesters_batchId_fkey" of relation "Semesters" does not exist
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 144,
+    severity: 'ERROR',
+    code: '42704',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'tablecmds.c',
+    line: '12648',
+    routine: 'ATExecDropConstraint',
+    sql: 'ALTER TABLE "Semesters" DROP CONSTRAINT "Semesters_batchId_fkey"',
+    parameters: undefined
+  },
+  sql: 'ALTER TABLE "Semesters" DROP CONSTRAINT "Semesters_batchId_fkey"',
+  parameters: {},
+  constraint: 'Semesters_batchId_fkey',
+  fields: undefined,
+  table: 'Semesters'
+}
+2025-08-14 02:00:14 +05:30: Error initializing database models: Error
+    at Query.run (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/dialects/postgres/query.js:50:25)
+    at /Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:315:28
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async Semester.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/model.js:979:17)
+    at async Sequelize.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:377:9)
+    at async Object.initModels (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/models/index.js:73:5)
+    at async startServer (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/server.js:135:5) {
+  name: 'SequelizeUnknownConstraintError',
+  parent: error: constraint "Semesters_batchId_fkey" of relation "Semesters" does not exist
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 144,
+    severity: 'ERROR',
+    code: '42704',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'tablecmds.c',
+    line: '12648',
+    routine: 'ATExecDropConstraint',
+    sql: 'ALTER TABLE "Semesters" DROP CONSTRAINT "Semesters_batchId_fkey"',
+    parameters: undefined
+  },
+  original: error: constraint "Semesters_batchId_fkey" of relation "Semesters" does not exist
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 144,
+    severity: 'ERROR',
+    code: '42704',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'tablecmds.c',
+    line: '12648',
+    routine: 'ATExecDropConstraint',
+    sql: 'ALTER TABLE "Semesters" DROP CONSTRAINT "Semesters_batchId_fkey"',
+    parameters: undefined
+  },
+  sql: 'ALTER TABLE "Semesters" DROP CONSTRAINT "Semesters_batchId_fkey"',
+  parameters: {},
+  constraint: 'Semesters_batchId_fkey',
+  fields: undefined,
+  table: 'Semesters'
+}
+2025-08-14 02:00:22 +05:30: Error initializing database models: Error
+    at Query.run (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/dialects/postgres/query.js:50:25)
+    at /Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:315:28
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async Semester.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/model.js:979:17)
+    at async Sequelize.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:377:9)
+    at async Object.initModels (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/models/index.js:73:5)
+    at async startServer (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/server.js:135:5) {
+  name: 'SequelizeUnknownConstraintError',
+  parent: error: constraint "Semesters_batchId_fkey" of relation "Semesters" does not exist
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 144,
+    severity: 'ERROR',
+    code: '42704',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'tablecmds.c',
+    line: '12648',
+    routine: 'ATExecDropConstraint',
+    sql: 'ALTER TABLE "Semesters" DROP CONSTRAINT "Semesters_batchId_fkey"',
+    parameters: undefined
+  },
+  original: error: constraint "Semesters_batchId_fkey" of relation "Semesters" does not exist
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 144,
+    severity: 'ERROR',
+    code: '42704',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'tablecmds.c',
+    line: '12648',
+    routine: 'ATExecDropConstraint',
+    sql: 'ALTER TABLE "Semesters" DROP CONSTRAINT "Semesters_batchId_fkey"',
+    parameters: undefined
+  },
+  sql: 'ALTER TABLE "Semesters" DROP CONSTRAINT "Semesters_batchId_fkey"',
+  parameters: {},
+  constraint: 'Semesters_batchId_fkey',
+  fields: undefined,
+  table: 'Semesters'
+}
+2025-08-14 02:00:23 +05:30: Error initializing database models: TypeError: Cannot read properties of null (reading '1')
+    at Query.run (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/dialects/postgres/query.js:97:86)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async /Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:315:16
+    at async PostgresQueryInterface.showIndex (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/dialects/abstract/query-interface.js:254:12)
+    at async Admin.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/model.js:988:29)
+    at async Sequelize.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:377:9)
+    at async Object.initModels (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/models/index.js:73:5)
+    at async startServer (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/server.js:135:5)
+2025-08-14 02:00:25 +05:30: Error initializing database models: Error
+    at Query.run (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/dialects/postgres/query.js:50:25)
+    at /Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:315:28
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async PostgresQueryInterface.showIndex (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/dialects/abstract/query-interface.js:254:12)
+    at async Teacher.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/model.js:988:29)
+    at async Sequelize.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:377:9)
+    at async Object.initModels (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/models/index.js:73:5)
+    at async startServer (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/server.js:135:5) {
+  name: 'SequelizeDatabaseError',
+  parent: error: cache lookup failed for attribute 1 of relation 685571
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 116,
+    severity: 'ERROR',
+    code: 'XX000',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'lsyscache.c',
+    line: '982',
+    routine: 'get_attoptions',
+    sql: "SELECT i.relname AS name, ix.indisprimary AS primary, ix.indisunique AS unique, ix.indkey AS indkey, array_agg(a.attnum) as column_indexes, array_agg(a.attname) AS column_names, pg_get_indexdef(ix.indexrelid) AS definition FROM pg_class t, pg_class i, pg_index ix, pg_attribute a WHERE t.oid = ix.indrelid AND i.oid = ix.indexrelid AND a.attrelid = t.oid AND t.relkind = 'r' and t.relname = 'Teachers' GROUP BY i.relname, ix.indexrelid, ix.indisprimary, ix.indisunique, ix.indkey ORDER BY i.relname;",
+    parameters: undefined
+  },
+  original: error: cache lookup failed for attribute 1 of relation 685571
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 116,
+    severity: 'ERROR',
+    code: 'XX000',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'lsyscache.c',
+    line: '982',
+    routine: 'get_attoptions',
+    sql: "SELECT i.relname AS name, ix.indisprimary AS primary, ix.indisunique AS unique, ix.indkey AS indkey, array_agg(a.attnum) as column_indexes, array_agg(a.attname) AS column_names, pg_get_indexdef(ix.indexrelid) AS definition FROM pg_class t, pg_class i, pg_index ix, pg_attribute a WHERE t.oid = ix.indrelid AND i.oid = ix.indexrelid AND a.attrelid = t.oid AND t.relkind = 'r' and t.relname = 'Teachers' GROUP BY i.relname, ix.indexrelid, ix.indisprimary, ix.indisunique, ix.indkey ORDER BY i.relname;",
+    parameters: undefined
+  },
+  sql: "SELECT i.relname AS name, ix.indisprimary AS primary, ix.indisunique AS unique, ix.indkey AS indkey, array_agg(a.attnum) as column_indexes, array_agg(a.attname) AS column_names, pg_get_indexdef(ix.indexrelid) AS definition FROM pg_class t, pg_class i, pg_index ix, pg_attribute a WHERE t.oid = ix.indrelid AND i.oid = ix.indexrelid AND a.attrelid = t.oid AND t.relkind = 'r' and t.relname = 'Teachers' GROUP BY i.relname, ix.indexrelid, ix.indisprimary, ix.indisunique, ix.indkey ORDER BY i.relname;",
+  parameters: {}
+}
+2025-08-14 02:00:32 +05:30: Error initializing database models: Error
+    at Query.run (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/dialects/postgres/query.js:50:25)
+    at /Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:315:28
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async Student.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/model.js:979:17)
+    at async Sequelize.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:377:9)
+    at async Object.initModels (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/models/index.js:73:5)
+    at async startServer (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/server.js:135:5) {
+  name: 'SequelizeUnknownConstraintError',
+  parent: error: constraint "Students_batch_fkey1" of relation "Students" does not exist
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 141,
+    severity: 'ERROR',
+    code: '42704',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'tablecmds.c',
+    line: '12648',
+    routine: 'ATExecDropConstraint',
+    sql: 'ALTER TABLE "Students" DROP CONSTRAINT "Students_batch_fkey1"',
+    parameters: undefined
+  },
+  original: error: constraint "Students_batch_fkey1" of relation "Students" does not exist
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 141,
+    severity: 'ERROR',
+    code: '42704',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'tablecmds.c',
+    line: '12648',
+    routine: 'ATExecDropConstraint',
+    sql: 'ALTER TABLE "Students" DROP CONSTRAINT "Students_batch_fkey1"',
+    parameters: undefined
+  },
+  sql: 'ALTER TABLE "Students" DROP CONSTRAINT "Students_batch_fkey1"',
+  parameters: {},
+  constraint: 'Students_batch_fkey1',
+  fields: undefined,
+  table: 'Students'
+}
+2025-08-14 02:00:35 +05:30: Error initializing database models: Error
+    at Query.run (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/dialects/postgres/query.js:50:25)
+    at /Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:315:28
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async Student.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/model.js:979:17)
+    at async Sequelize.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:377:9)
+    at async Object.initModels (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/models/index.js:73:5)
+    at async startServer (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/server.js:135:5) {
+  name: 'SequelizeUnknownConstraintError',
+  parent: error: constraint "Students_activeSemesterId_fkey1" of relation "Students" does not exist
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 152,
+    severity: 'ERROR',
+    code: '42704',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'tablecmds.c',
+    line: '12648',
+    routine: 'ATExecDropConstraint',
+    sql: 'ALTER TABLE "Students" DROP CONSTRAINT "Students_activeSemesterId_fkey1"',
+    parameters: undefined
+  },
+  original: error: constraint "Students_activeSemesterId_fkey1" of relation "Students" does not exist
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 152,
+    severity: 'ERROR',
+    code: '42704',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'tablecmds.c',
+    line: '12648',
+    routine: 'ATExecDropConstraint',
+    sql: 'ALTER TABLE "Students" DROP CONSTRAINT "Students_activeSemesterId_fkey1"',
+    parameters: undefined
+  },
+  sql: 'ALTER TABLE "Students" DROP CONSTRAINT "Students_activeSemesterId_fkey1"',
+  parameters: {},
+  constraint: 'Students_activeSemesterId_fkey1',
+  fields: undefined,
+  table: 'Students'
+}
+2025-08-14 02:00:40 +05:30: Error initializing database models: Error
+    at Query.run (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/dialects/postgres/query.js:50:25)
+    at /Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:315:28
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async TeacherSubject.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/model.js:979:17)
+    at async Sequelize.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:377:9)
+    at async Object.initModels (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/models/index.js:73:5)
+    at async startServer (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/server.js:135:5) {
+  name: 'SequelizeUnknownConstraintError',
+  parent: error: constraint "TeacherSubjects_subjectId_fkey" of relation "TeacherSubjects" does not exist
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 158,
+    severity: 'ERROR',
+    code: '42704',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'tablecmds.c',
+    line: '12648',
+    routine: 'ATExecDropConstraint',
+    sql: 'ALTER TABLE "TeacherSubjects" DROP CONSTRAINT "TeacherSubjects_subjectId_fkey"',
+    parameters: undefined
+  },
+  original: error: constraint "TeacherSubjects_subjectId_fkey" of relation "TeacherSubjects" does not exist
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 158,
+    severity: 'ERROR',
+    code: '42704',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'tablecmds.c',
+    line: '12648',
+    routine: 'ATExecDropConstraint',
+    sql: 'ALTER TABLE "TeacherSubjects" DROP CONSTRAINT "TeacherSubjects_subjectId_fkey"',
+    parameters: undefined
+  },
+  sql: 'ALTER TABLE "TeacherSubjects" DROP CONSTRAINT "TeacherSubjects_subjectId_fkey"',
+  parameters: {},
+  constraint: 'TeacherSubjects_subjectId_fkey',
+  fields: undefined,
+  table: 'TeacherSubjects'
+}
+2025-08-14 02:00:41 +05:30: Error initializing database models: Error
+    at Query.run (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/dialects/postgres/query.js:50:25)
+    at /Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:315:28
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async Student.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/model.js:979:17)
+    at async Sequelize.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:377:9)
+    at async Object.initModels (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/models/index.js:73:5)
+    at async startServer (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/server.js:135:5) {
+  name: 'SequelizeUnknownConstraintError',
+  parent: error: constraint "Students_batch_fkey" of relation "Students" does not exist
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 140,
+    severity: 'ERROR',
+    code: '42704',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'tablecmds.c',
+    line: '12648',
+    routine: 'ATExecDropConstraint',
+    sql: 'ALTER TABLE "Students" DROP CONSTRAINT "Students_batch_fkey"',
+    parameters: undefined
+  },
+  original: error: constraint "Students_batch_fkey" of relation "Students" does not exist
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 140,
+    severity: 'ERROR',
+    code: '42704',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'tablecmds.c',
+    line: '12648',
+    routine: 'ATExecDropConstraint',
+    sql: 'ALTER TABLE "Students" DROP CONSTRAINT "Students_batch_fkey"',
+    parameters: undefined
+  },
+  sql: 'ALTER TABLE "Students" DROP CONSTRAINT "Students_batch_fkey"',
+  parameters: {},
+  constraint: 'Students_batch_fkey',
+  fields: undefined,
+  table: 'Students'
+}
+2025-08-14 02:00:44 +05:30: Error initializing database models: Error
+    at Query.run (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/dialects/postgres/query.js:50:25)
+    at /Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:315:28
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async Student.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/model.js:979:17)
+    at async Sequelize.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:377:9)
+    at async Object.initModels (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/models/index.js:73:5)
+    at async startServer (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/server.js:135:5) {
+  name: 'SequelizeUnknownConstraintError',
+  parent: error: constraint "Students_activeSemesterId_fkey1" of relation "Students" does not exist
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 152,
+    severity: 'ERROR',
+    code: '42704',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'tablecmds.c',
+    line: '12648',
+    routine: 'ATExecDropConstraint',
+    sql: 'ALTER TABLE "Students" DROP CONSTRAINT "Students_activeSemesterId_fkey1"',
+    parameters: undefined
+  },
+  original: error: constraint "Students_activeSemesterId_fkey1" of relation "Students" does not exist
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 152,
+    severity: 'ERROR',
+    code: '42704',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'tablecmds.c',
+    line: '12648',
+    routine: 'ATExecDropConstraint',
+    sql: 'ALTER TABLE "Students" DROP CONSTRAINT "Students_activeSemesterId_fkey1"',
+    parameters: undefined
+  },
+  sql: 'ALTER TABLE "Students" DROP CONSTRAINT "Students_activeSemesterId_fkey1"',
+  parameters: {},
+  constraint: 'Students_activeSemesterId_fkey1',
+  fields: undefined,
+  table: 'Students'
+}
+2025-08-14 02:00:50 +05:30: Error initializing database models: Error
+    at Query.run (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/dialects/postgres/query.js:50:25)
+    at /Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:315:28
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async PostgresQueryInterface.showIndex (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/dialects/abstract/query-interface.js:254:12)
+    at async Student.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/model.js:988:29)
+    at async Sequelize.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:377:9)
+    at async Object.initModels (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/models/index.js:73:5)
+    at async startServer (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/server.js:135:5) {
+  name: 'SequelizeDatabaseError',
+  parent: error: cache lookup failed for attribute 1 of relation 694872
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 116,
+    severity: 'ERROR',
+    code: 'XX000',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'lsyscache.c',
+    line: '982',
+    routine: 'get_attoptions',
+    sql: "SELECT i.relname AS name, ix.indisprimary AS primary, ix.indisunique AS unique, ix.indkey AS indkey, array_agg(a.attnum) as column_indexes, array_agg(a.attname) AS column_names, pg_get_indexdef(ix.indexrelid) AS definition FROM pg_class t, pg_class i, pg_index ix, pg_attribute a WHERE t.oid = ix.indrelid AND i.oid = ix.indexrelid AND a.attrelid = t.oid AND t.relkind = 'r' and t.relname = 'Students' GROUP BY i.relname, ix.indexrelid, ix.indisprimary, ix.indisunique, ix.indkey ORDER BY i.relname;",
+    parameters: undefined
+  },
+  original: error: cache lookup failed for attribute 1 of relation 694872
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 116,
+    severity: 'ERROR',
+    code: 'XX000',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'lsyscache.c',
+    line: '982',
+    routine: 'get_attoptions',
+    sql: "SELECT i.relname AS name, ix.indisprimary AS primary, ix.indisunique AS unique, ix.indkey AS indkey, array_agg(a.attnum) as column_indexes, array_agg(a.attname) AS column_names, pg_get_indexdef(ix.indexrelid) AS definition FROM pg_class t, pg_class i, pg_index ix, pg_attribute a WHERE t.oid = ix.indrelid AND i.oid = ix.indexrelid AND a.attrelid = t.oid AND t.relkind = 'r' and t.relname = 'Students' GROUP BY i.relname, ix.indexrelid, ix.indisprimary, ix.indisunique, ix.indkey ORDER BY i.relname;",
+    parameters: undefined
+  },
+  sql: "SELECT i.relname AS name, ix.indisprimary AS primary, ix.indisunique AS unique, ix.indkey AS indkey, array_agg(a.attnum) as column_indexes, array_agg(a.attname) AS column_names, pg_get_indexdef(ix.indexrelid) AS definition FROM pg_class t, pg_class i, pg_index ix, pg_attribute a WHERE t.oid = ix.indrelid AND i.oid = ix.indexrelid AND a.attrelid = t.oid AND t.relkind = 'r' and t.relname = 'Students' GROUP BY i.relname, ix.indexrelid, ix.indisprimary, ix.indisunique, ix.indkey ORDER BY i.relname;",
+  parameters: {}
+}
+2025-08-14 02:00:52 +05:30: Error initializing database models: Error
+    at Query.run (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/dialects/postgres/query.js:50:25)
+    at /Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:315:28
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async Subject.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/model.js:979:17)
+    at async Sequelize.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:377:9)
+    at async Object.initModels (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/models/index.js:73:5)
+    at async startServer (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/server.js:135:5) {
+  name: 'SequelizeUnknownConstraintError',
+  parent: error: constraint "Subjects_semesterId_fkey" of relation "Subjects" does not exist
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 145,
+    severity: 'ERROR',
+    code: '42704',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'tablecmds.c',
+    line: '12648',
+    routine: 'ATExecDropConstraint',
+    sql: 'ALTER TABLE "Subjects" DROP CONSTRAINT "Subjects_semesterId_fkey"',
+    parameters: undefined
+  },
+  original: error: constraint "Subjects_semesterId_fkey" of relation "Subjects" does not exist
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 145,
+    severity: 'ERROR',
+    code: '42704',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'tablecmds.c',
+    line: '12648',
+    routine: 'ATExecDropConstraint',
+    sql: 'ALTER TABLE "Subjects" DROP CONSTRAINT "Subjects_semesterId_fkey"',
+    parameters: undefined
+  },
+  sql: 'ALTER TABLE "Subjects" DROP CONSTRAINT "Subjects_semesterId_fkey"',
+  parameters: {},
+  constraint: 'Subjects_semesterId_fkey',
+  fields: undefined,
+  table: 'Subjects'
+}
+2025-08-14 02:00:58 +05:30: Error initializing database models: Error
+    at Query.run (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/dialects/postgres/query.js:50:25)
+    at /Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:315:28
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async Semester.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/model.js:979:17)
+    at async Sequelize.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:377:9)
+    at async Object.initModels (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/models/index.js:73:5)
+    at async startServer (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/server.js:135:5) {
+  name: 'SequelizeUnknownConstraintError',
+  parent: error: constraint "Semesters_batchId_fkey" of relation "Semesters" does not exist
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 144,
+    severity: 'ERROR',
+    code: '42704',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'tablecmds.c',
+    line: '12648',
+    routine: 'ATExecDropConstraint',
+    sql: 'ALTER TABLE "Semesters" DROP CONSTRAINT "Semesters_batchId_fkey"',
+    parameters: undefined
+  },
+  original: error: constraint "Semesters_batchId_fkey" of relation "Semesters" does not exist
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 144,
+    severity: 'ERROR',
+    code: '42704',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'tablecmds.c',
+    line: '12648',
+    routine: 'ATExecDropConstraint',
+    sql: 'ALTER TABLE "Semesters" DROP CONSTRAINT "Semesters_batchId_fkey"',
+    parameters: undefined
+  },
+  sql: 'ALTER TABLE "Semesters" DROP CONSTRAINT "Semesters_batchId_fkey"',
+  parameters: {},
+  constraint: 'Semesters_batchId_fkey',
+  fields: undefined,
+  table: 'Semesters'
+}
+2025-08-14 02:00:58 +05:30: Error initializing database models: Error
+    at Query.run (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/dialects/postgres/query.js:50:25)
+    at /Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:315:28
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async Semester.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/model.js:979:17)
+    at async Sequelize.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:377:9)
+    at async Object.initModels (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/models/index.js:73:5)
+    at async startServer (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/server.js:135:5) {
+  name: 'SequelizeUnknownConstraintError',
+  parent: error: constraint "Semesters_batchId_fkey" of relation "Semesters" does not exist
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 144,
+    severity: 'ERROR',
+    code: '42704',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'tablecmds.c',
+    line: '12648',
+    routine: 'ATExecDropConstraint',
+    sql: 'ALTER TABLE "Semesters" DROP CONSTRAINT "Semesters_batchId_fkey"',
+    parameters: undefined
+  },
+  original: error: constraint "Semesters_batchId_fkey" of relation "Semesters" does not exist
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 144,
+    severity: 'ERROR',
+    code: '42704',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'tablecmds.c',
+    line: '12648',
+    routine: 'ATExecDropConstraint',
+    sql: 'ALTER TABLE "Semesters" DROP CONSTRAINT "Semesters_batchId_fkey"',
+    parameters: undefined
+  },
+  sql: 'ALTER TABLE "Semesters" DROP CONSTRAINT "Semesters_batchId_fkey"',
+  parameters: {},
+  constraint: 'Semesters_batchId_fkey',
+  fields: undefined,
+  table: 'Semesters'
+}
+2025-08-14 02:01:06 +05:30: Error initializing database models: Error
+    at Query.run (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/dialects/postgres/query.js:50:25)
+    at /Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:315:28
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async Semester.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/model.js:979:17)
+    at async Sequelize.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:377:9)
+    at async Object.initModels (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/models/index.js:73:5)
+    at async startServer (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/server.js:135:5) {
+  name: 'SequelizeUnknownConstraintError',
+  parent: error: constraint "Semesters_batchId_fkey" of relation "Semesters" does not exist
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 144,
+    severity: 'ERROR',
+    code: '42704',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'tablecmds.c',
+    line: '12648',
+    routine: 'ATExecDropConstraint',
+    sql: 'ALTER TABLE "Semesters" DROP CONSTRAINT "Semesters_batchId_fkey"',
+    parameters: undefined
+  },
+  original: error: constraint "Semesters_batchId_fkey" of relation "Semesters" does not exist
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 144,
+    severity: 'ERROR',
+    code: '42704',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'tablecmds.c',
+    line: '12648',
+    routine: 'ATExecDropConstraint',
+    sql: 'ALTER TABLE "Semesters" DROP CONSTRAINT "Semesters_batchId_fkey"',
+    parameters: undefined
+  },
+  sql: 'ALTER TABLE "Semesters" DROP CONSTRAINT "Semesters_batchId_fkey"',
+  parameters: {},
+  constraint: 'Semesters_batchId_fkey',
+  fields: undefined,
+  table: 'Semesters'
+}
+2025-08-14 02:01:10 +05:30: Error initializing database models: Error
+    at Query.run (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/dialects/postgres/query.js:50:25)
+    at /Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:315:28
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async Subject.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/model.js:979:17)
+    at async Sequelize.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:377:9)
+    at async Object.initModels (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/models/index.js:73:5)
+    at async startServer (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/server.js:135:5) {
+  name: 'SequelizeUnknownConstraintError',
+  parent: error: constraint "Subjects_batchId_fkey1" of relation "Subjects" does not exist
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 143,
+    severity: 'ERROR',
+    code: '42704',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'tablecmds.c',
+    line: '12648',
+    routine: 'ATExecDropConstraint',
+    sql: 'ALTER TABLE "Subjects" DROP CONSTRAINT "Subjects_batchId_fkey1"',
+    parameters: undefined
+  },
+  original: error: constraint "Subjects_batchId_fkey1" of relation "Subjects" does not exist
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 143,
+    severity: 'ERROR',
+    code: '42704',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'tablecmds.c',
+    line: '12648',
+    routine: 'ATExecDropConstraint',
+    sql: 'ALTER TABLE "Subjects" DROP CONSTRAINT "Subjects_batchId_fkey1"',
+    parameters: undefined
+  },
+  sql: 'ALTER TABLE "Subjects" DROP CONSTRAINT "Subjects_batchId_fkey1"',
+  parameters: {},
+  constraint: 'Subjects_batchId_fkey1',
+  fields: undefined,
+  table: 'Subjects'
+}
+2025-08-14 02:01:20 +05:30: Error initializing database models: Error
+    at Query.run (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/dialects/postgres/query.js:50:25)
+    at /Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:315:28
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async Student.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/model.js:979:17)
+    at async Sequelize.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:377:9)
+    at async Object.initModels (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/models/index.js:73:5)
+    at async startServer (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/server.js:135:5) {
+  name: 'SequelizeUnknownConstraintError',
+  parent: error: constraint "Students_activeSemesterId_fkey" of relation "Students" does not exist
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 151,
+    severity: 'ERROR',
+    code: '42704',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'tablecmds.c',
+    line: '12648',
+    routine: 'ATExecDropConstraint',
+    sql: 'ALTER TABLE "Students" DROP CONSTRAINT "Students_activeSemesterId_fkey"',
+    parameters: undefined
+  },
+  original: error: constraint "Students_activeSemesterId_fkey" of relation "Students" does not exist
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 151,
+    severity: 'ERROR',
+    code: '42704',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'tablecmds.c',
+    line: '12648',
+    routine: 'ATExecDropConstraint',
+    sql: 'ALTER TABLE "Students" DROP CONSTRAINT "Students_activeSemesterId_fkey"',
+    parameters: undefined
+  },
+  sql: 'ALTER TABLE "Students" DROP CONSTRAINT "Students_activeSemesterId_fkey"',
+  parameters: {},
+  constraint: 'Students_activeSemesterId_fkey',
+  fields: undefined,
+  table: 'Students'
+}
+2025-08-14 02:01:22 +05:30: Error initializing database models: Error
+    at Query.run (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/dialects/postgres/query.js:50:25)
+    at /Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:315:28
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async Subject.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/model.js:979:17)
+    at async Sequelize.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:377:9)
+    at async Object.initModels (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/models/index.js:73:5)
+    at async startServer (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/server.js:135:5) {
+  name: 'SequelizeUnknownConstraintError',
+  parent: error: constraint "Subjects_semesterId_fkey" of relation "Subjects" does not exist
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 145,
+    severity: 'ERROR',
+    code: '42704',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'tablecmds.c',
+    line: '12648',
+    routine: 'ATExecDropConstraint',
+    sql: 'ALTER TABLE "Subjects" DROP CONSTRAINT "Subjects_semesterId_fkey"',
+    parameters: undefined
+  },
+  original: error: constraint "Subjects_semesterId_fkey" of relation "Subjects" does not exist
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 145,
+    severity: 'ERROR',
+    code: '42704',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'tablecmds.c',
+    line: '12648',
+    routine: 'ATExecDropConstraint',
+    sql: 'ALTER TABLE "Subjects" DROP CONSTRAINT "Subjects_semesterId_fkey"',
+    parameters: undefined
+  },
+  sql: 'ALTER TABLE "Subjects" DROP CONSTRAINT "Subjects_semesterId_fkey"',
+  parameters: {},
+  constraint: 'Subjects_semesterId_fkey',
+  fields: undefined,
+  table: 'Subjects'
+}
+2025-08-14 02:01:32 +05:30: Error initializing database models: Error
+    at Query.run (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/dialects/postgres/query.js:50:25)
+    at /Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:315:28
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async Subject.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/model.js:979:17)
+    at async Sequelize.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:377:9)
+    at async Object.initModels (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/models/index.js:73:5)
+    at async startServer (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/server.js:135:5) {
+  name: 'SequelizeUnknownConstraintError',
+  parent: error: constraint "Subjects_semesterId_fkey" of relation "Subjects" does not exist
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 145,
+    severity: 'ERROR',
+    code: '42704',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'tablecmds.c',
+    line: '12648',
+    routine: 'ATExecDropConstraint',
+    sql: 'ALTER TABLE "Subjects" DROP CONSTRAINT "Subjects_semesterId_fkey"',
+    parameters: undefined
+  },
+  original: error: constraint "Subjects_semesterId_fkey" of relation "Subjects" does not exist
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 145,
+    severity: 'ERROR',
+    code: '42704',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'tablecmds.c',
+    line: '12648',
+    routine: 'ATExecDropConstraint',
+    sql: 'ALTER TABLE "Subjects" DROP CONSTRAINT "Subjects_semesterId_fkey"',
+    parameters: undefined
+  },
+  sql: 'ALTER TABLE "Subjects" DROP CONSTRAINT "Subjects_semesterId_fkey"',
+  parameters: {},
+  constraint: 'Subjects_semesterId_fkey',
+  fields: undefined,
+  table: 'Subjects'
+}
+2025-08-14 02:03:01 +05:30: Error initializing database models: TypeError: Cannot read properties of null (reading '1')
+    at Query.run (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/dialects/postgres/query.js:97:86)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async /Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:315:16
+    at async PostgresQueryInterface.showIndex (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/dialects/abstract/query-interface.js:254:12)
+    at async Admin.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/model.js:988:29)
+    at async Sequelize.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:377:9)
+    at async Object.initModels (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/models/index.js:73:5)
+    at async startServer (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/server.js:135:5)
+2025-08-14 02:03:19 +05:30: Error initializing database models: Error
+    at Query.run (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/dialects/postgres/query.js:50:25)
+    at /Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:315:28
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async PostgresQueryInterface.showIndex (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/dialects/abstract/query-interface.js:254:12)
+    at async Admin.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/model.js:988:29)
+    at async Sequelize.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:377:9)
+    at async Object.initModels (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/models/index.js:73:5)
+    at async startServer (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/server.js:135:5) {
+  name: 'SequelizeDatabaseError',
+  parent: error: cache lookup failed for attribute 1 of relation 758890
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 116,
+    severity: 'ERROR',
+    code: 'XX000',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'lsyscache.c',
+    line: '982',
+    routine: 'get_attoptions',
+    sql: "SELECT i.relname AS name, ix.indisprimary AS primary, ix.indisunique AS unique, ix.indkey AS indkey, array_agg(a.attnum) as column_indexes, array_agg(a.attname) AS column_names, pg_get_indexdef(ix.indexrelid) AS definition FROM pg_class t, pg_class i, pg_index ix, pg_attribute a WHERE t.oid = ix.indrelid AND i.oid = ix.indexrelid AND a.attrelid = t.oid AND t.relkind = 'r' and t.relname = 'Admins' GROUP BY i.relname, ix.indexrelid, ix.indisprimary, ix.indisunique, ix.indkey ORDER BY i.relname;",
+    parameters: undefined
+  },
+  original: error: cache lookup failed for attribute 1 of relation 758890
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 116,
+    severity: 'ERROR',
+    code: 'XX000',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'lsyscache.c',
+    line: '982',
+    routine: 'get_attoptions',
+    sql: "SELECT i.relname AS name, ix.indisprimary AS primary, ix.indisunique AS unique, ix.indkey AS indkey, array_agg(a.attnum) as column_indexes, array_agg(a.attname) AS column_names, pg_get_indexdef(ix.indexrelid) AS definition FROM pg_class t, pg_class i, pg_index ix, pg_attribute a WHERE t.oid = ix.indrelid AND i.oid = ix.indexrelid AND a.attrelid = t.oid AND t.relkind = 'r' and t.relname = 'Admins' GROUP BY i.relname, ix.indexrelid, ix.indisprimary, ix.indisunique, ix.indkey ORDER BY i.relname;",
+    parameters: undefined
+  },
+  sql: "SELECT i.relname AS name, ix.indisprimary AS primary, ix.indisunique AS unique, ix.indkey AS indkey, array_agg(a.attnum) as column_indexes, array_agg(a.attname) AS column_names, pg_get_indexdef(ix.indexrelid) AS definition FROM pg_class t, pg_class i, pg_index ix, pg_attribute a WHERE t.oid = ix.indrelid AND i.oid = ix.indexrelid AND a.attrelid = t.oid AND t.relkind = 'r' and t.relname = 'Admins' GROUP BY i.relname, ix.indexrelid, ix.indisprimary, ix.indisunique, ix.indkey ORDER BY i.relname;",
+  parameters: {}
+}
+2025-08-14 02:03:21 +05:30: Error initializing database models: Error
+    at Query.run (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/dialects/postgres/query.js:50:25)
+    at /Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:315:28
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async PostgresQueryInterface.showIndex (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/dialects/abstract/query-interface.js:254:12)
+    at async Student.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/model.js:988:29)
+    at async Sequelize.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:377:9)
+    at async Object.initModels (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/models/index.js:73:5)
+    at async startServer (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/server.js:135:5) {
+  name: 'SequelizeDatabaseError',
+  parent: error: cache lookup failed for attribute 1 of relation 759789
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 116,
+    severity: 'ERROR',
+    code: 'XX000',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'lsyscache.c',
+    line: '982',
+    routine: 'get_attoptions',
+    sql: "SELECT i.relname AS name, ix.indisprimary AS primary, ix.indisunique AS unique, ix.indkey AS indkey, array_agg(a.attnum) as column_indexes, array_agg(a.attname) AS column_names, pg_get_indexdef(ix.indexrelid) AS definition FROM pg_class t, pg_class i, pg_index ix, pg_attribute a WHERE t.oid = ix.indrelid AND i.oid = ix.indexrelid AND a.attrelid = t.oid AND t.relkind = 'r' and t.relname = 'Students' GROUP BY i.relname, ix.indexrelid, ix.indisprimary, ix.indisunique, ix.indkey ORDER BY i.relname;",
+    parameters: undefined
+  },
+  original: error: cache lookup failed for attribute 1 of relation 759789
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 116,
+    severity: 'ERROR',
+    code: 'XX000',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'lsyscache.c',
+    line: '982',
+    routine: 'get_attoptions',
+    sql: "SELECT i.relname AS name, ix.indisprimary AS primary, ix.indisunique AS unique, ix.indkey AS indkey, array_agg(a.attnum) as column_indexes, array_agg(a.attname) AS column_names, pg_get_indexdef(ix.indexrelid) AS definition FROM pg_class t, pg_class i, pg_index ix, pg_attribute a WHERE t.oid = ix.indrelid AND i.oid = ix.indexrelid AND a.attrelid = t.oid AND t.relkind = 'r' and t.relname = 'Students' GROUP BY i.relname, ix.indexrelid, ix.indisprimary, ix.indisunique, ix.indkey ORDER BY i.relname;",
+    parameters: undefined
+  },
+  sql: "SELECT i.relname AS name, ix.indisprimary AS primary, ix.indisunique AS unique, ix.indkey AS indkey, array_agg(a.attnum) as column_indexes, array_agg(a.attname) AS column_names, pg_get_indexdef(ix.indexrelid) AS definition FROM pg_class t, pg_class i, pg_index ix, pg_attribute a WHERE t.oid = ix.indrelid AND i.oid = ix.indexrelid AND a.attrelid = t.oid AND t.relkind = 'r' and t.relname = 'Students' GROUP BY i.relname, ix.indexrelid, ix.indisprimary, ix.indisunique, ix.indkey ORDER BY i.relname;",
+  parameters: {}
+}
+2025-08-14 02:03:30 +05:30: Error initializing database models: Error
+    at Query.run (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/dialects/postgres/query.js:50:25)
+    at /Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:315:28
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async PostgresQueryInterface.showIndex (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/dialects/abstract/query-interface.js:254:12)
+    at async Student.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/model.js:988:29)
+    at async Sequelize.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:377:9)
+    at async Object.initModels (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/models/index.js:73:5)
+    at async startServer (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/server.js:138:5) {
+  name: 'SequelizeDatabaseError',
+  parent: error: cache lookup failed for attribute 1 of relation 764119
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 116,
+    severity: 'ERROR',
+    code: 'XX000',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'lsyscache.c',
+    line: '982',
+    routine: 'get_attoptions',
+    sql: "SELECT i.relname AS name, ix.indisprimary AS primary, ix.indisunique AS unique, ix.indkey AS indkey, array_agg(a.attnum) as column_indexes, array_agg(a.attname) AS column_names, pg_get_indexdef(ix.indexrelid) AS definition FROM pg_class t, pg_class i, pg_index ix, pg_attribute a WHERE t.oid = ix.indrelid AND i.oid = ix.indexrelid AND a.attrelid = t.oid AND t.relkind = 'r' and t.relname = 'Students' GROUP BY i.relname, ix.indexrelid, ix.indisprimary, ix.indisunique, ix.indkey ORDER BY i.relname;",
+    parameters: undefined
+  },
+  original: error: cache lookup failed for attribute 1 of relation 764119
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 116,
+    severity: 'ERROR',
+    code: 'XX000',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'lsyscache.c',
+    line: '982',
+    routine: 'get_attoptions',
+    sql: "SELECT i.relname AS name, ix.indisprimary AS primary, ix.indisunique AS unique, ix.indkey AS indkey, array_agg(a.attnum) as column_indexes, array_agg(a.attname) AS column_names, pg_get_indexdef(ix.indexrelid) AS definition FROM pg_class t, pg_class i, pg_index ix, pg_attribute a WHERE t.oid = ix.indrelid AND i.oid = ix.indexrelid AND a.attrelid = t.oid AND t.relkind = 'r' and t.relname = 'Students' GROUP BY i.relname, ix.indexrelid, ix.indisprimary, ix.indisunique, ix.indkey ORDER BY i.relname;",
+    parameters: undefined
+  },
+  sql: "SELECT i.relname AS name, ix.indisprimary AS primary, ix.indisunique AS unique, ix.indkey AS indkey, array_agg(a.attnum) as column_indexes, array_agg(a.attname) AS column_names, pg_get_indexdef(ix.indexrelid) AS definition FROM pg_class t, pg_class i, pg_index ix, pg_attribute a WHERE t.oid = ix.indrelid AND i.oid = ix.indexrelid AND a.attrelid = t.oid AND t.relkind = 'r' and t.relname = 'Students' GROUP BY i.relname, ix.indexrelid, ix.indisprimary, ix.indisunique, ix.indkey ORDER BY i.relname;",
+  parameters: {}
+}
+2025-08-14 02:03:40 +05:30: Error initializing database models: Error
+    at Query.run (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/dialects/postgres/query.js:50:25)
+    at /Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:315:28
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async Student.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/model.js:979:17)
+    at async Sequelize.sync (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/sequelize/lib/sequelize.js:377:9)
+    at async Object.initModels (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/models/index.js:73:5)
+    at async startServer (/Users/anantmishra/Documents/GitHub/Evalis-GT/server/server.js:138:5) {
+  name: 'SequelizeUnknownConstraintError',
+  parent: error: constraint "Students_activeSemesterId_fkey1" of relation "Students" does not exist
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 152,
+    severity: 'ERROR',
+    code: '42704',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'tablecmds.c',
+    line: '12648',
+    routine: 'ATExecDropConstraint',
+    sql: 'ALTER TABLE "Students" DROP CONSTRAINT "Students_activeSemesterId_fkey1"',
+    parameters: undefined
+  },
+  original: error: constraint "Students_activeSemesterId_fkey1" of relation "Students" does not exist
+      at Parser.parseErrorMessage (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:283:98)
+      at Parser.handlePacket (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:122:29)
+      at Parser.parse (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/parser.js:35:38)
+      at TLSSocket.<anonymous> (/Users/anantmishra/Documents/GitHub/Evalis-GT/node_modules/pg-protocol/dist/index.js:11:42)
+      at TLSSocket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+    length: 152,
+    severity: 'ERROR',
+    code: '42704',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'tablecmds.c',
+    line: '12648',
+    routine: 'ATExecDropConstraint',
+    sql: 'ALTER TABLE "Students" DROP CONSTRAINT "Students_activeSemesterId_fkey1"',
+    parameters: undefined
+  },
+  sql: 'ALTER TABLE "Students" DROP CONSTRAINT "Students_activeSemesterId_fkey1"',
+  parameters: {},
+  constraint: 'Students_activeSemesterId_fkey1',
+  fields: undefined,
+  table: 'Students'
+}

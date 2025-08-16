@@ -10,32 +10,97 @@ const { logger } = require('../utils/logger');
  * @access  Public
  */
 const authStudent = asyncHandler(async (req, res) => {
-  const { id, password } = req.body;
+  const { id, password, email, firebaseToken } = req.body;
 
-  logger.info(`Student login attempt for ID: ${id}`);
+  logger.info(`Student login attempt for ID: ${id}, Email: ${email}, Firebase token: ${firebaseToken ? 'Yes' : 'No'}`);
 
-  // Check for student
-  const student = await Student.findOne({ where: { id } });
+  if ((!id && !email) || !password) {
+    logger.warn('Student login rejected: Missing ID/email or password');
+    res.status(400);
+    throw new Error('Please provide student ID/email and password');
+  }
 
-  if (student && (await student.matchPassword(password))) {
-    const { token, sessionId } = generateTokenWithSession(student, 'student');
+  try {
+    const allowFallback = process.env.ALLOW_PASSWORD_FALLBACK === 'true';
+    // Check for student by ID (primary method) or email (secondary method)
+    const whereClause = id ? { id } : { email };
+    logger.debug(`Searching for student with:`, whereClause);
+
+    const student = await Student.findOne({ where: whereClause });
+
+    logger.debug(`Student found: ${student ? 'Yes' : 'No'}`);
     
-    logger.info(`Student login successful: ${student.id}`);
+    if (!student) {
+      console.log('Student not found');
+      res.status(401);
+      throw new Error('Student not found with the provided ID/email');
+    }
+
+    logger.debug(`Student ID: ${student.id}, Name: ${student.name}, Email: ${student.email}`);
     
-    res.json({
-      id: student.id,
-      name: student.name,
-      section: student.section,
-      batch: student.batch,
-      email: student.email,
-      role: 'student',
-      token: token,
-      sessionId: sessionId,
-    });
-  } else {
-    logger.warn(`Student login failed for ID: ${id}`);
-    res.status(401);
-    throw new Error('Invalid ID or password');
+  // Try Firebase authentication first if we have an email
+    let isAuthenticated = false;
+    let authMethod = 'database';
+    
+    if (student.email && email) {
+      try {
+        // Import Firebase auth functions
+        const { loginWithEmailAndPassword } = require('../config/firebase');
+        
+        // Try Firebase authentication
+        const userCredential = await loginWithEmailAndPassword(student.email, password);
+        if (userCredential && userCredential.user) {
+          logger.info(`Firebase authentication successful for student: ${student.email}`);
+          isAuthenticated = true;
+          authMethod = 'firebase';
+        }
+      } catch (firebaseError) {
+        logger.debug(`Firebase authentication failed: ${firebaseError.message}`);
+        // Continue to database authentication
+      }
+    }
+    
+    // If Firebase auth failed or not available, optionally try database password
+    if (!isAuthenticated) {
+      if (allowFallback || !email) {
+        const isMatch = await student.matchPassword(password);
+        logger.debug(`Database password match result: ${isMatch}`);
+        if (isMatch) {
+          isAuthenticated = true;
+          authMethod = 'database';
+        }
+      } else {
+        logger.warn('Database password fallback disabled for student (email present)');
+      }
+    }
+    
+    if (isAuthenticated) {
+      const { token, sessionId } = generateTokenWithSession(student, 'student');
+      logger.info(`Student authentication successful via ${authMethod}: ${student.id}`);
+      
+      res.json({
+        id: student.id,
+        name: student.name,
+        section: student.section,
+        batch: student.batch,
+        email: student.email,
+        role: 'student',
+        token: token,
+        sessionId: sessionId,
+        authMethod: authMethod // Include auth method for debugging
+      });
+      return;
+    } else {
+      logger.warn(`Student authentication failed for ${id || email}`);
+      res.status(401);
+      throw new Error('Invalid ID or password');
+    }
+  } catch (error) {
+    console.error('Error in student authentication:', error);
+    if (!res.statusCode || res.statusCode === 200) {
+      res.status(500);
+    }
+    throw error;
   }
 });
 
@@ -45,9 +110,9 @@ const authStudent = asyncHandler(async (req, res) => {
  * @access  Public
  */
 const authTeacher = asyncHandler(async (req, res) => {
-  const { email, password, id } = req.body;
+  const { email, password, id, firebaseToken } = req.body;
   
-  logger.info(`Teacher login attempt with email: ${email}, ID: ${id}`);
+  logger.info(`Teacher login attempt with email: ${email}, ID: ${id}, Firebase token: ${firebaseToken ? 'Yes' : 'No'}`);
   
   if ((!email && !id) || !password) {
     logger.warn('Teacher login rejected: Missing email/ID or password');
@@ -56,6 +121,7 @@ const authTeacher = asyncHandler(async (req, res) => {
   }
 
   try {
+    const allowFallback = process.env.ALLOW_PASSWORD_FALLBACK === 'true';
     // Check for teacher by email (primary login method) or ID (secondary method)
     const whereClause = email ? { email } : { id };
     logger.debug(`Searching for teacher with:`, whereClause);
@@ -73,43 +139,78 @@ const authTeacher = asyncHandler(async (req, res) => {
 
     logger.debug(`Teacher found: ${teacher ? 'Yes' : 'No'}`);
     
-    if (teacher) {
-      logger.debug(`Teacher ID: ${teacher.id}, Name: ${teacher.name}, Email: ${teacher.email}`);
-      const isMatch = await teacher.matchPassword(password);
-      logger.debug(`Password match result: ${isMatch}`);
-      
-      if (isMatch) {
-        // Generate token with session management
-        const { token, sessionId } = generateTokenWithSession(teacher, 'teacher');
-        logger.info(`Teacher authentication successful: ${teacher.id}`);
-        
-        // Extract batch IDs from subjects
-        const batchIds = [...new Set(
-          teacher.Subjects
-            .map(subject => subject.batchId)
-            .filter(id => id)
-        )];
-        
-        res.json({
-          id: teacher.id,
-          name: teacher.name,
-          email: teacher.email,
-          subjects: teacher.Subjects || [],
-          batchIds: batchIds,
-          role: 'teacher',
-          token: token,
-          sessionId: sessionId,
-        });
-        return;
-      } else {
-        logger.warn(`Teacher password mismatch for ${email || id}`);
-        res.status(401);
-        throw new Error('Invalid password');
-      }
-    } else {
+    if (!teacher) {
       console.log('Teacher not found');
       res.status(401);
       throw new Error('Teacher not found with the provided email/ID');
+    }
+
+    logger.debug(`Teacher ID: ${teacher.id}, Name: ${teacher.name}, Email: ${teacher.email}`);
+    
+    // Try Firebase authentication first if we have Firebase available
+    let isAuthenticated = false;
+    let authMethod = 'database';
+    
+    if (email) {
+      try {
+        // Import Firebase auth functions
+        const { loginWithEmailAndPassword } = require('../config/firebase');
+        
+        // Try Firebase authentication
+        const userCredential = await loginWithEmailAndPassword(email, password);
+        if (userCredential && userCredential.user) {
+          logger.info(`Firebase authentication successful for teacher: ${email}`);
+          isAuthenticated = true;
+          authMethod = 'firebase';
+        }
+      } catch (firebaseError) {
+        logger.debug(`Firebase authentication failed: ${firebaseError.message}`);
+        // Continue to database authentication
+      }
+    }
+    
+    // If Firebase auth failed or not available, optionally try database password
+    if (!isAuthenticated) {
+      if (allowFallback || !email) {
+        const isMatch = await teacher.matchPassword(password);
+        logger.debug(`Database password match result: ${isMatch}`);
+        if (isMatch) {
+          isAuthenticated = true;
+          authMethod = 'database';
+        }
+      } else {
+        logger.warn('Database password fallback disabled for teacher (email present)');
+      }
+    }
+    
+    if (isAuthenticated) {
+      // Generate token with session management
+      const { token, sessionId } = generateTokenWithSession(teacher, 'teacher');
+      logger.info(`Teacher authentication successful via ${authMethod}: ${teacher.id}`);
+      
+      // Extract batch IDs from subjects
+      const batchIds = [...new Set(
+        teacher.Subjects
+          .map(subject => subject.batchId)
+          .filter(id => id)
+      )];
+      
+      res.json({
+        id: teacher.id,
+        name: teacher.name,
+        email: teacher.email,
+        subjects: teacher.Subjects || [],
+        batchIds: batchIds,
+        role: 'teacher',
+        token: token,
+        sessionId: sessionId,
+        authMethod: authMethod // Include auth method for debugging
+      });
+      return;
+    } else {
+      logger.warn(`Teacher authentication failed for ${email || id}`);
+      res.status(401);
+      throw new Error('Invalid password');
     }
   } catch (error) {
     console.error('Error in teacher authentication:', error);
@@ -126,39 +227,94 @@ const authTeacher = asyncHandler(async (req, res) => {
  * @access  Public
  */
 const authAdmin = asyncHandler(async (req, res) => {
-  const { username, password } = req.body;
+  const { username, password, email, firebaseToken } = req.body;
 
-  logger.info(`Admin login attempt for username: ${username}`);
+  logger.info(`Admin login attempt for username: ${username}, email: ${email}, Firebase token: ${firebaseToken ? 'Yes' : 'No'}`);
 
-  // Check for admin
-  const admin = await Admin.findOne({ where: { username } });
-
-  if (!admin) {
-    logger.warn(`Admin login failed: No admin found with username ${username}`);
-    res.status(401);
-    throw new Error('Invalid username or password');
+  if ((!username && !email) || !password) {
+    logger.warn('Admin login rejected: Missing username/email or password');
+    res.status(400);
+    throw new Error('Please provide username/email and password');
   }
 
-  const isMatch = await admin.matchPassword(password);
-  logger.debug(`Admin password match result: ${isMatch}`);
+  try {
+    // Check for admin by username (primary) or email (secondary)
+    const whereClause = username ? { username } : { email };
+    logger.debug(`Searching for admin with:`, whereClause);
 
-  if (admin && isMatch) {
-    logger.info(`Admin login successful for: ${admin.username}`);
-    const { token, sessionId } = generateTokenWithSession(admin, 'admin');
+    const admin = await Admin.findOne({ where: whereClause });
+
+    if (!admin) {
+      logger.warn(`Admin login failed: No admin found with ${username || email}`);
+      res.status(401);
+      throw new Error('Invalid username/email or password');
+    }
+
+    logger.debug(`Admin ID: ${admin.id}, Username: ${admin.username}, Email: ${admin.email}`);
     
-    res.json({
-      id: admin.id,
-      username: admin.username,
-      name: admin.name,
-      email: admin.email,
-      role: 'admin',
-      token: token,
-      sessionId: sessionId,
-    });
-  } else {
-    logger.warn(`Admin login failed: Invalid password for ${username}`);
-    res.status(401);
-    throw new Error('Invalid username or password');
+    // Try Firebase authentication first if we have an email
+    let isAuthenticated = false;
+    let authMethod = 'database';
+    
+    if (admin.email && (email || username.includes('@'))) {
+      try {
+        // Import Firebase auth functions
+        const { loginWithEmailAndPassword } = require('../config/firebase');
+        
+        // Try Firebase authentication
+        const loginEmail = email || username;
+        const userCredential = await loginWithEmailAndPassword(loginEmail, password);
+        if (userCredential && userCredential.user) {
+          logger.info(`Firebase authentication successful for admin: ${loginEmail}`);
+          isAuthenticated = true;
+          authMethod = 'firebase';
+        }
+      } catch (firebaseError) {
+        logger.debug(`Firebase authentication failed: ${firebaseError.message}`);
+        // Continue to database authentication
+      }
+    }
+    
+    // If Firebase auth failed or not available, try database password
+    if (!isAuthenticated) {
+      const isMatch = await admin.matchPassword(password);
+      logger.debug(`Database password match result: ${isMatch}`);
+      
+      if (isMatch) {
+        isAuthenticated = true;
+        authMethod = 'database';
+      } else {
+        // Extra diagnostics (do not leak sensitive data to client)
+        logger.warn(`Admin password mismatch for username=${admin.username}. Provided length=${password ? password.length : 'none'} hashLen=${admin.password ? admin.password.length : 'none'}`);
+      }
+    }
+
+    if (isAuthenticated) {
+      logger.info(`Admin authentication successful via ${authMethod}: ${admin.username}`);
+      const { token, sessionId } = generateTokenWithSession(admin, 'admin');
+      
+      res.json({
+        id: admin.id,
+        username: admin.username,
+        name: admin.name,
+        email: admin.email,
+        role: 'admin',
+        token: token,
+        sessionId: sessionId,
+        authMethod: authMethod // Include auth method for debugging
+      });
+      return;
+    } else {
+      logger.warn(`Admin authentication failed for ${username || email}`);
+      res.status(401);
+      throw new Error('Invalid username/email or password');
+    }
+  } catch (error) {
+    console.error('Error in admin authentication:', error);
+    if (!res.statusCode || res.statusCode === 200) {
+      res.status(500);
+    }
+    throw error;
   }
 });
 
@@ -355,6 +511,108 @@ const logoutAllSessions = asyncHandler(async (req, res) => {
   res.json({ message: 'All sessions logged out successfully' });
 });
 
+/**
+ * @desc    Sync Firebase password to database after Firebase password reset
+ * @route   POST /api/auth/sync-firebase-password
+ * @access  Public (but requires Firebase token verification)
+ */
+const syncFirebasePassword = asyncHandler(async (req, res) => {
+  const { email, firebaseToken, userType = 'teacher' } = req.body;
+  
+  logger.info(`Password sync request for ${userType}: ${email}`);
+  
+  if (!email || !firebaseToken) {
+    res.status(400);
+    throw new Error('Email and Firebase token are required');
+  }
+
+  try {
+    // Verify the Firebase token first
+    const firebaseAdmin = require('firebase-admin');
+    
+    if (!firebaseAdmin.apps.length) {
+      res.status(500);
+      throw new Error('Firebase Admin SDK not initialized');
+    }
+    
+    // Verify the Firebase token
+    const decodedToken = await firebaseAdmin.auth().verifyIdToken(firebaseToken);
+    
+    if (decodedToken.email !== email) {
+      res.status(403);
+      throw new Error('Token email does not match provided email');
+    }
+    
+    // Find the user in database
+    let Model, whereClause;
+    if (userType === 'teacher') {
+      Model = Teacher;
+      whereClause = { email };
+    } else if (userType === 'student') {
+      Model = Student;
+      whereClause = { id: email }; // Students can use ID or email
+    } else if (userType === 'admin') {
+      Model = Admin;
+      whereClause = { email }; // Admins use email
+    } else {
+      res.status(400);
+      throw new Error('Invalid user type. Must be teacher, student, or admin');
+    }
+    
+    const user = await Model.findOne({ where: whereClause });
+    
+    if (!user) {
+      res.status(404);
+      throw new Error(`${userType} not found with provided email/ID`);
+    }
+    
+    // Generate a temporary password flag to indicate Firebase auth is primary
+    const bcrypt = require('bcryptjs');
+    const tempPassword = `firebase_auth_${Date.now()}`;
+    const salt = await bcrypt.genSalt(10);
+    const hashedTempPassword = await bcrypt.hash(tempPassword, salt);
+    
+    // Update the user's password in database with a flag
+    await user.update({ 
+      password: hashedTempPassword,
+      firebaseAuth: true, // Add a flag to indicate Firebase auth is primary
+      lastFirebaseSync: new Date()
+    });
+    
+    logger.info(`Password synced successfully for ${userType}: ${email}`);
+    
+    res.json({
+      success: true,
+      message: 'Password synchronized successfully',
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: userType
+      }
+    });
+    
+  } catch (error) {
+    logger.error(`Error syncing Firebase password for ${email}:`, error);
+    
+    if (error.code === 'auth/id-token-expired') {
+      res.status(401);
+      throw new Error('Firebase token has expired');
+    } else if (error.code === 'auth/id-token-revoked') {
+      res.status(401);
+      throw new Error('Firebase token has been revoked');
+    } else if (error.code === 'auth/invalid-id-token') {
+      res.status(401);
+      throw new Error('Invalid Firebase token');
+    }
+    
+    if (!res.statusCode || res.statusCode === 200) {
+      res.status(500);
+    }
+    throw error;
+  }
+});
+
 // Generate JWT (keeping for backward compatibility)
 const generateToken = (id, role) => {
   return jwt.sign({ id, role }, process.env.JWT_SECRET, {
@@ -372,4 +630,5 @@ module.exports = {
   bulkPasswordReset,
   logoutUser,
   logoutAllSessions,
+  syncFirebasePassword,
 }; 

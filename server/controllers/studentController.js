@@ -5,7 +5,7 @@ const XLSX = require('xlsx');
 const { Op } = require('sequelize');
 const { generateRandomPassword } = require('../utils/passwordUtils');
 const { sendLoginCredentials, sendPasswordResetLink } = require('../utils/emailUtils');
-const { createFirebaseUser, sendPasswordResetEmail, updateFirebaseUser } = require('../utils/firebaseUtils');
+const { createFirebaseUser, generatePasswordResetLink, updateFirebaseUser } = require('../utils/firebaseUtils');
 
 /**
  * @desc    Get all students
@@ -100,45 +100,53 @@ const createStudent = asyncHandler(async (req, res) => {
         console.log(`Attempting to create Firebase user for student ${id} with email ${email}`);
         
         // Create Firebase user
-        const firebaseUser = await createFirebaseUser(email, generatedPassword, {
+        const firebaseResult = await createFirebaseUser(email, generatedPassword, {
           id: student.id,
           name: student.name,
         });
         
-        console.log(`Firebase user created successfully with UID: ${firebaseUser?.uid}`);
-        
-        // Generate password reset link
-        console.log(`Generating password reset link for ${email}`);
-        const resetLink = await sendPasswordResetEmail(email);
-        
-        console.log(`Password reset link generated: ${resetLink.substring(0, 30)}...`);
-        
-        // Send password reset email
-        console.log(`Sending password reset email to ${email}`);
-        await sendPasswordResetLink({
-          email,
-          name: student.name,
-        }, resetLink);
-        
-        console.log(`Password reset link sent to ${email}`);
-        
-        // Also send login credentials for reference
-        console.log(`Sending login credentials to ${email}`);
-        await sendLoginCredentials(student, generatedPassword);
-        
-        console.log(`Login credentials sent to ${email}`);
-        console.log(`All Firebase operations completed successfully for student ${id}`);
-        
-        return res.status(201).json({
-          id: student.id,
-          name: student.name,
-          section: student.section,
-          batch: student.batch,
-          email: student.email,
-          initialPassword: generatedPassword,
-          firebaseUserCreated: true,
-          firebaseUserId: firebaseUser?.uid
-        });
+        if (firebaseResult.success) {
+          console.log(`Firebase user created successfully with UID: ${firebaseResult.uid}`);
+          
+          // Generate password reset link
+          console.log(`Generating password reset link for ${email}`);
+          const resetLinkResult = await generatePasswordResetLink(email);
+          
+          if (resetLinkResult.success) {
+            console.log(`Password reset link generated successfully`);
+            
+            // Send password reset email
+            console.log(`Sending password reset email to ${email}`);
+            await sendPasswordResetLink({
+              email,
+              name: student.name,
+            }, resetLinkResult.resetLink);
+            
+            console.log(`Password reset link sent to ${email}`);
+            
+            // Also send login credentials for reference
+            console.log(`Sending login credentials to ${email}`);
+            await sendLoginCredentials(student, generatedPassword);
+            
+            console.log(`Login credentials sent to ${email}`);
+            console.log(`All Firebase operations completed successfully for student ${id}`);
+            
+            return res.status(201).json({
+              id: student.id,
+              name: student.name,
+              section: student.section,
+              batch: student.batch,
+              email: student.email,
+              initialPassword: generatedPassword,
+              firebaseUserCreated: true,
+              firebaseUserId: firebaseResult.uid
+            });
+          } else {
+            console.warn(`Failed to generate reset link: ${resetLinkResult.error}`);
+          }
+        } else {
+          console.warn(`Failed to create Firebase user: ${firebaseResult.error}`);
+        }
       } catch (error) {
         console.error('Error with Firebase operations:', error);
         console.error('Stack trace:', error.stack);
@@ -229,25 +237,33 @@ const updateStudent = asyncHandler(async (req, res) => {
         
         // If no existing user or couldn't update, create a new Firebase user
         if (!firebaseUser) {
-          firebaseUser = await createFirebaseUser(newEmail, generatedPassword, {
+          const firebaseResult = await createFirebaseUser(newEmail, generatedPassword, {
             id: updatedStudent.id,
             name: updatedStudent.name,
           });
+          
+          if (firebaseResult.success) {
+            firebaseUser = { uid: firebaseResult.uid };
+          }
         }
         
         // Generate password reset link
-        const resetLink = await sendPasswordResetEmail(newEmail);
+        const resetLinkResult = await generatePasswordResetLink(newEmail);
         
         // Send password reset email
-        await sendPasswordResetLink({
-          email: newEmail,
-          name: updatedStudent.name,
-        }, resetLink);
-        
-        console.log(`Firebase user updated/created and password reset link sent to ${newEmail}`);
-        
-        // Also send login credentials for reference
-        await sendLoginCredentials(updatedStudent, generatedPassword);
+        if (resetLinkResult.success) {
+          await sendPasswordResetLink({
+            email: newEmail,
+            name: updatedStudent.name,
+          }, resetLinkResult.resetLink);
+          
+          console.log(`Firebase user updated/created and password reset link sent to ${newEmail}`);
+          
+          // Also send login credentials for reference
+          await sendLoginCredentials(updatedStudent, generatedPassword);
+        } else {
+          console.warn(`Failed to generate reset link: ${resetLinkResult.error}`);
+        }
       } catch (error) {
         console.error('Error with Firebase operations:', error);
         // Continue even if Firebase operations fail
@@ -277,8 +293,41 @@ const deleteStudent = asyncHandler(async (req, res) => {
   const student = await Student.findOne({ where: { id: req.params.id } });
 
   if (student) {
+    console.log(`Deleting student: ${student.id} (${student.name})`);
+    
+    // If student has an email, delete their Firebase account
+    if (student.email) {
+      try {
+        console.log(`Attempting to delete Firebase user for email: ${student.email}`);
+        const { deleteFirebaseUserByEmail } = require('../utils/firebaseUtils');
+        
+        const deleteResult = await deleteFirebaseUserByEmail(student.email);
+        
+        if (deleteResult.success) {
+          console.log(`Firebase user deleted successfully for student ${student.id}: ${deleteResult.message}`);
+        } else {
+          console.warn(`Failed to delete Firebase user for student ${student.id}: ${deleteResult.error}`);
+        }
+      } catch (error) {
+        console.error(`Error deleting Firebase user for student ${student.id}:`, error);
+        // Continue with deletion even if Firebase operations fail
+      }
+    } else {
+      console.log(`Student ${student.id} has no email, skipping Firebase deletion`);
+    }
+    
+    // Delete any student submissions or related data if needed
+    // Note: You might want to add submission cleanup here if required
+    
+    // Delete the student from database
+    console.log(`Deleting student ${student.id} from database`);
     await student.destroy();
-    res.json({ message: 'Student removed' });
+    
+    console.log(`Student ${student.id} successfully deleted from system and Firebase`);
+    res.json({ 
+      message: 'Student removed', 
+      firebaseDeleted: !!student.email 
+    });
   } else {
     res.status(404);
     throw new Error('Student not found');
@@ -321,6 +370,111 @@ const getStudentSubmissions = asyncHandler(async (req, res) => {
   }));
 
   res.json(formattedSubmissions);
+});
+
+/**
+ * @desc    Get submissions for current authenticated student
+ * @route   GET /api/students/submissions
+ * @access  Private/Student
+ */
+const getCurrentStudentSubmissions = asyncHandler(async (req, res) => {
+  const student = req.user; // From auth middleware
+
+  const submissions = await Submission.findAll({
+    where: { studentId: student.id },
+    include: [{
+      model: Subject,
+      attributes: ['name'],
+      required: true
+    }],
+    order: [['submissionDate', 'DESC']]
+  });
+
+  // Format the response to include subject name
+  const formattedSubmissions = submissions.map(submission => ({
+    ...submission.toJSON(),
+    subjectName: submission.Subject.name
+  }));
+
+  res.json(formattedSubmissions);
+});
+
+/**
+ * @desc    Get subjects for a student (independent of submissions)
+ * @route   GET /api/students/:id/subjects
+ * @access  Private (student self, teacher, or admin)
+ */
+const getStudentSubjects = asyncHandler(async (req, res) => {
+  const student = await Student.findOne({ where: { id: req.params.id } });
+  if (!student) {
+    res.status(404);
+    throw new Error('Student not found');
+  }
+  console.log('[Diag:getStudentSubjects] START', { studentId: student.id, batch: student.batch, activeSemesterId: student.activeSemesterId });
+
+  // Permission: student can view own, teacher/admin can view any
+  if (req.user.role === 'student' && req.user.id !== req.params.id) {
+    res.status(403);
+    throw new Error('Not authorized to view these subjects');
+  }
+
+  // Base where clause by batch
+  const whereClause = { batchId: student.batch };
+  // If student has active semester, include subjects from that semester or legacy null semester
+  if (student.activeSemesterId) {
+    whereClause[Op.or] = [
+      { semesterId: student.activeSemesterId },
+      { semesterId: null }
+    ];
+  }
+
+  // Dynamically require to avoid circular reference issues
+  const { Semester, Batch, Teacher } = require('../models');
+  const subjects = await Subject.findAll({
+    where: whereClause,
+    include: [
+      { model: Semester },
+      { model: Batch },
+      { model: Teacher, through: { attributes: [] } }
+    ]
+  });
+  console.log('[Diag:getStudentSubjects] Subjects fetched', subjects.length);
+  res.json(subjects);
+  console.log('[Diag:getStudentSubjects] END');
+});
+
+/**
+ * @desc    Get subjects for current authenticated student
+ * @route   GET /api/students/subjects
+ * @access  Private/Student
+ */
+const getCurrentStudentSubjects = asyncHandler(async (req, res) => {
+  const student = req.user; // From auth middleware
+  console.log('[Diag:getCurrentStudentSubjects] START', { studentId: student.id, batch: student.batch, activeSemesterId: student.activeSemesterId });
+
+  // Base where clause by batch
+  const whereClause = { batchId: student.batch };
+  // If student has active semester, include subjects from that semester or legacy null semester
+  if (student.activeSemesterId) {
+    whereClause[Op.or] = [
+      { semesterId: student.activeSemesterId },
+      { semesterId: null }
+    ];
+  }
+
+  // Dynamically require to avoid circular reference issues
+  const { Semester, Batch, Teacher } = require('../models');
+  const subjects = await Subject.findAll({
+    where: whereClause,
+    include: [
+      { model: Semester },
+      { model: Batch },
+      { model: Teacher, through: { attributes: [] } }
+    ]
+  });
+  console.log('[Diag:getCurrentStudentSubjects] Subjects fetched', subjects.length);
+  res.json(subjects);
+  console.log('[Diag:getCurrentStudentSubjects] END');
 });
 
 /**
@@ -590,18 +744,22 @@ const importStudentsFromExcel = asyncHandler(async (req, res) => {
               });
               
               // Generate password reset link
-              const resetLink = await sendPasswordResetEmail(student.email);
+              const resetLinkResult = await generatePasswordResetLink(student.email);
               
-              // Send password reset email
-              await sendPasswordResetLink({
-                email: student.email,
-                name: student.name,
-              }, resetLink);
-              
-              console.log(`Firebase user created and password reset link sent to ${student.email}`);
-              
-              // Also send login credentials for reference
-              await sendLoginCredentials(student, generatedPassword);
+              if (resetLinkResult.success) {
+                // Send password reset email
+                await sendPasswordResetLink({
+                  email: student.email,
+                  name: student.name,
+                }, resetLinkResult.resetLink);
+                
+                console.log(`Firebase user created and password reset link sent to ${student.email}`);
+                
+                // Also send login credentials for reference
+                await sendLoginCredentials(student, generatedPassword);
+              } else {
+                console.warn(`Failed to generate reset link for ${student.email}: ${resetLinkResult.error}`);
+              }
             } catch (error) {
               console.error(`Error with Firebase operations for student ${student.id}:`, error);
               errors.push(`Failed to create Firebase user for student ${student.id}: ${error.message}`);
@@ -761,6 +919,9 @@ module.exports = {
   updateStudent,
   deleteStudent,
   getStudentSubmissions,
+  getCurrentStudentSubmissions,
+  getStudentSubjects,
+  getCurrentStudentSubjects,
   importStudents,
   importStudentsFromExcel,
   authStudent,

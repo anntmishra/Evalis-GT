@@ -4,17 +4,41 @@ Evalis is a comprehensive university grading and submission portal that provides
 
 ## Features
 
-- **Student Portal**: View submissions, grades, and academic progress
-- **Teacher Portal**: Manage subjects, grade submissions, track student performance
-- **Admin Dashboard**: Manage teachers, subjects, batches, and student data
-- **Excel Import**: Import student data easily from Excel files
-- **MongoDB Database**: Secure storage of all academic data
-- **Automated Emails**: Send login credentials to students' email addresses
+
+## Admin Login Troubleshooting
+
+If you cannot log in as admin:
+
+1. Ensure the backend is actually running (check logs for "Server running" message).
+2. Confirm an admin row exists:
+   - Run: `node server/createAdmin.js` (creates if missing, password = env DEFAULT_ADMIN_PASSWORD or `admin123`).
+3. To reset the admin password explicitly:
+   - Run: `node server/createAdmin.js --reset --password=newStrongPass123`.
+4. Verify environment variables `JWT_SECRET` and `DATABASE_URL` are set and the DB is reachable.
+5. If you recreated the database, re-run: `node server/setupFreshDatabase.js` then recreate admin.
+6. Observe login request/response in browser dev tools; 401 with correct username usually means password mismatch.
+
+After resetting, try login with:
+```
+username: admin
+password: (the password you set / admin123)
+```
+
+If problems persist, check server logs for lines containing `Admin login attempt` and `password match result` to pinpoint the issue.
+
+### CORS Issues (Frontend 5173 -> Backend 3000)
+
+Ensure backend started with NODE_ENV=development or set FRONTEND_URL env var, e.g.:
+```
+FRONTEND_URL=http://localhost:5173
+```
+To temporarily allow any origin (dev only):
+```
+CORS_ALLOW_ANY=true
+```
+Clear browser cache or hard-reload after changing CORS settings.
 
 ## Prerequisites
-
-- Node.js (v18.x or higher)
-- MongoDB (local or Atlas)
 - npm or yarn
 
 ## Installation

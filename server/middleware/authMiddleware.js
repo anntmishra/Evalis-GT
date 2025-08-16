@@ -148,11 +148,36 @@ const protect = asyncHandler(async (req, res, next) => {
           return next();
         }
         
+        // Try admin model (by email) before denying access
+        let adminUser = null;
+        try {
+          adminUser = await Admin.findOne({
+            where: { email: decodedFirebaseToken.email },
+            attributes: { exclude: ['password'] }
+          });
+        } catch (e) {
+          logger.debug('Admin lookup error during Firebase auth:', e.message);
+        }
+
+        if (adminUser) {
+          req.user = adminUser;
+          req.user.role = 'admin';
+          req.admin = adminUser;
+          logger.info('Firebase user authenticated as admin:', adminUser.username || adminUser.email);
+
+            // Cache the user with role-specific key
+            const cacheKey = `${token}:admin`;
+            tokenCache.set(cacheKey, {
+              user: adminUser,
+              role: 'admin',
+              expiresAt: Date.now() + CACHE_TTL
+            });
+
+          return next();
+        }
+
         // If no exact match but we have a validated Firebase token, we could create a new user record
-        // This is optional and depends on your application's requirements
-        console.log('Firebase token valid, but no matching user in database. Email:', decodedFirebaseToken.email);
-        
-        // Option 1: Deny access because no matching user
+        console.log('Firebase token valid, but no matching user in database (student/teacher/admin). Email:', decodedFirebaseToken.email);
         res.status(403);
         throw new Error('Valid Firebase token, but no matching user in our system');
         
@@ -227,10 +252,18 @@ const protect = asyncHandler(async (req, res, next) => {
               return next();
             }
           } else if (role === 'admin') {
+            // Support both legacy tokens (using admin numeric id) and new tokens (using username)
             user = await Admin.findOne({ 
               where: { username: decoded.id },
               attributes: { exclude: ['password'] }
             });
+            if (!user) {
+              // Fallback: try by primary key id if decoded.id was numeric ID
+              user = await Admin.findOne({
+                where: { id: decoded.id },
+                attributes: { exclude: ['password'] }
+              });
+            }
             
             if (user) {
               req.user = user;
@@ -298,9 +331,12 @@ const protect = asyncHandler(async (req, res, next) => {
               return next();
             }
 
-            // Finally try admin model (by username)
+            // Finally try admin model (by username first, then id fallback)
             user = await Admin.findOne({ 
               where: { username: decoded.id },
+              attributes: { exclude: ['password'] }
+            }) || await Admin.findOne({
+              where: { id: decoded.id },
               attributes: { exclude: ['password'] }
             });
 

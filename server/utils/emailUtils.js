@@ -3,16 +3,45 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
-// Create a transporter using SMTP
-const transporter = nodemailer.createTransport({
+// Basic validation of required env vars
+const missingEmailVars = [];
+['EMAIL_USER','EMAIL_PASS'].forEach(k => { if (!process.env[k]) missingEmailVars.push(k); });
+
+const EMAIL_DRY_RUN = process.env.EMAIL_DRY_RUN === 'true';
+
+const transporterConfig = {
   host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-  port: process.env.EMAIL_PORT || 587,
+  port: Number(process.env.EMAIL_PORT) || 587,
   secure: process.env.EMAIL_SECURE === 'true',
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
+};
+
+if (missingEmailVars.length) {
+  console.warn('[emailUtils] Missing email env vars:', missingEmailVars.join(', '));
+}
+console.log('[emailUtils] Transporter config (sanitized):', {
+  host: transporterConfig.host,
+  port: transporterConfig.port,
+  secure: transporterConfig.secure,
+  userPresent: !!transporterConfig.auth.user,
+  passPresent: !!transporterConfig.auth.pass,
+  dryRun: EMAIL_DRY_RUN
 });
+
+let transporter = null;
+try {
+  if (!EMAIL_DRY_RUN) {
+    transporter = nodemailer.createTransport(transporterConfig);
+  }
+} catch (e) {
+  console.error('[emailUtils] Failed to create transporter:', e.message);
+  if (missingEmailVars.length) {
+    console.error('[emailUtils] Missing environment variables prevented transporter creation:', missingEmailVars.join(', '));
+  }
+}
 
 /**
  * Send an email with login credentials to a student
@@ -52,6 +81,10 @@ const sendLoginCredentials = async (student, password) => {
   };
 
   try {
+    if (EMAIL_DRY_RUN || !transporter) {
+      console.log(`[emailUtils] DRY RUN - login credentials email NOT sent to ${student.email}`);
+      return { messageId: 'dry-run', accepted: [student.email] };
+    }
     const info = await transporter.sendMail(mailOptions);
     console.log(`Email sent to ${student.email}: ${info.messageId}`);
     return info;
@@ -95,6 +128,10 @@ const sendPasswordResetLink = async (user, resetLink) => {
   };
 
   try {
+    if (EMAIL_DRY_RUN || !transporter) {
+      console.log(`[emailUtils] DRY RUN - password reset email NOT sent to ${user.email}`);
+      return { messageId: 'dry-run', accepted: [user.email] };
+    }
     const info = await transporter.sendMail(mailOptions);
     console.log(`Password reset email sent to ${user.email}: ${info.messageId}`);
     return info;

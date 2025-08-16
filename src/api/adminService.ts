@@ -18,6 +18,13 @@ interface SetActiveSemesterResponse {
   data?: any;
 }
 
+interface ToggleSemesterResponse {
+  message: string;
+  semesterId: string;
+  batchId?: string;
+  studentsUpdated?: number;
+}
+
 /**
  * Generate semesters 1-8 for a batch
  */
@@ -76,3 +83,27 @@ export const setActiveSemesterForBatch = async (
     throw error;
   }
 }; 
+
+// Direct activate semester (exclusive inside batch)
+export const activateSemester = async (semesterId: string): Promise<ToggleSemesterResponse> => {
+  try {
+    const semBase = config.API_ENDPOINTS?.SEMESTERS || '/api/semesters';
+    const response = await axios.put(`${semBase}/${semesterId}/activate`, {}, getAuthConfig());
+    return response.data;
+  } catch (error: any) {
+    if (error.response?.data) throw error.response.data;
+    throw error;
+  }
+};
+
+// Direct deactivate semester
+export const deactivateSemester = async (semesterId: string): Promise<ToggleSemesterResponse> => {
+  try {
+    const semBase = config.API_ENDPOINTS?.SEMESTERS || '/api/semesters';
+    const response = await axios.put(`${semBase}/${semesterId}/deactivate`, {}, getAuthConfig());
+    return response.data;
+  } catch (error: any) {
+    if (error.response?.data) throw error.response.data;
+    throw error;
+  }
+};

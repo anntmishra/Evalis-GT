@@ -5,9 +5,6 @@ import { getStudentProfile, getStudentSubmissions } from '../api';
 // Note: API keys should be handled by the backend, not exposed in client code
 // These are kept for backward compatibility but should be moved to server-side
 
-// API keys (temporarily disabled for client-side security)
-// const OPENAI_API_KEY = ''; // Disabled - should be handled server-side
-
 // Track which responses have been used to avoid repetition
 let lastResponseTemplate = '';
 let responseCounter = 0;
@@ -31,8 +28,7 @@ const getAuthConfig = () => {
 
 // Define the API base URL
 const AI_API_URL = config.API_BASE_URL + '/ai-analyzer';
-// OpenAI API URL (commented out as not used in current implementation)
-// const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';
+// (Removed unused OPENAI_API_URL constant to satisfy TS lint)
 
 // Define the types for the API responses
 export interface StudentDataForAnalysis {
@@ -333,13 +329,12 @@ function generateMockResponse(
 ): string {
   console.log('Generating mock response for:', userMessage);
   
-  // Create variation by using the current timestamp (used for randomization)
-  const timestamp = new Date().getTime().toString().slice(-4);
-  console.log('Using timestamp for randomization:', timestamp);
+  // Create variation by using the current timestamp
+  // (Removed timestamp variable; not currently used for variation)
   
   // Select a subject the student is struggling with
-  const randomSubject = subjects[Math.floor(Math.random() * subjects.length)];
-  const subjectName = randomSubject?.name || 'Mathematics'; // Get subject name with fallback
+  const randomSubjectObj = subjects.length ? subjects[Math.floor(Math.random() * subjects.length)] : { id: 'GEN', name: 'General Studies' };
+  const randomSubjectName = typeof randomSubjectObj === 'string' ? randomSubjectObj : (randomSubjectObj.name || 'Subject');
   const overallGrade = Math.floor(75 + Math.random() * 15);
   const subjectGrade = Math.floor(65 + Math.random() * 20);
   const onTime = Math.floor(8 + Math.random() * 7);
@@ -360,7 +355,7 @@ function generateMockResponse(
   // Add grades information
   let gradesText = getRandomResponse('grades')
     .replace("{{overall}}", overallGrade.toString())
-    .replace("{{subject}}", subjectName)
+    .replace("{{subject}}", randomSubjectName)
     .replace("{{grade}}", subjectGrade.toString());
   mockResponse += gradesText + "\n\n";
   
@@ -377,7 +372,7 @@ function generateMockResponse(
   
   // Add advice
   let adviceText = getRandomResponse('advice')
-    .replace("{{subject}}", subjectName);
+    .replace("{{subject}}", randomSubjectName);
   mockResponse += adviceText;
   
   return mockResponse;

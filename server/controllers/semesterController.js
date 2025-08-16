@@ -1,4 +1,5 @@
 const asyncHandler = require('express-async-handler');
+const { Op } = require('sequelize');
 const { Semester, Batch, Subject, Student } = require('../models');
 
 // @desc    Create a new semester
@@ -37,7 +38,8 @@ const createSemester = asyncHandler(async (req, res) => {
     number,
     startDate,
     endDate,
-    active: active || true,
+    // Only default to true if not explicitly provided
+    active: active !== undefined ? active : true,
     batchId
   });
 
@@ -115,6 +117,70 @@ const updateSemester = asyncHandler(async (req, res) => {
   res.json(updatedSemester);
 });
 
+// @desc    Activate a semester (set it active, others in same batch inactive, update students)
+// @route   PUT /api/semesters/:id/activate
+// @access  Private/Admin
+const activateSemester = asyncHandler(async (req, res) => {
+  const semester = await Semester.findByPk(req.params.id);
+  if (!semester) {
+    res.status(404);
+    throw new Error('Semester not found');
+  }
+
+  // Transaction optional; keeping simple for now
+  // Deactivate other semesters of same batch
+  await Semester.update({ active: false }, {
+    where: {
+      batchId: semester.batchId,
+      id: { [Op.ne]: semester.id }
+    }
+  });
+
+  // Activate selected semester if not already
+  if (!semester.active) {
+    semester.active = true;
+    await semester.save();
+  }
+
+  // Set all students of this batch to have this active semester
+  const [studentsUpdated] = await Student.update({ activeSemesterId: semester.id }, {
+    where: { batch: semester.batchId }
+  });
+
+  res.json({
+    message: 'Semester activated',
+    semesterId: semester.id,
+    batchId: semester.batchId,
+    studentsUpdated
+  });
+});
+
+// @desc    Deactivate a semester (set active false, clear activeSemesterId for affected students)
+// @route   PUT /api/semesters/:id/deactivate
+// @access  Private/Admin
+const deactivateSemester = asyncHandler(async (req, res) => {
+  const semester = await Semester.findByPk(req.params.id);
+  if (!semester) {
+    res.status(404);
+    throw new Error('Semester not found');
+  }
+
+  if (semester.active) {
+    semester.active = false;
+    await semester.save();
+  }
+
+  const [studentsUpdated] = await Student.update({ activeSemesterId: null }, {
+    where: { activeSemesterId: semester.id }
+  });
+
+  res.json({
+    message: 'Semester deactivated',
+    semesterId: semester.id,
+    studentsUpdated
+  });
+});
+
 // @desc    Set active semester for students
 // @route   PUT /api/semesters/:id/set-active
 // @access  Private/Admin
@@ -185,6 +251,8 @@ module.exports = {
   getSemesters,
   getSemesterById,
   updateSemester,
+  activateSemester,
+  deactivateSemester,
   setActiveSemesterForStudents,
   getBatchSemesters
 }; 

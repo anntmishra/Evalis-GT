@@ -3,11 +3,12 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const colors = require('colors');
 const morgan = require('morgan');
+const path = require('path');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 const { connectDB } = require('./config/db');
 
-// Load environment variables
-dotenv.config();
+// Load environment variables from root directory
+dotenv.config({ path: path.join(__dirname, '../.env') });
 
 // Create Express app
 const app = express();

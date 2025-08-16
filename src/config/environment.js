@@ -3,76 +3,85 @@
  * 
  * This file centralizes all environment-specific configuration
  * to avoid hardcoded values throughout the application.
- * 
- * SECURITY NOTE: This file runs in the browser, so only include
- * public environment variables. Never include sensitive data like
- * DATABASE_URL, JWT_SECRET, etc.
  */
 
 // Default to development environment if not specified
-const NODE_ENV = import.meta.env.NODE_ENV || 'production';
+const NODE_ENV = import.meta.env.NODE_ENV || 'development';
 
-// Better Vercel detection - check for multiple Vercel patterns
-const IS_VERCEL = typeof window !== 'undefined' && 
-  (window.location.hostname.includes('vercel.app') || 
-   window.location.hostname.includes('vercel-deployment') ||
-   import.meta.env.VERCEL === '1' ||
-   import.meta.env.VERCEL_ENV) ||
-   // Also check for build-time Vercel environment
-   import.meta.env.VITE_VERCEL === '1' ||
-   process.env.VERCEL === '1';
+// Allow explicit override via Vite env (safe access)
+let viteEnv = {};
+try {
+  // In Vite / ESM this will succeed
+  // eslint-disable-next-line no-undef
+  viteEnv = import.meta.env || {};
+} catch (e) {
+  // Fallback for non-Vite contexts (tests, SSR) if ever needed
+  if (typeof process !== 'undefined') {
+    // eslint-disable-next-line no-undef
+    viteEnv = process.env || {};
+  }
+}
+const explicitBase = viteEnv?.VITE_API_BASE_URL || null;
+const explicitPort = viteEnv?.VITE_API_PORT || null;
 
-// Ensure sensitive environment variables are not exposed to frontend
+// Detect dev API port dynamically: if running Vite (5173/5174 etc.) prefer 3000 (our server port)
+let detectedDevPort = '3000';
 if (typeof window !== 'undefined') {
-  // We're in the browser - make sure no sensitive data is exposed
-  const sensitiveVars = ['DATABASE_URL', 'JWT_SECRET', 'REDIS_URL', 'FIREBASE_PRIVATE_KEY'];
-  sensitiveVars.forEach(varName => {
-    if (import.meta.env[varName] || import.meta.env[`VITE_${varName}`]) {
-      console.warn(`Warning: Sensitive environment variable ${varName} detected in frontend!`);
-    }
-  });
+  const lp = window.location.port;
+  if (['5173','5174','5175'].includes(lp)) {
+    detectedDevPort = '3000'; // Changed from 3001 to 3000 to match our server
+  }
 }
 
-// API URLs based on environment
-const API_BASE_URL = {
-  development: 'http://localhost:3000/api',
-  test: 'http://localhost:3000/api',
-  production: IS_VERCEL ? null : '/api', // No API for Vercel frontend-only deployment
-}[NODE_ENV];
+const devPort = explicitPort || detectedDevPort;
+
+// Function to get the appropriate API base URL.
+// Removed legacy override that forced admins to port 5003 (no server listening -> Network Error).
+// All roles now share the same API in dev unless explicitly overridden via VITE_API_BASE_URL.
+const getApiBaseUrl = () => ({
+  development: explicitBase || `http://localhost:${devPort}/api`,
+  test: explicitBase || `http://localhost:${devPort}/api`,
+  production: '/api'
+}[NODE_ENV]);
+
+// API URLs based on environment (runtime-friendly for dev)
+const API_BASE_URL = getApiBaseUrl();
+
+// Admin API now unified with main API (previous separate 5003 server disabled)
+const ADMIN_API_BASE_URL = API_BASE_URL;
 
 // Export environment configuration
 const config = {
   API_BASE_URL,
-  IS_FRONTEND_ONLY: IS_VERCEL || !API_BASE_URL,
-  NODE_ENV,
-  IS_VERCEL,
+  ADMIN_API_BASE_URL,
   API_ENDPOINTS: {
     AUTH: {
-      STUDENT_LOGIN: API_BASE_URL ? `${API_BASE_URL}/auth/student/login` : null,
-      TEACHER_LOGIN: API_BASE_URL ? `${API_BASE_URL}/auth/teacher/login` : null,
-      TEACHER_SETUP_PASSWORD: API_BASE_URL ? `${API_BASE_URL}/auth/teacher/setup-password` : null,
-      ADMIN_LOGIN: API_BASE_URL ? `${API_BASE_URL}/auth/admin/login` : null,
-      PROFILE: API_BASE_URL ? `${API_BASE_URL}/auth/profile` : null,
+      STUDENT_LOGIN: `${API_BASE_URL}/auth/student/login`,
+      TEACHER_LOGIN: `${API_BASE_URL}/auth/teacher/login`,
+      TEACHER_SETUP_PASSWORD: `${API_BASE_URL}/auth/teacher/setup-password`,
+      ADMIN_LOGIN: `${API_BASE_URL}/auth/admin/login`,
+      PROFILE: `${API_BASE_URL}/auth/profile`,
     },
     TEACHERS: {
-      BASE: API_BASE_URL ? `${API_BASE_URL}/teachers` : null,
-      IMPORT: API_BASE_URL ? `${API_BASE_URL}/teachers/import-excel` : null,
+      BASE: `${API_BASE_URL}/teachers`,
+      IMPORT: `${API_BASE_URL}/teachers/import-excel`,
     },
     STUDENTS: {
-      BASE: API_BASE_URL ? `${API_BASE_URL}/students` : null,
-      IMPORT: API_BASE_URL ? `${API_BASE_URL}/students/import-excel` : null,
+      BASE: `${API_BASE_URL}/students`,
+      IMPORT: `${API_BASE_URL}/students/import-excel`,
     },
-    SUBJECTS: API_BASE_URL ? `${API_BASE_URL}/subjects` : null,
-    BATCHES: API_BASE_URL ? `${API_BASE_URL}/batches` : null,
-    SUBMISSIONS: API_BASE_URL ? `${API_BASE_URL}/submissions` : null,
-    SEMESTERS: API_BASE_URL ? `${API_BASE_URL}/semesters` : null,
+    SUBJECTS: `${API_BASE_URL}/subjects`,
+    BATCHES: `${API_BASE_URL}/batches`,
+    ASSIGNMENTS: `${API_BASE_URL}/assignments`,
+    SUBMISSIONS: `${API_BASE_URL}/submissions`,
+    SEMESTERS: `${API_BASE_URL}/semesters`,
     AI_ANALYZER: {
-      BASE: API_BASE_URL ? `${API_BASE_URL}/ai-analyzer` : null,
-      STUDENT_ANALYSIS: API_BASE_URL ? `${API_BASE_URL}/ai-analyzer/student` : null,
-      SUBJECT_ANALYSIS: API_BASE_URL ? `${API_BASE_URL}/ai-analyzer/student/subject` : null,
-      RECOMMENDATIONS: API_BASE_URL ? `${API_BASE_URL}/ai-analyzer/student/recommendations` : null,
-      COMPREHENSIVE_DATA: API_BASE_URL ? `${API_BASE_URL}/ai-analyzer/comprehensive-data` : null,
-      PREDICTIVE_ANALYSIS: API_BASE_URL ? `${API_BASE_URL}/ai-analyzer/predictive` : null,
+      BASE: `${API_BASE_URL}/ai-analyzer`,
+      STUDENT_ANALYSIS: `${API_BASE_URL}/ai-analyzer/student`,
+      SUBJECT_ANALYSIS: `${API_BASE_URL}/ai-analyzer/student/subject`,
+      RECOMMENDATIONS: `${API_BASE_URL}/ai-analyzer/student/recommendations`,
+      COMPREHENSIVE_DATA: `${API_BASE_URL}/ai-analyzer/comprehensive-data`,
+      PREDICTIVE_ANALYSIS: `${API_BASE_URL}/ai-analyzer/predictive`,
     },
   },
   AUTH: {
@@ -81,16 +90,5 @@ const config = {
     CURRENT_USER_KEY: 'currentUser',
   }
 };
-
-// Add debug logging in development
-if (NODE_ENV === 'development' || typeof window !== 'undefined') {
-  console.log('🔧 Environment Configuration:', {
-    NODE_ENV,
-    IS_VERCEL,
-    IS_FRONTEND_ONLY: config.IS_FRONTEND_ONLY,
-    API_BASE_URL,
-    hostname: typeof window !== 'undefined' ? window.location.hostname : 'server-side'
-  });
-}
 
 export default config; 

@@ -38,6 +38,17 @@ router.route('/dashboard')
 router.route('/students')
   .get(protect, teacher, getAccessibleStudents);
 
+// Convenience route to get current teacher's students (without specifying ID)
+router.route('/me/students')
+  .get(protect, teacher, (req, res, next) => {
+    // Re-route to existing handler using req.user.id
+    if (req.user && req.user.id) {
+      req.params.id = req.user.id; // set param for controller
+      return getStudentsByTeacher(req, res, next);
+    }
+    res.status(400).json({ message: 'Unable to determine teacher ID' });
+  });
+
 // New accessible batches route
 router.route('/batches')
   .get(protect, teacher, getAccessibleBatches);

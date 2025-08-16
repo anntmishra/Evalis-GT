@@ -35,20 +35,26 @@ const createTestUsers = async () => {
     // Create test subjects
     console.log('Creating test subjects...'.cyan);
     const subjects = [
-      { id: 'CS101', name: 'Introduction to Programming', credits: 4, section: 'A' },
-      { id: 'CS102', name: 'Data Structures', credits: 4, section: 'A' }
+      { id: 'CS101', name: 'Introduction to Programming', credits: 4, section: 'A', batchId: batch.id },
+      { id: 'CS102', name: 'Data Structures', credits: 4, section: 'A', batchId: batch.id }
     ];
     
     for (const subjectData of subjects) {
       const [subject, created] = await Subject.findOrCreate({
         where: { id: subjectData.id },
-        defaults: subjectData
+  defaults: subjectData
       });
       
       if (created) {
         console.log(`Subject ${subject.id} created`.green);
       } else {
         console.log(`Subject ${subject.id} already exists`.yellow);
+        // Backfill missing batchId for legacy subject rows
+        if (!subject.batchId) {
+          subject.batchId = batch.id;
+          await subject.save();
+          console.log(`Backfilled batchId for subject ${subject.id} -> ${batch.id}`.cyan);
+        }
       }
     }
     

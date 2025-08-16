@@ -5,6 +5,8 @@ const {
   getSemesters,
   getSemesterById,
   updateSemester,
+  activateSemester,
+  deactivateSemester,
   setActiveSemesterForStudents,
   getBatchSemesters
 } = require('../controllers/semesterController');
@@ -19,5 +21,7 @@ router.get('/:id', getSemesterById);
 router.post('/', protect, adminOnly, createSemester);
 router.put('/:id', protect, adminOnly, updateSemester);
 router.put('/:id/set-active', protect, adminOnly, setActiveSemesterForStudents);
+router.put('/:id/activate', protect, adminOnly, activateSemester);
+router.put('/:id/deactivate', protect, adminOnly, deactivateSemester);
 
 module.exports = router; 

@@ -37,7 +37,6 @@ import {
   AutoAwesome, 
   School,
   TipsAndUpdates,
-  // CheckCircle, // Unused import
   BarChart,
   Image as ImageIcon,
   PictureAsPdf,
@@ -49,18 +48,16 @@ import { Subject } from '../types/university';
 import { EXAM_TYPES } from '../constants/universityData';
 import questionEnhancerService, { 
   Question as EnhancerQuestion, 
-  // EnhanceQuestionResponse, // Unused types
   EnhancePaperResponse,
-  CognitiveLevel,
-  // QuestionSuggestionResponse, // Unused types
-  // PromptGenerationResponse // Unused types
+  CognitiveLevel
 } from '../api/questionEnhancerService';
 import { generateQuestionPaperPDF, PDFQuestion } from '../api/pdfExportService';
 
 interface QuestionPaperCreatorProps {
   subjects: Subject[];
   examTypes: typeof EXAM_TYPES;
-  onQuestionPaperCreated: () => void;
+  // Made optional so parent components aren't forced to supply it; defaults to a no-op.
+  onQuestionPaperCreated?: () => void;
 }
 
 interface Question {
@@ -84,12 +81,11 @@ interface Question {
 const TeacherQuestionPaperCreator: React.FC<QuestionPaperCreatorProps> = ({
   subjects,
   examTypes,
-  onQuestionPaperCreated
+  onQuestionPaperCreated = () => {}
 }) => {
   const [title, setTitle] = useState<string>('');
   const [selectedSubject, setSelectedSubject] = useState<string>('');
   const [selectedExamType, setSelectedExamType] = useState<string>('');
-  // const [totalMarks, setTotalMarks] = useState<number>(100); // Unused state
   const [duration, setDuration] = useState<number>(180); // in minutes
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentQuestion, setCurrentQuestion] = useState<string>('');
