@@ -809,7 +809,7 @@ const TeacherPortal: React.FC = () => {
                                     variant="outline"
                                     size="sm"
                                     className="border-blue-300 text-blue-700 hover:bg-blue-100"
-                                    onClick={() => window.open(`http://localhost:3000${assignment.fileUrl}`, '_blank')}
+                                    onClick={() => window.open(config.getFileUrl(assignment.fileUrl), '_blank')}
                                   >
                                     <Download className="h-4 w-4 mr-1" />
                                     Download
@@ -818,7 +818,7 @@ const TeacherPortal: React.FC = () => {
                                     variant="outline"
                                     size="sm"
                                     className="border-blue-300 text-blue-700 hover:bg-blue-100"
-                                    onClick={() => window.open(`http://localhost:3000${assignment.fileUrl}`, '_blank')}
+                                    onClick={() => window.open(config.getFileUrl(assignment.fileUrl), '_blank')}
                                   >
                                     <Eye className="h-4 w-4 mr-1" />
                                     Preview
@@ -949,7 +949,7 @@ const TeacherPortal: React.FC = () => {
                                             variant="outline"
                                             size="sm"
                                             className="border-blue-300 text-blue-700 hover:bg-blue-100"
-                                            onClick={() => window.open(`http://localhost:3000${submission.fileUrl}`, '_blank')}
+                                            onClick={() => window.open(config.getFileUrl(submission.fileUrl), '_blank')}
                                           >
                                             <Download className="h-4 w-4 mr-1" />
                                             Download
@@ -1137,7 +1137,7 @@ const TeacherPortal: React.FC = () => {
             </div>
             <div className="flex-1 overflow-hidden">
               <PDFAnnotator
-                fileUrl={`http://localhost:3000${selectedSubmission.fileUrl}`}
+                fileUrl={config.getFileUrl(selectedSubmission.fileUrl)}
                 studentName={selectedSubmission.Student?.name || 'Unknown Student'}
                 submissionId={selectedSubmission.id}
                 onSave={handlePDFAnnotationSave}
