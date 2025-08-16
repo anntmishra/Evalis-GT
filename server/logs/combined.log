@@ -23651,3 +23651,318 @@
 {"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError starting server: Unknown constraint error\u001b[39m","timestamp":"2025-08-17 01:13:14:1314"}
 {"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mPort 3000 is in use (single-attempt mode); moving to next candidate if available.\u001b[39m","timestamp":"2025-08-17 01:13:19:1319"}
 {"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mFailed to bind candidate port 3000: EADDRINUSE\u001b[39m","timestamp":"2025-08-17 01:13:19:1319"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mPort 3000 is in use (single-attempt mode); moving to next candidate if available.\u001b[39m","timestamp":"2025-08-17 01:13:44:1344"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mFailed to bind candidate port 3000: EADDRINUSE\u001b[39m","timestamp":"2025-08-17 01:13:44:1344"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mPort 3000 is in use (single-attempt mode); moving to next candidate if available.\u001b[39m","timestamp":"2025-08-17 01:13:44:1344"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mFailed to bind candidate port 3000: EADDRINUSE\u001b[39m","timestamp":"2025-08-17 01:13:44:1344"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mPort 3001 is in use (single-attempt mode); moving to next candidate if available.\u001b[39m","timestamp":"2025-08-17 01:13:44:1344"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mFailed to bind candidate port 3001: EADDRINUSE\u001b[39m","timestamp":"2025-08-17 01:13:44:1344"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 134\u001b[39m","timestamp":"2025-08-17 01:16:13:1613"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-17 01:16:13:1613"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-gm1x4bnie-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:16:13:1613"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - 500 - 26ms - ::1\u001b[39m","timestamp":"2025-08-17 01:16:13:1613"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 135\u001b[39m","timestamp":"2025-08-17 01:17:46:1746"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-17 01:17:46:1746"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mSession ID mismatch for user T001. Expected different session. Enforcing single session.\u001b[39m","timestamp":"2025-08-17 01:17:46:1746"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /api/auth/status - 401 - 36ms - ::1\u001b[39m","timestamp":"2025-08-17 01:17:46:1746"}
+{"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError starting server: Unknown constraint error\u001b[39m","timestamp":"2025-08-17 01:22:30:2230"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mPort 3000 is in use (single-attempt mode); moving to next candidate if available.\u001b[39m","timestamp":"2025-08-17 01:22:42:2242"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mFailed to bind candidate port 3000: EADDRINUSE\u001b[39m","timestamp":"2025-08-17 01:22:42:2242"}
+{"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError starting server: Unknown constraint error\u001b[39m","timestamp":"2025-08-17 01:25:45:2545"}
+{"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError starting server: Unknown constraint error\u001b[39m","timestamp":"2025-08-17 01:25:50:2550"}
+{"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError starting server: Unknown constraint error\u001b[39m","timestamp":"2025-08-17 01:26:04:264"}
+{"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError starting server: Unknown constraint error\u001b[39m","timestamp":"2025-08-17 01:26:09:269"}
+{"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError starting server: Unknown constraint error\u001b[39m","timestamp":"2025-08-17 01:26:26:2626"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mPort 3000 is in use (single-attempt mode); moving to next candidate if available.\u001b[39m","timestamp":"2025-08-17 01:26:39:2639"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mFailed to bind candidate port 3000: EADDRINUSE\u001b[39m","timestamp":"2025-08-17 01:26:39:2639"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 136\u001b[39m","timestamp":"2025-08-17 01:29:11:2911"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/student/login - ::1\u001b[39m","timestamp":"2025-08-17 01:29:11:2911"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-bhee23du5-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:29:11:2911"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/student/login - 500 - 16ms - ::1\u001b[39m","timestamp":"2025-08-17 01:29:11:2911"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/sync-firebase-password - ::1\u001b[39m","timestamp":"2025-08-17 01:29:13:2913"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-bhee23du5-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:29:13:2913"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/sync-firebase-password - 500 - 9ms - ::1\u001b[39m","timestamp":"2025-08-17 01:29:13:2913"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 137\u001b[39m","timestamp":"2025-08-17 01:29:13:2913"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 138\u001b[39m","timestamp":"2025-08-17 01:29:13:2913"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/students/subjects - ::1\u001b[39m","timestamp":"2025-08-17 01:29:13:2913"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-bhee23du5-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:29:13:2913"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/students/subjects - 500 - 3ms - ::1\u001b[39m","timestamp":"2025-08-17 01:29:13:2913"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 139\u001b[39m","timestamp":"2025-08-17 01:29:13:2913"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-17 01:29:13:2913"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-bhee23du5-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:29:13:2913"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - 500 - 1ms - ::1\u001b[39m","timestamp":"2025-08-17 01:29:13:2913"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/assignments/student - ::1\u001b[39m","timestamp":"2025-08-17 01:29:13:2913"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-bhee23du5-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:29:13:2913"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/assignments/student - 500 - 2ms - ::1\u001b[39m","timestamp":"2025-08-17 01:29:13:2913"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/students/profile - ::1\u001b[39m","timestamp":"2025-08-17 01:29:13:2913"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-bhee23du5-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:29:13:2913"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/students/profile - 500 - 0ms - ::1\u001b[39m","timestamp":"2025-08-17 01:29:13:2913"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/students/submissions - ::1\u001b[39m","timestamp":"2025-08-17 01:29:13:2913"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-bhee23du5-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:29:13:2913"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/students/submissions - 500 - 1ms - ::1\u001b[39m","timestamp":"2025-08-17 01:29:13:2913"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 140\u001b[39m","timestamp":"2025-08-17 01:29:31:2931"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/teacher/login - ::1\u001b[39m","timestamp":"2025-08-17 01:29:31:2931"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-bhee23du5-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:29:31:2931"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/teacher/login - 500 - 3ms - ::1\u001b[39m","timestamp":"2025-08-17 01:29:31:2931"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/sync-firebase-password - ::1\u001b[39m","timestamp":"2025-08-17 01:29:32:2932"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-bhee23du5-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:29:32:2932"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/sync-firebase-password - 500 - 5ms - ::1\u001b[39m","timestamp":"2025-08-17 01:29:32:2932"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-17 01:29:32:2932"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-bhee23du5-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:29:32:2932"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - 500 - 2ms - ::1\u001b[39m","timestamp":"2025-08-17 01:29:32:2932"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 141\u001b[39m","timestamp":"2025-08-17 01:29:32:2932"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 142\u001b[39m","timestamp":"2025-08-17 01:29:32:2932"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 143\u001b[39m","timestamp":"2025-08-17 01:29:32:2932"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 144\u001b[39m","timestamp":"2025-08-17 01:29:32:2932"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 145\u001b[39m","timestamp":"2025-08-17 01:29:32:2932"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/teachers/batches - ::1\u001b[39m","timestamp":"2025-08-17 01:29:32:2932"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-bhee23du5-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:29:32:2932"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/teachers/batches - 500 - 2ms - ::1\u001b[39m","timestamp":"2025-08-17 01:29:32:2932"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/teachers/52nzXbQ3pKemHH9XJ0btX9LhDDh2/students - ::1\u001b[39m","timestamp":"2025-08-17 01:29:32:2932"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-bhee23du5-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:29:32:2932"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/teachers/52nzXbQ3pKemHH9XJ0btX9LhDDh2/students - 500 - 1ms - ::1\u001b[39m","timestamp":"2025-08-17 01:29:32:2932"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/assignments/teacher - ::1\u001b[39m","timestamp":"2025-08-17 01:29:32:2932"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-bhee23du5-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:29:32:2932"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/assignments/teacher - 500 - 1ms - ::1\u001b[39m","timestamp":"2025-08-17 01:29:32:2932"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/submissions/teacher/52nzXbQ3pKemHH9XJ0btX9LhDDh2 - ::1\u001b[39m","timestamp":"2025-08-17 01:29:32:2932"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-bhee23du5-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:29:32:2932"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/submissions/teacher/52nzXbQ3pKemHH9XJ0btX9LhDDh2 - 500 - 1ms - ::1\u001b[39m","timestamp":"2025-08-17 01:29:32:2932"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/teachers/52nzXbQ3pKemHH9XJ0btX9LhDDh2/students - ::1\u001b[39m","timestamp":"2025-08-17 01:29:32:2932"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-bhee23du5-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:29:32:2932"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/teachers/52nzXbQ3pKemHH9XJ0btX9LhDDh2/students - 500 - 0ms - ::1\u001b[39m","timestamp":"2025-08-17 01:29:32:2932"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/teachers/subjects - ::1\u001b[39m","timestamp":"2025-08-17 01:29:32:2932"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-bhee23du5-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:29:32:2932"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/teachers/subjects - 500 - 5ms - ::1\u001b[39m","timestamp":"2025-08-17 01:29:32:2932"}
+{"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError starting server: Unknown constraint error\u001b[39m","timestamp":"2025-08-17 01:31:06:316"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mPort 3000 is in use (single-attempt mode); moving to next candidate if available.\u001b[39m","timestamp":"2025-08-17 01:31:18:3118"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mFailed to bind candidate port 3000: EADDRINUSE\u001b[39m","timestamp":"2025-08-17 01:31:18:3118"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 146\u001b[39m","timestamp":"2025-08-17 01:32:00:320"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-17 01:32:00:320"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-gm1x4bnie-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:32:00:320"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - 500 - 32ms - ::1\u001b[39m","timestamp":"2025-08-17 01:32:00:320"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 147\u001b[39m","timestamp":"2025-08-17 01:32:59:3259"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-17 01:32:59:3259"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mSession ID mismatch for user T001. Expected different session. Enforcing single session.\u001b[39m","timestamp":"2025-08-17 01:33:00:330"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /api/auth/status - 401 - 18ms - ::1\u001b[39m","timestamp":"2025-08-17 01:33:00:330"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 148\u001b[39m","timestamp":"2025-08-17 01:36:17:3617"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/teacher/login - ::1\u001b[39m","timestamp":"2025-08-17 01:36:17:3617"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-n9aoz4dzf-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:36:17:3617"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/teacher/login - 500 - 20ms - ::1\u001b[39m","timestamp":"2025-08-17 01:36:17:3617"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/sync-firebase-password - ::1\u001b[39m","timestamp":"2025-08-17 01:36:18:3618"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-n9aoz4dzf-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:36:18:3618"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/sync-firebase-password - 500 - 1ms - ::1\u001b[39m","timestamp":"2025-08-17 01:36:18:3618"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-17 01:36:18:3618"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-n9aoz4dzf-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:36:18:3618"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - 500 - 1ms - ::1\u001b[39m","timestamp":"2025-08-17 01:36:18:3618"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 149\u001b[39m","timestamp":"2025-08-17 01:36:18:3618"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 150\u001b[39m","timestamp":"2025-08-17 01:36:18:3618"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 151\u001b[39m","timestamp":"2025-08-17 01:36:18:3618"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/teachers/52nzXbQ3pKemHH9XJ0btX9LhDDh2/students - ::1\u001b[39m","timestamp":"2025-08-17 01:36:18:3618"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-n9aoz4dzf-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:36:18:3618"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/teachers/52nzXbQ3pKemHH9XJ0btX9LhDDh2/students - 500 - 0ms - ::1\u001b[39m","timestamp":"2025-08-17 01:36:18:3618"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/assignments/teacher - ::1\u001b[39m","timestamp":"2025-08-17 01:36:18:3618"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-n9aoz4dzf-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:36:18:3618"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/assignments/teacher - 500 - 0ms - ::1\u001b[39m","timestamp":"2025-08-17 01:36:18:3618"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/teachers/batches - ::1\u001b[39m","timestamp":"2025-08-17 01:36:18:3618"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-n9aoz4dzf-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:36:18:3618"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/teachers/batches - 500 - 1ms - ::1\u001b[39m","timestamp":"2025-08-17 01:36:18:3618"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 152\u001b[39m","timestamp":"2025-08-17 01:36:18:3618"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/submissions/teacher/52nzXbQ3pKemHH9XJ0btX9LhDDh2 - ::1\u001b[39m","timestamp":"2025-08-17 01:36:18:3618"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-n9aoz4dzf-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:36:18:3618"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/submissions/teacher/52nzXbQ3pKemHH9XJ0btX9LhDDh2 - 500 - 1ms - ::1\u001b[39m","timestamp":"2025-08-17 01:36:18:3618"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 153\u001b[39m","timestamp":"2025-08-17 01:36:18:3618"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/teachers/52nzXbQ3pKemHH9XJ0btX9LhDDh2/students - ::1\u001b[39m","timestamp":"2025-08-17 01:36:18:3618"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-n9aoz4dzf-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:36:18:3618"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/teachers/52nzXbQ3pKemHH9XJ0btX9LhDDh2/students - 500 - 0ms - ::1\u001b[39m","timestamp":"2025-08-17 01:36:18:3618"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/teachers/subjects - ::1\u001b[39m","timestamp":"2025-08-17 01:36:18:3618"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-n9aoz4dzf-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:36:18:3618"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/teachers/subjects - 500 - 0ms - ::1\u001b[39m","timestamp":"2025-08-17 01:36:18:3618"}
+{"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError starting server: Unknown constraint error\u001b[39m","timestamp":"2025-08-17 01:37:07:377"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mPort 3000 is in use (single-attempt mode); moving to next candidate if available.\u001b[39m","timestamp":"2025-08-17 01:37:18:3718"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mFailed to bind candidate port 3000: EADDRINUSE\u001b[39m","timestamp":"2025-08-17 01:37:18:3718"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 154\u001b[39m","timestamp":"2025-08-17 01:40:08:408"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 155\u001b[39m","timestamp":"2025-08-17 01:40:08:408"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/teachers/batches - ::1\u001b[39m","timestamp":"2025-08-17 01:40:08:408"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-n9aoz4dzf-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:40:08:408"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/teachers/batches - 500 - 22ms - ::1\u001b[39m","timestamp":"2025-08-17 01:40:08:408"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 156\u001b[39m","timestamp":"2025-08-17 01:40:08:408"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-17 01:40:08:408"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-n9aoz4dzf-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:40:08:408"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - 500 - 0ms - ::1\u001b[39m","timestamp":"2025-08-17 01:40:08:408"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/teachers/52nzXbQ3pKemHH9XJ0btX9LhDDh2/students - ::1\u001b[39m","timestamp":"2025-08-17 01:40:08:408"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-n9aoz4dzf-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:40:08:408"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/teachers/52nzXbQ3pKemHH9XJ0btX9LhDDh2/students - 500 - 1ms - ::1\u001b[39m","timestamp":"2025-08-17 01:40:08:408"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 157\u001b[39m","timestamp":"2025-08-17 01:40:08:408"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-17 01:40:08:408"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-n9aoz4dzf-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:40:08:408"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - 500 - 0ms - ::1\u001b[39m","timestamp":"2025-08-17 01:40:08:408"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/teachers/52nzXbQ3pKemHH9XJ0btX9LhDDh2/students - ::1\u001b[39m","timestamp":"2025-08-17 01:40:08:408"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-n9aoz4dzf-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:40:08:408"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/teachers/52nzXbQ3pKemHH9XJ0btX9LhDDh2/students - 500 - 0ms - ::1\u001b[39m","timestamp":"2025-08-17 01:40:08:408"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 158\u001b[39m","timestamp":"2025-08-17 01:40:08:408"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/assignments/teacher - ::1\u001b[39m","timestamp":"2025-08-17 01:40:08:408"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-n9aoz4dzf-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:40:08:408"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/assignments/teacher - 500 - 1ms - ::1\u001b[39m","timestamp":"2025-08-17 01:40:08:408"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 159\u001b[39m","timestamp":"2025-08-17 01:40:08:408"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/submissions/teacher/52nzXbQ3pKemHH9XJ0btX9LhDDh2 - ::1\u001b[39m","timestamp":"2025-08-17 01:40:08:408"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-n9aoz4dzf-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:40:08:408"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/submissions/teacher/52nzXbQ3pKemHH9XJ0btX9LhDDh2 - 500 - 1ms - ::1\u001b[39m","timestamp":"2025-08-17 01:40:08:408"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/teachers/subjects - ::1\u001b[39m","timestamp":"2025-08-17 01:40:08:408"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-n9aoz4dzf-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:40:08:408"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/teachers/subjects - 500 - 0ms - ::1\u001b[39m","timestamp":"2025-08-17 01:40:08:408"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 160\u001b[39m","timestamp":"2025-08-17 01:40:27:4027"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-17 01:40:27:4027"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-n9aoz4dzf-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:40:27:4027"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - 500 - 2ms - ::1\u001b[39m","timestamp":"2025-08-17 01:40:27:4027"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-17 01:40:27:4027"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-n9aoz4dzf-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:40:27:4027"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - 500 - 17ms - ::1\u001b[39m","timestamp":"2025-08-17 01:40:27:4027"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 161\u001b[39m","timestamp":"2025-08-17 01:40:52:4052"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/teacher/login - ::1\u001b[39m","timestamp":"2025-08-17 01:40:52:4052"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-n9aoz4dzf-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:40:52:4052"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/teacher/login - 500 - 1ms - ::1\u001b[39m","timestamp":"2025-08-17 01:40:52:4052"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/sync-firebase-password - ::1\u001b[39m","timestamp":"2025-08-17 01:40:53:4053"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-n9aoz4dzf-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:40:53:4053"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/sync-firebase-password - 500 - 2ms - ::1\u001b[39m","timestamp":"2025-08-17 01:40:53:4053"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-17 01:40:53:4053"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-n9aoz4dzf-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:40:53:4053"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - 500 - 1ms - ::1\u001b[39m","timestamp":"2025-08-17 01:40:53:4053"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 162\u001b[39m","timestamp":"2025-08-17 01:40:53:4053"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 163\u001b[39m","timestamp":"2025-08-17 01:40:53:4053"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/teachers/52nzXbQ3pKemHH9XJ0btX9LhDDh2/students - ::1\u001b[39m","timestamp":"2025-08-17 01:40:53:4053"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-n9aoz4dzf-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:40:53:4053"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/teachers/52nzXbQ3pKemHH9XJ0btX9LhDDh2/students - 500 - 1ms - ::1\u001b[39m","timestamp":"2025-08-17 01:40:53:4053"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 164\u001b[39m","timestamp":"2025-08-17 01:40:53:4053"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/teachers/52nzXbQ3pKemHH9XJ0btX9LhDDh2/students - ::1\u001b[39m","timestamp":"2025-08-17 01:40:53:4053"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-n9aoz4dzf-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:40:53:4053"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/teachers/52nzXbQ3pKemHH9XJ0btX9LhDDh2/students - 500 - 1ms - ::1\u001b[39m","timestamp":"2025-08-17 01:40:53:4053"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/teachers/batches - ::1\u001b[39m","timestamp":"2025-08-17 01:40:53:4053"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-n9aoz4dzf-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:40:53:4053"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/teachers/batches - 500 - 1ms - ::1\u001b[39m","timestamp":"2025-08-17 01:40:53:4053"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 165\u001b[39m","timestamp":"2025-08-17 01:40:53:4053"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/teachers/subjects - ::1\u001b[39m","timestamp":"2025-08-17 01:40:53:4053"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-n9aoz4dzf-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:40:53:4053"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/teachers/subjects - 500 - 0ms - ::1\u001b[39m","timestamp":"2025-08-17 01:40:53:4053"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 166\u001b[39m","timestamp":"2025-08-17 01:40:53:4053"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/assignments/teacher - ::1\u001b[39m","timestamp":"2025-08-17 01:40:53:4053"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-n9aoz4dzf-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:40:53:4053"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/assignments/teacher - 500 - 2ms - ::1\u001b[39m","timestamp":"2025-08-17 01:40:53:4053"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/submissions/teacher/52nzXbQ3pKemHH9XJ0btX9LhDDh2 - ::1\u001b[39m","timestamp":"2025-08-17 01:40:53:4053"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-n9aoz4dzf-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:40:53:4053"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/submissions/teacher/52nzXbQ3pKemHH9XJ0btX9LhDDh2 - 500 - 1ms - ::1\u001b[39m","timestamp":"2025-08-17 01:40:53:4053"}
+{"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError starting server: Unknown constraint error\u001b[39m","timestamp":"2025-08-17 01:42:06:426"}
+{"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError starting server: Unknown constraint error\u001b[39m","timestamp":"2025-08-17 01:42:12:4212"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mPort 3000 is in use (single-attempt mode); moving to next candidate if available.\u001b[39m","timestamp":"2025-08-17 01:42:23:4223"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mFailed to bind candidate port 3000: EADDRINUSE\u001b[39m","timestamp":"2025-08-17 01:42:23:4223"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mPort 3000 is in use (single-attempt mode); moving to next candidate if available.\u001b[39m","timestamp":"2025-08-17 01:42:40:4240"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mFailed to bind candidate port 3000: EADDRINUSE\u001b[39m","timestamp":"2025-08-17 01:42:40:4240"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mPort 3000 is in use (single-attempt mode); moving to next candidate if available.\u001b[39m","timestamp":"2025-08-17 01:42:40:4240"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mFailed to bind candidate port 3000: EADDRINUSE\u001b[39m","timestamp":"2025-08-17 01:42:40:4240"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mPort 3001 is in use (single-attempt mode); moving to next candidate if available.\u001b[39m","timestamp":"2025-08-17 01:42:40:4240"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mFailed to bind candidate port 3001: EADDRINUSE\u001b[39m","timestamp":"2025-08-17 01:42:40:4240"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 167\u001b[39m","timestamp":"2025-08-17 01:44:33:4433"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-17 01:44:33:4433"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-bhee23du5-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:44:33:4433"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - 500 - 14ms - ::1\u001b[39m","timestamp":"2025-08-17 01:44:33:4433"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 168\u001b[39m","timestamp":"2025-08-17 01:47:00:470"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-17 01:47:00:470"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-gm1x4bnie-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:47:00:470"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - 500 - 15ms - ::1\u001b[39m","timestamp":"2025-08-17 01:47:00:470"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 169\u001b[39m","timestamp":"2025-08-17 01:48:00:480"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-17 01:48:00:480"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mSession ID mismatch for user T001. Expected different session. Enforcing single session.\u001b[39m","timestamp":"2025-08-17 01:48:00:480"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /api/auth/status - 401 - 26ms - ::1\u001b[39m","timestamp":"2025-08-17 01:48:00:480"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 170\u001b[39m","timestamp":"2025-08-17 01:50:12:5012"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-17 01:50:12:5012"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-bhee23du5-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:50:12:5012"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - 500 - 20ms - ::1\u001b[39m","timestamp":"2025-08-17 01:50:12:5012"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 171\u001b[39m","timestamp":"2025-08-17 01:50:12:5012"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-17 01:50:12:5012"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-bhee23du5-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:50:12:5012"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - 500 - 1ms - ::1\u001b[39m","timestamp":"2025-08-17 01:50:12:5012"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 172\u001b[39m","timestamp":"2025-08-17 01:50:22:5022"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/teacher/login - ::1\u001b[39m","timestamp":"2025-08-17 01:50:23:5023"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-bhee23du5-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:50:23:5023"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/teacher/login - 500 - 1ms - ::1\u001b[39m","timestamp":"2025-08-17 01:50:23:5023"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/sync-firebase-password - ::1\u001b[39m","timestamp":"2025-08-17 01:50:23:5023"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-bhee23du5-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:50:23:5023"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/sync-firebase-password - 500 - 1ms - ::1\u001b[39m","timestamp":"2025-08-17 01:50:23:5023"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 173\u001b[39m","timestamp":"2025-08-17 01:50:23:5023"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 174\u001b[39m","timestamp":"2025-08-17 01:50:23:5023"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 175\u001b[39m","timestamp":"2025-08-17 01:50:23:5023"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 176\u001b[39m","timestamp":"2025-08-17 01:50:23:5023"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 177\u001b[39m","timestamp":"2025-08-17 01:50:23:5023"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 178\u001b[39m","timestamp":"2025-08-17 01:50:23:5023"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-17 01:50:23:5023"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-bhee23du5-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:50:23:5023"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - 500 - 1ms - ::1\u001b[39m","timestamp":"2025-08-17 01:50:23:5023"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/teachers/subjects - ::1\u001b[39m","timestamp":"2025-08-17 01:50:23:5023"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-bhee23du5-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:50:23:5023"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/teachers/subjects - 500 - 1ms - ::1\u001b[39m","timestamp":"2025-08-17 01:50:23:5023"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/teachers/batches - ::1\u001b[39m","timestamp":"2025-08-17 01:50:23:5023"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-bhee23du5-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:50:23:5023"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/teachers/batches - 500 - 1ms - ::1\u001b[39m","timestamp":"2025-08-17 01:50:23:5023"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/teachers/52nzXbQ3pKemHH9XJ0btX9LhDDh2/students - ::1\u001b[39m","timestamp":"2025-08-17 01:50:23:5023"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-bhee23du5-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:50:23:5023"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/teachers/52nzXbQ3pKemHH9XJ0btX9LhDDh2/students - 500 - 3ms - ::1\u001b[39m","timestamp":"2025-08-17 01:50:23:5023"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/assignments/teacher - ::1\u001b[39m","timestamp":"2025-08-17 01:50:23:5023"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-bhee23du5-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:50:23:5023"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/assignments/teacher - 500 - 2ms - ::1\u001b[39m","timestamp":"2025-08-17 01:50:23:5023"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/submissions/teacher/52nzXbQ3pKemHH9XJ0btX9LhDDh2 - ::1\u001b[39m","timestamp":"2025-08-17 01:50:23:5023"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-bhee23du5-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:50:23:5023"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/submissions/teacher/52nzXbQ3pKemHH9XJ0btX9LhDDh2 - 500 - 3ms - ::1\u001b[39m","timestamp":"2025-08-17 01:50:23:5023"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/teachers/52nzXbQ3pKemHH9XJ0btX9LhDDh2/students - ::1\u001b[39m","timestamp":"2025-08-17 01:50:23:5023"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-bhee23du5-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:50:23:5023"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/teachers/52nzXbQ3pKemHH9XJ0btX9LhDDh2/students - 500 - 0ms - ::1\u001b[39m","timestamp":"2025-08-17 01:50:23:5023"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 179\u001b[39m","timestamp":"2025-08-17 01:50:42:5042"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 180\u001b[39m","timestamp":"2025-08-17 01:50:42:5042"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-17 01:50:42:5042"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-bhee23du5-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:50:42:5042"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - 500 - 14ms - ::1\u001b[39m","timestamp":"2025-08-17 01:50:42:5042"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-17 01:50:42:5042"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-bhee23du5-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:50:42:5042"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - 500 - 0ms - ::1\u001b[39m","timestamp":"2025-08-17 01:50:42:5042"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 181\u001b[39m","timestamp":"2025-08-17 01:51:05:515"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-17 01:51:05:515"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-bhee23du5-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:51:05:515"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - 500 - 3ms - ::1\u001b[39m","timestamp":"2025-08-17 01:51:05:515"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-17 01:51:05:515"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-bhee23du5-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 01:51:05:515"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - 500 - 5ms - ::1\u001b[39m","timestamp":"2025-08-17 01:51:05:515"}
+{"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError starting server: Unknown constraint error\u001b[39m","timestamp":"2025-08-17 01:53:20:5320"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mPort 3000 is in use (single-attempt mode); moving to next candidate if available.\u001b[39m","timestamp":"2025-08-17 01:53:32:5332"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mFailed to bind candidate port 3000: EADDRINUSE\u001b[39m","timestamp":"2025-08-17 01:53:32:5332"}
+{"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError starting server: Unknown constraint error\u001b[39m","timestamp":"2025-08-17 01:57:47:5747"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mPort 3000 is in use (single-attempt mode); moving to next candidate if available.\u001b[39m","timestamp":"2025-08-17 01:57:58:5758"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mFailed to bind candidate port 3000: EADDRINUSE\u001b[39m","timestamp":"2025-08-17 01:57:58:5758"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 182\u001b[39m","timestamp":"2025-08-17 02:03:00:30"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-17 02:03:00:30"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mSession ID mismatch for user T001. Expected different session. Enforcing single session.\u001b[39m","timestamp":"2025-08-17 02:03:00:30"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /api/auth/status - 401 - 22ms - ::1\u001b[39m","timestamp":"2025-08-17 02:03:00:30"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 183\u001b[39m","timestamp":"2025-08-17 02:06:06:66"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-17 02:06:06:66"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-bhee23du5-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 02:06:06:66"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - 500 - 26ms - ::1\u001b[39m","timestamp":"2025-08-17 02:06:06:66"}
+{"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError starting server: Unknown constraint error\u001b[39m","timestamp":"2025-08-17 02:17:46:1746"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mPort 3000 is in use (single-attempt mode); moving to next candidate if available.\u001b[39m","timestamp":"2025-08-17 02:17:58:1758"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mFailed to bind candidate port 3000: EADDRINUSE\u001b[39m","timestamp":"2025-08-17 02:17:58:1758"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 184\u001b[39m","timestamp":"2025-08-17 02:18:00:180"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-17 02:18:00:180"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mSession ID mismatch for user T001. Expected different session. Enforcing single session.\u001b[39m","timestamp":"2025-08-17 02:18:00:180"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /api/auth/status - 401 - 7ms - ::1\u001b[39m","timestamp":"2025-08-17 02:18:00:180"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 185\u001b[39m","timestamp":"2025-08-17 02:21:06:216"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-17 02:21:06:216"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-bhee23du5-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 02:21:06:216"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - 500 - 13ms - ::1\u001b[39m","timestamp":"2025-08-17 02:21:06:216"}
+{"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError starting server: Unknown constraint error\u001b[39m","timestamp":"2025-08-17 02:28:27:2827"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mPort 3000 is in use (single-attempt mode); moving to next candidate if available.\u001b[39m","timestamp":"2025-08-17 02:28:31:2831"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mFailed to bind candidate port 3000: EADDRINUSE\u001b[39m","timestamp":"2025-08-17 02:28:31:2831"}
+{"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError starting server: Unknown constraint error\u001b[39m","timestamp":"2025-08-17 02:30:06:306"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mPort 3000 is in use (single-attempt mode); moving to next candidate if available.\u001b[39m","timestamp":"2025-08-17 02:30:17:3017"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mFailed to bind candidate port 3000: EADDRINUSE\u001b[39m","timestamp":"2025-08-17 02:30:17:3017"}
+{"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError starting server: Unknown constraint error\u001b[39m","timestamp":"2025-08-17 02:30:26:3026"}
+{"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError starting server: Unknown constraint error\u001b[39m","timestamp":"2025-08-17 02:30:31:3031"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mPort 3000 is in use (single-attempt mode); moving to next candidate if available.\u001b[39m","timestamp":"2025-08-17 02:30:42:3042"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mFailed to bind candidate port 3000: EADDRINUSE\u001b[39m","timestamp":"2025-08-17 02:30:42:3042"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mPort 3000 is in use (single-attempt mode); moving to next candidate if available.\u001b[39m","timestamp":"2025-08-17 02:33:17:3317"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mFailed to bind candidate port 3000: EADDRINUSE\u001b[39m","timestamp":"2025-08-17 02:33:17:3317"}
