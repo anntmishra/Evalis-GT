@@ -1,0 +1,14 @@
+server/
+node_modules/
+.env
+.env.local
+.env.development
+.env.production
+*.log
+.DS_Store
+coverage/
+.nyc_output/
+.cache/
+dist/assets/*.map
+src/**/*.test.*
+src/**/*.spec.*

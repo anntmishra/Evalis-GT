@@ -9,4 +9,27 @@ export default defineConfig({
             "@": path.resolve(__dirname, "./src"),
         },
     },
+    build: {
+        outDir: 'dist',
+        assetsDir: 'assets',
+        sourcemap: false,
+        rollupOptions: {
+            output: {
+                manualChunks: {
+                    'react-vendor': ['react', 'react-dom'],
+                    'firebase-vendor': ['firebase/app', 'firebase/auth'],
+                    'ui-vendor': ['lucide-react', '@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu']
+                }
+            }
+        }
+    },
+    base: './',
+    server: {
+        port: 5173,
+        host: true
+    },
+    preview: {
+        port: 4173,
+        host: true
+    }
 });
