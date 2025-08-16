@@ -1,9 +1,10 @@
 const { Sequelize } = require('sequelize');
 const colors = require('colors');
 const dotenv = require('dotenv');
+const path = require('path');
 
-// Load environment variables
-dotenv.config();
+// Load environment variables from root directory
+dotenv.config({ path: path.join(__dirname, '../../.env') });
 
  // NeonDB connection string
 const DATABASE_URL = process.env.DATABASE_URL;

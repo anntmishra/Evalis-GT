@@ -1,5 +1,15 @@
 const jwt = require('jsonwebtoken');
 const { logger } = require('../utils/logger');
+/**
+ * Session Manager
+ * In-memory session tracking is NOT shared across PM2 cluster workers or multiple containers.
+ * This caused false "Session expired" errors when a subsequent HTTP request was handled by a
+ * different worker that did not have the session state in RAM. We now support a non-strict
+ * rehydration mode: if SESSION_STRICT !== 'true' and a JWT verifies but no matching in-memory
+ * session exists, we recreate (rehydrate) a lightweight session record so the user stays logged in.
+ * Set SESSION_STRICT=true if you want the old (strict) behavior that forces re-login on any
+ * missing session state or sessionId mismatch.
+ */
 
 // Session store to track active sessions and prevent conflicts
 class SessionManager {
@@ -168,7 +178,10 @@ const sessionManager = new SessionManager();
 
 // Enhanced token generation with session management
 const generateTokenWithSession = (user, role) => {
-  const userId = user.id || user.username; // Handle both regular users and admin
+  // For admins we prefer the stable username (so downstream middleware that queries by username works)
+  // Previous implementation used numeric id for admins which broke protect middleware (it searched by username)
+  // Keep backward compatibility: students/teachers still use id; admins use username.
+  const userId = role === 'admin' ? user.username : (user.id || user.username);
   const deviceInfo = {
     userAgent: 'server-generated', // This would come from request headers in real implementation
     ip: 'server-generated'
@@ -207,13 +220,42 @@ const validateSession = (req, res, next) => {
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     
-    // Check if session is valid
+    // Check if session is valid (cluster-safe: allow rehydration when missing)
     if (!sessionManager.isValidSession(decoded.id, decoded.sessionId)) {
-      logger.warn(`Invalid session for user ${decoded.id}, token: ${token.substring(0, 10)}...`);
-      return res.status(401).json({ 
-        message: 'Session expired or invalid. Please login again.',
-        code: 'SESSION_INVALID'
-      });
+      const strict = process.env.SESSION_STRICT === 'true';
+      const hasAnySession = sessionManager.activeSessions.has(decoded.id);
+      if (!strict) {
+        // In non-strict mode we assume this is a different cluster worker without the in-memory session.
+        // Rehydrate a lightweight session so downstream auth works.
+        if (!hasAnySession) {
+          sessionManager.activeSessions.set(decoded.id, {
+            sessionId: decoded.sessionId,
+            role: decoded.role,
+            lastActivity: Date.now(),
+            loginTime: (decoded.iat ? decoded.iat * 1000 : Date.now()),
+            deviceInfo: { note: 'rehydrated (cluster)' },
+            isActive: true
+          });
+          // Register token if missing
+          if (!sessionManager.sessionTokens.has(token)) {
+            sessionManager.sessionTokens.set(token, { userId: decoded.id, role: decoded.role, sessionId: decoded.sessionId });
+          }
+          logger.warn(`Session rehydrated for user ${decoded.id} (cluster worker without original state).`);
+        } else {
+          // User has a session but sessionId mismatch => likely a concurrent login; treat as invalid.
+          logger.warn(`Session ID mismatch for user ${decoded.id}. Expected different session. Enforcing single session.`);
+          return res.status(401).json({
+            message: 'Another login detected. Please login again.',
+            code: 'SESSION_CONFLICT'
+          });
+        }
+      } else {
+        logger.warn(`Invalid session for user ${decoded.id} (strict mode), token: ${token.substring(0, 10)}...`);
+        return res.status(401).json({ 
+          message: 'Session expired or invalid. Please login again.',
+          code: 'SESSION_INVALID'
+        });
+      }
     }
 
     // Check if token is still registered

@@ -43,6 +43,15 @@ const Assignment = sequelize.define('Assignment', {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  requiresFileUpload: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
+  allowedFileTypes: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    comment: 'JSON array of allowed file types like ["pdf", "doc", "docx"]'
+  },
   createdAt: {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW,

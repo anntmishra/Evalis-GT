@@ -14,7 +14,7 @@ import {
   CheckCircle,
   Description
 } from '@mui/icons-material';
-import { STUDENT_SUBMISSIONS } from '../constants/universityData';
+import { getStudentSubmissions } from '../api';
 
 interface SubmissionCheckerProps {
   studentIds: string[];
@@ -38,27 +38,43 @@ const SubmissionChecker: React.FC<SubmissionCheckerProps> = ({
   const [submissions, setSubmissions] = useState<Submission[]>([]);
 
   useEffect(() => {
-    // Get submissions for the selected students, exam type, and subject
-    const filteredSubmissions: Submission[] = [];
-    
-    studentIds.forEach(studentId => {
-      const studentSubmissions = STUDENT_SUBMISSIONS[studentId] || [];
-      const submission = studentSubmissions.find(
-        sub => sub.examType === examType && sub.subjectId === subjectId
-      );
-      
-      if (submission) {
-        filteredSubmissions.push({
-          studentId,
-          studentName: studentId, // Usually you'd fetch the name from a students list
-          submissionText: submission.submissionText,
-          submissionDate: submission.submissionDate,
-          plagiarismScore: submission.plagiarismScore || 0
-        });
+    const fetchSubmissions = async () => {
+      try {
+        const filteredSubmissions: Submission[] = [];
+        
+        // Fetch submissions for each student
+        for (const studentId of studentIds) {
+          try {
+            const response = await getStudentSubmissions(studentId);
+            const studentSubmissions = response.data || [];
+            
+            const submission = studentSubmissions.find(
+              (sub: any) => sub.examType === examType && sub.subjectId === subjectId
+            );
+            
+            if (submission) {
+              filteredSubmissions.push({
+                studentId,
+                studentName: submission.studentName || studentId,
+                submissionText: submission.submissionText,
+                submissionDate: submission.submissionDate,
+                plagiarismScore: submission.plagiarismScore || 0
+              });
+            }
+          } catch (error) {
+            console.error(`Error fetching submissions for student ${studentId}:`, error);
+          }
+        }
+        
+        setSubmissions(filteredSubmissions);
+      } catch (error) {
+        console.error('Error fetching submissions:', error);
       }
-    });
-    
-    setSubmissions(filteredSubmissions);
+    };
+
+    if (studentIds.length > 0) {
+      fetchSubmissions();
+    }
   }, [studentIds, examType, subjectId]);
 
   const getPlagiarismColor = (score: number) => {

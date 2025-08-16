@@ -2,7 +2,24 @@ import axios from 'axios';
 import { Student } from '../types/university';
 import config from '../config/environment';
 
-const API_URL = config.API_ENDPOINTS.STUDENTS.BASE;
+// Get the appropriate API base URL based on user role
+const getApiBaseUrl = () => {
+  try {
+    const currentUser = localStorage.getItem(config.AUTH.CURRENT_USER_KEY);
+    if (currentUser) {
+      const userData = JSON.parse(currentUser);
+      if (userData.role === 'admin') {
+        return config.ADMIN_API_BASE_URL;
+      }
+    }
+  } catch (e) {
+    // Fallback to regular API
+  }
+  return config.API_BASE_URL;
+};
+
+const getApiUrl = () => `${getApiBaseUrl()}/students`;
+const getBatchApiUrl = (batchId: string) => `${getApiBaseUrl()}/batches/${batchId}/students`;
 
 // Get token from storage
 const getToken = () => {
@@ -148,6 +165,7 @@ const authConfig = () => {
 export const getAllStudents = async () => {
   try {
     console.log('Fetching all students from API');
+    const API_URL = getApiUrl();
     const response = await axios.get(API_URL, authConfig());
     
     // Log response structure to debug
@@ -180,14 +198,9 @@ export const getAllStudents = async () => {
 export const getStudentsByBatch = async (batchId: string) => {
   try {
     console.log(`Fetching students for batch: ${batchId}`);
-    const response = await axios.get(`${config.API_ENDPOINTS.BATCHES}/${batchId}/students`, authConfig());
-    
-    // Log response structure to debug
-    console.log('getStudentsByBatch response structure:', {
-      hasData: !!response.data,
-      isArray: Array.isArray(response.data),
-      hasStudents: response.data && response.data.students !== undefined,
-    });
+    const API_URL = getBatchApiUrl(batchId);
+    console.log('Fetching students from:', API_URL);
+    const response = await axios.get(API_URL, authConfig());
     
     // Handle both response formats: array or {students: array}
     const students = Array.isArray(response.data) 
@@ -198,12 +211,52 @@ export const getStudentsByBatch = async (batchId: string) => {
     return students;
   } catch (error: any) {
     console.error(`Error in getStudentsByBatch for batch ${batchId}:`, error);
-    // Add more context to the error
-    if (error.response) {
-      console.error('Server responded with:', error.response.status, error.response.data);
-    } else if (error.request) {
-      console.error('No response from server. Network issue?', error.request);
+    throw error;
+  }
+};
+
+// Get student assignments
+export const getStudentAssignments = async (studentId?: string) => {
+  try {
+    // For students accessing their own assignments, use the /assignments/student endpoint
+    // For admins accessing specific student assignments, use the /students/:id/assignments endpoint
+    let API_URL;
+    
+    if (studentId) {
+      // Admin access - use the parameter-based endpoint
+      API_URL = `${getApiBaseUrl()}/students/${studentId}/assignments`;
+    } else {
+      // Student access - use the user-based endpoint
+      API_URL = `${getApiBaseUrl()}/assignments/student`;
     }
+    
+    console.log('Fetching student assignments from:', API_URL);
+    const response = await axios.get(API_URL, authConfig());
+    return response.data;
+  } catch (error: any) {
+    console.error('Error fetching student assignments:', error);
+    throw error;
+  }
+};
+
+// Get student subjects
+export const getStudentSubjects = async (studentId?: string) => {
+  try {
+    let API_URL;
+    
+    if (studentId) {
+      // Admin/Teacher access - use the parameter-based endpoint
+      API_URL = `${getApiBaseUrl()}/students/${studentId}/subjects`;
+    } else {
+      // Student access - use the user-based endpoint
+      API_URL = `${getApiBaseUrl()}/students/subjects`;
+    }
+    
+    console.log('Fetching student subjects from:', API_URL);
+    const response = await axios.get(API_URL, authConfig());
+    return response.data;
+  } catch (error: any) {
+    console.error('Error fetching student subjects:', error);
     throw error;
   }
 };
@@ -211,6 +264,7 @@ export const getStudentsByBatch = async (batchId: string) => {
 // Get student by ID
 export const getStudentById = async (id: string) => {
   try {
+    const API_URL = getApiUrl();
     const response = await axios.get(`${API_URL}/${id}`, authConfig());
     return response.data;
   } catch (error) {
@@ -221,7 +275,9 @@ export const getStudentById = async (id: string) => {
 // Create student
 export const createStudent = async (student: Partial<Student>) => {
   try {
+    const API_URL = getApiUrl();
     console.log('Creating student with data:', JSON.stringify(student));
+    console.log('Creating student at:', API_URL);
     const response = await axios.post(API_URL, student, authConfig());
     console.log('Create student response:', response.data);
     return response.data;
@@ -234,6 +290,8 @@ export const createStudent = async (student: Partial<Student>) => {
 // Update student
 export const updateStudent = async (id: string, student: Partial<Student>) => {
   try {
+    const API_URL = getApiUrl();
+    console.log('Updating student at:', `${API_URL}/${id}`);
     const response = await axios.put(`${API_URL}/${id}`, student, authConfig());
     return response.data;
   } catch (error: any) {
@@ -244,9 +302,45 @@ export const updateStudent = async (id: string, student: Partial<Student>) => {
 // Delete student
 export const deleteStudent = async (id: string) => {
   try {
+    const API_URL = getApiUrl();
     const response = await axios.delete(`${API_URL}/${id}`, authConfig());
     return response.data;
   } catch (error: any) {
+    throw error;
+  }
+};
+
+// Submit assignment
+export const submitAssignment = async (assignmentId: string, submissionData: {
+  submissionText: string;
+  file?: File;
+}) => {
+  try {
+    console.log('Submitting assignment:', assignmentId);
+    
+    // Create FormData to handle file upload
+    const formData = new FormData();
+    formData.append('submissionText', submissionData.submissionText);
+    
+    if (submissionData.file) {
+      formData.append('file', submissionData.file);
+    }
+
+    const response = await axios.post(
+      `${config.API_BASE_URL}/submissions/assignment/${assignmentId}`,
+      formData,
+      {
+        ...authConfig(),
+        headers: {
+          ...authConfig().headers,
+          'Content-Type': 'multipart/form-data',
+        }
+      }
+    );
+    console.log('Assignment submitted successfully');
+    return response.data;
+  } catch (error: any) {
+    console.error('Error submitting assignment:', error);
     throw error;
   }
 };
@@ -257,5 +351,6 @@ export default {
   getStudentById,
   createStudent,
   updateStudent,
-  deleteStudent
+  deleteStudent,
+  submitAssignment
 }; 

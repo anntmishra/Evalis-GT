@@ -38,3 +38,1563 @@
 2025-08-14 00:10:37 +05:30: [33mDatabase configuration:[39m
 2025-08-14 00:10:41 +05:30: [33mDatabase configuration:[39m
 2025-08-14 00:10:46 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:00:00 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:00:00 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:00:00 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:00:00 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:00:00 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:00:00 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:00:00 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:00:00 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:00:00 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:00:01 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:00:01 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:00:01 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:00:01 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:00:01 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:00:01 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:00:01 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:00:00 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:00:01 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:00:01 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:00:01 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:00:01 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:00:01 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:00:01 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:00:01 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:00:00 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:00:01 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:00:01 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:00:01 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:00:01 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:00:01 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:00:01 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:00:01 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:00:00 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:00:01 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:00:01 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:00:01 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:00:01 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:00:01 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:00:01 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:00:01 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:00:00 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:00:01 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:00:01 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:00:01 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:00:01 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:00:01 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:00:01 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:00:01 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:00:00 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:00:01 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:00:01 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:00:01 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:00:01 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:00:01 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:00:01 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:00:01 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:00:00 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:00:01 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:00:01 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:00:01 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:00:01 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:00:01 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:00:01 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:00:01 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:00:00 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:00:01 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:00:01 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:00:01 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:00:01 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:00:01 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:00:01 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:00:01 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:00:01 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:00:01 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:00:01 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:00:01 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:00:02 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:00:02 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:00:02 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:00:02 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:00:02 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:00:02 +05:30: Initializing database models...
+2025-08-14 02:00:03 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:00:03 +05:30: Initializing database models...
+2025-08-14 02:00:03 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:00:03 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:00:03 +05:30: Initializing database models...
+2025-08-14 02:00:03 +05:30: Initializing database models...
+2025-08-14 02:00:03 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:00:03 +05:30: Initializing database models...
+2025-08-14 02:00:03 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:00:03 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:00:03 +05:30: Initializing database models...
+2025-08-14 02:00:03 +05:30: Initializing database models...
+2025-08-14 02:00:03 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:00:03 +05:30: Initializing database models...
+2025-08-14 02:00:06 +05:30: 2025-08-14 02:00:06:06 [31m[31merror[31m[39m: [31m[31mError starting server: Unknown constraint error[31m[39m
+2025-08-14 02:00:06 +05:30: 2025-08-14 02:00:06:06 [31m[31merror[31m[39m: [31m[31mError starting server: Unknown constraint error[31m[39m
+2025-08-14 02:00:06 +05:30: 2025-08-14 02:00:06:06 [31m[31merror[31m[39m: [31m[31mError starting server: Unknown constraint error[31m[39m
+2025-08-14 02:00:06 +05:30: 2025-08-14 02:00:06:06 [31m[31merror[31m[39m: [31m[31mError starting server: Unknown constraint error[31m[39m
+2025-08-14 02:00:06 +05:30: 2025-08-14 02:00:06:06 [31m[31merror[31m[39m: [31m[31mError starting server: Unknown constraint error[31m[39m
+2025-08-14 02:00:06 +05:30: 2025-08-14 02:00:06:06 [31m[31merror[31m[39m: [31m[31mError starting server: Unknown constraint error[31m[39m
+2025-08-14 02:00:06 +05:30: 2025-08-14 02:00:06:06 [31m[31merror[31m[39m: [31m[31mError starting server: Unknown constraint error[31m[39m
+2025-08-14 02:00:10 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:00:10 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:00:10 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:00:10 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:00:10 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:00:10 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:00:10 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:00:10 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:00:11 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:00:11 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:00:11 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:00:11 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:00:11 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:00:11 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:00:11 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:00:10 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:00:11 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:00:11 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:00:11 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:00:11 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:00:11 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:00:11 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:00:11 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:00:10 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:00:11 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:00:11 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:00:11 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:00:11 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:00:11 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:00:11 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:00:11 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:00:10 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:00:11 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:00:11 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:00:11 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:00:11 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:00:11 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:00:11 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:00:11 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:00:10 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:00:11 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:00:11 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:00:11 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:00:11 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:00:11 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:00:11 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:00:11 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:00:10 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:00:11 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:00:11 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:00:11 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:00:11 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:00:11 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:00:11 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:00:11 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:00:10 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:00:11 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:00:11 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:00:11 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:00:11 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:00:11 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:00:11 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:00:11 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:00:11 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:00:11 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:00:11 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:00:11 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:00:11 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:00:11 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:00:12 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:00:12 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:00:12 +05:30: Initializing database models...
+2025-08-14 02:00:12 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:00:12 +05:30: Initializing database models...
+2025-08-14 02:00:12 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:00:12 +05:30: Initializing database models...
+2025-08-14 02:00:12 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:00:12 +05:30: Initializing database models...
+2025-08-14 02:00:12 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:00:12 +05:30: Initializing database models...
+2025-08-14 02:00:12 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:00:12 +05:30: Initializing database models...
+2025-08-14 02:00:12 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:00:12 +05:30: Initializing database models...
+2025-08-14 02:00:14 +05:30: 2025-08-14 02:00:14:014 [31m[31merror[31m[39m: [31m[31mError starting server: Unknown constraint error[31m[39m
+2025-08-14 02:00:14 +05:30: 2025-08-14 02:00:14:014 [31m[31merror[31m[39m: [31m[31mError starting server: Unknown constraint error[31m[39m
+2025-08-14 02:00:14 +05:30: 2025-08-14 02:00:14:014 [31m[31merror[31m[39m: [31m[31mError starting server: Unknown constraint error[31m[39m
+2025-08-14 02:00:14 +05:30: 2025-08-14 02:00:14:014 [31m[31merror[31m[39m: [31m[31mError starting server: Unknown constraint error[31m[39m
+2025-08-14 02:00:16 +05:30: Database models synchronized successfully
+2025-08-14 02:00:18 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:00:18 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:00:18 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:00:18 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:00:18 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:00:19 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:00:19 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:00:19 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:00:19 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:00:19 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:00:19 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:00:19 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:00:18 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:00:19 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:00:19 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:00:19 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:00:19 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:00:19 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:00:19 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:00:19 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:00:18 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:00:19 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:00:19 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:00:19 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:00:19 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:00:19 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:00:19 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:00:19 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:00:18 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:00:19 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:00:19 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:00:19 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:00:19 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:00:19 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:00:19 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:00:19 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:00:19 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:00:19 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:00:19 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:00:19 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:00:20 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:00:20 +05:30: Initializing database models...
+2025-08-14 02:00:20 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:00:20 +05:30: Initializing database models...
+2025-08-14 02:00:20 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:00:20 +05:30: Initializing database models...
+2025-08-14 02:00:20 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:00:20 +05:30: Initializing database models...
+2025-08-14 02:00:20 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:00:20 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:00:20 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:00:20 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:00:20 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:00:20 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:00:20 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:00:20 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:00:20 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:00:21 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:00:22 +05:30: 2025-08-14 02:00:22:022 [31m[31merror[31m[39m: [31m[31mError starting server: Unknown constraint error[31m[39m
+2025-08-14 02:00:22 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:00:22 +05:30: Initializing database models...
+2025-08-14 02:00:23 +05:30: 2025-08-14 02:00:23:023 [31m[31merror[31m[39m: [31m[31mError starting server: Cannot read properties of null (reading '1')[31m[39m
+2025-08-14 02:00:24 +05:30: Database models synchronized successfully
+2025-08-14 02:00:25 +05:30: Database models synchronized successfully
+2025-08-14 02:00:25 +05:30: 2025-08-14 02:00:25:025 [31m[31merror[31m[39m: [31m[31mError starting server: cache lookup failed for attribute 1 of relation 685571[31m[39m
+2025-08-14 02:00:26 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:00:26 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:00:27 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:00:27 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:00:27 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:00:27 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:00:27 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:00:27 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:00:27 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:00:27 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:00:27 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:00:27 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:00:27 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:00:27 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:00:27 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:00:27 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:00:27 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:00:27 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:00:28 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:00:28 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:00:28 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:00:28 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:00:28 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:00:28 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:00:28 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:00:28 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:00:28 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:00:28 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:00:28 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:00:29 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:00:29 +05:30: Initializing database models...
+2025-08-14 02:00:29 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:00:29 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:00:29 +05:30: Initializing database models...
+2025-08-14 02:00:29 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:00:29 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:00:29 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:00:29 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:00:29 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:00:29 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:00:29 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:00:29 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:00:29 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:00:29 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:00:29 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:00:29 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:00:29 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:00:29 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:00:29 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:00:29 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:00:29 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:00:29 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:00:30 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:00:30 +05:30: Initializing database models...
+2025-08-14 02:00:30 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:00:30 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:00:31 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:00:31 +05:30: Initializing database models...
+2025-08-14 02:00:31 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:00:31 +05:30: Initializing database models...
+2025-08-14 02:00:32 +05:30: 2025-08-14 02:00:32:032 [31m[31merror[31m[39m: [31m[31mError starting server: Unknown constraint error[31m[39m
+2025-08-14 02:00:32 +05:30: Database models synchronized successfully
+2025-08-14 02:00:32 +05:30: Database models synchronized successfully
+2025-08-14 02:00:34 +05:30: Database models synchronized successfully
+2025-08-14 02:00:35 +05:30: 2025-08-14 02:00:35:035 [31m[31merror[31m[39m: [31m[31mError starting server: Unknown constraint error[31m[39m
+2025-08-14 02:00:36 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:00:36 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:00:36 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:00:36 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:00:36 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:00:36 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:00:36 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:00:36 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:00:36 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:00:36 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:00:36 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:00:36 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:00:36 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:00:36 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:00:36 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:00:36 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:00:36 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:00:36 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:00:37 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:00:37 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:00:37 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:00:37 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:00:37 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:00:37 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:00:37 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:00:37 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:00:37 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:00:37 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:00:37 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:00:37 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:00:38 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:00:38 +05:30: Initializing database models...
+2025-08-14 02:00:38 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:00:38 +05:30: Initializing database models...
+2025-08-14 02:00:38 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:00:39 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:00:39 +05:30: Initializing database models...
+2025-08-14 02:00:38 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:00:39 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:00:39 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:00:39 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:00:39 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:00:39 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:00:39 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:00:39 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:00:39 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:00:39 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:00:39 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:00:39 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:00:39 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:00:39 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:00:39 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:00:39 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:00:39 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:00:39 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:00:40 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:00:40 +05:30: 2025-08-14 02:00:40:040 [31m[31merror[31m[39m: [31m[31mError starting server: Unknown constraint error[31m[39m
+2025-08-14 02:00:40 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:00:40 +05:30: Initializing database models...
+2025-08-14 02:00:40 +05:30: Database models synchronized successfully
+2025-08-14 02:00:41 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:00:41 +05:30: Initializing database models...
+2025-08-14 02:00:41 +05:30: 2025-08-14 02:00:41:041 [31m[31merror[31m[39m: [31m[31mError starting server: Unknown constraint error[31m[39m
+2025-08-14 02:00:42 +05:30: Database models synchronized successfully
+2025-08-14 02:00:44 +05:30: 2025-08-14 02:00:44:044 [31m[31merror[31m[39m: [31m[31mError starting server: Unknown constraint error[31m[39m
+2025-08-14 02:00:44 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:00:45 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:00:44 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:00:45 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:00:45 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:00:45 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:00:45 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:00:45 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:00:45 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:00:45 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:00:45 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:00:45 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:00:45 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:00:45 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:00:45 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:00:45 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:00:45 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:00:45 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:00:45 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:00:45 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:00:45 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:00:45 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:00:45 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:00:45 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:00:45 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:00:45 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:00:45 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:00:45 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:00:45 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:00:46 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:00:46 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:00:46 +05:30: Initializing database models...
+2025-08-14 02:00:46 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:00:46 +05:30: Initializing database models...
+2025-08-14 02:00:47 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:00:47 +05:30: Initializing database models...
+2025-08-14 02:00:47 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:00:47 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:00:47 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:00:47 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:00:47 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:00:47 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:00:47 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:00:47 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:00:47 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:00:48 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:00:49 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:00:49 +05:30: Initializing database models...
+2025-08-14 02:00:50 +05:30: Database models synchronized successfully
+2025-08-14 02:00:50 +05:30: 2025-08-14 02:00:50:050 [31m[31merror[31m[39m: [31m[31mError starting server: cache lookup failed for attribute 1 of relation 694872[31m[39m
+2025-08-14 02:00:50 +05:30: Database models synchronized successfully
+2025-08-14 02:00:52 +05:30: Database models synchronized successfully
+2025-08-14 02:00:52 +05:30: 2025-08-14 02:00:52:052 [31m[31merror[31m[39m: [31m[31mError starting server: Unknown constraint error[31m[39m
+2025-08-14 02:00:54 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:00:54 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:00:54 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:00:54 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:00:54 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:00:54 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:00:54 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:00:54 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:00:54 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:00:54 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:00:54 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:00:54 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:00:54 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:00:54 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:00:54 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:00:54 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:00:54 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:00:54 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:00:54 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:00:54 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:00:54 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:00:54 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:00:54 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:00:54 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:00:54 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:00:54 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:00:55 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:00:55 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:00:55 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:00:55 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:00:56 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:00:56 +05:30: Initializing database models...
+2025-08-14 02:00:56 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:00:56 +05:30: Initializing database models...
+2025-08-14 02:00:56 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:00:56 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:00:56 +05:30: Initializing database models...
+2025-08-14 02:00:56 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:00:56 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:00:56 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:00:56 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:00:56 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:00:56 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:00:56 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:00:56 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:00:57 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:00:57 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:00:57 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:00:57 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:00:57 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:00:57 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:00:57 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:00:57 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:00:57 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:00:57 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:00:57 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:00:58 +05:30: 2025-08-14 02:00:58:058 [31m[31merror[31m[39m: [31m[31mError starting server: Unknown constraint error[31m[39m
+2025-08-14 02:00:58 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:00:58 +05:30: Initializing database models...
+2025-08-14 02:00:58 +05:30: 2025-08-14 02:00:58:058 [31m[31merror[31m[39m: [31m[31mError starting server: Unknown constraint error[31m[39m
+2025-08-14 02:00:58 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:00:58 +05:30: Initializing database models...
+2025-08-14 02:00:58 +05:30: Database models synchronized successfully
+2025-08-14 02:01:01 +05:30: Database models synchronized successfully
+2025-08-14 02:01:02 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:01:02 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:01:02 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:01:02 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:01:02 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:01:02 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:01:02 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:01:02 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:01:02 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:01:02 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:01:02 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:01:02 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:01:02 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:01:02 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:01:02 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:01:02 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:01:02 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:01:02 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:01:03 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:01:03 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:01:03 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:01:03 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:01:03 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:01:03 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:01:03 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:01:03 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:01:03 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:01:03 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:01:03 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:01:03 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:01:04 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:01:04 +05:30: Initializing database models...
+2025-08-14 02:01:04 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:01:04 +05:30: Initializing database models...
+2025-08-14 02:01:05 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:01:05 +05:30: Initializing database models...
+2025-08-14 02:01:06 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:01:06 +05:30: 2025-08-14 02:01:06:16 [31m[31merror[31m[39m: [31m[31mError starting server: Unknown constraint error[31m[39m
+2025-08-14 02:01:06 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:01:06 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:01:06 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:01:06 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:01:06 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:01:06 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:01:06 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:01:07 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:01:07 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:01:08 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:01:08 +05:30: Initializing database models...
+2025-08-14 02:01:09 +05:30: Database models synchronized successfully
+2025-08-14 02:01:10 +05:30: Database models synchronized successfully
+2025-08-14 02:01:10 +05:30: 2025-08-14 02:01:10:110 [31m[31merror[31m[39m: [31m[31mError starting server: Unknown constraint error[31m[39m
+2025-08-14 02:01:11 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:01:11 +05:30: Database models synchronized successfully
+2025-08-14 02:01:11 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:01:11 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:01:11 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:01:11 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:01:11 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:01:11 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:01:11 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:01:11 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:01:11 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:01:13 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:01:13 +05:30: Initializing database models...
+2025-08-14 02:01:13 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:01:13 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:01:13 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:01:13 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:01:13 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:01:13 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:01:13 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:01:13 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:01:13 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:01:14 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:01:14 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:01:14 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:01:14 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:01:14 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:01:14 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:01:14 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:01:14 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:01:14 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:01:14 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:01:15 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:01:15 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:01:15 +05:30: Initializing database models...
+2025-08-14 02:01:15 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:01:15 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:01:15 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:01:15 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:01:15 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:01:15 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:01:15 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:01:15 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:01:15 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:01:15 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:01:15 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:01:15 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:01:15 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:01:15 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:01:15 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:01:15 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:01:15 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:01:15 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:01:15 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:01:16 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:01:16 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:01:16 +05:30: Initializing database models...
+2025-08-14 02:01:16 +05:30: Database models synchronized successfully
+2025-08-14 02:01:16 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:01:16 +05:30: Initializing database models...
+2025-08-14 02:01:17 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:01:17 +05:30: Initializing database models...
+2025-08-14 02:01:20 +05:30: 2025-08-14 02:01:20:120 [31m[31merror[31m[39m: [31m[31mError starting server: Unknown constraint error[31m[39m
+2025-08-14 02:01:20 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:01:20 +05:30: Database models synchronized successfully
+2025-08-14 02:01:20 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:01:20 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:01:20 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:01:20 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:01:20 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:01:20 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:01:20 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:01:20 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:01:21 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:01:22 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:01:22 +05:30: Initializing database models...
+2025-08-14 02:01:22 +05:30: 2025-08-14 02:01:22:122 [31m[31merror[31m[39m: [31m[31mError starting server: Unknown constraint error[31m[39m
+2025-08-14 02:01:24 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:01:24 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:01:24 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:01:24 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:01:24 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:01:24 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:01:24 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:01:24 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:01:24 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:01:24 +05:30: Database models synchronized successfully
+2025-08-14 02:01:25 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:01:25 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:01:25 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:01:25 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:01:25 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:01:25 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:01:25 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:01:25 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:01:25 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:01:25 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:01:25 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:01:26 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:01:26 +05:30: Initializing database models...
+2025-08-14 02:01:26 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:01:26 +05:30: Initializing database models...
+2025-08-14 02:01:26 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:01:26 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:01:26 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:01:26 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:01:26 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:01:26 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:01:26 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:01:26 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:01:27 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:01:27 +05:30: Database models synchronized successfully
+2025-08-14 02:01:27 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:01:28 +05:30: Database models synchronized successfully
+2025-08-14 02:01:28 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:01:28 +05:30: Initializing database models...
+2025-08-14 02:01:28 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:01:28 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:01:29 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:01:29 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:01:29 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:01:29 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:01:29 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:01:29 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:01:29 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:01:29 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:01:30 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:01:30 +05:30: Initializing database models...
+2025-08-14 02:01:31 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:01:31 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:01:31 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:01:31 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:01:31 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:01:31 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:01:31 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:01:31 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:01:31 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:01:32 +05:30: 2025-08-14 02:01:32:132 [31m[31merror[31m[39m: [31m[31mError starting server: Unknown constraint error[31m[39m
+2025-08-14 02:01:32 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:01:32 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:01:32 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:01:32 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:01:32 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:01:32 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:01:32 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:01:32 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:01:32 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:01:32 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:01:33 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:01:33 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:01:33 +05:30: Initializing database models...
+2025-08-14 02:01:34 +05:30: Database models synchronized successfully
+2025-08-14 02:01:34 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:01:34 +05:30: Initializing database models...
+2025-08-14 02:01:36 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:01:36 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:01:36 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:01:36 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:01:36 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:01:36 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:01:36 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:01:36 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:01:36 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:01:37 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:01:38 +05:30: Database models synchronized successfully
+2025-08-14 02:01:38 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:01:38 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:01:38 +05:30: Initializing database models...
+2025-08-14 02:01:38 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:01:38 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:01:38 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:01:38 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:01:38 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:01:38 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:01:38 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:01:38 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:01:39 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:01:40 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:01:40 +05:30: Initializing database models...
+2025-08-14 02:01:40 +05:30: Database models synchronized successfully
+2025-08-14 02:01:42 +05:30: Database models synchronized successfully
+2025-08-14 02:01:42 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:01:42 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:01:42 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:01:42 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:01:42 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:01:42 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:01:42 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:01:42 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:01:42 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:01:43 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:01:44 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:01:44 +05:30: Initializing database models...
+2025-08-14 02:01:44 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:01:44 +05:30: Database models synchronized successfully
+2025-08-14 02:01:44 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:01:44 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:01:44 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:01:44 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:01:44 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:01:44 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:01:44 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:01:44 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:01:45 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:01:45 +05:30: Database models synchronized successfully
+2025-08-14 02:01:46 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:01:46 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:01:46 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:01:46 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:01:46 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:01:46 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:01:46 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:01:46 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:01:46 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:01:46 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:01:46 +05:30: Initializing database models...
+2025-08-14 02:01:47 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:01:48 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:01:48 +05:30: Initializing database models...
+2025-08-14 02:01:49 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:01:49 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:01:49 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:01:49 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:01:49 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:01:49 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:01:49 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:01:49 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:01:49 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:01:50 +05:30: Database models synchronized successfully
+2025-08-14 02:01:50 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:01:50 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:01:50 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:01:50 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:01:50 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:01:50 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:01:50 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:01:50 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:01:50 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:01:50 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:01:51 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:01:51 +05:30: Initializing database models...
+2025-08-14 02:01:51 +05:30: Database models synchronized successfully
+2025-08-14 02:01:51 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:01:52 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:01:52 +05:30: Initializing database models...
+2025-08-14 02:01:54 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:01:54 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:01:54 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:01:54 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:01:54 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:01:54 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:01:54 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:01:54 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:01:54 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:01:55 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:01:55 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:01:55 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:01:56 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:01:56 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:01:56 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:01:56 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:01:56 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:01:56 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:01:56 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:01:56 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:01:56 +05:30: Initializing database models...
+2025-08-14 02:01:56 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:01:57 +05:30: Database models synchronized successfully
+2025-08-14 02:01:57 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:01:57 +05:30: Initializing database models...
+2025-08-14 02:01:58 +05:30: Database models synchronized successfully
+2025-08-14 02:02:00 +05:30: Database models synchronized successfully
+2025-08-14 02:02:01 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:02:01 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:02:01 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:02:01 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:02:01 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:02:01 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:02:01 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:02:01 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:02:01 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:02:02 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:02:02 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:02:02 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:02:02 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:02:02 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:02:02 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:02:02 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:02:02 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:02:02 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:02:02 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:02:02 +05:30: Database models synchronized successfully
+2025-08-14 02:02:03 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:02:03 +05:30: Initializing database models...
+2025-08-14 02:02:03 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:02:04 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:02:04 +05:30: Initializing database models...
+2025-08-14 02:02:04 +05:30: Database models synchronized successfully
+2025-08-14 02:02:05 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:02:05 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:02:05 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:02:05 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:02:05 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:02:05 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:02:05 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:02:05 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:02:05 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:02:05 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:02:06 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:02:06 +05:30: Initializing database models...
+2025-08-14 02:02:07 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:02:07 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:02:07 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:02:07 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:02:07 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:02:07 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:02:07 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:02:07 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:02:07 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:02:08 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:02:08 +05:30: Database models synchronized successfully
+2025-08-14 02:02:09 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:02:09 +05:30: Initializing database models...
+2025-08-14 02:02:09 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:02:09 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:02:09 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:02:09 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:02:09 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:02:09 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:02:09 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:02:09 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:02:09 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:02:09 +05:30: Database models synchronized successfully
+2025-08-14 02:02:10 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:02:11 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:02:11 +05:30: Initializing database models...
+2025-08-14 02:02:12 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:02:12 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:02:12 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:02:12 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:02:12 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:02:12 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:02:12 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:02:12 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:02:12 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:02:13 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:02:13 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:02:13 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:02:14 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:02:14 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:02:14 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:02:14 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:02:14 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:02:14 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:02:14 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:02:14 +05:30: Database models synchronized successfully
+2025-08-14 02:02:14 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:02:14 +05:30: Initializing database models...
+2025-08-14 02:02:14 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:02:15 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:02:15 +05:30: Initializing database models...
+2025-08-14 02:02:15 +05:30: Database models synchronized successfully
+2025-08-14 02:02:18 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:02:18 +05:30: Database models synchronized successfully
+2025-08-14 02:02:18 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:02:18 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:02:18 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:02:18 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:02:18 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:02:18 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:02:18 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:02:18 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:02:19 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:02:20 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:02:20 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:02:20 +05:30: Initializing database models...
+2025-08-14 02:02:20 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:02:20 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:02:20 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:02:20 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:02:20 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:02:20 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:02:20 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:02:20 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:02:20 +05:30: Database models synchronized successfully
+2025-08-14 02:02:20 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:02:21 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:02:21 +05:30: Initializing database models...
+2025-08-14 02:02:22 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:02:22 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:02:22 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:02:22 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:02:22 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:02:22 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:02:22 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:02:22 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:02:22 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:02:23 +05:30: Database models synchronized successfully
+2025-08-14 02:02:23 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:02:24 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:02:24 +05:30: Initializing database models...
+2025-08-14 02:02:24 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:02:24 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:02:24 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:02:24 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:02:24 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:02:24 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:02:24 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:02:24 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:02:24 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:02:25 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:02:26 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:02:26 +05:30: Initializing database models...
+2025-08-14 02:02:26 +05:30: Database models synchronized successfully
+2025-08-14 02:02:27 +05:30: Database models synchronized successfully
+2025-08-14 02:02:27 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:02:27 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:02:27 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:02:27 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:02:27 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:02:27 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:02:27 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:02:27 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:02:27 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:02:28 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:02:29 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:02:29 +05:30: Initializing database models...
+2025-08-14 02:02:31 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:02:31 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:02:31 +05:30: Database models synchronized successfully
+2025-08-14 02:02:31 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:02:31 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:02:31 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:02:31 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:02:31 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:02:31 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:02:31 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:02:31 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:02:31 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:02:31 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:02:31 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:02:31 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:02:31 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:02:31 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:02:31 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:02:31 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:02:31 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:02:32 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:02:32 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:02:32 +05:30: Initializing database models...
+2025-08-14 02:02:33 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:02:33 +05:30: Initializing database models...
+2025-08-14 02:02:33 +05:30: Database models synchronized successfully
+2025-08-14 02:02:35 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:02:35 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:02:35 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:02:35 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:02:35 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:02:35 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:02:35 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:02:35 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:02:35 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:02:35 +05:30: Database models synchronized successfully
+2025-08-14 02:02:36 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:02:37 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:02:37 +05:30: Initializing database models...
+2025-08-14 02:02:37 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:02:37 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:02:37 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:02:37 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:02:37 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:02:37 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:02:37 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:02:37 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:02:37 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:02:37 +05:30: Database models synchronized successfully
+2025-08-14 02:02:38 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:02:39 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:02:39 +05:30: Initializing database models...
+2025-08-14 02:02:40 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:02:40 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:02:40 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:02:40 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:02:40 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:02:40 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:02:40 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:02:40 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:02:40 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:02:40 +05:30: Database models synchronized successfully
+2025-08-14 02:02:40 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:02:41 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:02:41 +05:30: Initializing database models...
+2025-08-14 02:02:42 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:02:42 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:02:42 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:02:42 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:02:42 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:02:42 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:02:42 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:02:42 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:02:42 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:02:42 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:02:43 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:02:43 +05:30: Initializing database models...
+2025-08-14 02:02:44 +05:30: Database models synchronized successfully
+2025-08-14 02:02:44 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:02:44 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:02:44 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:02:44 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:02:44 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:02:44 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:02:44 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:02:44 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:02:44 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:02:45 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:02:45 +05:30: Database models synchronized successfully
+2025-08-14 02:02:46 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:02:46 +05:30: Initializing database models...
+2025-08-14 02:02:48 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:02:48 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:02:48 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:02:48 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:02:48 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:02:48 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:02:48 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:02:48 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:02:48 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:02:48 +05:30: Database models synchronized successfully
+2025-08-14 02:02:49 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:02:50 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:02:50 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:02:50 +05:30: Initializing database models...
+2025-08-14 02:02:50 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:02:50 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:02:50 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:02:50 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:02:50 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:02:50 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:02:50 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:02:50 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:02:50 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:02:50 +05:30: Database models synchronized successfully
+2025-08-14 02:02:51 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:02:51 +05:30: Initializing database models...
+2025-08-14 02:02:53 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:02:53 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:02:53 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:02:53 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:02:53 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:02:53 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:02:53 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:02:53 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:02:53 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:02:53 +05:30: Database models synchronized successfully
+2025-08-14 02:02:53 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:02:54 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:02:54 +05:30: Initializing database models...
+2025-08-14 02:02:55 +05:30: Database models synchronized successfully
+2025-08-14 02:02:55 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:02:55 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:02:55 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:02:55 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:02:55 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:02:55 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:02:55 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:02:55 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:02:55 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:02:55 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:02:57 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:02:57 +05:30: Initializing database models...
+2025-08-14 02:02:57 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:02:57 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:02:57 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:02:57 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:02:57 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:02:57 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:02:57 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:02:58 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:02:58 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:02:58 +05:30: Database models synchronized successfully
+2025-08-14 02:02:58 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:02:59 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:02:59 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:02:59 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:02:59 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:02:59 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:02:59 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:02:59 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:02:59 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:02:59 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:02:59 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:02:59 +05:30: Initializing database models...
+2025-08-14 02:03:00 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:03:01 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:03:01 +05:30: Initializing database models...
+2025-08-14 02:03:01 +05:30: 2025-08-14 02:03:01:31 [31m[31merror[31m[39m: [31m[31mError starting server: Cannot read properties of null (reading '1')[31m[39m
+2025-08-14 02:03:02 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:03:02 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:03:02 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:03:02 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:03:02 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:03:02 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:03:02 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:03:02 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:03:02 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:03:03 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:03:03 +05:30: Database models synchronized successfully
+2025-08-14 02:03:04 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:03:04 +05:30: Initializing database models...
+2025-08-14 02:03:06 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:03:06 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:03:06 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:03:06 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:03:06 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:03:06 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:03:06 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:03:06 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:03:06 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:03:07 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:03:07 +05:30: Database models synchronized successfully
+2025-08-14 02:03:07 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:03:07 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:03:07 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:03:07 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:03:07 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:03:07 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:03:07 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:03:07 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:03:07 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:03:08 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:03:08 +05:30: Initializing database models...
+2025-08-14 02:03:08 +05:30: Database models synchronized successfully
+2025-08-14 02:03:08 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:03:09 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:03:09 +05:30: Initializing database models...
+2025-08-14 02:03:11 +05:30: Database models synchronized successfully
+2025-08-14 02:03:11 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:03:11 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:03:11 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:03:11 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:03:11 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:03:11 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:03:11 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:03:11 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:03:11 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:03:12 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:03:12 +05:30: Database models synchronized successfully
+2025-08-14 02:03:12 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:03:12 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:03:12 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:03:12 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:03:12 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:03:12 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:03:12 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:03:12 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:03:12 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:03:13 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:03:13 +05:30: Initializing database models...
+2025-08-14 02:03:13 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:03:14 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:03:14 +05:30: Initializing database models...
+2025-08-14 02:03:15 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:03:15 +05:30: Database models synchronized successfully
+2025-08-14 02:03:15 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:03:15 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:03:15 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:03:15 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:03:15 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:03:15 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:03:15 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:03:15 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:03:16 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:03:16 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:03:16 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:03:16 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:03:16 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:03:16 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:03:16 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:03:16 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:03:16 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:03:16 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:03:17 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:03:17 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:03:17 +05:30: Initializing database models...
+2025-08-14 02:03:18 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:03:18 +05:30: Initializing database models...
+2025-08-14 02:03:19 +05:30: 2025-08-14 02:03:19:319 [31m[31merror[31m[39m: [31m[31mError starting server: cache lookup failed for attribute 1 of relation 758890[31m[39m
+2025-08-14 02:03:20 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:03:20 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:03:20 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:03:20 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:03:20 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:03:20 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:03:20 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:03:20 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:03:20 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:03:20 +05:30: Database models synchronized successfully
+2025-08-14 02:03:20 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:03:21 +05:30: 2025-08-14 02:03:21:321 [31m[31merror[31m[39m: [31m[31mError starting server: cache lookup failed for attribute 1 of relation 759789[31m[39m
+2025-08-14 02:03:21 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:03:21 +05:30: Initializing database models...
+2025-08-14 02:03:23 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:03:23 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:03:23 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:03:23 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:03:23 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:03:23 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:03:23 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:03:23 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:03:23 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:03:24 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:03:24 +05:30: Database models synchronized successfully
+2025-08-14 02:03:24 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:03:24 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:03:24 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:03:24 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:03:24 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:03:24 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:03:24 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:03:25 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:03:25 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:03:25 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:03:25 +05:30: Initializing database models...
+2025-08-14 02:03:25 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:03:25 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:03:25 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:03:25 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:03:25 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:03:25 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:03:25 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:03:25 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:03:25 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:03:25 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:03:25 +05:30: Database models synchronized successfully
+2025-08-14 02:03:26 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:03:26 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:03:26 +05:30: Initializing database models...
+2025-08-14 02:03:27 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:03:27 +05:30: Initializing database models...
+2025-08-14 02:03:28 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:03:28 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:03:29 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:03:29 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:03:29 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:03:29 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:03:29 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:03:29 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:03:29 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:03:29 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:03:30 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:03:30 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:03:30 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:03:30 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:03:30 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:03:30 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:03:30 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:03:30 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:03:30 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:03:30 +05:30: Database models synchronized successfully
+2025-08-14 02:03:30 +05:30: 2025-08-14 02:03:30:330 [31m[31merror[31m[39m: [31m[31mError starting server: cache lookup failed for attribute 1 of relation 764119[31m[39m
+2025-08-14 02:03:30 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:03:30 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:03:30 +05:30: Initializing database models...
+2025-08-14 02:03:31 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:03:31 +05:30: Initializing database models...
+2025-08-14 02:03:33 +05:30: Database models synchronized successfully
+2025-08-14 02:03:34 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:03:34 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:03:34 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:03:34 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:03:34 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:03:34 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:03:34 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:03:34 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:03:34 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:03:34 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:03:34 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:03:34 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:03:34 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:03:34 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:03:34 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:03:34 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:03:34 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:03:34 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:03:35 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:03:35 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:03:36 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:03:36 +05:30: Initializing database models...
+2025-08-14 02:03:36 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:03:36 +05:30: Initializing database models...
+2025-08-14 02:03:36 +05:30: Database models synchronized successfully
+2025-08-14 02:03:36 +05:30: 2025-08-14 02:03:36:336 [33m[33mwarn[33m[39m: [33m[33mPort 3000 is in use, trying port 3001...[33m[39m
+2025-08-14 02:03:37 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:03:37 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:03:37 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:03:37 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:03:37 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:03:37 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:03:37 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:03:37 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:03:37 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:03:38 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:03:38 +05:30: Database models synchronized successfully
+2025-08-14 02:03:38 +05:30: 2025-08-14 02:03:38:338 [33m[33mwarn[33m[39m: [33m[33mPort 3000 is in use, trying port 3001...[33m[39m
+2025-08-14 02:03:39 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:03:39 +05:30: Initializing database models...
+2025-08-14 02:03:40 +05:30: 2025-08-14 02:03:40:340 [31m[31merror[31m[39m: [31m[31mError starting server: Unknown constraint error[31m[39m
+2025-08-14 02:03:43 +05:30: Database models synchronized successfully
+2025-08-14 02:03:43 +05:30: 2025-08-14 02:03:43:343 [33m[33mwarn[33m[39m: [33m[33mPort 3000 is in use, trying port 3001...[33m[39m
+2025-08-14 02:03:43 +05:30: Database models synchronized successfully
+2025-08-14 02:03:43 +05:30: 2025-08-14 02:03:43:343 [33m[33mwarn[33m[39m: [33m[33mPort 3000 is in use, trying port 3001...[33m[39m
+2025-08-14 02:03:44 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:03:44 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:03:44 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:03:44 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:03:44 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:03:44 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:03:44 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:03:44 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:03:44 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:03:45 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:03:46 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:03:46 +05:30: Initializing database models...
+2025-08-14 02:03:48 +05:30: Database models synchronized successfully
+2025-08-14 02:03:48 +05:30: 2025-08-14 02:03:48:348 [33m[33mwarn[33m[39m: [33m[33mPort 3000 is in use, trying port 3001...[33m[39m
+2025-08-14 02:03:51 +05:30: Database models synchronized successfully
+2025-08-14 02:03:51 +05:30: 2025-08-14 02:03:51:351 [33m[33mwarn[33m[39m: [33m[33mPort 3000 is in use, trying port 3001...[33m[39m
+2025-08-14 02:03:57 +05:30: Database models synchronized successfully
+2025-08-14 02:03:57 +05:30: 2025-08-14 02:03:57:357 [33m[33mwarn[33m[39m: [33m[33mPort 3000 is in use, trying port 3001...[33m[39m
+2025-08-14 02:30:42 +05:30: 2025-08-14 02:30:42:3042 [31m[31merror[31m[39m: [31m[31mError during server shutdown: Server is not running.[31m[39m
+2025-08-14 02:30:42 +05:30: 2025-08-14 02:30:42:3042 [31m[31merror[31m[39m: [31m[31mError during server shutdown: Server is not running.[31m[39m
+2025-08-14 02:30:42 +05:30: 2025-08-14 02:30:42:3042 [31m[31merror[31m[39m: [31m[31mError during server shutdown: Server is not running.[31m[39m
+2025-08-14 02:30:42 +05:30: 2025-08-14 02:30:42:3042 [31m[31merror[31m[39m: [31m[31mError during server shutdown: Server is not running.[31m[39m
+2025-08-14 02:30:42 +05:30: 2025-08-14 02:30:42:3042 [31m[31merror[31m[39m: [31m[31mError during server shutdown: Server is not running.[31m[39m
+2025-08-14 02:30:42 +05:30: 2025-08-14 02:30:42:3042 [31m[31merror[31m[39m: [31m[31mError during server shutdown: Server is not running.[31m[39m
+2025-08-14 02:30:42 +05:30: 2025-08-14 02:30:42:3042 [31m[31merror[31m[39m: [31m[31mError during server shutdown: Server is not running.[31m[39m
+2025-08-14 02:30:47 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:30:47 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:30:47 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:30:47 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:30:47 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:30:47 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:30:47 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:30:47 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:30:47 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:30:47 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:30:47 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:30:47 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:30:47 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:30:47 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:30:47 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:30:47 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:30:47 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:30:47 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:30:47 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:30:47 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:30:47 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:30:47 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:30:47 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:30:47 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:30:47 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:30:47 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:30:47 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:30:47 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:30:47 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:30:47 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:30:47 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:30:47 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:30:47 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:30:47 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:30:47 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:30:47 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:30:47 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:30:47 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:30:47 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:30:47 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:30:47 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:30:47 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:30:47 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:30:47 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:30:47 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:30:47 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:30:47 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:30:47 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:30:47 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:30:47 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:30:47 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:30:47 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:30:47 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:30:47 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:30:47 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:30:47 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:30:47 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:30:47 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:30:47 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:30:47 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:30:47 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:30:47 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:30:47 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:30:48 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:30:48 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:30:48 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:30:48 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:30:48 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:30:48 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:30:48 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:30:49 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:30:49 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:30:49 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:30:49 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:30:49 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:30:49 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:30:49 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:30:50 +05:30: 2025-08-14 02:30:50:3050 [31m[31merror[31m[39m: [31m[31mError starting server: Unknown constraint error[31m[39m
+2025-08-14 02:30:50 +05:30: 2025-08-14 02:30:50:3050 [31m[31merror[31m[39m: [31m[31mError starting server: Unknown constraint error[31m[39m
+2025-08-14 02:30:51 +05:30: 2025-08-14 02:30:51:3051 [31m[31merror[31m[39m: [31m[31mError starting server: Unknown constraint error[31m[39m
+2025-08-14 02:30:51 +05:30: 2025-08-14 02:30:51:3051 [31m[31merror[31m[39m: [31m[31mError starting server: Unknown constraint error[31m[39m
+2025-08-14 02:30:55 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:30:55 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:30:55 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:30:55 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:30:55 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:30:55 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:30:55 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:30:55 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:30:55 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:30:55 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:30:55 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:30:55 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:30:55 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:30:55 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:30:55 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:30:55 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:30:55 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:30:55 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:30:55 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:30:55 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:30:55 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:30:55 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:30:55 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:30:55 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:30:55 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:30:55 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:30:55 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:30:55 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:30:55 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:30:55 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:30:55 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:30:55 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:30:55 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:30:55 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:30:55 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:30:55 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:30:56 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:30:56 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:30:56 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:30:56 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:30:57 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:30:57 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:30:57 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:30:57 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:30:58 +05:30: 2025-08-14 02:30:58:3058 [31m[31merror[31m[39m: [31m[31mError starting server: Unknown constraint error[31m[39m
+2025-08-14 02:30:59 +05:30: 2025-08-14 02:30:59:3059 [31m[31merror[31m[39m: [31m[31mError starting server: Unknown constraint error[31m[39m
+2025-08-14 02:30:59 +05:30: 2025-08-14 02:30:59:3059 [33m[33mwarn[33m[39m: [33m[33mPort 3000 is in use, trying port 3001...[33m[39m
+2025-08-14 02:30:59 +05:30: 2025-08-14 02:30:59:3059 [33m[33mwarn[33m[39m: [33m[33mPort 3000 is in use, trying port 3001...[33m[39m
+2025-08-14 02:30:59 +05:30: 2025-08-14 02:30:59:3059 [31m[31merror[31m[39m: [31m[31mError starting server: Unknown constraint error[31m[39m
+2025-08-14 02:31:00 +05:30: 2025-08-14 02:31:00:310 [33m[33mwarn[33m[39m: [33m[33mPort 3000 is in use, trying port 3001...[33m[39m
+2025-08-14 02:31:03 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:31:03 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:31:03 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:31:03 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:31:03 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:31:03 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:31:03 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:31:03 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:31:03 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:31:03 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:31:03 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:31:03 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:31:03 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:31:03 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:31:03 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:31:03 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:31:03 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:31:03 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:31:03 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:31:04 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:31:04 +05:30: [33mDatabase configuration:[39m
+2025-08-14 02:31:04 +05:30: [36mUsing NeonDB serverless PostgreSQL[39m
+2025-08-14 02:31:04 +05:30: Environment variables incomplete, trying service account file
+2025-08-14 02:31:04 +05:30: Loaded Firebase Admin SDK from: /Users/anantmishra/Documents/GitHub/Evalis-GT/Firebase Admin SDK.json
+2025-08-14 02:31:04 +05:30: Using Firebase project from file: evalis-d16f2
+2025-08-14 02:31:04 +05:30: Using Firebase client email from file: [CONFIGURED]
+2025-08-14 02:31:04 +05:30: Private key found in file: [CONFIGURED]
+2025-08-14 02:31:04 +05:30: Firebase Admin SDK initialized successfully with JSON file
+2025-08-14 02:31:04 +05:30: [33mConnecting to NeonDB PostgreSQL...[39m
+2025-08-14 02:31:04 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:31:04 +05:30: ✅ Firebase Admin SDK connection test successful
+2025-08-14 02:31:05 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:31:05 +05:30: [4m[36mNeonDB PostgreSQL Connected[39m[24m
+2025-08-14 02:31:07 +05:30: 2025-08-14 02:31:07:317 [33m[33mwarn[33m[39m: [33m[33mPort 3000 is in use, trying port 3001...[33m[39m
+2025-08-14 02:31:15 +05:30: 2025-08-14 02:31:15:3115 [33m[33mwarn[33m[39m: [33m[33mPort 3000 is in use, trying port 3001...[33m[39m
+2025-08-14 02:31:16 +05:30: 2025-08-14 02:31:16:3116 [33m[33mwarn[33m[39m: [33m[33mPort 3000 is in use, trying port 3001...[33m[39m
+2025-08-14 02:31:17 +05:30: 2025-08-14 02:31:17:3117 [33m[33mwarn[33m[39m: [33m[33mPort 3000 is in use, trying port 3001...[33m[39m

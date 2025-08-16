@@ -18,7 +18,11 @@
     "types": ["react", "react-dom", "node"],
     "typeRoots": ["./node_modules/@types", "./src/types"],
     "allowJs": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
   "include": ["src", "src/context/AuthContext.d.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]

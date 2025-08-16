@@ -31,122 +31,85 @@ export function AuthProvider({ children }) {
 
   // This effect runs on initial component mount to restore user state
   useEffect(() => {
-    // Set a safety timeout to prevent infinite loading
-    const timeoutId = setTimeout(() => {
-      console.warn('Auth initialization timeout reached, setting loading to false');
-      setLoading(false);
-    }, 10000); // 10 second timeout
-
-    try {
-      // Check for user in localStorage on page load
-      const storedUser = localStorage.getItem(config.AUTH.CURRENT_USER_KEY);
-      
-      if (storedUser) {
-        try {
-          const parsedUser = JSON.parse(storedUser);
-          setCurrentUser(parsedUser);
-          
-          // Make sure token is also available in the TOKEN_STORAGE_KEY
-          if (parsedUser.token && !localStorage.getItem(config.AUTH.TOKEN_STORAGE_KEY)) {
-            localStorage.setItem(config.AUTH.TOKEN_STORAGE_KEY, parsedUser.token);
-          }
-          
-          // Validate the session silently
-          const validateSession = async () => {
-            try {
-              // Skip API validation in frontend-only mode
-              if (config.IS_FRONTEND_ONLY) {
-                console.log('Frontend-only mode: Skipping API session validation');
-                setLoading(false);
-                return;
-              }
-            
-              // Check if token is still valid by making a lightweight API call
-              const token = localStorage.getItem(config.AUTH.TOKEN_STORAGE_KEY);
-              if (!token) {
-                setLoading(false);
-                return;
-              }
-            
-              const response = await axios.get(
-                `${config.API_BASE_URL}/auth/status`,
-                { 
-                  headers: { 
-                    Authorization: `Bearer ${token}` 
-                  },
-                  // Avoid throwing 401s which might trigger logout
-                  validateStatus: (status) => status < 500
-                }
-              );
-            
-              // If session is invalid, try refresh token if available
-              if (response.status !== 200 && parsedUser.refreshToken) {
-                try {
-                  const refreshResponse = await axios.post(
-                    `${config.API_BASE_URL}/auth/refresh`,
-                    { refreshToken: parsedUser.refreshToken }
-                  );
-                
-                  if (refreshResponse.status === 200 && refreshResponse.data.token) {
-                    // Update tokens
-                    localStorage.setItem(config.AUTH.TOKEN_STORAGE_KEY, refreshResponse.data.token);
-                  
-                    // Update user object
-                    parsedUser.token = refreshResponse.data.token;
-                    if (refreshResponse.data.refreshToken) {
-                      parsedUser.refreshToken = refreshResponse.data.refreshToken;
-                    }
-                  
-                    localStorage.setItem(config.AUTH.CURRENT_USER_KEY, JSON.stringify(parsedUser));
-                    setCurrentUser(parsedUser);
-                  }
-                } catch (refreshError) {
-                  console.error('Token refresh failed:', refreshError);
-                  // Don't logout here, let the app continue with potentially invalid token
-                  // The API interceptor will handle actual API call failures
-                }
-              }
-            } catch (error) {
-              console.error('Session validation error:', error);
-              // Don't logout here to avoid disrupting user experience on page load
-            } finally {
-              // Always set loading to false regardless of success or failure
-              setLoading(false);
-              clearTimeout(timeoutId);
-            }
-          };
+    // Check for user in localStorage on page load
+    const storedUser = localStorage.getItem(config.AUTH.CURRENT_USER_KEY);
+    
+    if (storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        setCurrentUser(parsedUser);
         
-          validateSession();
+        // Make sure token is also available in the TOKEN_STORAGE_KEY
+        if (parsedUser.token && !localStorage.getItem(config.AUTH.TOKEN_STORAGE_KEY)) {
+          localStorage.setItem(config.AUTH.TOKEN_STORAGE_KEY, parsedUser.token);
+        }
+        
+        // Validate the session silently
+        const validateSession = async () => {
+          try {
+            // Check if token is still valid by making a lightweight API call
+            const token = localStorage.getItem(config.AUTH.TOKEN_STORAGE_KEY);
+            if (!token) return;
+            
+            const response = await axios.get(
+              `${config.API_BASE_URL}/auth/status`,
+              { 
+                headers: { 
+                  Authorization: `Bearer ${token}` 
+                },
+                // Avoid throwing 401s which might trigger logout
+                validateStatus: (status) => status < 500
+              }
+            );
+            
+            // If session is invalid, try refresh token if available
+            if (response.status !== 200 && parsedUser.refreshToken) {
+              try {
+                const refreshResponse = await axios.post(
+                  `${config.API_BASE_URL}/auth/refresh`,
+                  { refreshToken: parsedUser.refreshToken }
+                );
+                
+                if (refreshResponse.status === 200 && refreshResponse.data.token) {
+                  // Update tokens
+                  localStorage.setItem(config.AUTH.TOKEN_STORAGE_KEY, refreshResponse.data.token);
+                  
+                  // Update user object
+                  parsedUser.token = refreshResponse.data.token;
+                  if (refreshResponse.data.refreshToken) {
+                    parsedUser.refreshToken = refreshResponse.data.refreshToken;
+                  }
+                  
+                  localStorage.setItem(config.AUTH.CURRENT_USER_KEY, JSON.stringify(parsedUser));
+                  setCurrentUser(parsedUser);
+                }
+              } catch (refreshError) {
+                console.error('Token refresh failed:', refreshError);
+                // Don't logout here, let the app continue with potentially invalid token
+                // The API interceptor will handle actual API call failures
+              }
+            }
+          } catch (error) {
+            console.error('Session validation error:', error);
+            // Don't logout here to avoid disrupting user experience on page load
+          }
+        };
+        
+        validateSession();
       } catch (e) {
         console.error('Error parsing stored user data:', e);
         // If there's an error parsing the user data, clear it
         localStorage.removeItem(config.AUTH.CURRENT_USER_KEY);
-        setLoading(false);
       }
-    } else {
-      // No stored user, set loading to false
-      setLoading(false);
     }
     
     // Subscribe to Firebase auth state changes
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setFirebaseUser(user);
-      // Only set loading false if we haven't already done so above
-      if (!storedUser) {
-        setLoading(false);
-        clearTimeout(timeoutId);
-      }
+      setLoading(false);
     });
     
-    return () => {
-      unsubscribe();
-      clearTimeout(timeoutId);
-    };
-  } catch (mainError) {
-    console.error('Error in AuthContext initialization:', mainError);
-    setLoading(false);
-    clearTimeout(timeoutId);
-  }
+    return () => unsubscribe();
   }, []);
 
   // Unified login function
@@ -309,6 +272,301 @@ export function AuthProvider({ children }) {
     }
   };
 
+  // Student login function
+  const studentLogin = async (studentId, password) => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      console.log('Attempting student login with ID:', studentId);
+      
+      // Try student login through our API first
+      try {
+        const response = await axios.post(`${config.API_BASE_URL}/auth/student/login`, {
+          id: studentId,
+          password
+        });
+        
+        if (response.status === 200 && response.data) {
+          console.log('Student login successful:', response.data);
+          const userData = response.data;
+          
+          // Store user data and token
+          localStorage.setItem(config.AUTH.CURRENT_USER_KEY, JSON.stringify(userData));
+          localStorage.setItem(config.AUTH.TOKEN_STORAGE_KEY, userData.token);
+          
+          setCurrentUser(userData);
+          setLoading(false);
+          return userData;
+        }
+      } catch (apiError) {
+        console.log('API login failed, trying Firebase if student has email:', apiError.response?.status, apiError.message);
+        
+        // If it's a 401, the student might not exist in the database yet
+        if (apiError.response?.status === 401) {
+          console.log('Student not found in database, will try Firebase authentication');
+        }
+        
+        // If API login fails and studentId looks like an email, try Firebase authentication
+        if (studentId.includes('@')) {
+          try {
+            const userCredential = await loginWithEmailAndPassword(studentId, password);
+            const user = userCredential.user;
+            
+            console.log('Firebase login successful for student:', user.email);
+            
+            // Get Firebase ID token
+            const firebaseToken = await user.getIdToken();
+            
+            // Store Firebase token
+            localStorage.setItem('firebaseToken', firebaseToken);
+            
+            // Try to sync the password to database (optional, for future logins)
+            // Note: This endpoint may not exist on all servers, so we handle it gracefully
+            try {
+              const syncResponse = await axios.post(`${config.API_BASE_URL}/auth/sync-firebase-password`, {
+                email: studentId,
+                firebaseToken: firebaseToken,
+                userType: 'student'
+              });
+              console.log('Password synced to database successfully');
+            } catch (syncError) {
+              // Only log as warning since this is optional functionality
+              if (syncError.response?.status === 404) {
+                console.log('Password sync endpoint not available - this is optional');
+              } else if (syncError.code === 'ECONNREFUSED' || syncError.code === 'ERR_NETWORK') {
+                console.log('Server not reachable for password sync - this is optional');
+              } else {
+                console.warn('Password sync failed, but login successful:', syncError.message);
+              }
+            }
+            
+            // Create user data from Firebase
+            const userData = {
+              id: user.uid,
+              email: user.email,
+              name: user.displayName || user.email.split('@')[0],
+              role: 'student',
+              token: firebaseToken,
+              authMethod: 'firebase',
+              studentId: `FB_${user.uid.substring(0, 8)}` // Generate a student ID for Firebase users
+            };
+            
+            localStorage.setItem(config.AUTH.CURRENT_USER_KEY, JSON.stringify(userData));
+            localStorage.setItem(config.AUTH.TOKEN_STORAGE_KEY, firebaseToken);
+            
+            setCurrentUser(userData);
+            setLoading(false);
+            return userData;
+          } catch (firebaseError) {
+            console.error('Firebase login also failed:', firebaseError.message);
+            throw firebaseError;
+          }
+        } else {
+          // If not an email, just throw the original API error
+          throw apiError;
+        }
+      }
+    } catch (err) {
+      console.error('Student login error:', err);
+      const errorMessage = err.response?.data?.message || err.message || 'Invalid student ID or password. Please check your credentials and try again.';
+      setError(errorMessage);
+      throw new Error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Teacher login function
+  const teacherLogin = async (email, password) => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      console.log('Attempting teacher login with email:', email);
+      
+      // Try teacher login through our API first
+      try {
+        const response = await axios.post(`${config.API_BASE_URL}/auth/teacher/login`, {
+          email: email,
+          password
+        });
+        
+        if (response.status === 200 && response.data) {
+          console.log('Teacher login successful:', response.data);
+          const userData = response.data;
+          
+          // Store user data and token
+          localStorage.setItem(config.AUTH.CURRENT_USER_KEY, JSON.stringify(userData));
+          localStorage.setItem(config.AUTH.TOKEN_STORAGE_KEY, userData.token);
+          
+          setCurrentUser(userData);
+          setLoading(false);
+          return userData;
+        }
+      } catch (apiError) {
+        console.log('API login failed, trying Firebase:', apiError.message);
+        
+        // If API login fails, try Firebase authentication
+        try {
+          const userCredential = await loginWithEmailAndPassword(email, password);
+          const user = userCredential.user;
+          
+          console.log('Firebase login successful for teacher:', user.email);
+          
+          // Get Firebase ID token
+          const firebaseToken = await user.getIdToken();
+          
+          // Store Firebase token
+          localStorage.setItem('firebaseToken', firebaseToken);
+          
+          // Try to sync the password to database (optional, for future logins)
+          // Note: This endpoint may not exist on all servers, so we handle it gracefully
+          try {
+            await axios.post(`${config.API_BASE_URL}/auth/sync-firebase-password`, {
+              email: email,
+              firebaseToken: firebaseToken,
+              userType: 'teacher'
+            });
+            console.log('Password synced to database successfully');
+          } catch (syncError) {
+            // Only log as warning since this is optional functionality
+            if (syncError.response?.status === 404) {
+              console.log('Password sync endpoint not available - this is optional');
+            } else {
+              console.warn('Password sync failed, but login successful:', syncError.message);
+            }
+          }
+          
+          // Create user data from Firebase
+          const userData = {
+            id: user.uid,
+            email: user.email,
+            name: user.displayName || user.email.split('@')[0],
+            role: 'teacher',
+            token: firebaseToken,
+            authMethod: 'firebase'
+          };
+          
+          localStorage.setItem(config.AUTH.CURRENT_USER_KEY, JSON.stringify(userData));
+          localStorage.setItem(config.AUTH.TOKEN_STORAGE_KEY, firebaseToken);
+          
+          setCurrentUser(userData);
+          setLoading(false);
+          return userData;
+        } catch (firebaseError) {
+          console.error('Firebase login also failed:', firebaseError.message);
+          throw firebaseError;
+        }
+      }
+    } catch (err) {
+      console.error('Teacher login error:', err);
+      const errorMessage = err.response?.data?.message || err.message || 'Invalid email or password. Please check your credentials and try again.';
+      setError(errorMessage);
+      throw new Error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Admin login function
+  const adminLogin = async (username, password) => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      console.log('Attempting admin login with username:', username);
+      
+      // Try admin login through our API first
+      try {
+        const response = await axios.post(`${config.API_BASE_URL}/auth/admin/login`, {
+          username: username,
+          password
+        });
+        
+        if (response.status === 200 && response.data) {
+          console.log('Admin login successful:', response.data);
+          const userData = response.data;
+          
+          // Store user data and token
+          localStorage.setItem(config.AUTH.CURRENT_USER_KEY, JSON.stringify(userData));
+          localStorage.setItem(config.AUTH.TOKEN_STORAGE_KEY, userData.token);
+          
+          setCurrentUser(userData);
+          setLoading(false);
+          return userData;
+        }
+      } catch (apiError) {
+        console.log('API login failed, trying Firebase if username is email:', apiError.message);
+        
+        // If API login fails and username looks like an email, try Firebase authentication
+        if (username.includes('@')) {
+          try {
+            const userCredential = await loginWithEmailAndPassword(username, password);
+            const user = userCredential.user;
+            
+            console.log('Firebase login successful for admin:', user.email);
+            
+            // Get Firebase ID token
+            const firebaseToken = await user.getIdToken();
+            
+            // Store Firebase token
+            localStorage.setItem('firebaseToken', firebaseToken);
+            
+            // Try to sync the password to database (optional, for future logins)
+            // Note: This endpoint may not exist on all servers, so we handle it gracefully
+            try {
+              await axios.post(`${config.API_BASE_URL}/auth/sync-firebase-password`, {
+                email: username,
+                firebaseToken: firebaseToken,
+                userType: 'admin'
+              });
+              console.log('Password synced to database successfully');
+            } catch (syncError) {
+              // Only log as warning since this is optional functionality
+              if (syncError.response?.status === 404) {
+                console.log('Password sync endpoint not available - this is optional');
+              } else {
+                console.warn('Password sync failed, but login successful:', syncError.message);
+              }
+            }
+            
+            // Create user data from Firebase
+            const userData = {
+              id: user.uid,
+              username: user.email,
+              email: user.email,
+              name: user.displayName || user.email.split('@')[0],
+              role: 'admin',
+              token: firebaseToken,
+              authMethod: 'firebase'
+            };
+            
+            localStorage.setItem(config.AUTH.CURRENT_USER_KEY, JSON.stringify(userData));
+            localStorage.setItem(config.AUTH.TOKEN_STORAGE_KEY, firebaseToken);
+            
+            setCurrentUser(userData);
+            setLoading(false);
+            return userData;
+          } catch (firebaseError) {
+            console.error('Firebase login also failed:', firebaseError.message);
+            throw firebaseError;
+          }
+        } else {
+          // If not an email, just throw the original API error
+          throw apiError;
+        }
+      }
+    } catch (err) {
+      console.error('Admin login error:', err);
+      const errorMessage = err.response?.data?.message || err.message || 'Invalid username or password. Please check your credentials and try again.';
+      setError(errorMessage);
+      throw new Error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const logout = async () => {
     // Sign out from Firebase if user is signed in
     if (firebaseUser) {
@@ -335,6 +593,9 @@ export function AuthProvider({ children }) {
     loading,
     error,
     login,
+    studentLogin,
+    teacherLogin,
+    adminLogin,
     logout,
     setupTeacherPassword,
     requestPasswordReset

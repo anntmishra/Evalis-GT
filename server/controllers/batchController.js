@@ -35,30 +35,46 @@ const getBatchById = asyncHandler(async (req, res) => {
  * @access  Private/Admin
  */
 const createBatch = asyncHandler(async (req, res) => {
-  const { name, department, startYear, endYear, active } = req.body;
-  
-  // Validate required fields
-  if (!name || !department || !startYear || !endYear) {
+  const { id: requestedId, name, department, startYear, endYear, active } = req.body;
+
+  // Basic validation (treat 0 as invalid year, ensure numbers)
+  if (!name || !department || startYear == null || endYear == null) {
     res.status(400);
-    throw new Error('Please provide all required fields: name, department, startYear, endYear');
+    throw new Error('Required fields: name, department, startYear, endYear');
   }
-  
-  // Check if batch with same name already exists
-  const batchExists = await Batch.findOne({ where: { name } });
-  if (batchExists) {
+
+  if (isNaN(Number(startYear)) || isNaN(Number(endYear))) {
     res.status(400);
-    throw new Error('Batch with this name already exists');
+    throw new Error('startYear and endYear must be numeric');
   }
-  
+
   // Validate years
   if (endYear <= startYear) {
     res.status(400);
     throw new Error('End year must be greater than start year');
   }
-  
-  // Generate batch ID (e.g., "BTech2024")
-  const id = `${department.substring(0, 5)}${startYear}`;
-  
+
+  // Prefer provided ID, otherwise generate canonical format `${startYear}-${endYear}`
+  // This aligns with front-end expectation (e.g. 2023-2027) and avoids legacy BTech2023 pattern.
+  let id = (requestedId || '').trim();
+  if (!id) {
+    id = `${startYear}-${endYear}`;
+  }
+
+  // Ensure ID uniqueness
+  const existingById = await Batch.findByPk(id);
+  if (existingById) {
+    res.status(400);
+    throw new Error(`Batch with id '${id}' already exists`);
+  }
+
+  // Ensure name uniqueness (allow same name only if pointing to same id)
+  const existingByName = await Batch.findOne({ where: { name } });
+  if (existingByName) {
+    res.status(400);
+    throw new Error(`Batch with name '${name}' already exists`);
+  }
+
   const batch = await Batch.create({
     id,
     name,
@@ -67,13 +83,8 @@ const createBatch = asyncHandler(async (req, res) => {
     endYear,
     active: active !== undefined ? active : true
   });
-  
-  if (batch) {
-    res.status(201).json(batch);
-  } else {
-    res.status(400);
-    throw new Error('Invalid batch data');
-  }
+
+  return res.status(201).json(batch);
 });
 
 /**
@@ -83,32 +94,42 @@ const createBatch = asyncHandler(async (req, res) => {
  */
 const updateBatch = asyncHandler(async (req, res) => {
   const { name, department, startYear, endYear, active } = req.body;
-  
+
   const batch = await Batch.findByPk(req.params.id);
-  
   if (!batch) {
     res.status(404);
     throw new Error('Batch not found');
   }
-  
-  // If name is being updated, check if it conflicts with another batch
+
+  // Validate years if provided
+  const newStart = startYear != null ? Number(startYear) : batch.startYear;
+  const newEnd = endYear != null ? Number(endYear) : batch.endYear;
+  if (isNaN(newStart) || isNaN(newEnd)) {
+    res.status(400);
+    throw new Error('startYear and endYear must be numeric');
+  }
+  if (newEnd <= newStart) {
+    res.status(400);
+    throw new Error('End year must be greater than start year');
+  }
+
+  // Ensure name uniqueness
   if (name && name !== batch.name) {
-    const nameExists = await Batch.findOne({ where: { name } });
-    if (nameExists) {
+    const conflict = await Batch.findOne({ where: { name } });
+    if (conflict) {
       res.status(400);
-      throw new Error('Batch with this name already exists');
+      throw new Error(`Batch with name '${name}' already exists`);
     }
   }
-  
-  // Update batch fields
+
   batch.name = name || batch.name;
   batch.department = department || batch.department;
-  batch.startYear = startYear || batch.startYear;
-  batch.endYear = endYear || batch.endYear;
-  batch.active = active !== undefined ? active : batch.active;
-  
+  batch.startYear = newStart;
+  batch.endYear = newEnd;
+  if (active !== undefined) batch.active = active;
+
   const updatedBatch = await batch.save();
-  res.json(updatedBatch);
+  return res.json(updatedBatch);
 });
 
 /**

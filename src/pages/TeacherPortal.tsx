@@ -1,1279 +1,1152 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Container,
-  Typography,
-  Box,
-  Tab,
-  Tabs,
-  Paper,
-  Grid,
-  Button,
-  Divider,
-  TextField,
-  Select,
-  FormControl,
-  InputLabel,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Snackbar,
-  Alert,
-  Chip,
-  AlertColor,
-  SelectChangeEvent,
-  MenuItem,
-  CircularProgress
-} from '@mui/material';
-import {
-  Assessment,
-  Warning,
+import { useNavigate } from 'react-router-dom';
+import { Button } from '../components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import { Alert, AlertDescription } from '../components/ui/alert';
+import { Badge } from '../components/ui/badge';
+import { Input } from '../components/ui/input';
+import { Label } from '../components/ui/label';
+import { 
+  GraduationCap,
+  Users,
+  FileText,
+  BarChart3,
+  Plus,
+  Upload,
+  Download,
+  Filter,
+  Clock,
   CheckCircle,
-  CloudUpload,
-  Refresh,
-  People,
-  Description
-} from '@mui/icons-material';
+  AlertCircle,
+  Loader2,
+  BookOpen,
+  PenTool,
+  Eye,
+  User,
+  Calendar,
+  Edit3,
+  Trash2
+} from 'lucide-react';
+import Header from '../components/Header';
 import { Subject } from '../types/university';
 import { EXAM_TYPES } from '../constants/universityData';
-import Header from '../components/Header';
-import { getStudentsByTeacher, getTeacherSubjects, attemptSessionRecovery } from '../api/teacherService';
+import { getStudentsByTeacher, getTeacherSubjects, getAccessibleBatches, getTeacherSubmissions, getTeacherAssignments, gradeSubmission, saveAnnotatedPDF, deleteAssignment } from '../api/teacherService';
+import { getLetterGrade, getGradePoints } from '../utils/gradeCalculator';
 import { getStudentsByBatch } from '../api/studentService';
-import { getAllBatches } from '../api/batchService';
-import { gradeSubmission } from '../api';
 import config from '../config/environment';
-import { useNavigate } from 'react-router-dom';
 import TeacherAssignmentCreator from '../components/TeacherAssignmentCreator';
 import TeacherQuestionPaperCreator from '../components/TeacherQuestionPaperCreator';
-
-// Simplified Student type that matches the backend response
-interface Student {
-  id: string;
-  name: string;
-  section: string;
-  batch: string;
-  batchName: string;
-}
-
-interface Batch {
-  id: string;
-  name: string;
-  department?: string;
-  startYear?: number;
-  endYear?: number;
-}
-
-interface AlertState {
-  open: boolean;
-  message: string;
-  severity: AlertColor;
-}
-
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
-}
-
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      {...other}
-    >
-      {value === index && (
-        <Box sx={{ p: 3 }}>
-          {children}
-        </Box>
-      )}
-    </div>
-  );
-}
-
-// Add these interfaces near the top with other interfaces
-interface Submission {
-  id: string;
-  studentId: string;
-  subjectId: string;
-  examType: string;
-  submissionText: string;
-  submissionDate: string;
-  score: number | null;
-  feedback: string | null;
-  graded: boolean;
-  gradedBy?: string;
-  gradedDate?: string;
-}
+import PDFAnnotator from '../components/PDFAnnotator';
 
 const TeacherPortal: React.FC = () => {
-  const [selectedBatch, setSelectedBatch] = useState<string>('');
-  const [selectedSubject, setSelectedSubject] = useState<string>('');
-  const [selectedExamType, setSelectedExamType] = useState<string>('');
-  const [grades, setGrades] = useState<Record<string, number>>({});
-  const [alert, setAlert] = useState<AlertState>({ open: false, message: '', severity: 'success' });
-  const [tabValue, setTabValue] = useState(0);
-  const [studentsList, setStudentsList] = useState<Student[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [fetchAttempted, setFetchAttempted] = useState<boolean>(false);
-  const [teacherSubjects, setTeacherSubjects] = useState<Subject[]>([]);
-  const [subjectsLoading, setSubjectsLoading] = useState<boolean>(false);
-  const [availableBatches, setAvailableBatches] = useState<Batch[]>([]);
-  const [batchesLoading, setBatchesLoading] = useState<boolean>(false);
-  const [sessionRecoveryAttempted, setSessionRecoveryAttempted] = useState<boolean>(false);
-  const [submissions, setSubmissions] = useState<Submission[]>([]);
-  const [submissionsLoading, setSubmissionsLoading] = useState<boolean>(false);
-  const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
-  const [feedback, setFeedback] = useState<string>('');
-  const [sortConfig, setSortConfig] = useState<{key: string, direction: 'asc' | 'desc'}>({
-    key: 'examType',
-    direction: 'asc'
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [students, setStudents] = useState<any[]>([]);
+  const [submissions, setSubmissions] = useState<any[]>([]);
+  const [assignments, setAssignments] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [notification, setNotification] = useState({ 
+    open: false, 
+    message: '', 
+    severity: 'success' as 'success' | 'error' 
   });
+  const [selectedBatch, setSelectedBatch] = useState('');
+  const [batches, setBatches] = useState<any[]>([]);
+  const [showPDFAnnotator, setShowPDFAnnotator] = useState(false);
+  const [selectedSubmission, setSelectedSubmission] = useState<any>(null);
+  
   const navigate = useNavigate();
 
-  // Get teacher info from localStorage using the correct key
-  const userData = localStorage.getItem(config.AUTH.CURRENT_USER_KEY);
-  const teacherInfo = userData ? JSON.parse(userData) : null;
-  const teacherId = teacherInfo?.id;
+  // Stats for dashboard
+  const [stats, setStats] = useState({
+    totalStudents: 0,
+    totalAssignments: 0,
+    pendingGrading: 0,
+    completedGrading: 0
+  });
 
-  // Check authentication persistence
   useEffect(() => {
-    // Verify the user is logged in and is a teacher
-    if (!teacherInfo) {
-      console.log('No teacher info found, redirecting to login');
+    // Check authentication
+    const userDataStr = localStorage.getItem(config.AUTH.CURRENT_USER_KEY);
+    
+    if (!userDataStr) {
       navigate('/login');
       return;
     }
-    
-    if (teacherInfo.role !== 'teacher') {
-      console.log('User is not a teacher, redirecting to login');
-      navigate('/login');
-      return;
-    }
-    
-    // Session recovery handler
-    const handleSessionRecovery = async () => {
-      // Only try recovery once
-      if (sessionRecoveryAttempted) return;
+
+    try {
+      const userData = JSON.parse(userDataStr);
       
-      setSessionRecoveryAttempted(true);
-      console.log('Checking if session recovery is needed...');
-      
-      // Set flag that we're in recovery mode
-      sessionStorage.setItem('auth:recovering', 'true');
-      
-      try {
-        const recoverySuccessful = await attemptSessionRecovery();
-        
-        if (recoverySuccessful) {
-          console.log('Session recovery successful');
-          setAlert({
-            open: true,
-            message: 'Your session has been restored.',
-            severity: 'success'
-          });
-          
-          // Now try to fetch students again
-          fetchStudents();
-        } else {
-          console.log('Could not recover session silently, but continuing with local data');
-          setAlert({
-            open: true,
-            message: 'Your session may have expired. Please select a batch to continue.',
-            severity: 'warning'
-          });
-        }
-      } catch (error) {
-        console.error('Error during session recovery:', error);
-      } finally {
-        // Clear recovery flag
-        sessionStorage.removeItem('auth:recovering');
-      }
-    };
-    
-    // Check token status and attempt recovery if needed
-    const token = localStorage.getItem(config.AUTH.TOKEN_STORAGE_KEY);
-    if (!token && teacherInfo) {
-      console.log('No auth token found, but user info exists - attempting recovery');
-      handleSessionRecovery();
-    }
-    
-    // Setup auth event listeners
-    const handleAuthError = (event: CustomEvent<{message: string}>) => {
-      console.log('Auth error event received:', event.detail.message);
-      setAlert({
-        open: true,
-        message: event.detail.message,
-        severity: 'error'
-      });
-      
-      // Clear user data and redirect to login after a short delay
-      setTimeout(() => {
-        localStorage.removeItem(config.AUTH.CURRENT_USER_KEY);
-        localStorage.removeItem(config.AUTH.TOKEN_STORAGE_KEY);
+      if (userData.role !== 'teacher') {
         navigate('/login');
-      }, 2000);
-    };
-    
-    const handleAuthWarning = (event: CustomEvent<{message: string}>) => {
-      console.log('Auth warning event received:', event.detail.message);
-      setAlert({
-        open: true,
-        message: event.detail.message,
-        severity: 'warning'
-      });
+        return;
+      }
       
-      // Try session recovery
-      handleSessionRecovery();
-    };
-    
-    window.addEventListener('auth:error', handleAuthError as EventListener);
-    window.addEventListener('auth:warning', handleAuthWarning as EventListener);
-    
-    // Fetch students taught by this teacher, but only if we haven't attempted yet
-    if (teacherId && !fetchAttempted) {
+      initializeData();
+    } catch (error) {
+      console.error('Error parsing user data:', error);
+      navigate('/login');
+    }
+  }, [navigate]);
+
+  // Fetch students when batch selection changes
+  useEffect(() => {
+    if (selectedBatch) {
+      fetchStudents(selectedBatch);
+    } else {
       fetchStudents();
     }
-    
-    // Cleanup event listeners
-    return () => {
-      window.removeEventListener('auth:error', handleAuthError as EventListener);
-      window.removeEventListener('auth:warning', handleAuthWarning as EventListener);
-    };
-  }, [teacherId, navigate, teacherInfo, fetchAttempted, sessionRecoveryAttempted]);
+  }, [selectedBatch]);
 
-  // Fetch teacher subjects
-  useEffect(() => {
-    const fetchTeacherSubjects = async () => {
-      if (!teacherId) {
-        console.warn('No teacher ID available for fetching subjects');
-        return;
-      }
-      
-      try {
-        setSubjectsLoading(true);
-        console.log('Fetching subjects for teacher:', teacherId);
-        const fetchedSubjects = await getTeacherSubjects();
-        console.log('Fetched teacher subjects:', fetchedSubjects);
-        setTeacherSubjects(fetchedSubjects);
-        
-        // If we have subjects and none is selected yet, select the first one
-        if (fetchedSubjects?.length > 0 && !selectedSubject) {
-          console.log('Setting initial subject to:', fetchedSubjects[0].id);
-          setSelectedSubject(fetchedSubjects[0].id);
-        }
-        
-        setSubjectsLoading(false);
-      } catch (error) {
-        console.error('Error fetching teacher subjects:', error);
-        setAlert({
-          open: true,
-          message: 'Failed to load subjects. Please try again later.',
-          severity: 'error'
-        });
-        setSubjectsLoading(false);
-      }
-    };
-    
-    fetchTeacherSubjects();
-  }, [teacherId, selectedSubject]);
-
-  // Fetch all available batches
-  useEffect(() => {
-    const fetchAvailableBatches = async () => {
-      try {
-        setBatchesLoading(true);
-        const batches = await getAllBatches();
-        console.log('Fetched available batches:', batches);
-        setAvailableBatches(batches);
-        setBatchesLoading(false);
-      } catch (error) {
-        console.error('Error fetching batches:', error);
-        setBatchesLoading(false);
-      }
-    };
-    
-    fetchAvailableBatches();
-  }, []);
-
-  const fetchStudents = async () => {
+  const initializeData = async () => {
     try {
       setLoading(true);
-      setFetchAttempted(true); // Mark that we've attempted a fetch
-      
-      // Explicitly log authentication status
-      const token = localStorage.getItem(config.AUTH.TOKEN_STORAGE_KEY) || 
-                   (teacherInfo?.token ? teacherInfo.token : null);
-      
-      console.log('Fetching students with auth token available:', !!token);
-      console.log('Teacher ID:', teacherId);
-      
-      if (!teacherId) {
-        console.error('No teacher ID available');
-        setAlert({
-          open: true,
-          message: 'Teacher ID is missing. Please log in again.',
-          severity: 'error'
-        });
-        setLoading(false);
-        return;
-      }
-      
-      try {
-        const fetchedStudents = await getStudentsByTeacher(teacherId);
-        console.log('Fetched students:', fetchedStudents);
-        setStudentsList(fetchedStudents);
-        
-        // Group students by batch for filtering
-        const batchesSet = new Set(fetchedStudents
-          .filter((student: Student) => student.batch) // Only include students with batch
-          .map((student: Student) => student.batch));
-        
-        const availableBatchNames = [...batchesSet];
-        console.log('Available batch names:', availableBatchNames);
-        
-        // If we have students and no batch is selected yet, select the first batch
-        if (fetchedStudents.length > 0 && !selectedBatch && batchesSet.size > 0) {
-          const firstBatch = Array.from(batchesSet)[0] as string;
-          console.log('Setting initial batch to:', firstBatch);
-          setSelectedBatch(firstBatch);
-        }
-      } catch (apiError: any) {
-        // Handle authentication errors specially to avoid redirecting
-        // on page reload when the token exists but might be expired
-        if (apiError.response && (apiError.response.status === 401 || apiError.response.status === 403)) {
-          console.log('Authentication error during API call, but not redirecting immediately');
-          setAlert({
-            open: true,
-            message: 'Session may have expired. Try selecting a batch to continue.',
-            severity: 'warning'
-          });
-        } else {
-          throw apiError; // re-throw for the outer catch to handle
-        }
-      }
-      
-      setLoading(false);
+      await Promise.all([
+        fetchTeacherSubjects(),
+        fetchBatches(),
+        fetchStudents(),
+        fetchAssignments(),
+        fetchSubmissions()
+      ]);
     } catch (error) {
-      console.error('Error fetching students:', error);
-      setAlert({
-        open: true,
-        message: 'Failed to load students. Please try again later.',
-        severity: 'error'
-      });
-      setLoading(false);
-    }
-  };
-
-  // Update the batch fetch function with better error handling  
-  const fetchStudentsByBatch = async (batchId: string) => {
-    if (!batchId) {
-      setAlert({
-        open: true,
-        message: 'Please select a batch first',
-        severity: 'warning'
-      });
-      return;
-    }
-    
-    try {
-      setLoading(true);
-      console.log(`Manually fetching students for batch: ${batchId}`);
-      
-      try {
-        const fetchedStudents = await getStudentsByBatch(batchId);
-        console.log('Fetched students by batch:', fetchedStudents);
-        
-        // Process students to ensure they have batch information
-        const processedStudents = fetchedStudents.map((student: any) => {
-          // Ensure the student has batch information
-          if (!student.batchName && student.batch) {
-            // Find batch name from available batches
-            const batch = availableBatches.find(b => b.id === student.batch);
-            return {
-              ...student,
-              batchName: batch?.name || `Batch ${student.batch}`
-            };
-          }
-          return student;
-        });
-        
-        setStudentsList(processedStudents);
-        
-        setAlert({
-          open: true,
-          message: `Successfully loaded ${processedStudents.length} students from batch ${batchId}`,
-          severity: 'success'
-        });
-      } catch (apiError: any) {
-        // If we get auth error when manually fetching, try to recover
-        if (apiError.response && (apiError.response.status === 401 || apiError.response.status === 403)) {
-          console.log('Authentication error during API call - treating as session recovery');
-          setAlert({
-            open: true,
-            message: 'Session expired during fetch. Please click "Load Students" again.',
-            severity: 'warning'
-          });
-        } else {
-          throw apiError; // re-throw for the outer catch to handle
-        }
-      }
-      
-      setLoading(false);
-    } catch (error) {
-      console.error('Error fetching students by batch:', error);
-      setAlert({
-        open: true,
-        message: 'Failed to load students for this batch. Please try again.',
-        severity: 'error'
-      });
-      setLoading(false);
-    }
-  };
-
-  // Add a manual refresh function for all data
-  const handleRefreshAll = () => {
-    console.log('Refreshing all teacher data...');
-    fetchStudents();
-    
-    // Also refresh subjects
-    const fetchTeacherSubjects = async () => {
-      try {
-        setSubjectsLoading(true);
-        const fetchedSubjects = await getTeacherSubjects();
-        console.log('Refreshed teacher subjects:', fetchedSubjects);
-        setTeacherSubjects(fetchedSubjects);
-        setSubjectsLoading(false);
-      } catch (error) {
-        console.error('Error refreshing teacher subjects:', error);
-        setSubjectsLoading(false);
-      }
-    };
-    
-    fetchTeacherSubjects();
-  };
-
-  // Add a manual refresh function for students
-  const handleRefresh = () => {
-    console.log('Refreshing student data...');
-    fetchStudents();
-  };
-
-  const handleGradeChange = (studentId: string, value: string) => {
-    const numValue = Number(value);
-    if (!isNaN(numValue) && numValue >= 0 && numValue <= 100) {
-      setGrades(prev => ({ ...prev, [studentId]: numValue }));
-    }
-  };
-
-  const handleBatchChange = (event: SelectChangeEvent<string>) => {
-    const newBatchId = event.target.value;
-    setSelectedBatch(newBatchId);
-    
-    // Reset other selections
-    setGrades({});
-    
-    // Automatically fetch students for the selected batch
-    if (newBatchId) {
-      fetchStudentsByBatch(newBatchId);
-    }
-  };
-
-  const handleSubjectChange = (event: SelectChangeEvent<string>) => {
-    setSelectedSubject(event.target.value);
-  };
-
-  const handleExamTypeChange = (event: SelectChangeEvent<string>) => {
-    setSelectedExamType(event.target.value);
-  };
-
-  const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
-    setTabValue(newValue);
-  };
-
-  // Filter students by selected batch
-  const filteredStudents = selectedBatch 
-    ? studentsList.filter(student => student.batch === selectedBatch)
-    : studentsList;
-
-  // Group batches with their names for display
-  const batchesWithNames = studentsList.reduce((acc, student) => {
-    if (student.batch && !acc[student.batch]) {
-      acc[student.batch] = {
-        id: student.batch,
-        name: student.batchName || `Batch ${student.batch}`
-      };
-    }
-    return acc;
-  }, {} as Record<string, { id: string, name: string }>);
-
-  // Ensure we have at least one batch option
-  const availableBatchesForDropdown = Object.values(batchesWithNames).length > 0 
-    ? Object.values(batchesWithNames)
-    : [{ id: 'default', name: 'Default Batch' }];
-    
-  console.log('Batches for dropdown:', availableBatchesForDropdown);
-
-  // Add this function to fetch submissions
-  const fetchSubmissions = async () => {
-    if (!selectedSubject || !selectedExamType) {
-      setAlert({
-        open: true,
-        message: 'Please select a subject and exam type first',
-        severity: 'warning'
-      });
-      return;
-    }
-    
-    try {
-      setSubmissionsLoading(true);
-      
-      // Call the API to get submissions for the selected subject and exam type
-      const response = await fetch(
-        `${config.API_BASE_URL}/submissions/subject/${selectedSubject}?examType=${selectedExamType}`,
-        {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem(config.AUTH.TOKEN_STORAGE_KEY)}`
-          }
-        }
-      );
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch submissions');
-      }
-      
-      const data = await response.json();
-      
-      // First sort by exam type
-      let sortedData = sortSubmissionsByExamType(data);
-      
-      // Then apply user's current sort configuration
-      if (sortConfig.key) {
-        sortedData = applySortConfig(sortedData, sortConfig.key, sortConfig.direction);
-      }
-      
-      setSubmissions(sortedData);
-      setSubmissionsLoading(false);
-    } catch (error) {
-      console.error('Error fetching submissions:', error);
-      setAlert({
-        open: true,
-        message: 'Failed to fetch submissions. Please try again.',
-        severity: 'error'
-      });
-      setSubmissionsLoading(false);
-    }
-  };
-
-  // Function to sort submissions by exam type
-  const sortSubmissionsByExamType = (submissions: Submission[]): Submission[] => {
-    // Define sort order for exam types (e.g., midterm before assignment)
-    const examTypePriority: Record<string, number> = {};
-    
-    // Assign priority based on order in EXAM_TYPES
-    EXAM_TYPES.forEach((type, index) => {
-      examTypePriority[type.id] = index;
-    });
-    
-    return [...submissions].sort((a, b) => {
-      // First sort by exam type priority
-      const examTypeOrderDiff = (examTypePriority[a.examType] ?? 999) - (examTypePriority[b.examType] ?? 999);
-      
-      if (examTypeOrderDiff !== 0) {
-        return examTypeOrderDiff;
-      }
-      
-      // If same exam type, sort by submission date (most recent first)
-      return new Date(b.submissionDate).getTime() - new Date(a.submissionDate).getTime();
-    });
-  };
-
-  // Extract sorting logic to a reusable function
-  const applySortConfig = (data: Submission[], key: string, direction: 'asc' | 'desc'): Submission[] => {
-    return [...data].sort((a, b) => {
-      if (key === 'studentName') {
-        const studentA = filteredStudents.find(s => s.id === a.studentId)?.name || '';
-        const studentB = filteredStudents.find(s => s.id === b.studentId)?.name || '';
-        return direction === 'asc' 
-          ? studentA.localeCompare(studentB)
-          : studentB.localeCompare(studentA);
-      }
-      
-      if (key === 'submissionDate') {
-        const dateA = new Date(a.submissionDate).getTime();
-        const dateB = new Date(b.submissionDate).getTime();
-        return direction === 'asc' ? dateA - dateB : dateB - dateA;
-      }
-      
-      if (key === 'score') {
-        const scoreA = a.score || 0;
-        const scoreB = b.score || 0;
-        return direction === 'asc' ? scoreA - scoreB : scoreB - scoreA;
-      }
-      
-      if (key === 'examType') {
-        // Get the exam type names for better display
-        const examTypeA = EXAM_TYPES.find(t => t.id === a.examType)?.name || a.examType;
-        const examTypeB = EXAM_TYPES.find(t => t.id === b.examType)?.name || b.examType;
-        return direction === 'asc' 
-          ? examTypeA.localeCompare(examTypeB)
-          : examTypeB.localeCompare(examTypeA);
-      }
-      
-      // Default case
-      return 0;
-    });
-  };
-
-  // Function to handle sorting when a column header is clicked
-  const handleSort = (key: string) => {
-    let direction: 'asc' | 'desc' = 'asc';
-    
-    if (sortConfig.key === key && sortConfig.direction === 'asc') {
-      direction = 'desc';
-    }
-    
-    setSortConfig({ key, direction });
-    
-    // Sort the submissions based on the selected column
-    const sortedSubmissions = applySortConfig(submissions, key, direction);
-    setSubmissions(sortedSubmissions);
-  };
-
-  // Helper to get exam type name from ID
-  const getExamTypeName = (typeId: string): string => {
-    return EXAM_TYPES.find(t => t.id === typeId)?.name || typeId;
-  };
-
-  // Update useEffect to fetch submissions when subject or exam type changes
-  useEffect(() => {
-    if (selectedSubject && selectedExamType) {
-      fetchSubmissions();
-    }
-  }, [selectedSubject, selectedExamType]);
-
-  // Add function to save feedback
-  const saveSubmissionGrade = async (_studentId: string, score: number, feedbackText: string) => {
-    if (!selectedSubmission || !selectedSubmission.id) {
-      setAlert({
-        open: true,
-        message: 'No submission selected',
-        severity: 'error'
-      });
-      return;
-    }
-    
-    try {
-      setLoading(true);
-      
-      await gradeSubmission(selectedSubmission.id, {
-        score,
-        feedback: feedbackText
-      });
-      
-      setAlert({
-        open: true,
-        message: 'Feedback saved successfully',
-        severity: 'success'
-      });
-      
-      // Refresh submissions data
-      fetchSubmissions();
-    } catch (error) {
-      console.error('Error saving grade:', error);
-      setAlert({
-        open: true,
-        message: 'Failed to save feedback. Please try again.',
-        severity: 'error'
-      });
+      console.error('Error initializing data:', error);
+      showNotification('Failed to load data. Please try again.', 'error');
     } finally {
       setLoading(false);
     }
   };
 
-  // Add a function to handle assignment creation success
-  const handleAssignmentCreated = () => {
-    console.log('Assignment created successfully');
-    setAlert({
-      open: true,
-      message: 'Assignment created and saved to database successfully! Students will now be able to view and submit this assignment.',
-      severity: 'success'
-    });
-    
-    // You could also refresh the assignments list here if you want to show them
-    // fetchAssignments();
+  const fetchTeacherSubjects = async () => {
+    try {
+      const response = await getTeacherSubjects();
+      setSubjects(response);
+    } catch (error) {
+      console.error('Error fetching subjects:', error);
+    }
   };
 
-  // Handle question paper creation
-  const handleQuestionPaperCreated = () => {
-    setAlert({
-      open: true,
-      message: 'Question paper created successfully!',
-      severity: 'success'
-    });
+  const fetchBatches = async () => {
+    try {
+      const response = await getAccessibleBatches();
+      setBatches(Array.isArray(response) ? response : []);
+    } catch (error) {
+      console.error('Error fetching teacher-accessible batches:', error);
+    }
   };
+
+  const fetchStudents = async (batchId?: string) => {
+    try {
+      let response;
+      if (batchId) {
+        // Fetch students from specific batch
+        response = await getStudentsByBatch(batchId);
+      } else {
+        // Fetch all students assigned to this teacher
+        response = await getStudentsByTeacher();
+      }
+      setStudents(response);
+      setStats(prev => ({ ...prev, totalStudents: response.length }));
+    } catch (error) {
+      console.error('Error fetching students:', error);
+      showNotification('Failed to load students. Please try again.', 'error');
+    }
+  };
+
+  const fetchSubmissions = async () => {
+    try {
+      const response = await getTeacherSubmissions();
+      setSubmissions(response);
+      
+      // Update stats based on submissions
+      const pendingGrading = response.filter((sub: any) => !sub.graded).length;
+      const completedGrading = response.filter((sub: any) => sub.graded).length;
+      setStats(prev => ({ 
+        ...prev, 
+        pendingGrading, 
+        completedGrading 
+      }));
+    } catch (error) {
+      console.error('Error fetching submissions:', error);
+      setSubmissions([]);
+    }
+  };
+
+  const fetchAssignments = async () => {
+    try {
+      const response = await getTeacherAssignments();
+      setAssignments(response || []);
+      setStats(prev => ({
+        ...prev,
+        totalAssignments: response.length
+      }));
+    } catch (error) {
+      console.error('Error fetching assignments:', error);
+      setAssignments([]);
+      setStats(prev => ({
+        ...prev,
+        totalAssignments: 0
+      }));
+    }
+  };  const showNotification = (message: string, severity: 'success' | 'error') => {
+    setNotification({ open: true, message, severity });
+  };
+
+  // Grading handlers
+  const handleGradeSubmission = async (submissionId: number) => {
+    const gradeInput = document.getElementById(`grade-${submissionId}`) as HTMLInputElement;
+    const feedbackInput = document.getElementById(`feedback-${submissionId}`) as HTMLInputElement;
+    
+    const grade = gradeInput?.value;
+    const feedback = feedbackInput?.value || '';
+    
+    if (!grade || isNaN(Number(grade)) || Number(grade) < 0 || Number(grade) > 100) {
+      showNotification('Please enter a valid grade between 0 and 100', 'error');
+      return;
+    }
+
+    try {
+      // Call the grading API - we'll need to implement this in teacherService
+      await gradeSubmission(submissionId, Number(grade), feedback);
+      showNotification('Grade submitted successfully!', 'success');
+      fetchSubmissions(); // Refresh the submissions list
+    } catch (error) {
+      console.error('Error grading submission:', error);
+      showNotification('Failed to submit grade. Please try again.', 'error');
+    }
+  };
+
+  const handleViewSubmission = (submission: any) => {
+    // Check if this is a PDF submission
+    if (submission.fileUrl && submission.fileUrl.toLowerCase().includes('.pdf')) {
+      setSelectedSubmission(submission);
+      setShowPDFAnnotator(true);
+    } else {
+      // For text submissions or non-PDF files
+      console.log('Viewing submission:', submission);
+      alert(`Viewing submission by ${submission.Student?.name}:\n\n${submission.submissionText || 'No text content'}`);
+    }
+  };
+
+  const handleClosePDFAnnotator = () => {
+    setShowPDFAnnotator(false);
+    setSelectedSubmission(null);
+  };
+
+  const handlePDFAnnotationSave = async (annotations: any[], gradedPdfUrl: string) => {
+    try {
+      // Save the annotated PDF to the server
+      await saveAnnotatedPDF(selectedSubmission.id, annotations, gradedPdfUrl);
+      
+      console.log('PDF annotations saved:', annotations);
+      console.log('Graded PDF URL:', gradedPdfUrl);
+      showNotification('PDF annotations saved successfully!', 'success');
+      
+      // Refresh submissions to get updated data
+      await fetchSubmissions();
+      
+      handleClosePDFAnnotator();
+    } catch (error) {
+      console.error('Error saving PDF annotations:', error);
+      showNotification('Failed to save PDF annotations. Please try again.', 'error');
+    }
+  };
+
+  const handleDeleteAssignment = async (assignmentId: string, assignmentTitle: string) => {
+    if (!window.confirm(`Are you sure you want to delete "${assignmentTitle}"? This will also delete all submissions and uploaded files. This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      const response = await deleteAssignment(assignmentId);
+      showNotification(
+        `Assignment deleted successfully. ${response.deletedSubmissions || 0} submissions were also removed.`, 
+        'success'
+      );
+      
+      // Refresh assignments and submissions
+      await Promise.all([fetchAssignments(), fetchSubmissions()]);
+    } catch (error) {
+      console.error('Error deleting assignment:', error);
+      showNotification('Failed to delete assignment. Please try again.', 'error');
+    }
+  };
+
+  const StatCard = ({ title, value, icon, description, trend }: { 
+    title: string; 
+    value: number | string; 
+    icon: React.ReactNode; 
+    description: string;
+    trend?: string;
+  }) => (
+    <Card className="border-0 shadow-md hover:shadow-lg transition-shadow">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-medium text-gray-600">{title}</CardTitle>
+        <div className="text-gray-400">{icon}</div>
+      </CardHeader>
+      <CardContent>
+        <div className="text-2xl font-bold text-black">{value}</div>
+        <p className="text-xs text-gray-500 mt-1">{description}</p>
+        {trend && (
+          <div className="flex items-center mt-2">
+            <Badge variant="outline" className="text-xs border-green-200 text-green-800">
+              {trend}
+            </Badge>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+
+  const QuickActionCard = ({ title, description, icon, onClick, disabled = false }: {
+    title: string;
+    description: string;
+    icon: React.ReactNode;
+    onClick: () => void;
+    disabled?: boolean;
+  }) => (
+    <Card 
+      className={`border-0 shadow-md hover:shadow-lg transition-all cursor-pointer ${disabled ? 'opacity-50' : ''}`}
+      onClick={disabled ? undefined : onClick}
+    >
+      <CardContent className="p-6">
+        <div className="flex items-center gap-4">
+          <div className="p-3 bg-gray-100 rounded-lg text-black">
+            {icon}
+          </div>
+          <div className="flex-1">
+            <h3 className="font-semibold text-black mb-1">{title}</h3>
+            <p className="text-sm text-gray-600">{description}</p>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header title="Teacher Portal" />
+        <div className="container mx-auto px-6 py-8">
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="h-8 w-8 animate-spin mr-3" />
+            <span className="text-lg text-gray-600">Loading your dashboard...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <>
+    <div className="min-h-screen bg-gray-50">
       <Header title="Teacher Portal" />
-      <Container maxWidth="xl">
-        <Grid container spacing={3}>
-          <Grid item xs={12}>
-            <Paper sx={{ p: 3, mb: 3 }}>
-              <Typography variant="h5" gutterBottom>
-                Welcome, {teacherInfo?.name || 'Teacher'}!
-              </Typography>
-              
-              {/* Batch Selection Section - More Prominent */}
-              <Box sx={{ mb: 4, p: 2, backgroundColor: '#f5f5f5', borderRadius: 1 }}>
-                <Typography variant="h6" gutterBottom>
-                  Select Student Batch
-                </Typography>
-                
-                {sessionRecoveryAttempted && !loading && (
-                  <Box sx={{ mb: 2, p: 1, backgroundColor: '#fff8e1', borderRadius: 1, border: '1px solid #ffe57f' }}>
-                    <Typography variant="body2" color="warning.main" sx={{ display: 'flex', alignItems: 'center' }}>
-                      <Warning fontSize="small" sx={{ mr: 1 }} />
-                      Your session may have expired. Please select a batch to continue working.
-                    </Typography>
-                  </Box>
-                )}
-                
-                <Grid container spacing={2} alignItems="center">
-                  <Grid item xs={12} md={6}>
-                    <FormControl fullWidth>
-                      <InputLabel>Batch</InputLabel>
-                      <Select
-                        value={selectedBatch}
-                        onChange={handleBatchChange}
-                        disabled={batchesLoading}
-                      >
-                        <MenuItem value="">
-                          <em>Select a batch</em>
-                        </MenuItem>
-                        {availableBatches.map((batch) => (
-                          <MenuItem key={batch.id} value={batch.id}>
-                            {batch.name || batch.id}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                  </Grid>
-                  <Grid item xs={12} md={6}>
-                    <Button
-                      variant="contained"
-                      startIcon={<People />}
-                      onClick={() => fetchStudentsByBatch(selectedBatch)}
-                      disabled={!selectedBatch || loading}
-                      sx={{ mr: 2 }}
-                    >
-                      Load Students
-                    </Button>
-                    <Button
-                      variant="outlined"
-                      startIcon={<Refresh />}
-                      onClick={handleRefreshAll}
-                      disabled={loading || batchesLoading}
-                    >
-                      Refresh All Data
-                    </Button>
-                  </Grid>
-                </Grid>
-                
-                {(loading || batchesLoading) && (
-                  <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-                    <CircularProgress size={24} />
-                  </Box>
-                )}
-                
-                {/* Display message when no students are loaded */}
-                {!loading && studentsList.length === 0 && (
-                  <Box sx={{ mt: 2, p: 2, backgroundColor: '#fff8e1', borderRadius: 1 }}>
-                    <Typography>
-                      No students loaded. Please select a batch and click "Load Students".
-                    </Typography>
-                    {sessionRecoveryAttempted && (
-                      <Button 
-                        variant="contained" 
-                        color="primary"
-                        size="small"
-                        sx={{ mt: 1 }}
-                        onClick={async () => {
-                          const recoverySuccessful = await attemptSessionRecovery();
-                          if (recoverySuccessful && selectedBatch) {
-                            fetchStudentsByBatch(selectedBatch);
-                          }
-                        }}
-                      >
-                        Reconnect Session
-                      </Button>
-                    )}
-                  </Box>
-                )}
-              </Box>
-              
-              {/* Tabs Section */}
-              <Box sx={{ borderBottom: 1, borderColor: 'divider', mt: 4 }}>
-                <Tabs 
-                  value={tabValue} 
-                  onChange={handleTabChange}
-                  aria-label="teacher portal tabs"
-                >
-                  <Tab label="Student List" icon={<Assessment />} iconPosition="start" />
-                  <Tab label="Create Assignment" icon={<CloudUpload />} iconPosition="start" />
-                  <Tab label="Create Question Paper" icon={<Description />} iconPosition="start" />
-                  <Tab label="Grade Students" icon={<CheckCircle />} iconPosition="start" />
-                </Tabs>
-              </Box>
-              
-              {/* Tab Content */}
-              <TabPanel value={tabValue} index={0}>
-                {/* Student List Tab */}
-                <Box>
-                  <Typography variant="h6" gutterBottom>
-                    Students in Selected Batch
-                    <Button 
-                      variant="outlined" 
-                      size="small" 
-                      startIcon={<Refresh />} 
-                      onClick={handleRefresh} 
-                      disabled={loading}
-                      sx={{ ml: 2 }}
-                    >
-                      Refresh
-                    </Button>
-                  </Typography>
 
-                  {loading ? (
-                    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-                      <CircularProgress />
-                    </Box>
-                  ) : (
-                    <TableContainer component={Paper}>
-                      <Table size="small">
-                        <TableHead>
-                          <TableRow>
-                            <TableCell>Student ID</TableCell>
-                            <TableCell>Name</TableCell>
-                            <TableCell>Section</TableCell>
-                            <TableCell>Batch</TableCell>
-                          </TableRow>
-                        </TableHead>
-                        <TableBody>
-                          {filteredStudents.length > 0 ? (
-                            filteredStudents.map((student) => (
-                              <TableRow key={student.id}
-                                sx={{ cursor: 'pointer', '&:hover': { bgcolor: '#f5f5f5' } }}
-                              >
-                                <TableCell>{student.id}</TableCell>
-                                <TableCell>{student.name}</TableCell>
-                                <TableCell>{student.section}</TableCell>
-                                <TableCell>{student.batchName || student.batch}</TableCell>
-                              </TableRow>
-                            ))
-                          ) : (
-                            <TableRow>
-                              <TableCell colSpan={4} align="center">
-                                No students available. Please select a batch.
-                              </TableCell>
-                            </TableRow>
-                          )}
-                        </TableBody>
-                      </Table>
-                    </TableContainer>
-                  )}
-                </Box>
-              </TabPanel>
-              
-              <TabPanel value={tabValue} index={1}>
-                {/* Create Assignment Tab */}
-                <Box sx={{ maxWidth: '800px', mx: 'auto' }}>
-                  <TeacherAssignmentCreator 
-                    subjects={teacherSubjects} 
-                    examTypes={EXAM_TYPES}
-                    onAssignmentCreated={handleAssignmentCreated} 
-                  />
-                </Box>
-              </TabPanel>
+      <div className="container mx-auto px-6 py-8">
+        {/* Header Section */}
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="p-2 bg-black rounded-lg">
+              <GraduationCap className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-black">Teacher Dashboard</h1>
+              <p className="text-gray-600">Manage your classes, assignments, and student progress</p>
+            </div>
+          </div>
+        </div>
 
-              <TabPanel value={tabValue} index={2}>
-                {/* Create Question Paper Tab */}
-                <Box sx={{ maxWidth: '800px', mx: 'auto' }}>
-                  <TeacherQuestionPaperCreator 
-                    subjects={teacherSubjects} 
-                    examTypes={EXAM_TYPES}
-                    onQuestionPaperCreated={handleQuestionPaperCreated} 
-                  />
-                </Box>
-              </TabPanel>
-
-              <TabPanel value={tabValue} index={3}>
-                {/* Student List and Grading Tab */}
-                <Box>
-                  <Grid container spacing={3}>
-                    <Grid item xs={12} md={6}>
-                      <FormControl fullWidth sx={{ mb: 2 }}>
-                        <InputLabel>Subject</InputLabel>
-                        <Select
-                          value={selectedSubject}
-                          onChange={handleSubjectChange}
-                          disabled={subjectsLoading}
-                        >
-                          <MenuItem value="">
-                            <em>Select a subject</em>
-                          </MenuItem>
-                          {teacherSubjects.map((subject) => (
-                            <MenuItem key={subject.id} value={subject.id}>
-                              {subject.name}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-                    </Grid>
-                    <Grid item xs={12} md={6}>
-                      <FormControl fullWidth sx={{ mb: 2 }}>
-                        <InputLabel>Exam Type</InputLabel>
-                        <Select
-                          value={selectedExamType}
-                          onChange={handleExamTypeChange}
-                        >
-                          <MenuItem value="">
-                            <em>Select exam type</em>
-                          </MenuItem>
-                          {EXAM_TYPES.map((type) => (
-                            <MenuItem key={type.id} value={type.id}>
-                              {type.name}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-                    </Grid>
-                  </Grid>
-
-                  {selectedSubject && selectedExamType ? (
-                    <Box>
-                      <Typography variant="h6" gutterBottom>
-                        Student Submissions
-                        <Button 
-                          variant="outlined" 
-                          size="small" 
-                          startIcon={<Refresh />} 
-                          onClick={fetchSubmissions} 
-                          disabled={submissionsLoading}
-                          sx={{ ml: 2 }}
-                        >
-                          Refresh
-                        </Button>
-                      </Typography>
-                      
-                      {submissionsLoading ? (
-                        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2, mb: 2 }}>
-                          <CircularProgress />
-                        </Box>
-                      ) : (
-                        <TableContainer component={Paper} sx={{ mb: 4 }}>
-                          <Table size="small">
-                            <TableHead>
-                              <TableRow>
-                                <TableCell 
-                                  onClick={() => handleSort('studentName')}
-                                  sx={{ cursor: 'pointer' }}
-                                >
-                                  Student Name
-                                  {sortConfig.key === 'studentName' && (
-                                    <span>{sortConfig.direction === 'asc' ? ' ↑' : ' ↓'}</span>
-                                  )}
-                                </TableCell>
-                                <TableCell 
-                                  onClick={() => handleSort('examType')}
-                                  sx={{ cursor: 'pointer' }}
-                                >
-                                  Exam Type
-                                  {sortConfig.key === 'examType' && (
-                                    <span>{sortConfig.direction === 'asc' ? ' ↑' : ' ↓'}</span>
-                                  )}
-                                </TableCell>
-                                <TableCell 
-                                  onClick={() => handleSort('submissionDate')}
-                                  sx={{ cursor: 'pointer' }}
-                                >
-                                  Submission Date
-                                  {sortConfig.key === 'submissionDate' && (
-                                    <span>{sortConfig.direction === 'asc' ? ' ↑' : ' ↓'}</span>
-                                  )}
-                                </TableCell>
-                                <TableCell>Status</TableCell>
-                                <TableCell 
-                                  onClick={() => handleSort('score')}
-                                  sx={{ cursor: 'pointer' }}
-                                >
-                                  Score
-                                  {sortConfig.key === 'score' && (
-                                    <span>{sortConfig.direction === 'asc' ? ' ↑' : ' ↓'}</span>
-                                  )}
-                                </TableCell>
-                                <TableCell>Actions</TableCell>
-                              </TableRow>
-                            </TableHead>
-                            <TableBody>
-                              {submissions.length > 0 ? (
-                                // Only map through actual submissions rather than all students
-                                submissions.map((submission) => {
-                                  // Find the student associated with this submission
-                                  const student = filteredStudents.find(s => s.id === submission.studentId);
-                                  const isGraded = submission.graded;
-                                  
-                                  return (
-                                    <TableRow key={submission.id}>
-                                      <TableCell>{student ? student.name : `Student ID: ${submission.studentId}`}</TableCell>
-                                      <TableCell>{getExamTypeName(submission.examType)}</TableCell>
-                                      <TableCell>
-                                        {new Date(submission.submissionDate).toLocaleDateString()}
-                                      </TableCell>
-                                      <TableCell>
-                                        {!isGraded && <Chip size="small" label="Not Graded" color="warning" />}
-                                        {isGraded && <Chip size="small" label="Graded" color="success" />}
-                                      </TableCell>
-                                      <TableCell>{isGraded ? submission.score : '-'}</TableCell>
-                                      <TableCell>
-                                        <Button 
-                                          variant="contained" 
-                                          size="small" 
-                                          onClick={() => setSelectedSubmission(submission)}
-                                        >
-                                          {isGraded ? 'Review' : 'Grade'}
-                                        </Button>
-                                      </TableCell>
-                                    </TableRow>
-                                  );
-                                })
-                              ) : (
-                                <TableRow>
-                                  <TableCell colSpan={6} align="center">
-                                    No submissions found for this subject and exam type.
-                                  </TableCell>
-                                </TableRow>
-                              )}
-                            </TableBody>
-                          </Table>
-                        </TableContainer>
-                      )}
-                      
-                      {/* Submission Grading Panel */}
-                      {selectedSubmission && (
-                        <Paper sx={{ p: 3, mb: 3, border: '1px solid #e0e0e0' }}>
-                          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                            <Typography variant="h6">
-                              {selectedSubmission.graded ? 'Reviewing' : 'Grading'} Submission
-                            </Typography>
-                            <Button 
-                              size="small" 
-                              onClick={() => {
-                                setSelectedSubmission(null);
-                                setFeedback('');
-                              }}
-                              variant="outlined"
-                            >
-                              Close
-                            </Button>
-                          </Box>
-                          
-                          <Divider sx={{ mb: 2 }} />
-                          
-                          {/* Student info */}
-                          <Box sx={{ mb: 2 }}>
-                            <Typography variant="body2">
-                              <strong>Student:</strong> {filteredStudents.find(s => s.id === selectedSubmission.studentId)?.name || 'Unknown'}
-                            </Typography>
-                            <Typography variant="body2">
-                              <strong>Submitted:</strong> {new Date(selectedSubmission.submissionDate).toLocaleString()}
-                            </Typography>
-                          </Box>
-                          
-                          {/* Submission Content */}
-                          <Box sx={{ bgcolor: '#f5f5f5', p: 2, borderRadius: 1, mb: 3, height: '200px', overflowY: 'auto' }}>
-                            <Typography variant="body2" gutterBottom>
-                              <strong>Submission Content:</strong>
-                            </Typography>
-                            <Typography variant="body2">
-                              {selectedSubmission.submissionText || 'No content available'}
-                            </Typography>
-                          </Box>
-                          
-                          {/* Grading Tools - only show if not already graded */}
-                          {!selectedSubmission.graded && (
-                            <Box sx={{ mb: 3 }}>
-                              <Typography variant="subtitle1" gutterBottom>
-                                Grading Tools
-                              </Typography>
-                              <Box sx={{ display: 'flex', gap: 2 }}>
-                                <Button 
-                                  variant="contained" 
-                                  color="success" 
-                                  startIcon={<CheckCircle />}
-                                  size="small"
-                                >
-                                  Correct
-                                </Button>
-                                <Button 
-                                  variant="contained" 
-                                  color="error" 
-                                  startIcon={<Warning />}
-                                  size="small"
-                                >
-                                  Incorrect
-                                </Button>
-                                <Button 
-                                  variant="contained" 
-                                  color="info" 
-                                  size="small"
-                                >
-                                  Partially Correct
-                                </Button>
-                              </Box>
-                            </Box>
-                          )}
-                          
-                          {/* Score Assignment */}
-                          <Box>
-                            <Typography variant="subtitle1" gutterBottom>
-                              {selectedSubmission.graded ? 'Score and Feedback' : 'Assign Score'}
-                            </Typography>
-                            
-                            {/* Quick Grade Actions */}
-                            {!selectedSubmission.graded && (
-                              <Box sx={{ mb: 3 }}>
-                                <Typography variant="body2" gutterBottom>
-                                  Quick Grade Actions:
-                                </Typography>
-                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                                  <Button 
-                                    variant="outlined" 
-                                    size="small" 
-                                    onClick={() => handleGradeChange(selectedSubmission.studentId, '100')}
-                                  >
-                                    A+ (100)
-                                  </Button>
-                                  <Button 
-                                    variant="outlined" 
-                                    size="small" 
-                                    onClick={() => handleGradeChange(selectedSubmission.studentId, '90')}
-                                  >
-                                    A (90)
-                                  </Button>
-                                  <Button 
-                                    variant="outlined" 
-                                    size="small" 
-                                    onClick={() => handleGradeChange(selectedSubmission.studentId, '80')}
-                                  >
-                                    B (80)
-                                  </Button>
-                                  <Button 
-                                    variant="outlined" 
-                                    size="small" 
-                                    onClick={() => handleGradeChange(selectedSubmission.studentId, '70')}
-                                  >
-                                    C (70)
-                                  </Button>
-                                  <Button 
-                                    variant="outlined" 
-                                    size="small" 
-                                    onClick={() => handleGradeChange(selectedSubmission.studentId, '60')}
-                                  >
-                                    D (60)
-                                  </Button>
-                                  <Button 
-                                    variant="outlined" 
-                                    size="small" 
-                                    color="error"
-                                    onClick={() => handleGradeChange(selectedSubmission.studentId, '0')}
-                                  >
-                                    F (0)
-                                  </Button>
-                                </Box>
-                              </Box>
-                            )}
-                            
-                            <Grid container spacing={2} alignItems="center">
-                              <Grid item xs={12} md={6}>
-                                <TextField
-                                  label="Score"
-                                  type="number"
-                                  fullWidth
-                                  size="small"
-                                  inputProps={{ min: 0, max: 100 }}
-                                  value={grades[selectedSubmission.studentId] || selectedSubmission.score || ''}
-                                  onChange={(e) => handleGradeChange(selectedSubmission.studentId, e.target.value)}
-                                  helperText="Enter score out of 100"
-                                  disabled={selectedSubmission.graded}
-                                />
-                              </Grid>
-                              <Grid item xs={12} md={6}>
-                                <TextField
-                                  label="Feedback"
-                                  fullWidth
-                                  size="small"
-                                  multiline
-                                  rows={2}
-                                  placeholder="Add feedback for the student"
-                                  value={feedback || selectedSubmission.feedback || ''}
-                                  onChange={(e) => setFeedback(e.target.value)}
-                                  disabled={selectedSubmission.graded}
-                                />
-                              </Grid>
-                            </Grid>
-                            
-                            {!selectedSubmission.graded && (
-                              <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
-                                <Button 
-                                  variant="contained" 
-                                  color="primary"
-                                  onClick={() => {
-                                    const score = Number(grades[selectedSubmission.studentId] || 0);
-                                    saveSubmissionGrade(selectedSubmission.studentId, score, feedback);
-                                  }}
-                                  disabled={loading}
-                                >
-                                  {loading ? <CircularProgress size={24} /> : 'Save Grade'}
-                                </Button>
-                              </Box>
-                            )}
-                          </Box>
-                        </Paper>
-                      )}
-                    </Box>
-                  ) : (
-                    <Box sx={{ p: 3, bgcolor: '#f5f5f5', borderRadius: 1 }}>
-                      <Typography>
-                        Please select a subject and exam type to view and grade student submissions.
-                      </Typography>
-                    </Box>
-                  )}
-                </Box>
-              </TabPanel>
-            </Paper>
-          </Grid>
-        </Grid>
-
-        <Snackbar
-          open={alert.open}
-          autoHideDuration={6000}
-          onClose={() => setAlert({...alert, open: false})}
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-        >
-          <Alert 
-            onClose={() => setAlert({...alert, open: false})} 
-            severity={alert.severity}
-            sx={{ width: '100%' }}
-          >
-            {alert.message}
+        {/* Notification */}
+        {notification.open && (
+          <Alert className={`mb-6 ${notification.severity === 'error' ? 'border-red-200 bg-red-50' : 'border-green-200 bg-green-50'}`}>
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription className={notification.severity === 'error' ? 'text-red-800' : 'text-green-800'}>
+              {notification.message}
+            </AlertDescription>
           </Alert>
-        </Snackbar>
-      </Container>
-    </>
+        )}
+
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-6 bg-white border border-gray-200">
+            <TabsTrigger value="dashboard" className="flex items-center gap-2 data-[state=active]:bg-black data-[state=active]:text-white">
+              <BarChart3 className="h-4 w-4" />
+              <span className="hidden sm:inline">Dashboard</span>
+            </TabsTrigger>
+            <TabsTrigger value="students" className="flex items-center gap-2 data-[state=active]:bg-black data-[state=active]:text-white">
+              <Users className="h-4 w-4" />
+              <span className="hidden sm:inline">Students</span>
+            </TabsTrigger>
+            <TabsTrigger value="assignments" className="flex items-center gap-2 data-[state=active]:bg-black data-[state=active]:text-white">
+              <FileText className="h-4 w-4" />
+              <span className="hidden sm:inline">Assignments</span>
+            </TabsTrigger>
+            <TabsTrigger value="grading" className="flex items-center gap-2 data-[state=active]:bg-black data-[state=active]:text-white">
+              <PenTool className="h-4 w-4" />
+              <span className="hidden sm:inline">Grading</span>
+            </TabsTrigger>
+            <TabsTrigger value="questions" className="flex items-center gap-2 data-[state=active]:bg-black data-[state=active]:text-white">
+              <BookOpen className="h-4 w-4" />
+              <span className="hidden sm:inline">Questions</span>
+            </TabsTrigger>
+            <TabsTrigger value="reports" className="flex items-center gap-2 data-[state=active]:bg-black data-[state=active]:text-white">
+              <BarChart3 className="h-4 w-4" />
+              <span className="hidden sm:inline">Reports</span>
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Dashboard Tab */}
+          <TabsContent value="dashboard" className="space-y-6">
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <StatCard
+                title="Total Students"
+                value={stats.totalStudents}
+                icon={<Users className="h-4 w-4" />}
+                description="Students under your guidance"
+                trend="+5 this month"
+              />
+              <StatCard
+                title="Active Assignments"
+                value={stats.totalAssignments}
+                icon={<FileText className="h-4 w-4" />}
+                description="Currently active assignments"
+              />
+              <StatCard
+                title="Pending Grading"
+                value={stats.pendingGrading}
+                icon={<Clock className="h-4 w-4" />}
+                description="Submissions awaiting review"
+              />
+              <StatCard
+                title="Completed Grading"
+                value={stats.completedGrading}
+                icon={<CheckCircle className="h-4 w-4" />}
+                description="Recently graded submissions"
+                trend="+3 today"
+              />
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <QuickActionCard
+                title="Create Assignment"
+                description="Create new assignments for your students"
+                icon={<Plus className="h-5 w-5" />}
+                onClick={() => setActiveTab('assignments')}
+              />
+              <QuickActionCard
+                title="Grade Submissions"
+                description="Review and grade pending submissions"
+                icon={<PenTool className="h-5 w-5" />}
+                onClick={() => setActiveTab('grading')}
+              />
+              <QuickActionCard
+                title="View Students"
+                description="Manage your student roster"
+                icon={<Users className="h-5 w-5" />}
+                onClick={() => setActiveTab('students')}
+              />
+              <QuickActionCard
+                title="Create Questions"
+                description="Build question papers and tests"
+                icon={<BookOpen className="h-5 w-5" />}
+                onClick={() => setActiveTab('questions')}
+              />
+              <QuickActionCard
+                title="Upload Materials"
+                description="Share resources with students"
+                icon={<Upload className="h-5 w-5" />}
+                onClick={() => {}}
+              />
+              <QuickActionCard
+                title="View Reports"
+                description="Analyze student performance"
+                icon={<BarChart3 className="h-5 w-5" />}
+                onClick={() => setActiveTab('reports')}
+              />
+            </div>
+
+            {/* Batch Filter for Dashboard */}
+            <Card className="border-0 shadow-md">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  Batch Overview
+                </CardTitle>
+                <CardDescription>Select a batch to view specific information</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-4">
+                  <Label htmlFor="dashboard-batch-select" className="text-sm font-medium text-gray-700">
+                    Filter by Batch:
+                  </Label>
+                  <select 
+                    id="dashboard-batch-select"
+                    value={selectedBatch} 
+                    onChange={(e) => setSelectedBatch(e.target.value)}
+                    className="px-3 py-2 border border-gray-200 rounded-md focus:border-black focus:ring-black min-w-[200px]"
+                  >
+                    <option value="">All Batches</option>
+                    {batches.map((batch) => {
+                      const label = batch.name || batch.batchName || batch.id;
+                      const extra = batch.startYear && batch.endYear ? ` ${batch.startYear}-${batch.endYear}` : '';
+                      return (
+                        <option key={batch.id} value={batch.id}>
+                          {label}{extra}
+                        </option>
+                      );
+                    })}
+                  </select>
+                  {selectedBatch && (
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => setSelectedBatch('')}
+                      className="border-gray-200 hover:bg-gray-50"
+                    >
+                      Clear Filter
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Recent Activity */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card className="border-0 shadow-md">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Clock className="h-5 w-5" />
+                    Recent Submissions
+                    {selectedBatch && (
+                      <Badge variant="outline" className="ml-2 border-blue-200 text-blue-800">
+                        {batches.find(b => b.id === selectedBatch)?.name}
+                      </Badge>
+                    )}
+                  </CardTitle>
+                  <CardDescription>
+                    Latest student submissions requiring attention
+                    {selectedBatch ? ' from selected batch' : ''}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {submissions.length > 0 ? submissions.map((submission, index) => (
+                      <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div className="flex-1">
+                          <p className="font-medium text-black">{submission.title || 'Assignment'}</p>
+                          <p className="text-sm text-gray-600">{submission.studentName || 'Student'} • {submission.submittedAt || 'Recently'}</p>
+                        </div>
+                        <Badge variant="outline" className="border-orange-200 text-orange-800">
+                          {submission.status || 'Pending'}
+                        </Badge>
+                      </div>
+                    )) : (
+                      <div className="text-center py-4 text-gray-500">
+                        No recent submissions
+                        {selectedBatch && ' from selected batch'}
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-0 shadow-md">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <BookOpen className="h-5 w-5" />
+                    Your Subjects
+                  </CardTitle>
+                  <CardDescription>Subjects you're currently teaching</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {subjects.length > 0 ? subjects.map((subject) => (
+                      <div key={subject.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div className="flex-1">
+                          <p className="font-medium text-black">{subject.name}</p>
+                          <p className="text-sm text-gray-600">{subject.code}</p>
+                        </div>
+                        <Badge variant="outline" className="border-blue-200 text-blue-800">
+                          Active
+                        </Badge>
+                      </div>
+                    )) : (
+                      <div className="text-center py-4 text-gray-500">
+                        No subjects assigned yet
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Students Tab */}
+          <TabsContent value="students" className="space-y-6">
+            <Card className="border-0 shadow-md">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  Student Management
+                </CardTitle>
+                <CardDescription>View and manage students by batch</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-4">
+                      <Label htmlFor="batch-select" className="text-sm font-medium text-gray-700">
+                        Select Batch:
+                      </Label>
+                      <select 
+                        id="batch-select"
+                        value={selectedBatch} 
+                        onChange={(e) => setSelectedBatch(e.target.value)}
+                        className="px-3 py-2 border border-gray-200 rounded-md focus:border-black focus:ring-black min-w-[200px]"
+                      >
+                        <option value="">All Students</option>
+                        {batches.map((batch) => {
+                          const label = batch.name || batch.batchName || batch.id;
+                          const extra = batch.startYear && batch.endYear ? ` ${batch.startYear}-${batch.endYear}` : '';
+                          return (
+                            <option key={batch.id} value={batch.id}>
+                              {label}{extra}
+                            </option>
+                          );
+                        })}
+                      </select>
+                    </div>
+                    <div className="flex-1">
+                      <Input 
+                        placeholder="Search students..." 
+                        className="border-gray-200 focus:border-black focus:ring-black"
+                      />
+                    </div>
+                    <Button variant="outline" className="border-gray-200 hover:bg-gray-50">
+                      <Filter className="h-4 w-4 mr-2" />
+                      Filter
+                    </Button>
+                    <Button className="bg-black hover:bg-gray-800 text-white">
+                      <Download className="h-4 w-4 mr-2" />
+                      Export
+                    </Button>
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm text-gray-600">
+                      Showing {students.length} students
+                      {selectedBatch && (
+                        <span className="ml-2">
+                          from {batches.find(b => b.id === selectedBatch)?.name || 'selected batch'}
+                        </span>
+                      )}
+                    </p>
+                    <Badge variant="outline" className="border-blue-200 text-blue-800">
+                      {selectedBatch ? 'Filtered' : 'All Students'}
+                    </Badge>
+                  </div>
+                  
+                  {loading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="h-6 w-6 animate-spin mr-2" />
+                      Loading students...
+                    </div>
+                  ) : students.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {students.map((student) => (
+                        <Card key={student.id} className="border border-gray-200 hover:shadow-md transition-shadow">
+                          <CardContent className="p-4">
+                            <div className="flex items-start justify-between mb-3">
+                              <div className="flex-1">
+                                <h3 className="font-semibold text-black">{student.name}</h3>
+                                <p className="text-sm text-gray-600">{student.studentId}</p>
+                                <p className="text-sm text-gray-600">{student.email}</p>
+                                {student.batch && (
+                                  <p className="text-sm text-gray-500">Batch: {student.batch}</p>
+                                )}
+                              </div>
+                              <Badge variant="outline" className="border-green-200 text-green-800">
+                                Active
+                              </Badge>
+                            </div>
+                            <div className="space-y-2">
+                              {student.currentGrade && (
+                                <div className="flex items-center justify-between text-sm">
+                                  <span className="text-gray-600">Current Grade:</span>
+                                  <Badge className="bg-blue-100 text-blue-800 border-blue-200">
+                                    {student.currentGrade}
+                                  </Badge>
+                                </div>
+                              )}
+                              <div className="flex items-center gap-2 pt-2">
+                                <Button variant="outline" size="sm" className="flex-1">
+                                  <Eye className="h-4 w-4 mr-2" />
+                                  View Profile
+                                </Button>
+                                <Button variant="outline" size="sm" className="flex-1">
+                                  <BarChart3 className="h-4 w-4 mr-2" />
+                                  Grades
+                                </Button>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">No students found</h3>
+                      <p className="text-gray-600 mb-4">
+                        {selectedBatch 
+                          ? 'No students found in the selected batch' 
+                          : 'No students assigned to you yet'
+                        }
+                      </p>
+                      {selectedBatch && (
+                        <Button 
+                          variant="outline" 
+                          onClick={() => setSelectedBatch('')}
+                          className="border-gray-200 hover:bg-gray-50"
+                        >
+                          View All Students
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Assignments Tab */}
+          <TabsContent value="assignments" className="space-y-6">
+            <Card className="border-0 shadow-md">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="h-5 w-5" />
+                  Assignment Management
+                </CardTitle>
+                <CardDescription>Create and manage assignments for your students</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <TeacherAssignmentCreator 
+                  subjects={subjects}
+                  examTypes={EXAM_TYPES}
+                  onAssignmentCreated={() => {
+                    // Refresh assignments when a new one is created
+                    fetchAssignments();
+                    showNotification('Assignment created successfully!', 'success');
+                  }}
+                />
+              </CardContent>
+            </Card>
+
+            {/* Existing Assignments */}
+            <Card className="border-0 shadow-md">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BookOpen className="h-5 w-5" />
+                  Your Assignments
+                </CardTitle>
+                <CardDescription>View and manage your created assignments</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {assignments.length > 0 ? (
+                  <div className="space-y-4">
+                    {assignments.map((assignment, index) => (
+                      <Card key={assignment.id || index} className="border border-gray-200">
+                        <CardContent className="p-4">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <h4 className="font-medium text-black mb-1">
+                                {assignment.title || `Assignment ${index + 1}`}
+                              </h4>
+                              <p className="text-sm text-gray-600 mb-2">
+                                {assignment.subject || assignment.subjectName} • Due: {assignment.dueDate ? new Date(assignment.dueDate).toLocaleDateString() : 'No due date'}
+                              </p>
+                              <p className="text-xs text-gray-500 line-clamp-2">
+                                {assignment.description || 'No description available'}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Badge variant="outline" className="border-blue-200 text-blue-700">
+                                {assignment.examType || 'Assignment'}
+                              </Badge>
+                              <Badge className={
+                                assignment.status === 'active' ? 'bg-green-100 text-green-800 border-green-200' :
+                                assignment.status === 'draft' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' :
+                                'bg-gray-100 text-gray-800 border-gray-200'
+                              }>
+                                {assignment.status || 'Active'}
+                              </Badge>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="border-red-300 text-red-700 hover:bg-red-100"
+                                onClick={() => handleDeleteAssignment(assignment.id, assignment.title || `Assignment ${index + 1}`)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                          
+                          {/* Assignment File */}
+                          {assignment.fileUrl && (
+                            <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                  <FileText className="h-4 w-4 text-blue-600" />
+                                  <div>
+                                    <p className="text-sm font-medium text-blue-800">Question Paper</p>
+                                    <p className="text-xs text-blue-600">
+                                      {assignment.fileUrl.split('/').pop() || 'Assignment file'}
+                                    </p>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="border-blue-300 text-blue-700 hover:bg-blue-100"
+                                    onClick={() => window.open(`http://localhost:3000${assignment.fileUrl}`, '_blank')}
+                                  >
+                                    <Download className="h-4 w-4 mr-1" />
+                                    Download
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="border-blue-300 text-blue-700 hover:bg-blue-100"
+                                    onClick={() => window.open(`http://localhost:3000${assignment.fileUrl}`, '_blank')}
+                                  >
+                                    <Eye className="h-4 w-4 mr-1" />
+                                    Preview
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                          
+                          {/* Assignment Stats */}
+                          <div className="mt-3 flex items-center gap-4 text-sm text-gray-600">
+                            <span className="flex items-center gap-1">
+                              <Users className="h-4 w-4" />
+                              {assignment.submissionCount || 0} submissions
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Calendar className="h-4 w-4" />
+                              Created {assignment.createdAt ? new Date(assignment.createdAt).toLocaleDateString() : 'Recently'}
+                            </span>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <FileText className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">No assignments created yet</h3>
+                    <p className="text-gray-600 mb-6">Create your first assignment to get started</p>
+                    <Button
+                      onClick={() => setActiveTab('assignments')}
+                      className="bg-black hover:bg-gray-800 text-white"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Create Assignment
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Grading Tab */}
+          <TabsContent value="grading" className="space-y-6">
+            <Card className="border-0 shadow-md">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <PenTool className="h-5 w-5" />
+                  Grading Center
+                </CardTitle>
+                <CardDescription>Review and grade student submissions</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4">
+                    <div className="flex-1">
+                      <Input 
+                        placeholder="Search submissions..." 
+                        className="border-gray-200 focus:border-black focus:ring-black"
+                      />
+                    </div>
+                    <Button variant="outline" className="border-gray-200 hover:bg-gray-50">
+                      <Filter className="h-4 w-4 mr-2" />
+                      Filter
+                    </Button>
+                  </div>
+                  
+                  {/* Submissions List */}
+                  {submissions.length > 0 ? (
+                    <div className="space-y-4">
+                      {submissions.map((submission) => (
+                        <Card key={submission.id} className="border border-gray-200 hover:shadow-md transition-shadow">
+                          <CardContent className="p-6">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1 space-y-2">
+                                <div className="flex items-center gap-4">
+                                  <h3 className="font-semibold text-lg text-black">
+                                    {submission.Assignment?.title || `Assignment ${submission.assignmentId}`}
+                                  </h3>
+                                  <Badge 
+                                    variant="outline" 
+                                    className={submission.graded ? 'border-green-200 text-green-800' : 'border-orange-200 text-orange-800'}
+                                  >
+                                    {submission.graded ? 'Graded' : 'Pending Review'}
+                                  </Badge>
+                                </div>
+                                
+                                <div className="flex items-center gap-6 text-sm text-gray-600">
+                                  <span className="flex items-center gap-1">
+                                    <User className="h-4 w-4" />
+                                    {submission.Student?.name || 'Unknown Student'} ({submission.Student?.section || 'N/A'})
+                                  </span>
+                                  <span className="flex items-center gap-1">
+                                    <BookOpen className="h-4 w-4" />
+                                    {submission.Subject?.name || 'Unknown Subject'}
+                                  </span>
+                                  <span className="flex items-center gap-1">
+                                    <Calendar className="h-4 w-4" />
+                                    Submitted: {submission.submissionDate ? new Date(submission.submissionDate).toLocaleDateString() : 'Unknown'}
+                                  </span>
+                                </div>
+
+                                {/* Submission Preview */}
+                                <div className="mt-3 space-y-3">
+                                  {/* Text Submission */}
+                                  <div className="p-3 bg-gray-50 rounded-lg">
+                                    <p className="text-sm text-gray-700 font-medium mb-1">Text Submission:</p>
+                                    <p className="text-sm text-gray-600 line-clamp-3">
+                                      {submission.submissionText || 'No text submission provided'}
+                                    </p>
+                                  </div>
+
+                                  {/* File Attachment */}
+                                  {submission.fileUrl && (
+                                    <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                                      <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                          <FileText className="h-4 w-4 text-blue-600" />
+                                          <div>
+                                            <p className="text-sm font-medium text-blue-800">Student Submission File</p>
+                                            <p className="text-xs text-blue-600">
+                                              {submission.fileUrl.split('/').pop() || 'Submitted File'}
+                                            </p>
+                                          </div>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                          <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="border-blue-300 text-blue-700 hover:bg-blue-100"
+                                            onClick={() => window.open(`http://localhost:3000${submission.fileUrl}`, '_blank')}
+                                          >
+                                            <Download className="h-4 w-4 mr-1" />
+                                            Download
+                                          </Button>
+                                          {submission.fileUrl.toLowerCase().includes('.pdf') && (
+                                            <Button
+                                              variant="outline"
+                                              size="sm"
+                                              className="border-green-300 text-green-700 hover:bg-green-100"
+                                              onClick={() => handleViewSubmission(submission)}
+                                            >
+                                              <Edit3 className="h-4 w-4 mr-1" />
+                                              Grade PDF
+                                            </Button>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* Graded File (if available) */}
+                                  {submission.gradedFileUrl && (
+                                    <div className="p-3 bg-green-50 rounded-lg border border-green-200">
+                                      <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                          <CheckCircle className="h-4 w-4 text-green-600" />
+                                          <div>
+                                            <p className="text-sm font-medium text-green-800">Graded File with Annotations</p>
+                                            <p className="text-xs text-green-600">
+                                              Contains teacher feedback and corrections
+                                            </p>
+                                          </div>
+                                        </div>
+                                        <Button
+                                          variant="outline"
+                                          size="sm"
+                                          className="border-green-300 text-green-700 hover:bg-green-100"
+                                          onClick={() => window.open(submission.gradedFileUrl, '_blank')}
+                                        >
+                                          <Eye className="h-4 w-4 mr-1" />
+                                          View Graded
+                                        </Button>
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Grade Display/Input */}
+                                {submission.graded ? (
+                                  <div className="flex items-center gap-4 mt-3">
+                                    <Badge className="bg-blue-100 text-blue-800 border-blue-200">
+                                      {submission.score || 0}% ({getLetterGrade(submission.score || 0)})
+                                    </Badge>
+                                    <Badge className="bg-gray-100 text-gray-800 border-gray-200">
+                                      {getGradePoints(submission.score || 0)} GP
+                                    </Badge>
+                                    {submission.feedback && (
+                                      <span className="text-sm text-gray-600">
+                                        Feedback provided
+                                      </span>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <div className="space-y-2 mt-3">
+                                    <div className="flex items-center gap-2">
+                                      <Input 
+                                        type="number" 
+                                        placeholder="Grade (0-100)" 
+                                        className="w-32 text-sm"
+                                        min="0"
+                                        max="100"
+                                        id={`grade-${submission.id}`}
+                                        onChange={(e) => {
+                                          const score = parseInt(e.target.value);
+                                          const previewElement = document.getElementById(`preview-${submission.id}`);
+                                          if (previewElement && !isNaN(score)) {
+                                            previewElement.textContent = `${getLetterGrade(score)} (${getGradePoints(score)} GP)`;
+                                          } else if (previewElement) {
+                                            previewElement.textContent = '';
+                                          }
+                                        }}
+                                      />
+                                      <span id={`preview-${submission.id}`} className="text-sm font-medium text-blue-600"></span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <Input 
+                                        placeholder="Feedback (optional)" 
+                                        className="flex-1 text-sm"
+                                        id={`feedback-${submission.id}`}
+                                      />
+                                      <Button
+                                        size="sm"
+                                        className="bg-black hover:bg-gray-800 text-white"
+                                        onClick={() => handleGradeSubmission(submission.id)}
+                                      >
+                                        Submit Grade
+                                      </Button>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+
+                              <div className="flex items-center gap-2 ml-4">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="border-gray-200 hover:bg-gray-50"
+                                  onClick={() => handleViewSubmission(submission)}
+                                >
+                                  <Eye className="h-4 w-4 mr-2" />
+                                  View Full
+                                </Button>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <PenTool className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                      <h3 className="text-xl font-semibold text-gray-900 mb-2">No submissions yet</h3>
+                      <p className="text-gray-600">Student submissions will appear here when they submit assignments</p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Questions Tab */}
+          <TabsContent value="questions" className="space-y-6">
+            <Card className="border-0 shadow-md">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BookOpen className="h-5 w-5" />
+                  Question Paper Creator
+                </CardTitle>
+                <CardDescription>Create and manage question papers and tests</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <TeacherQuestionPaperCreator 
+                  subjects={subjects}
+                  examTypes={EXAM_TYPES}
+                />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Reports Tab */}
+          <TabsContent value="reports" className="space-y-6">
+            <Card className="border-0 shadow-md">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5" />
+                  Performance Reports
+                </CardTitle>
+                <CardDescription>Analyze student performance and progress</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8 text-gray-500">
+                  Reports and analytics interface will be implemented here
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
+
+      {/* PDF Annotator Modal */}
+      {showPDFAnnotator && selectedSubmission && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg w-full h-full max-w-7xl max-h-[95vh] overflow-hidden flex flex-col">
+            <div className="flex items-center justify-between p-4 border-b">
+              <h2 className="text-xl font-semibold">
+                Grading: {selectedSubmission.Student?.name} - {selectedSubmission.Assignment?.title}
+              </h2>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleClosePDFAnnotator}
+              >
+                Close
+              </Button>
+            </div>
+            <div className="flex-1 overflow-hidden">
+              <PDFAnnotator
+                fileUrl={`http://localhost:3000${selectedSubmission.fileUrl}`}
+                studentName={selectedSubmission.Student?.name || 'Unknown Student'}
+                submissionId={selectedSubmission.id}
+                onSave={handlePDFAnnotationSave}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 

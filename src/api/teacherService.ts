@@ -2,7 +2,24 @@ import axios from 'axios';
 import { Teacher } from '../types/university';
 import config from '../config/environment';
 
-const API_URL = config.API_ENDPOINTS.TEACHERS.BASE;
+// Get the appropriate API base URL based on user role
+const getApiBaseUrl = () => {
+  try {
+    const currentUser = localStorage.getItem(config.AUTH.CURRENT_USER_KEY);
+    if (currentUser) {
+      const userData = JSON.parse(currentUser);
+      // Admin now uses same base URL; previously separate admin port removed.
+      if (userData.role === 'admin') {
+        return config.API_BASE_URL;
+      }
+    }
+  } catch (e) {
+    // Fallback to regular API
+  }
+  return config.API_BASE_URL;
+};
+
+const getApiUrl = () => `${getApiBaseUrl()}/teachers`;
 
 // Get token from storage
 const getToken = () => {
@@ -157,6 +174,8 @@ const multipartConfig = () => {
 // Get all teachers
 export const getTeachers = async () => {
   try {
+    const API_URL = getApiUrl();
+    console.log('Fetching teachers from:', API_URL);
     const response = await axios.get(API_URL, authConfig());
     return response.data;
   } catch (error) {
@@ -167,6 +186,7 @@ export const getTeachers = async () => {
 // Get teacher by ID
 export const getTeacherById = async (id: string) => {
   try {
+    const API_URL = getApiUrl();
     const response = await axios.get(`${API_URL}/${id}`, authConfig());
     return response.data;
   } catch (error) {
@@ -177,6 +197,7 @@ export const getTeacherById = async (id: string) => {
 // Create teacher
 export const createTeacher = async (teacher: Teacher) => {
   try {
+    const API_URL = getApiUrl();
     const response = await axios.post(API_URL, teacher, authConfig());
     return response.data;
   } catch (error) {
@@ -187,6 +208,7 @@ export const createTeacher = async (teacher: Teacher) => {
 // Update teacher
 export const updateTeacher = async (id: string, teacher: Partial<Teacher>) => {
   try {
+    const API_URL = getApiUrl();
     const response = await axios.put(`${API_URL}/${id}`, teacher, authConfig());
     return response.data;
   } catch (error) {
@@ -197,6 +219,7 @@ export const updateTeacher = async (id: string, teacher: Partial<Teacher>) => {
 // Delete teacher
 export const deleteTeacher = async (id: string) => {
   try {
+    const API_URL = getApiUrl();
     const response = await axios.delete(`${API_URL}/${id}`, authConfig());
     return response.data;
   } catch (error) {
@@ -207,6 +230,7 @@ export const deleteTeacher = async (id: string) => {
 // Assign subject to teacher
 export const assignSubject = async (teacherId: string, subjectId: string) => {
   try {
+    const API_URL = getApiUrl();
     const response = await axios.post(
       `${API_URL}/${teacherId}/subjects`,
       { subjectId },
@@ -221,6 +245,7 @@ export const assignSubject = async (teacherId: string, subjectId: string) => {
 // Remove subject from teacher
 export const removeSubject = async (teacherId: string, subjectId: string) => {
   try {
+    const API_URL = getApiUrl();
     const response = await axios.delete(
       `${API_URL}/${teacherId}/subjects/${subjectId}`,
       authConfig()
@@ -237,6 +262,7 @@ export const importTeachersFromExcel = async (file: File) => {
     const formData = new FormData();
     formData.append('file', file);
 
+    const API_URL = getApiUrl();
     const response = await axios.post(
       `${API_URL}/import-excel`,
       formData,
@@ -249,8 +275,27 @@ export const importTeachersFromExcel = async (file: File) => {
 };
 
 // Get students by teacher ID
-export const getStudentsByTeacher = async (teacherId: string) => {
+export const getStudentsByTeacher = async (teacherId?: string) => {
   try {
+    // If teacherId not provided, derive from current user
+    if (!teacherId) {
+      const userData = localStorage.getItem(config.AUTH.CURRENT_USER_KEY);
+      if (userData) {
+        try {
+          const user = JSON.parse(userData);
+          if (user && user.id) {
+            teacherId = user.id;
+          }
+        } catch (e) {
+          console.error('Failed parsing user data for teacherId:', e);
+        }
+      }
+    }
+
+    if (!teacherId) {
+      throw new Error('Teacher ID is missing. Please re-login.');
+    }
+
     console.log(`Fetching students for teacher ID: ${teacherId}`);
     
     // Check if we have a token
@@ -265,10 +310,8 @@ export const getStudentsByTeacher = async (teacherId: string) => {
     const authHeaders = authConfig();
     console.log('Request headers:', authHeaders.headers);
     
-    const response = await axios.get(
-      `${API_URL}/${teacherId}/students`,
-      authHeaders
-    );
+  const API_URL = getApiUrl();
+  const response = await axios.get(`${API_URL}/${teacherId}/students`, authHeaders);
     
     console.log(`API returned ${response.data ? response.data.length : 0} students`);
     return response.data || [];
@@ -330,7 +373,8 @@ export const getTeacherSubjects = async () => {
     
     const teacherId = teacherInfo.id;
     console.log('Teacher ID from localStorage:', teacherId);
-    console.log('API URL:', `${API_URL}/subjects`);
+  const API_URL = getApiUrl();
+  console.log('API URL:', `${API_URL}/subjects`);
     
     // Check if we have a token
     const token = getToken();
@@ -344,7 +388,7 @@ export const getTeacherSubjects = async () => {
     console.log('Request headers:', authHeaders.headers);
     
     const response = await axios.get(
-      `${API_URL}/subjects`,
+  `${API_URL}/subjects`,
       authHeaders
     );
     
@@ -377,6 +421,137 @@ export const getTeacherSubjects = async () => {
   }
 };
 
+// Get batches accessible to current teacher (based on their assigned subjects)
+export const getAccessibleBatches = async () => {
+  try {
+    const token = getToken();
+    if (!token) throw new Error('Authentication token missing. Please log in again.');
+    const authHeaders = authConfig();
+  const API_URL = getApiUrl();
+  const response = await axios.get(`${API_URL}/batches`, authHeaders);
+    return Array.isArray(response.data) ? response.data : [];
+  } catch (error: any) {
+    console.error('Error fetching accessible batches:', error);
+    throw error;
+  }
+};
+
+// Create assignment
+export const createAssignment = async (assignmentData: {
+  title: string;
+  description: string;
+  subjectId: string;
+  dueDate: string;
+  maxMarks?: number;
+}) => {
+  try {
+    const API_URL = `${getApiBaseUrl()}/assignments`;
+    console.log('Creating assignment at:', API_URL);
+    const response = await axios.post(API_URL, assignmentData, authConfig());
+    return response.data;
+  } catch (error: any) {
+    console.error('Error creating assignment:', error);
+    throw error;
+  }
+};
+
+// Get assignments for the current teacher
+export const getTeacherAssignments = async () => {
+  try {
+    console.log('Fetching teacher assignments...');
+    
+    const response = await axios.get(
+      `${config.API_ENDPOINTS.ASSIGNMENTS}/teacher`,
+      authConfig()
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching teacher assignments:', error);
+    throw error;
+  }
+};
+
+// Get submissions for the current teacher
+export const getTeacherSubmissions = async () => {
+  try {
+    console.log('Fetching teacher submissions...');
+    
+    // Get current user info
+    const userData = localStorage.getItem(config.AUTH.CURRENT_USER_KEY);
+    const teacherInfo = userData ? JSON.parse(userData) : null;
+    
+    if (!teacherInfo || !teacherInfo.id) {
+      console.error('No teacher info found in localStorage');
+      throw new Error('Teacher information not available');
+    }
+    
+    console.log('Using teacher ID:', teacherInfo.id);
+    
+    const response = await axios.get(
+      `${config.API_ENDPOINTS.SUBMISSIONS}/teacher/${teacherInfo.id}`,
+      authConfig()
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching teacher submissions:', error);
+    throw error;
+  }
+};
+
+// Grade a submission
+export const gradeSubmission = async (submissionId: number, score: number, feedback: string) => {
+  try {
+    console.log('Grading submission:', submissionId, score, feedback);
+    const response = await axios.put(
+      `${config.API_ENDPOINTS.SUBMISSIONS}/${submissionId}`,
+      {
+        score,
+        feedback,
+        plagiarismScore: 0 // Default for now
+      },
+      authConfig()
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error grading submission:', error);
+    throw error;
+  }
+};
+
+// Delete assignment
+export const deleteAssignment = async (assignmentId: string) => {
+  try {
+    console.log('Deleting assignment:', assignmentId);
+    const response = await axios.delete(
+      `${config.API_ENDPOINTS.ASSIGNMENTS}/${assignmentId}`,
+      authConfig()
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting assignment:', error);
+    throw error;
+  }
+};
+
+// Save annotated PDF for a submission
+export const saveAnnotatedPDF = async (submissionId: number, annotations: any[], gradedPdfUrl: string) => {
+  try {
+    console.log('Saving annotated PDF for submission:', submissionId);
+    const response = await axios.post(
+      `${config.API_ENDPOINTS.SUBMISSIONS}/${submissionId}/annotated-pdf`,
+      {
+        annotations,
+        gradedPdfUrl
+      },
+      authConfig()
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error saving annotated PDF:', error);
+    throw error;
+  }
+};
+
 export default {
   getTeachers,
   getTeacherById,
@@ -388,5 +563,12 @@ export default {
   importTeachersFromExcel,
   getStudentsByTeacher,
   getSubmissionsByTeacher,
-  getTeacherSubjects
+  getTeacherSubjects,
+  getAccessibleBatches,
+  createAssignment,
+  getTeacherAssignments,
+  getTeacherSubmissions,
+  gradeSubmission,
+  deleteAssignment,
+  saveAnnotatedPDF
 }; 

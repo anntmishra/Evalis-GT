@@ -1,4 +1,4 @@
-const { DataTypes } = require('sequelize');
+const { DataTypes, Op } = require('sequelize');
 const bcrypt = require('bcryptjs');
 const { sequelize } = require('../config/db');
 
@@ -14,8 +14,15 @@ const Teacher = sequelize.define('Teacher', {
   },
   email: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true, // Allow null so teachers can be created without email, controller will generate if needed
     unique: true,
+    validate: {
+      isEmailOrNull(value) {
+        if (value && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(value)) {
+          throw new Error('Invalid email format');
+        }
+      }
+    }
   },
   password: {
     type: DataTypes.STRING,
@@ -58,9 +65,7 @@ Teacher.generateTeacherId = async function() {
     const latestTeacher = await this.findOne({
       order: [['createdAt', 'DESC']],
       where: {
-        id: {
-          [sequelize.Op.like]: 'T%'
-        }
+        id: { [Op.like]: 'T%' }
       }
     });
 

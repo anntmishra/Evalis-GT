@@ -65,7 +65,7 @@ const BatchList: React.FC<BatchListProps> = ({ onBatchChange }) => {
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [formData, setFormData] = useState<BatchFormData>({
     name: '',
-    department: '',
+    department: 'BTech',
     startYear: new Date().getFullYear(),
     endYear: new Date().getFullYear() + 4,
     active: true
@@ -135,11 +135,12 @@ const BatchList: React.FC<BatchListProps> = ({ onBatchChange }) => {
 
   // Add batch handlers
   const handleShowAddModal = () => {
+    const currentYear = new Date().getFullYear();
     setFormData({
       name: '',
-      department: '',
-      startYear: new Date().getFullYear(),
-      endYear: new Date().getFullYear() + 4,
+      department: 'BTech',
+      startYear: currentYear,
+      endYear: currentYear + 4,
       active: true
     });
     setShowAddModal(true);
@@ -148,7 +149,15 @@ const BatchList: React.FC<BatchListProps> = ({ onBatchChange }) => {
   const handleAddBatch = async () => {
     try {
       setLoading(true);
-      await createBatch(formData);
+      // Auto-generate name if left blank
+      const payload = { ...formData } as BatchFormData;
+      if (!payload.name.trim()) {
+        payload.name = `${payload.department} ${payload.startYear}-${payload.endYear}`;
+      }
+      if (payload.endYear <= payload.startYear) {
+        throw new Error('End year must be greater than start year');
+      }
+      await createBatch(payload);
       await fetchBatches();
       setShowAddModal(false);
       setError(null);
@@ -158,7 +167,8 @@ const BatchList: React.FC<BatchListProps> = ({ onBatchChange }) => {
       }
     } catch (err) {
       console.error('Error adding batch:', err);
-      setError('Failed to add batch. Please try again.');
+      const message = (err as any)?.response?.data?.message || (err as Error).message || 'Failed to add batch. Please try again.';
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -182,7 +192,14 @@ const BatchList: React.FC<BatchListProps> = ({ onBatchChange }) => {
     
     try {
       setLoading(true);
-      await updateBatch(currentBatch.id, formData);
+      const payload = { ...formData } as BatchFormData;
+      if (!payload.name.trim()) {
+        payload.name = `${payload.department} ${payload.startYear}-${payload.endYear}`;
+      }
+      if (payload.endYear <= payload.startYear) {
+        throw new Error('End year must be greater than start year');
+      }
+      await updateBatch(currentBatch.id, payload);
       await fetchBatches();
       setShowEditModal(false);
       setError(null);
@@ -192,7 +209,8 @@ const BatchList: React.FC<BatchListProps> = ({ onBatchChange }) => {
       }
     } catch (err) {
       console.error('Error updating batch:', err);
-      setError('Failed to update batch. Please try again.');
+      const message = (err as any)?.response?.data?.message || (err as Error).message || 'Failed to update batch. Please try again.';
+      setError(message);
     } finally {
       setLoading(false);
     }

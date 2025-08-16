@@ -36,7 +36,7 @@ import {
   Semester 
 } from '../api/semesterService';
 import { getAllBatches } from '../api/batchService';
-import { generateSemestersForBatch, setActiveSemesterForBatch } from '../api/adminService';
+import { generateSemestersForBatch, setActiveSemesterForBatch, activateSemester, deactivateSemester } from '../api/adminService';
 
 // Define a Batch interface if not available from batchService
 interface Batch {
@@ -131,7 +131,15 @@ const SemesterManagement: React.FC<SemesterManagementProps> = ({ onSuccess, onEr
       }
     } catch (error: any) {
       console.error('Error generating semesters', error);
-      onError(error.response?.data?.message || 'Failed to generate semesters');
+      const status = error.status || error.response?.status;
+      const backendMsg = error.message || error.response?.data?.message;
+      if (status === 401) {
+        onError('Not authenticated. Please log out and log back in as an admin.');
+      } else if (status === 403) {
+        onError('Permission denied. Your token is not an admin token.');
+      } else {
+        onError(backendMsg || 'Failed to generate semesters');
+      }
     } finally {
       setGeneratingSemesters(false);
     }
@@ -166,6 +174,36 @@ const SemesterManagement: React.FC<SemesterManagementProps> = ({ onSuccess, onEr
     } catch (error: any) {
       console.error('Error setting active semester', error);
       onError(error.response?.data?.message || 'Failed to set active semester');
+    } finally {
+      setSettingActive(false);
+      setActiveSettingId(null);
+    }
+  };
+
+  const handleToggleActive = async (semesterId: string, isActive: boolean) => {
+    setSettingActive(true);
+    setActiveSettingId(semesterId);
+    try {
+      if (isActive) {
+        await deactivateSemester(semesterId);
+        onSuccess('Semester deactivated');
+      } else {
+        await activateSemester(semesterId);
+        onSuccess('Semester activated');
+      }
+      if (selectedBatch) {
+        loadSemesters(selectedBatch);
+      }
+    } catch (e: any) {
+      console.error('Toggle active error', e);
+      const status = e.status || e.response?.status;
+      if (status === 401) {
+        onError('Not authenticated. Please re-login as admin.');
+      } else if (status === 403) {
+        onError('Access denied. Admin privileges required.');
+      } else {
+        onError(e.message || 'Failed to toggle semester');
+      }
     } finally {
       setSettingActive(false);
       setActiveSettingId(null);
@@ -273,21 +311,34 @@ const SemesterManagement: React.FC<SemesterManagementProps> = ({ onSuccess, onEr
                   <TableCell>
                     {new Date(semester.endDate).toLocaleDateString()}
                   </TableCell>
-                  <TableCell align="center">
-                    <Tooltip title="Set as Active Semester">
-                      <IconButton
-                        color="primary"
-                        onClick={() => handleOpenSetActiveDialog(semester.id)}
-                        disabled={semester.active || settingActive}
-                      >
-                        {activeSettingId === semester.id && settingActive ? (
-                          <CircularProgress size={24} />
-                        ) : semester.active ? (
-                          <CheckCircleIcon sx={{ color: green[500] }} />
-                        ) : (
-                          <CheckCircleIcon sx={{ color: grey[400] }} />
-                        )}
-                      </IconButton>
+                  <TableCell align="center" sx={{ display: 'flex', justifyContent: 'center', gap: 1 }}>
+                    <Tooltip title="Set Active (updates students)">
+                      <span>
+                        <IconButton
+                          color="primary"
+                          onClick={() => handleOpenSetActiveDialog(semester.id)}
+                          disabled={settingActive && activeSettingId === semester.id}
+                        >
+                          {activeSettingId === semester.id && settingActive ? (
+                            <CircularProgress size={24} />
+                          ) : (
+                            <CheckCircleIcon sx={{ color: semester.active ? green[500] : grey[400] }} />
+                          )}
+                        </IconButton>
+                      </span>
+                    </Tooltip>
+                    <Tooltip title={semester.active ? 'Deactivate Semester' : 'Activate Semester (exclusive)'}>
+                      <span>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          color={semester.active ? 'warning' : 'success'}
+                          disabled={settingActive && activeSettingId === semester.id}
+                          onClick={() => handleToggleActive(semester.id, semester.active)}
+                        >
+                          {settingActive && activeSettingId === semester.id ? 'Working...' : semester.active ? 'Deactivate' : 'Activate'}
+                        </Button>
+                      </span>
                     </Tooltip>
                   </TableCell>
                 </TableRow>

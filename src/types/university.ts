@@ -19,6 +19,8 @@ export interface Subject {
   batchId?: string;
   Batch?: any;
   Semester?: any;
+  code?: string; // optional shorthand code used in UI
+  instructor?: string; // optional instructor name populated client-side
 }
 
 export interface StudentSubmission {
@@ -35,6 +37,20 @@ export interface StudentSubmission {
   graded: boolean;
   gradedBy: string | null;
   gradedDate: string | null;
+  // Additional fields for enhanced functionality
+  title?: string;
+  subject?: string;
+  submittedAt?: string;
+  status?: 'pending' | 'submitted' | 'graded';
+  grade?: number;
+  letterGrade?: string;
+  gradePoints?: number;
+  assignmentId?: string;
+  filePath?: string;
+  fileName?: string;
+  fileUrl?: string;
+  gradedFileUrl?: string;
+  annotations?: string;
 }
 
 export interface Batch {

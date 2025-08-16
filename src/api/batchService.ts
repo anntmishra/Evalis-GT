@@ -1,7 +1,23 @@
 import axios from 'axios';
 import config from '../config/environment';
 
-const API_URL = config.API_ENDPOINTS.BATCHES;
+// Get the appropriate API base URL based on user role
+const getApiBaseUrl = () => {
+  try {
+    const currentUser = localStorage.getItem(config.AUTH.CURRENT_USER_KEY);
+    if (currentUser) {
+      const userData = JSON.parse(currentUser);
+      if (userData.role === 'admin') {
+        return config.ADMIN_API_BASE_URL;
+      }
+    }
+  } catch (e) {
+    // Fallback to regular API
+  }
+  return config.API_BASE_URL;
+};
+
+const getApiUrl = () => `${getApiBaseUrl()}/batches`;
 
 // Get token from storage
 const getToken = () => {
@@ -26,20 +42,36 @@ const authConfig = () => {
 
 // Get all batches
 export const getAllBatches = async () => {
+  const API_URL = getApiUrl();
+  
+  if (!API_URL) {
+    throw new Error('API URL not configured');
+  }
+  
   try {
+    console.log('Fetching batches from:', API_URL);
     const response = await axios.get(API_URL, authConfig());
+    console.log('Batches response:', response.data);
     return response.data;
   } catch (error) {
+    console.error('Error fetching batches:', error);
     throw error;
   }
 };
 
 // Get batch by ID
 export const getBatchById = async (id: string) => {
+  const API_URL = getApiUrl();
+  
+  if (!API_URL) {
+    throw new Error('API URL not configured');
+  }
+  
   try {
     const response = await axios.get(`${API_URL}/${id}`, authConfig());
     return response.data;
   } catch (error) {
+    console.error('Error fetching batch:', error);
     throw error;
   }
 };
@@ -52,10 +84,17 @@ export const createBatch = async (batch: {
   endYear: number;
   active?: boolean;
 }) => {
+  const API_URL = getApiUrl();
+  
+  if (!API_URL) {
+    throw new Error('API URL not configured');
+  }
+  
   try {
     const response = await axios.post(API_URL, batch, authConfig());
     return response.data;
   } catch (error) {
+    console.error('Error creating batch:', error);
     throw error;
   }
 };
@@ -68,20 +107,34 @@ export const updateBatch = async (id: string, batch: {
   endYear: number;
   active?: boolean;
 }) => {
+  const API_URL = getApiUrl();
+  
+  if (!API_URL) {
+    throw new Error('API URL not configured');
+  }
+  
   try {
     const response = await axios.put(`${API_URL}/${id}`, batch, authConfig());
     return response.data;
   } catch (error) {
+    console.error('Error updating batch:', error);
     throw error;
   }
 };
 
 // Delete batch
 export const deleteBatch = async (id: string) => {
+  const API_URL = getApiUrl();
+  
+  if (!API_URL) {
+    throw new Error('API URL not configured');
+  }
+  
   try {
     const response = await axios.delete(`${API_URL}/${id}`, authConfig());
     return response.data;
   } catch (error) {
+    console.error('Error deleting batch:', error);
     throw error;
   }
 };

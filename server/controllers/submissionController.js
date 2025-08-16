@@ -2,6 +2,30 @@ const asyncHandler = require('express-async-handler');
 const { Submission, Student, Subject, Teacher, TeacherSubject, Assignment } = require('../models');
 const { Op } = require('sequelize');
 
+// Grade Scale System
+const GRADE_SCALE = [
+  { min: 100, max: 100, grade: 'O', gradePoint: 10.0 },
+  { min: 90, max: 99, grade: 'A+', gradePoint: 9.0 },
+  { min: 81, max: 89, grade: 'A', gradePoint: 8.0 },
+  { min: 77, max: 80, grade: 'B+', gradePoint: 7.0 },
+  { min: 66, max: 76, grade: 'B', gradePoint: 6.0 },
+  { min: 55, max: 65, grade: 'C+', gradePoint: 5.0 },
+  { min: 45, max: 54, grade: 'C', gradePoint: 4.0 },
+  { min: 33, max: 44, grade: 'D', gradePoint: 3.0 },
+  { min: 0, max: 32, grade: 'F', gradePoint: 0.0 }
+];
+
+// Helper functions for grade calculation
+const calculateLetterGrade = (score) => {
+  const grade = GRADE_SCALE.find(scale => score >= scale.min && score <= scale.max);
+  return grade ? grade.grade : 'F';
+};
+
+const calculateGradePoints = (score) => {
+  const grade = GRADE_SCALE.find(scale => score >= scale.min && score <= scale.max);
+  return grade ? grade.gradePoint : 0.0;
+};
+
 /**
  * @desc    Get all submissions
  * @route   GET /api/submissions
@@ -195,6 +219,12 @@ const updateSubmission = asyncHandler(async (req, res) => {
   submission.feedback = feedback !== undefined ? feedback : submission.feedback;
   submission.plagiarismScore = plagiarismScore !== undefined ? plagiarismScore : submission.plagiarismScore;
 
+  // Calculate letter grade if score is provided
+  if (score !== undefined) {
+    submission.letterGrade = calculateLetterGrade(score);
+    submission.gradePoints = calculateGradePoints(score);
+  }
+
   // If this is being graded for the first time
   if (!submission.graded && score !== undefined) {
     submission.graded = true;
@@ -381,7 +411,13 @@ const getSubmissionsByTeacher = asyncHandler(async (req, res) => {
  */
 const submitAssignment = asyncHandler(async (req, res) => {
   const assignmentId = req.params.id;
-  const { submissionText, fileUrl } = req.body;
+  const { submissionText } = req.body;
+
+  console.log('Submit assignment request:', {
+    assignmentId,
+    submissionText: submissionText ? 'provided' : 'empty',
+    file: req.file ? req.file.filename : 'no file'
+  });
 
   // Verify the assignment exists
   const assignment = await Assignment.findByPk(assignmentId);
@@ -410,6 +446,9 @@ const submitAssignment = asyncHandler(async (req, res) => {
     throw new Error('You have already submitted this assignment');
   }
 
+  // Get file URL if file was uploaded
+  const fileUrl = req.file ? `/uploads/submissions/${req.file.filename}` : null;
+
   // Create submission
   const submission = await Submission.create({
     studentId: req.user.id,
@@ -417,7 +456,7 @@ const submitAssignment = asyncHandler(async (req, res) => {
     assignmentId,
     examType: assignment.examType,
     submissionText: submissionText || '',
-    fileUrl: fileUrl || null,
+    fileUrl: fileUrl,
     submissionDate: new Date(),
     score: null,
     plagiarismScore: 0,
@@ -435,6 +474,48 @@ const submitAssignment = asyncHandler(async (req, res) => {
   }
 });
 
+/**
+ * @desc    Save annotated PDF for a submission
+ * @route   POST /api/submissions/:id/annotated-pdf
+ * @access  Private/Teacher
+ */
+const saveAnnotatedPDF = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { annotations, gradedPdfUrl } = req.body;
+
+  const submission = await Submission.findByPk(id);
+
+  if (!submission) {
+    res.status(404);
+    throw new Error('Submission not found');
+  }
+
+  // Update submission with annotated PDF URL and annotations
+  await submission.update({
+    gradedFileUrl: gradedPdfUrl,
+    annotations: JSON.stringify(annotations),
+    gradedBy: req.user.id,
+    gradedDate: new Date(),
+    status: 'graded'
+  });
+
+  res.json({
+    message: 'Annotated PDF saved successfully',
+    submission: await Submission.findByPk(id, {
+      include: [
+        {
+          model: Student,
+          attributes: ['id', 'name', 'section', 'batch']
+        },
+        {
+          model: Assignment,
+          attributes: ['id', 'title', 'description']
+        }
+      ]
+    })
+  });
+});
+
 module.exports = {
   getSubmissions,
   getSubmissionById,
@@ -443,5 +524,6 @@ module.exports = {
   deleteSubmission,
   getSubmissionsBySubject,
   getSubmissionsByTeacher,
-  submitAssignment
+  submitAssignment,
+  saveAnnotatedPDF
 }; 

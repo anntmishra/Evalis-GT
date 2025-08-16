@@ -13,8 +13,8 @@ const { logger, requestLogger } = require('./utils/logger');
 const healthRoutes = require('./routes/healthRoutes');
 const { validateSession } = require('./utils/sessionManager');
 
-// Load env vars
-dotenv.config();
+// Load env vars from root directory
+dotenv.config({ path: path.join(__dirname, '../.env') });
 
 // Log environment variables
 logger.info('Starting Evalis Server...');
@@ -37,8 +37,7 @@ const assignmentRoutes = require('./routes/assignmentRoutes');
 const startServerOnPort = (app, port, maxAttempts = 10) => {
   if (maxAttempts <= 0) {
     logger.error('Exceeded maximum port attempts. Cannot start server.');
-    process.exit(1);
-    return;
+    return Promise.reject(new Error('Max port attempts exceeded'));
   }
 
   return new Promise((resolve, reject) => {
@@ -49,13 +48,19 @@ const startServerOnPort = (app, port, maxAttempts = 10) => {
       })
       .on('error', (err) => {
         if (err.code === 'EADDRINUSE') {
-          logger.warn(`Port ${port} is in use, trying port ${port + 1}...`);
-          // Close the server that failed to bind
-          server.close();
-          // Try the next port
-          startServerOnPort(app, parseInt(port) + 1, maxAttempts - 1)
-            .then(resolve)
-            .catch(reject);
+          // If we have remaining attempts, recurse (incremental search mode)
+          if (maxAttempts > 1) {
+            logger.warn(`Port ${port} is in use, trying port ${parseInt(port,10) + 1}...`);
+            server.close();
+            startServerOnPort(app, parseInt(port,10) + 1, maxAttempts - 1)
+              .then(resolve)
+              .catch(reject);
+          } else {
+            // No remaining attempts for this invocation (e.g. candidatePorts path with maxAttempts=1)
+            logger.warn(`Port ${port} is in use (single-attempt mode); moving to next candidate if available.`);
+            server.close();
+            reject(err); // allow outer candidatePorts loop to continue
+          }
         } else {
           logger.error(`Failed to start server: ${err.message}`);
           reject(err);
@@ -130,10 +135,13 @@ const startServer = async () => {
     // Connect to database
     await connectDB();
     
-    // Initialize models and sync database
-    logger.info('Initializing database models...');
-    await models.initModels();
-    logger.info('Database models initialized successfully');
+    // Sync models with database
+    // In production, you shouldn't use force: true
+    const isDev = process.env.NODE_ENV === 'development';
+    logger.info(`Syncing database in ${isDev ? 'development' : 'production'} mode...`);
+    
+    await models.sequelize.sync({ alter: true });
+    logger.info('Database synced successfully');
     
     const app = express();
     
@@ -142,19 +150,75 @@ const startServer = async () => {
       app.use(requestLogger);
     }
 
-    // Session validation middleware
-    app.use(validateSession);
-    
-    // Middleware
+    // CORS must run BEFORE session validation so even 401 responses get headers
+    const devOrigins = ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175'];
+    const rawConfiguredOrigins = (process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',') : []).filter(Boolean);
+    const allowLocalhost = process.env.CORS_ALLOW_LOCALHOST === 'true';
+
+    // Validate and normalize configured origins to avoid runtime URL parsing errors
+    const validConfiguredOrigins = [];
+    for (const o of rawConfiguredOrigins) {
+      const trimmed = o.trim();
+      if (!trimmed) continue;
+      try {
+        const u = new URL(trimmed);
+        if (!/^https?:$/.test(u.protocol)) {
+          logger.warn(`Ignoring FRONTEND_URL entry (unsupported protocol): ${trimmed}`);
+          continue;
+        }
+        // Normalize by removing trailing slashes
+        const normalized = `${u.protocol}//${u.host}`;
+        validConfiguredOrigins.push(normalized);
+      } catch (e) {
+        logger.warn(`Invalid FRONTEND_URL entry ignored: ${trimmed} -> ${e.message}`);
+      }
+    }
+
+    const baseAllowed = new Set([...(process.env.NODE_ENV === 'development' ? devOrigins : []), ...validConfiguredOrigins]);
+
+    // Expose current allowed origins for debugging
+    logger.info(`CORS allowed (base) origins: ${Array.from(baseAllowed).join(', ') || '(none)'}`);
+    if (allowLocalhost) logger.info('CORS localhost wildcard enabled');
+    if (process.env.CORS_ALLOW_ANY === 'true') logger.warn('CORS_ALLOW_ANY=true (permissive)');
+
+    const corsOriginFn = (origin, callback) => {
+      if (!origin) return callback(null, true); // non-browser / curl
+      if (baseAllowed.has(origin)) return callback(null, true);
+      if (allowLocalhost && /^(http:\/\/localhost:\d+|http:\/\/127\.0\.0\.1:\d+)/.test(origin)) return callback(null, true);
+      if (process.env.CORS_ALLOW_ANY === 'true') return callback(null, true);
+      logger.debug(`CORS reject origin: ${origin}`);
+      return callback(new Error(`CORS blocked for origin ${origin}`));
+    };
+
     app.use(cors({
-      origin: process.env.NODE_ENV === 'development' 
-        ? ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175']
-        : process.env.FRONTEND_URL?.split(',') || false,
+      origin: corsOriginFn,
       credentials: true,
-      methods: ['GET', 'POST', 'PUT', 'DELETE'],
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization'],
-      maxAge: 86400 // Cache preflight requests for 24 hours
+      exposedHeaders: ['Content-Type'],
+      maxAge: 86400
     }));
+
+    // Session validation AFTER CORS
+    app.use(validateSession);
+
+    // Manual OPTIONS handler for reliability (uses same logic as primary CORS)
+    app.options('*', (req, res) => {
+      const origin = req.headers.origin;
+      if (!origin) {
+        return res.sendStatus(204);
+      }
+      corsOriginFn(origin, (err) => {
+        if (!err) {
+          res.header('Access-Control-Allow-Origin', origin);
+          res.header('Vary', 'Origin');
+        }
+        res.header('Access-Control-Allow-Credentials', 'true');
+        res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,PATCH,OPTIONS');
+        res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+        res.sendStatus(204);
+      });
+    });
     app.use(express.json({ limit: process.env.MAX_FILE_SIZE || '10mb' })); // Configurable JSON payload size
     app.use(express.urlencoded({ extended: true, limit: process.env.MAX_FILE_SIZE || '10mb' })); // Configurable form data size
     
@@ -205,6 +269,19 @@ const startServer = async () => {
       });
     });
     
+    // Debug route to inspect current CORS configuration (development only)
+    if (process.env.NODE_ENV === 'development') {
+      app.get('/api/debug/cors-origins', (req, res) => {
+        res.json({
+          baseAllowed: Array.from(baseAllowed),
+          allowLocalhost,
+            allowAny: process.env.CORS_ALLOW_ANY === 'true',
+          rawConfiguredOrigins,
+          validConfiguredOrigins
+        });
+      });
+    }
+
     // Routes
     app.use('/api/auth', authRoutes);
     app.use('/api/students', studentRoutes);
@@ -225,11 +302,47 @@ const startServer = async () => {
     app.use(notFound);
     app.use(errorHandler);
     
-    // Use a different port if the default is already in use
-    const initialPort = parseInt(process.env.PORT) || DEFAULT_PORT;
-    
-    // Start the server with port retry mechanism
-    await startServerOnPort(app, initialPort);
+    // Port selection logic
+        // Support a FIXED_PORT to disable auto-increment logic (useful for docker / predictable local dev)
+        if (process.env.FIXED_PORT) {
+          const fixed = parseInt(process.env.FIXED_PORT,10);
+          if (!isNaN(fixed)) {
+            logger.info(`FIXED_PORT detected (${fixed}) - skipping candidate/auto increment logic`);
+            await startServerOnPort(app, fixed, 1);
+            return; // Stop further port logic
+          }
+        }
+
+        const initialPort = parseInt(process.env.PORT) || DEFAULT_PORT;
+    const candidatePorts = (process.env.PORT_CANDIDATES || '')
+      .split(',')
+      .map(p => p.trim())
+      .filter(Boolean)
+      .map(p => parseInt(p, 10))
+      .filter(n => !isNaN(n) && n > 0 && n < 65536);
+
+    if (candidatePorts.length) {
+      logger.info(`Attempting candidate ports (PORT_CANDIDATES): ${candidatePorts.join(', ')}`);
+      let started = false;
+      for (const p of candidatePorts) {
+        try {
+          await startServerOnPort(app, p, 1); // single attempt for each specified port
+          started = true;
+          break;
+        } catch (e) {
+          logger.warn(`Failed to bind candidate port ${p}: ${e.code || e.message}`);
+        }
+      }
+      if (!started) {
+        logger.warn('All candidate ports failed, falling back to incremental search starting at ' + initialPort);
+        await startServerOnPort(app, initialPort);
+      } else {
+        logger.info('Server started on one of the candidate ports successfully.');
+      }
+    } else {
+      // Start the server with incremental retry mechanism
+      await startServerOnPort(app, initialPort);
+    }
   } catch (error) {
     logger.error(`Error starting server: ${error.message}`);
     process.exit(1);

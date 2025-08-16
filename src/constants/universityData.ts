@@ -1,13 +1,14 @@
 import { Teacher } from '../types/university';
-import { STUDENTS, SUBJECTS, EXAM_TYPES, GRADE_SCALE, STUDENT_SUBMISSIONS } from '../data/universityData';
+import { SUBJECTS, EXAM_TYPES, GRADE_SCALE } from '../data/universityData';
 
 // Re-export for backwards compatibility
-export { STUDENTS, SUBJECTS, EXAM_TYPES, GRADE_SCALE, STUDENT_SUBMISSIONS };
+export { SUBJECTS, EXAM_TYPES, GRADE_SCALE };
 
 // Backward compatibility for components that expect BATCHES
+// Students are now fetched dynamically from the database
 export const BATCHES: any = {
   '2023': {
-    students: STUDENTS['2023-2027'] || [],
+    students: [], // Fetch from API using getStudentsByBatch
     subjects: [...SUBJECTS['CSE-1'], ...SUBJECTS['CSE-2']]
   },
   '2024': {
@@ -18,13 +19,7 @@ export const BATCHES: any = {
       { code: 'CSE402', name: 'Web Technologies' },
       { code: 'CSE502', name: 'Machine Learning' },
     ],
-    students: [
-      { id: '24001', name: 'Advait Mehta', email: 'advait.mehta@bennett.edu.in' },
-      { id: '24002', name: 'Ananya Reddy', email: 'ananya.reddy@bennett.edu.in' },
-      { id: '24003', name: 'Reyansh Gupta', email: 'reyansh.gupta@bennett.edu.in' },
-      { id: '24004', name: 'Ishaan Verma', email: 'ishaan.verma@bennett.edu.in' },
-      { id: '24005', name: 'Aisha Kapoor', email: 'aisha.kapoor@bennett.edu.in' },
-    ],
+    students: [], // Fetch from API using getStudentsByBatch
   },
 };
 

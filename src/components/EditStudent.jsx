@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getStudentById, updateStudent, createStudent, getBatches } from '../api';
+import { getStudentById, updateStudent, createStudent, getBatches, deleteStudent } from '../api';
 
 export default function EditStudent({ studentId, onClose, onSuccess }) {
   const [student, setStudent] = useState({
@@ -16,6 +16,8 @@ export default function EditStudent({ studentId, onClose, onSuccess }) {
   const [error, setError] = useState(null);
   const [initialPassword, setInitialPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -89,6 +91,29 @@ export default function EditStudent({ studentId, onClose, onSuccess }) {
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(initialPassword);
+  };
+
+  const handleDelete = async () => {
+    try {
+      setDeleting(true);
+      setError(null);
+      
+      await deleteStudent(studentId);
+      
+      if (onSuccess) {
+        onSuccess();
+      }
+      
+      if (onClose) {
+        onClose();
+      }
+    } catch (err) {
+      console.error('Error deleting student:', err);
+      setError(err.response?.data?.message || 'Failed to delete student. Please try again.');
+    } finally {
+      setDeleting(false);
+      setShowDeleteConfirm(false);
+    }
   };
 
   if (loading) {
@@ -249,25 +274,73 @@ export default function EditStudent({ studentId, onClose, onSuccess }) {
           </div>
         </div>
         
-        <div className="mt-6 flex justify-end space-x-3">
-          {onClose && (
+        <div className="mt-6 flex justify-between">
+          {/* Delete button (only show when editing existing student) */}
+          {studentId && (
             <button
               type="button"
-              onClick={onClose}
-              className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              onClick={() => setShowDeleteConfirm(true)}
+              disabled={saving || deleting}
+              className="px-4 py-2 border border-red-300 rounded-md shadow-sm text-sm font-medium text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
             >
-              Cancel
+              {deleting ? 'Deleting...' : 'Delete Student'}
             </button>
           )}
-          <button
-            type="submit"
-            disabled={saving}
-            className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
-          >
-            {saving ? 'Saving...' : 'Save'}
-          </button>
+          
+          {/* Right-aligned buttons */}
+          <div className="flex space-x-3 ml-auto">
+            {onClose && (
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                Cancel
+              </button>
+            )}
+            <button
+              type="submit"
+              disabled={saving || deleting}
+              className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+            >
+              {saving ? 'Saving...' : 'Save'}
+            </button>
+          </div>
         </div>
       </form>
+      
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">
+              Confirm Delete
+            </h3>
+            <p className="text-sm text-gray-500 mb-6">
+              Are you sure you want to delete student <strong>{student.name}</strong> (ID: {student.id})? 
+              This action cannot be undone and will permanently remove the student and all associated data.
+            </p>
+            <div className="flex justify-end space-x-3">
+              <button
+                type="button"
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={deleting}
+                className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDelete}
+                disabled={deleting}
+                className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
+              >
+                {deleting ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 

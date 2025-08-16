@@ -7,10 +7,14 @@ const {
   updateStudent,
   deleteStudent,
   getStudentSubmissions,
+  getCurrentStudentSubmissions,
+  getStudentSubjects,
+  getCurrentStudentSubjects,
   importStudents,
   importStudentsFromExcel,
   getStudentProfile
 } = require('../controllers/studentController');
+const { getStudentAssignmentsByParam } = require('../controllers/assignmentController');
 const { protect, admin, student } = require('../middleware/authMiddleware');
 
 // Student routes
@@ -20,6 +24,12 @@ router.route('/')
 
 router.route('/profile')
   .get(protect, student, getStudentProfile);
+
+router.route('/subjects')
+  .get(protect, student, getCurrentStudentSubjects);
+
+router.route('/submissions')
+  .get(protect, student, getCurrentStudentSubmissions);
 
 router.route('/import')
   .post(protect, admin, importStudents);
@@ -34,5 +44,11 @@ router.route('/:id')
 
 router.route('/:id/submissions')
   .get(protect, getStudentSubmissions);
+
+router.route('/:id/subjects')
+  .get(protect, getStudentSubjects);
+
+router.route('/:id/assignments')
+  .get(protect, getStudentAssignmentsByParam);
 
 module.exports = router; 

@@ -5,15 +5,13 @@ import config from '../config/environment';
  * Get token from local storage
  */
 export const getToken = (): string | null => {
-  // First try to get Firebase token
-  let token = localStorage.getItem('firebaseToken');
-  
-  // Then fall back to our stored token
-  if (!token) {
-    token = localStorage.getItem(config.AUTH.TOKEN_STORAGE_KEY);
-  }
-  
-  return token;
+  // IMPORTANT: Prefer our application-issued JWT (may carry admin role)
+  // over any Firebase ID token that might belong to a non-admin user still in storage.
+  // Previous ordering caused admin actions to send a Firebase token (student/teacher)
+  // resulting in 401/403 on protected admin routes.
+  const appToken = localStorage.getItem(config.AUTH.TOKEN_STORAGE_KEY);
+  if (appToken) return appToken;
+  return localStorage.getItem('firebaseToken');
 };
 
 /**
@@ -69,13 +67,8 @@ export const refreshFirebaseToken = async (): Promise<string | null> => {
 
 // Function to get current token or refresh if needed
 export const getAuthToken = async (): Promise<string | null> => {
-  // First try to get Firebase token
-  let token = localStorage.getItem('firebaseToken');
-  
-  // Then fall back to our stored token
-  if (!token) {
-    token = localStorage.getItem(config.AUTH.TOKEN_STORAGE_KEY);
-  }
+  // Prefer app token first (could hold admin role)
+  let token = localStorage.getItem(config.AUTH.TOKEN_STORAGE_KEY) || localStorage.getItem('firebaseToken');
   
   // If we have a Firebase user but token is missing or potentially expired, refresh it
   if (auth.currentUser) {
@@ -108,8 +101,7 @@ export const getAuthToken = async (): Promise<string | null> => {
 
 // Function to check if user is authenticated
 export const isAuthenticated = (): boolean => {
-  const token = localStorage.getItem(config.AUTH.TOKEN_STORAGE_KEY) || 
-                localStorage.getItem('firebaseToken');
+  const token = localStorage.getItem(config.AUTH.TOKEN_STORAGE_KEY) || localStorage.getItem('firebaseToken');
   const userData = localStorage.getItem(config.AUTH.CURRENT_USER_KEY);
   
   // Also check if we have a current Firebase user

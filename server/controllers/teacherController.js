@@ -1,5 +1,5 @@
 const asyncHandler = require('express-async-handler');
-const { Teacher, Subject, TeacherSubject, Student, Batch } = require('../models');
+const { Teacher, Subject, TeacherSubject, Student, Batch, Semester } = require('../models');
 const XLSX = require('xlsx');
 const jwt = require('jsonwebtoken');
 const { Op } = require('sequelize');
@@ -54,7 +54,7 @@ const createTeacher = asyncHandler(async (req, res) => {
     console.log('Teacher creation request received');
     console.log('Request body:', req.body);
     
-    const { name, email, subjects, password, role } = req.body;
+  const { name, email, subjects, password, role } = req.body;
     let { id } = req.body;
 
     console.log('Extracted fields:', { id, name, email, subjectsLength: subjects?.length });
@@ -72,8 +72,8 @@ const createTeacher = asyncHandler(async (req, res) => {
       console.log('Generated teacher ID:', id);
     }
 
-    // Generate email if not provided
-    const teacherEmail = email || Teacher.generateEmail(name);
+  // Generate email if not provided (optional flow)
+  const teacherEmail = email || null; // allow null now; generation removed to avoid accidental duplicates
     console.log('Teacher email:', teacherEmail);
 
     // Import generateRandomPassword
@@ -96,12 +96,13 @@ const createTeacher = asyncHandler(async (req, res) => {
     }
 
     // Check if email already exists
-    const emailExists = await Teacher.findOne({ where: { email: teacherEmail } });
-    
-    if (emailExists) {
-      console.log('Email already in use:', teacherEmail);
-      res.status(400);
-      throw new Error('Email already in use');
+    if (teacherEmail) {
+      const emailExists = await Teacher.findOne({ where: { email: teacherEmail } });
+      if (emailExists) {
+        console.log('Email already in use:', teacherEmail);
+        res.status(400);
+        throw new Error('Email already in use');
+      }
     }
 
     console.log('Creating teacher in database...');
@@ -109,7 +110,7 @@ const createTeacher = asyncHandler(async (req, res) => {
     const teacher = await Teacher.create({
       id,
       name,
-      email: teacherEmail,
+  email: teacherEmail,
       password: teacherPassword,
       role: role || 'teacher', // Ensure role is set
     });
@@ -137,46 +138,68 @@ const createTeacher = asyncHandler(async (req, res) => {
       console.log('Teacher created successfully:', teacher.id);
       
       // If email is provided, create Firebase user and send password reset link
-      if (email) {
+      if (teacherEmail) {
         try {
-          console.log(`Attempting to create Firebase user for teacher ${id} with email ${email}`);
+          console.log(`Attempting to create Firebase user for teacher ${id} with email ${teacherEmail}`);
           
           // Import Firebase functions
-          const { createFirebaseUser, sendPasswordResetEmail } = require('../utils/firebaseUtils');
+          const { createFirebaseUser, generatePasswordResetLink } = require('../utils/firebaseUtils');
           const { sendPasswordResetLink, sendLoginCredentials } = require('../utils/emailUtils');
           
-          // Create Firebase user
-          const firebaseUser = await createFirebaseUser(email, teacherPassword, {
-            id: teacher.id,
-            name: teacher.name,
-          });
+          // Check if Firebase Admin SDK is available
+          let resetLinkSent = false;
           
-          console.log(`Firebase user created successfully with UID: ${firebaseUser?.uid}`);
+          try {
+            // Create Firebase user
+            const firebaseResult = await createFirebaseUser(teacherEmail, teacherPassword, {
+              id: teacher.id,
+              name: teacher.name,
+            });
+            
+            if (firebaseResult.success) {
+              console.log(`Firebase user created successfully with UID: ${firebaseResult.uid}`);
+              
+              // Generate password reset link using Admin SDK
+              console.log(`Generating password reset link for ${teacherEmail}`);
+              const resetLinkResult = await generatePasswordResetLink(teacherEmail);
+              
+              if (resetLinkResult.success) {
+                console.log(`Password reset link generated successfully`);
+                
+                // Send password reset email
+                console.log(`Sending password reset email to ${teacherEmail}`);
+                await sendPasswordResetLink({
+                  email: teacherEmail,
+                  name: teacher.name,
+                }, resetLinkResult.resetLink);
+                
+                console.log(`Password reset link sent to ${teacherEmail}`);
+                resetLinkSent = true;
+              } else {
+                console.warn(`Failed to generate reset link: ${resetLinkResult.error}`);
+              }
+            } else {
+              console.warn(`Failed to create Firebase user: ${firebaseResult.error}`);
+            }
+          } catch (firebaseError) {
+            console.warn(`Firebase operations failed for teacher ${id}:`, firebaseError.message);
+            console.log(`Falling back to direct credentials email for ${teacherEmail}`);
+          }
           
-          // Generate password reset link
-          console.log(`Generating password reset link for ${email}`);
-          const resetLink = await sendPasswordResetEmail(email);
-          
-          console.log(`Password reset link generated: ${resetLink.substring(0, 30)}...`);
-          
-          // Send password reset email
-          console.log(`Sending password reset email to ${email}`);
-          await sendPasswordResetLink({
-            email,
-            name: teacher.name,
-          }, resetLink);
-          
-          console.log(`Password reset link sent to ${email}`);
-          
-          // Also send login credentials for reference (creating a teacher version of this utility)
+          // Always send login credentials for reference (or as fallback if Firebase failed)
           await sendLoginCredentials({
-            email,
+            email: teacherEmail,
             name: teacher.name,
             id: teacher.id
           }, teacherPassword);
           
-          console.log(`Login credentials sent to ${email}`);
-          console.log(`All Firebase operations completed successfully for teacher ${id}`);
+          console.log(`Login credentials sent to ${teacherEmail}`);
+          
+          if (resetLinkSent) {
+            console.log(`All Firebase operations completed successfully for teacher ${id}`);
+          } else {
+            console.log(`Teacher ${id} created with direct password delivery (Firebase unavailable)`);
+          }
         } catch (error) {
           console.error(`Error with Firebase operations for teacher ${id}:`, error);
           // Don't fail the whole operation if Firebase operations fail
@@ -189,7 +212,7 @@ const createTeacher = asyncHandler(async (req, res) => {
         email: teacher.email,
         Subjects: teacher.Subjects || [],
         role: teacher.role,
-        initialPassword: email ? teacherPassword : undefined
+        initialPassword: teacherEmail ? teacherPassword : undefined
       });
     } else {
       console.log('Failed to create teacher');
@@ -338,12 +361,42 @@ const deleteTeacher = asyncHandler(async (req, res) => {
   const teacher = await Teacher.findOne({ where: { id: req.params.id } });
 
   if (teacher) {
+    console.log(`Deleting teacher: ${teacher.id} (${teacher.name})`);
+    
+    // If teacher has an email, delete their Firebase account
+    if (teacher.email) {
+      try {
+        console.log(`Attempting to delete Firebase user for email: ${teacher.email}`);
+        const { deleteFirebaseUserByEmail } = require('../utils/firebaseUtils');
+        
+        const deleteResult = await deleteFirebaseUserByEmail(teacher.email);
+        
+        if (deleteResult.success) {
+          console.log(`Firebase user deleted successfully for teacher ${teacher.id}: ${deleteResult.message}`);
+        } else {
+          console.warn(`Failed to delete Firebase user for teacher ${teacher.id}: ${deleteResult.error}`);
+        }
+      } catch (error) {
+        console.error(`Error deleting Firebase user for teacher ${teacher.id}:`, error);
+        // Continue with deletion even if Firebase operations fail
+      }
+    } else {
+      console.log(`Teacher ${teacher.id} has no email, skipping Firebase deletion`);
+    }
+    
     // First delete all teacher-subject associations
+    console.log(`Deleting teacher-subject associations for teacher ${teacher.id}`);
     await TeacherSubject.destroy({ where: { teacherId: teacher.id } });
     
-    // Then delete the teacher
+    // Then delete the teacher from database
+    console.log(`Deleting teacher ${teacher.id} from database`);
     await teacher.destroy();
-    res.json({ message: 'Teacher removed' });
+    
+    console.log(`Teacher ${teacher.id} successfully deleted from system and Firebase`);
+    res.json({ 
+      message: 'Teacher removed', 
+      firebaseDeleted: !!teacher.email 
+    });
   } else {
     res.status(404);
     throw new Error('Teacher not found');
@@ -660,18 +713,12 @@ const getStudentsByTeacher = asyncHandler(async (req, res) => {
 
     // First, get all the teacher's subjects with their section details
     const teacherSubjects = await Subject.findAll({
-      where: {
-        id: {
-          [Op.in]: subjectIds
-        }
-      },
+      where: { id: { [Op.in]: subjectIds } },
       include: [
-        // Check if Batch model is available before using it in the include
-        Batch ? {
-          model: Batch,
-          through: { attributes: [] }
-        } : null
-      ].filter(Boolean) // Filter out null values if Batch is undefined
+        Batch ? { model: Batch } : null,
+        // Include semester so we can infer batch if subject has only semester linkage
+        Semester ? { model: Semester, attributes: ['id','batchId'] } : null
+      ].filter(Boolean)
     });
 
     console.log(`Found ${teacherSubjects.length} subjects with details`);
@@ -679,6 +726,9 @@ const getStudentsByTeacher = asyncHandler(async (req, res) => {
       console.log(`Subject ${subject.id}: ${subject.name}, Section: ${subject.section}`);
       if (subject.Batches) {
         console.log(`  Associated with batches: ${subject.Batches.map(b => b.id).join(', ')}`);
+      }
+      if (subject.Semester && subject.Semester.batchId) {
+        console.log(`  Inferred batch from semester: ${subject.Semester.batchId}`);
       }
     });
 
@@ -690,11 +740,15 @@ const getStudentsByTeacher = asyncHandler(async (req, res) => {
     const taughtBatches = new Set();
     teacherSubjects.forEach(subject => {
       if (subject.Batches && Array.isArray(subject.Batches) && subject.Batches.length > 0) {
-        subject.Batches.forEach(batch => {
-          if (batch && batch.id) {
-            taughtBatches.add(batch.id);
-          }
-        });
+        subject.Batches.forEach(batch => { if (batch && batch.id) taughtBatches.add(batch.id); });
+      }
+      // If no direct batch linkage but semester has batchId
+      if ((!subject.Batches || subject.Batches.length === 0) && subject.Semester && subject.Semester.batchId) {
+        taughtBatches.add(subject.Semester.batchId);
+      }
+      // Also fallback to legacy subject.batchId field
+      if (subject.batchId) {
+        taughtBatches.add(subject.batchId);
       }
     });
     const batchArray = [...taughtBatches];
@@ -730,11 +784,21 @@ const getStudentsByTeacher = asyncHandler(async (req, res) => {
         : whereClause;
 
     // Now find students in those sections or batches
-    const students = await Student.findAll({
+    let students = await Student.findAll({
       where: finalWhereClause,
       attributes: { exclude: ['password'] },
       order: [['id', 'ASC']]
     });
+
+    // Fallback: if no students returned but we have taught batches, fetch by batch only.
+    if (students.length === 0 && batchArray.length > 0) {
+      console.log('Primary student search empty; applying batch-only fallback');
+      students = await Student.findAll({
+        where: { batch: { [Op.in]: batchArray } },
+        attributes: { exclude: ['password'] },
+        order: [['id', 'ASC']]
+      });
+    }
 
     console.log(`Found ${students.length} students`);
 
@@ -986,44 +1050,60 @@ const getAccessibleStudents = asyncHandler(async (req, res) => {
 const getAccessibleBatches = asyncHandler(async (req, res) => {
   try {
     const teacherId = req.user.id;
-    
-    // Find all subjects assigned to the teacher along with their batch information
-    const teacherWithSubjects = await Teacher.findByPk(teacherId, {
-      include: [{
-        model: Subject,
-        include: [{
-          model: Batch
-        }]
-      }]
+    const debug = req.query.debug === '1';
+
+    // Step 1: Fetch subject IDs from join table (authoritative for assignments)
+    const teacherSubjectLinks = await TeacherSubject.findAll({
+      where: { teacherId },
+      attributes: ['subjectId']
     });
-    
-    if (!teacherWithSubjects) {
-      res.status(404);
-      throw new Error('Teacher not found');
-    }
-    
-    // Extract unique batch IDs from teacher's subjects
-    const batchIds = [...new Set(
-      teacherWithSubjects.Subjects
-        .map(subject => subject.batchId)
-        .filter(id => id) // Filter out any undefined or null values
-    )];
-    
-    if (batchIds.length === 0) {
-      // Teacher has no assigned subjects with batches
+    const subjectIds = teacherSubjectLinks.map(l => l.subjectId);
+
+    if (subjectIds.length === 0) {
+      if (debug) return res.json({ batches: [], debug: { subjectIds: [], note: 'No subject assignments for this teacher' } });
       return res.json([]);
     }
-    
-    // Find all batches
-    const batches = await Batch.findAll({
-      where: {
-        id: {
-          [Op.in]: batchIds
-        }
-      }
+
+    // Step 2: Load subjects with minimal fields + Semester for batch linkage
+    const subjects = await Subject.findAll({
+      where: { id: { [Op.in]: subjectIds } },
+      attributes: ['id','name','batchId','semesterId'],
+      include: [ { model: Semester, attributes: ['id','batchId'] } ]
     });
-    
-    res.json(batches);
+
+    // Step 3: Derive batch IDs from multiple sources
+    const batchIdSet = new Set();
+    subjects.forEach(s => {
+      if (s.batchId) batchIdSet.add(s.batchId);
+      if (s.batch) batchIdSet.add(s.batch); // legacy
+      if (s.Semester && s.Semester.batchId) batchIdSet.add(s.Semester.batchId);
+    });
+
+    // Step 4: Fallback raw query if still none (covers schema edge cases)
+    if (batchIdSet.size === 0) {
+      const [rows] = await sequelize.query(`
+        SELECT DISTINCT COALESCE("Subjects"."batchId", "Semesters"."batchId") AS "batchId"
+        FROM "TeacherSubjects"
+        JOIN "Subjects" ON "Subjects"."id" = "TeacherSubjects"."subjectId"
+        LEFT JOIN "Semesters" ON "Semesters"."id" = "Subjects"."semesterId"
+        WHERE "TeacherSubjects"."teacherId" = :teacherId
+      `, { replacements: { teacherId } });
+      rows.forEach(r => r.batchId && batchIdSet.add(r.batchId));
+    }
+
+    const batchIds = [...batchIdSet];
+    if (batchIds.length === 0) {
+      if (debug) return res.json({ batches: [], debug: { subjectIds, subjects, note: 'No batchIds derivable from subjects/semesters' } });
+      return res.json([]);
+    }
+
+    // Step 5: Fetch batch records
+    const batches = await Batch.findAll({ where: { id: { [Op.in]: batchIds } } });
+    const normalized = batches.map(b => ({ id: b.id, name: b.name || b.id, startYear: b.startYear, endYear: b.endYear }));
+
+    if (debug) return res.json({ batches: normalized, debug: { subjectIds, subjects: subjects.map(s => ({ id: s.id, batchId: s.batchId, semesterId: s.semesterId, semesterBatch: s.Semester?.batchId })) } });
+
+    res.json(normalized);
   } catch (error) {
     console.error('Error fetching accessible batches:', error);
     res.status(500).json({ message: 'Server error while fetching batches' });

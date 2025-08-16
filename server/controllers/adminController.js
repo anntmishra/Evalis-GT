@@ -12,6 +12,596 @@ const {
 const { createSemestersForBatch } = require('../utils/seedData');
 
 /**
+ * @desc    Get dashboard statistics
+ * @route   GET /api/admin/dashboard
+ * @access  Private/Admin
+ */
+const getDashboardStats = asyncHandler(async (req, res) => {
+  try {
+    const [studentCount, teacherCount, batchCount, subjectCount] = await Promise.all([
+      Student.count(),
+      Teacher.count(),
+      Batch.count(),
+      Subject.count()
+    ]);
+
+    res.json({
+      success: true,
+      data: {
+        totalStudents: studentCount,
+        totalTeachers: teacherCount,
+        totalBatches: batchCount,
+        totalSubjects: subjectCount
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching dashboard stats:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch dashboard statistics'
+    });
+  }
+});
+
+/**
+ * @desc    Get all batches
+ * @route   GET /api/admin/batches
+ * @access  Private/Admin
+ */
+const getBatches = asyncHandler(async (req, res) => {
+  try {
+    const batches = await Batch.findAll({
+      order: [['startYear', 'DESC']]
+    });
+
+    res.json(batches);
+  } catch (error) {
+    console.error('Error fetching batches:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch batches'
+    });
+  }
+});
+
+/**
+ * @desc    Create a new batch
+ * @route   POST /api/admin/batches
+ * @access  Private/Admin
+ */
+const createBatch = asyncHandler(async (req, res) => {
+  try {
+    const { name, department, startYear, endYear, active = true } = req.body;
+
+    if (!name || !department || !startYear || !endYear) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide name, department, startYear, and endYear'
+      });
+    }
+
+    // Check if batch already exists
+    const existingBatch = await Batch.findOne({
+      where: { name, startYear, endYear }
+    });
+
+    if (existingBatch) {
+      return res.status(400).json({
+        success: false,
+        message: 'Batch with this name and years already exists'
+      });
+    }
+
+    const batch = await Batch.create({
+      name,
+      department,
+      startYear,
+      endYear,
+      active
+    });
+
+    res.status(201).json({
+      success: true,
+      data: batch
+    });
+  } catch (error) {
+    console.error('Error creating batch:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to create batch'
+    });
+  }
+});
+
+/**
+ * @desc    Get all teachers
+ * @route   GET /api/admin/teachers
+ * @access  Private/Admin
+ */
+const getTeachers = asyncHandler(async (req, res) => {
+  try {
+    const teachers = await Teacher.findAll({
+      attributes: { exclude: ['password'] },
+      include: [
+        {
+          model: Subject,
+          through: { attributes: [] },
+          attributes: ['id', 'name', 'code']
+        }
+      ]
+    });
+
+    res.json(teachers);
+  } catch (error) {
+    console.error('Error fetching teachers:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch teachers'
+    });
+  }
+});
+
+/**
+ * @desc    Create a new teacher
+ * @route   POST /api/admin/teachers
+ * @access  Private/Admin
+ */
+const createTeacher = asyncHandler(async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+
+    if (!name || !email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide name and email'
+      });
+    }
+
+    // Check if teacher already exists
+    const existingTeacher = await Teacher.findOne({ where: { email } });
+    if (existingTeacher) {
+      return res.status(400).json({
+        success: false,
+        message: 'Teacher with this email already exists'
+      });
+    }
+
+    // Generate teacher ID
+    const teacherId = await Teacher.generateTeacherId();
+    
+    // Generate password if not provided
+    const teacherPassword = password || Teacher.generatePassword(teacherId);
+
+    // Hash password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(teacherPassword, salt);
+
+    const teacher = await Teacher.create({
+      id: teacherId,
+      name,
+      email,
+      password: hashedPassword
+    });
+
+    res.status(201).json({
+      success: true,
+      data: {
+        id: teacher.id,
+        name: teacher.name,
+        email: teacher.email
+      }
+    });
+  } catch (error) {
+    console.error('Error creating teacher:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to create teacher'
+    });
+  }
+});
+
+/**
+ * @desc    Update teacher
+ * @route   PUT /api/admin/teachers/:id
+ * @access  Private/Admin
+ */
+const updateTeacher = asyncHandler(async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, email } = req.body;
+
+    const teacher = await Teacher.findByPk(id);
+    if (!teacher) {
+      return res.status(404).json({
+        success: false,
+        message: 'Teacher not found'
+      });
+    }
+
+    // Check if email is being changed and if it already exists
+    if (email && email !== teacher.email) {
+      const existingTeacher = await Teacher.findOne({ where: { email } });
+      if (existingTeacher) {
+        return res.status(400).json({
+          success: false,
+          message: 'Teacher with this email already exists'
+        });
+      }
+    }
+
+    await teacher.update({ name, email });
+
+    res.json({
+      success: true,
+      data: {
+        id: teacher.id,
+        name: teacher.name,
+        email: teacher.email
+      }
+    });
+  } catch (error) {
+    console.error('Error updating teacher:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update teacher'
+    });
+  }
+});
+
+/**
+ * @desc    Delete teacher
+ * @route   DELETE /api/admin/teachers/:id
+ * @access  Private/Admin
+ */
+const deleteTeacher = asyncHandler(async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const teacher = await Teacher.findByPk(id);
+    if (!teacher) {
+      return res.status(404).json({
+        success: false,
+        message: 'Teacher not found'
+      });
+    }
+
+    console.log(`Admin deleting teacher: ${teacher.id} (${teacher.name})`);
+    
+    // If teacher has an email, delete their Firebase account
+    if (teacher.email) {
+      try {
+        console.log(`Attempting to delete Firebase user for email: ${teacher.email}`);
+        const { deleteFirebaseUserByEmail } = require('../utils/firebaseUtils');
+        
+        const deleteResult = await deleteFirebaseUserByEmail(teacher.email);
+        
+        if (deleteResult.success) {
+          console.log(`Firebase user deleted successfully for teacher ${teacher.id}: ${deleteResult.message}`);
+        } else {
+          console.warn(`Failed to delete Firebase user for teacher ${teacher.id}: ${deleteResult.error}`);
+        }
+      } catch (error) {
+        console.error(`Error deleting Firebase user for teacher ${teacher.id}:`, error);
+        // Continue with deletion even if Firebase operations fail
+      }
+    }
+
+    await teacher.destroy();
+
+    console.log(`Teacher ${teacher.id} successfully deleted by admin`);
+    res.json({
+      success: true,
+      message: 'Teacher deleted successfully',
+      firebaseDeleted: !!teacher.email
+    });
+  } catch (error) {
+    console.error('Error deleting teacher:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete teacher'
+    });
+  }
+});
+
+/**
+ * @desc    Get all students
+ * @route   GET /api/admin/students
+ * @access  Private/Admin
+ */
+const getStudents = asyncHandler(async (req, res) => {
+  try {
+    const { batch } = req.query;
+    
+    const whereClause = batch ? { batch } : {};
+    
+    const students = await Student.findAll({
+      where: whereClause,
+      attributes: { exclude: ['password'] },
+      include: [
+        {
+          model: Batch,
+          attributes: ['name', 'department']
+        }
+      ],
+      order: [['name', 'ASC']]
+    });
+
+    res.json(students);
+  } catch (error) {
+    console.error('Error fetching students:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch students'
+    });
+  }
+});
+
+/**
+ * @desc    Create a new student
+ * @route   POST /api/admin/students
+ * @access  Private/Admin
+ */
+const createStudent = asyncHandler(async (req, res) => {
+  try {
+    const { id, name, email, batch, section, password } = req.body;
+
+    if (!id || !name || !email || !batch) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide id, name, email, and batch'
+      });
+    }
+
+    // Check if student already exists
+    const existingStudent = await Student.findByPk(id);
+    if (existingStudent) {
+      return res.status(400).json({
+        success: false,
+        message: 'Student with this ID already exists'
+      });
+    }
+
+    // Check if batch exists
+    const batchExists = await Batch.findByPk(batch);
+    if (!batchExists) {
+      return res.status(400).json({
+        success: false,
+        message: 'Batch not found'
+      });
+    }
+
+    // Hash password
+    const studentPassword = password || 'student123'; // Default password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(studentPassword, salt);
+
+    const student = await Student.create({
+      id,
+      name,
+      email,
+      batch,
+      section,
+      password: hashedPassword
+    });
+
+    res.status(201).json({
+      success: true,
+      data: {
+        id: student.id,
+        name: student.name,
+        email: student.email,
+        batch: student.batch,
+        section: student.section
+      }
+    });
+  } catch (error) {
+    console.error('Error creating student:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to create student'
+    });
+  }
+});
+
+/**
+ * @desc    Update student
+ * @route   PUT /api/admin/students/:id
+ * @access  Private/Admin
+ */
+const updateStudent = asyncHandler(async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, email, batch, section } = req.body;
+
+    const student = await Student.findByPk(id);
+    if (!student) {
+      return res.status(404).json({
+        success: false,
+        message: 'Student not found'
+      });
+    }
+
+    // Check if batch exists if being updated
+    if (batch && batch !== student.batch) {
+      const batchExists = await Batch.findByPk(batch);
+      if (!batchExists) {
+        return res.status(400).json({
+          success: false,
+          message: 'Batch not found'
+        });
+      }
+    }
+
+    await student.update({ name, email, batch, section });
+
+    res.json({
+      success: true,
+      data: {
+        id: student.id,
+        name: student.name,
+        email: student.email,
+        batch: student.batch,
+        section: student.section
+      }
+    });
+  } catch (error) {
+    console.error('Error updating student:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update student'
+    });
+  }
+});
+
+/**
+ * @desc    Delete student
+ * @route   DELETE /api/admin/students/:id
+ * @access  Private/Admin
+ */
+const deleteStudent = asyncHandler(async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const student = await Student.findByPk(id);
+    if (!student) {
+      return res.status(404).json({
+        success: false,
+        message: 'Student not found'
+      });
+    }
+
+    console.log(`Admin deleting student: ${student.id} (${student.name})`);
+    
+    // If student has an email, delete their Firebase account
+    if (student.email) {
+      try {
+        console.log(`Attempting to delete Firebase user for email: ${student.email}`);
+        const { deleteFirebaseUserByEmail } = require('../utils/firebaseUtils');
+        
+        const deleteResult = await deleteFirebaseUserByEmail(student.email);
+        
+        if (deleteResult.success) {
+          console.log(`Firebase user deleted successfully for student ${student.id}: ${deleteResult.message}`);
+        } else {
+          console.warn(`Failed to delete Firebase user for student ${student.id}: ${deleteResult.error}`);
+        }
+      } catch (error) {
+        console.error(`Error deleting Firebase user for student ${student.id}:`, error);
+        // Continue with deletion even if Firebase operations fail
+      }
+    }
+
+    await student.destroy();
+
+    console.log(`Student ${student.id} successfully deleted by admin`);
+    res.json({
+      success: true,
+      message: 'Student deleted successfully',
+      firebaseDeleted: !!student.email
+    });
+  } catch (error) {
+    console.error('Error deleting student:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete student'
+    });
+  }
+});
+
+/**
+ * @desc    Get all subjects
+ * @route   GET /api/admin/subjects
+ * @access  Private/Admin
+ */
+const getSubjects = asyncHandler(async (req, res) => {
+  try {
+    const subjects = await Subject.findAll({
+      include: [
+        {
+          model: Batch,
+          attributes: ['name', 'department']
+        },
+        {
+          model: Semester,
+          attributes: ['name', 'number']
+        }
+      ],
+      order: [['name', 'ASC']]
+    });
+
+    res.json(subjects);
+  } catch (error) {
+    console.error('Error fetching subjects:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch subjects'
+    });
+  }
+});
+
+/**
+ * @desc    Create a new subject
+ * @route   POST /api/admin/subjects
+ * @access  Private/Admin
+ */
+const createSubject = asyncHandler(async (req, res) => {
+  try {
+    const { id, name, code, section, description, credits, batchId, semesterId } = req.body;
+
+    if (!name || !section) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide name and section'
+      });
+    }
+
+    // Check if batch exists if provided
+    if (batchId) {
+      const batchExists = await Batch.findByPk(batchId);
+      if (!batchExists) {
+        return res.status(400).json({
+          success: false,
+          message: 'Batch not found'
+        });
+      }
+    }
+
+    // Check if semester exists if provided
+    if (semesterId) {
+      const semesterExists = await Semester.findByPk(semesterId);
+      if (!semesterExists) {
+        return res.status(400).json({
+          success: false,
+          message: 'Semester not found'
+        });
+      }
+    }
+
+    const subject = await Subject.create({
+      id,
+      name,
+      code,
+      section,
+      description,
+      credits: credits || 3,
+      batchId,
+      semesterId
+    });
+
+    res.status(201).json({
+      success: true,
+      data: subject
+    });
+  } catch (error) {
+    console.error('Error creating subject:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to create subject'
+    });
+  }
+});
+
+/**
  * @desc    Add students in batch
  * @route   POST /api/admin/students/batch
  * @access  Private/Admin
@@ -435,6 +1025,19 @@ const setActiveSemesterForBatch = asyncHandler(async (req, res) => {
 });
 
 module.exports = {
+  getDashboardStats,
+  getBatches,
+  createBatch,
+  getTeachers,
+  createTeacher,
+  updateTeacher,
+  deleteTeacher,
+  getStudents,
+  createStudent,
+  updateStudent,
+  deleteStudent,
+  getSubjects,
+  createSubject,
   addStudentsBatch,
   addTeacher,
   assignSubjectToTeacher,

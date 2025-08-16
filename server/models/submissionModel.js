@@ -51,6 +51,14 @@ const Submission = sequelize.define('Submission', {
     type: DataTypes.FLOAT,
     allowNull: true,
   },
+  letterGrade: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  gradePoints: {
+    type: DataTypes.FLOAT,
+    allowNull: true,
+  },
   plagiarismScore: {
     type: DataTypes.FLOAT,
     defaultValue: 0,
@@ -73,6 +81,14 @@ const Submission = sequelize.define('Submission', {
   },
   gradedDate: {
     type: DataTypes.DATE,
+    allowNull: true,
+  },
+  gradedFileUrl: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  annotations: {
+    type: DataTypes.TEXT,
     allowNull: true,
   }
 }, {
