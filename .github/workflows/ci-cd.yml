@@ -30,40 +30,18 @@ jobs:
     
     - name: Clean and install dependencies
       run: |
-        # Clean any existing node_modules and package-lock files
-        rm -rf node_modules package-lock.json
-        rm -rf server/node_modules server/package-lock.json
-        
         # Clear npm cache to avoid platform-specific issues
         npm cache clean --force
         
-        # Install dependencies with fresh package-lock files and platform detection
+        # Install dependencies with npm install (not npm ci) to handle optional deps
         npm install --force
         cd server && npm install --force
-        
-        # Verify Rollup installation and install platform-specific dependencies if needed
-        cd ..
-        if ! npm list @rollup/rollup-linux-x64-gnu 2>/dev/null; then
-          npm install @rollup/rollup-linux-x64-gnu --save-optional --force || echo "Optional dependency installation failed, continuing..."
-        fi
     
     - name: Run linter
       run: npm run lint
     
     - name: Build frontend
-      run: |
-        # Try normal build first
-        npm run build || {
-          echo "Build failed, attempting to fix Rollup dependencies..."
-          
-          # Remove and reinstall Rollup with platform-specific dependencies
-          npm uninstall rollup @rollup/rollup-linux-x64-gnu || true
-          npm install rollup --force
-          npm install @rollup/rollup-linux-x64-gnu --save-optional --force || true
-          
-          # Retry build
-          npm run build
-        }
+      run: npm run build
     
     - name: Run tests (if available)
       run: |

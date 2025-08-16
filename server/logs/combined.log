@@ -23554,3 +23554,49 @@
 {"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError starting server: Unknown constraint error\u001b[39m","timestamp":"2025-08-16 23:27:03:273"}
 {"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mPort 3000 is in use (single-attempt mode); moving to next candidate if available.\u001b[39m","timestamp":"2025-08-16 23:27:13:2713"}
 {"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mFailed to bind candidate port 3000: EADDRINUSE\u001b[39m","timestamp":"2025-08-16 23:27:13:2713"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 125\u001b[39m","timestamp":"2025-08-16 23:34:15:3415"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-16 23:34:15:3415"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-gm1x4bnie-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-16 23:34:15:3415"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - 500 - 21ms - ::1\u001b[39m","timestamp":"2025-08-16 23:34:15:3415"}
+{"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError starting server: Unknown constraint error\u001b[39m","timestamp":"2025-08-16 23:41:29:4129"}
+{"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError starting server: Unknown constraint error\u001b[39m","timestamp":"2025-08-16 23:41:37:4137"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mPort 3000 is in use (single-attempt mode); moving to next candidate if available.\u001b[39m","timestamp":"2025-08-16 23:41:49:4149"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mFailed to bind candidate port 3000: EADDRINUSE\u001b[39m","timestamp":"2025-08-16 23:41:49:4149"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 126\u001b[39m","timestamp":"2025-08-16 23:58:03:583"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-16 23:58:03:583"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mSession ID mismatch for user T001. Expected different session. Enforcing single session.\u001b[39m","timestamp":"2025-08-16 23:58:03:583"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /api/auth/status - 401 - 26ms - ::1\u001b[39m","timestamp":"2025-08-16 23:58:03:583"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 127\u001b[39m","timestamp":"2025-08-17 00:05:48:548"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-17 00:05:48:548"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mSession ID mismatch for user T001. Expected different session. Enforcing single session.\u001b[39m","timestamp":"2025-08-17 00:05:48:548"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /api/auth/status - 401 - 25ms - ::1\u001b[39m","timestamp":"2025-08-17 00:05:48:548"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 128\u001b[39m","timestamp":"2025-08-17 00:32:41:3241"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-17 00:32:41:3241"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - 204 - 9ms - ::1\u001b[39m","timestamp":"2025-08-17 00:32:41:3241"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-17 00:32:41:3241"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mSession ID mismatch for user T001. Expected different session. Enforcing single session.\u001b[39m","timestamp":"2025-08-17 00:32:41:3241"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /api/auth/status - 401 - 16ms - ::1\u001b[39m","timestamp":"2025-08-17 00:32:41:3241"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 129\u001b[39m","timestamp":"2025-08-17 00:34:44:3444"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-17 00:34:44:3444"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-gm1x4bnie-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 00:34:44:3444"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - 500 - 5ms - ::1\u001b[39m","timestamp":"2025-08-17 00:34:44:3444"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 130\u001b[39m","timestamp":"2025-08-17 00:46:08:468"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-17 00:46:08:468"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mCORS reject origin: https://evalis-gm1x4bnie-anntmishras-projects.vercel.app\u001b[39m","timestamp":"2025-08-17 00:46:08:468"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mOPTIONS /api/auth/status - 500 - 7ms - ::1\u001b[39m","timestamp":"2025-08-17 00:46:08:468"}
+{"level":"\u001b[37mdebug\u001b[39m","message":"\u001b[37mNew connection established. Total connections: 131\u001b[39m","timestamp":"2025-08-17 00:47:41:4741"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /api/auth/status - ::1\u001b[39m","timestamp":"2025-08-17 00:47:41:4741"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mSession ID mismatch for user T001. Expected different session. Enforcing single session.\u001b[39m","timestamp":"2025-08-17 00:47:41:4741"}
+{"level":"\u001b[35mhttp\u001b[39m","message":"\u001b[35mGET /api/auth/status - 401 - 13ms - ::1\u001b[39m","timestamp":"2025-08-17 00:47:41:4741"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mPort 3000 is in use (single-attempt mode); moving to next candidate if available.\u001b[39m","timestamp":"2025-08-17 00:52:38:5238"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mFailed to bind candidate port 3000: EADDRINUSE\u001b[39m","timestamp":"2025-08-17 00:52:38:5238"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mPort 3000 is in use (single-attempt mode); moving to next candidate if available.\u001b[39m","timestamp":"2025-08-17 00:52:39:5239"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mFailed to bind candidate port 3000: EADDRINUSE\u001b[39m","timestamp":"2025-08-17 00:52:39:5239"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mPort 3001 is in use (single-attempt mode); moving to next candidate if available.\u001b[39m","timestamp":"2025-08-17 00:52:39:5239"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mFailed to bind candidate port 3001: EADDRINUSE\u001b[39m","timestamp":"2025-08-17 00:52:39:5239"}
+{"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError starting server: Unknown constraint error\u001b[39m","timestamp":"2025-08-17 00:53:09:539"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mPort 3000 is in use (single-attempt mode); moving to next candidate if available.\u001b[39m","timestamp":"2025-08-17 00:53:20:5320"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mFailed to bind candidate port 3000: EADDRINUSE\u001b[39m","timestamp":"2025-08-17 00:53:20:5320"}
+{"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError starting server: Unknown constraint error\u001b[39m","timestamp":"2025-08-17 00:56:50:5650"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mPort 3000 is in use (single-attempt mode); moving to next candidate if available.\u001b[39m","timestamp":"2025-08-17 00:57:01:571"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mFailed to bind candidate port 3000: EADDRINUSE\u001b[39m","timestamp":"2025-08-17 00:57:01:571"}
