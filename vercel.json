@@ -4,9 +4,7 @@
   "outputDirectory": "dist",
   "framework": "vite",
   "functions": {
-    "server/serverless.js": {
-      "runtime": "nodejs18.x"
-    }
+    "server/api/*.js": {}
   },
   "rewrites": [
     {
