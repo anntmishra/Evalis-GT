@@ -464,25 +464,42 @@ app.get('/api/admin/students', async (req, res) => {
 
 app.get('/api/admin/teachers', async (req, res) => {
   try {
+    console.log('Admin teachers endpoint called');
+    console.log('DATABASE_URL available:', !!process.env.DATABASE_URL);
+    
+    // Ensure database connection
     if (!dbConnected) {
-      console.log('🔌 Attempting database connection...');
-      const { connectDB } = require('./config/db');
-      await connectDB();
-      dbConnected = true;
+      try {
+        console.log('Attempting database connection...');
+        const { connectDB } = require('./config/db');
+        await connectDB();
+        dbConnected = true;
+        console.log('Database connected successfully');
+      } catch (dbError) {
+        console.error('DB connection failed:', dbError);
+        return res.status(500).json({
+          success: false,
+          message: 'Database connection failed',
+          error: dbError.message
+        });
+      }
     }
 
-    const { Teacher, Subject } = require('./models');
+    const { Teacher } = require('./models');
     
     const teachers = await Teacher.findAll({
-      attributes: { exclude: ['password'] }
+      attributes: { exclude: ['password'] },
+      order: [['name', 'ASC']]
     });
 
+    console.log(`Found ${teachers.length} admin teachers`);
     res.json(teachers);
   } catch (error) {
     console.error('Error fetching admin teachers:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch teachers'
+      message: 'Failed to fetch teachers',
+      error: error.message
     });
   }
 });
