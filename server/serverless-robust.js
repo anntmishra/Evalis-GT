@@ -185,27 +185,53 @@ app.get('/api/auth/health', (req, res) => {
 // Auth status endpoint
 app.get('/api/auth/status', (req, res) => {
   try {
-    const token = req.headers.authorization?.replace('Bearer ', '');
+    const authHeader = req.headers.authorization;
+    const token = authHeader?.replace('Bearer ', '');
     
     if (!token) {
       return res.status(401).json({
-        message: 'No token provided'
+        valid: false,
+        message: 'No token provided',
+        authHeader: !!authHeader
       });
     }
     
+    const jwtSecret = process.env.JWT_SECRET || 'fallback-secret';
     const jwt = require('jsonwebtoken');
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     
-    res.json({
-      valid: true,
-      user: decoded,
-      timestamp: new Date().toISOString()
-    });
+    try {
+      const decoded = jwt.verify(token, jwtSecret);
+      
+      res.json({
+        valid: true,
+        user: decoded,
+        timestamp: new Date().toISOString()
+      });
+    } catch (jwtError) {
+      // If JWT verification fails, try to decode without verification to see the payload
+      try {
+        const decoded = jwt.decode(token);
+        return res.status(401).json({
+          valid: false,
+          message: 'Token verification failed',
+          error: jwtError.message,
+          tokenPayload: decoded,
+          hasSecret: !!process.env.JWT_SECRET
+        });
+      } catch (decodeError) {
+        return res.status(401).json({
+          valid: false,
+          message: 'Invalid token format',
+          error: jwtError.message,
+          hasSecret: !!process.env.JWT_SECRET
+        });
+      }
+    }
     
   } catch (error) {
-    res.status(401).json({
+    res.status(500).json({
       valid: false,
-      message: 'Invalid token',
+      message: 'Auth status check failed',
       error: error.message
     });
   }
@@ -351,6 +377,45 @@ app.get('/api/batches', async (req, res) => {
       message: 'Error fetching batches',
       error: error.message,
       details: 'Please check database connection and models'
+    });
+  }
+});
+
+// Batch students endpoint
+app.get('/api/batches/:batchId/students', async (req, res) => {
+  try {
+    // Ensure database connection
+    if (!dbConnected) {
+      try {
+        const { connectDB } = require('./config/db');
+        await connectDB();
+        dbConnected = true;
+      } catch (dbError) {
+        console.error('DB connection failed:', dbError);
+        return res.status(500).json({
+          message: 'Database connection failed',
+          error: dbError.message
+        });
+      }
+    }
+    
+    const { Student } = require('./models');
+    const { batchId } = req.params;
+    
+    const students = await Student.findAll({
+      where: { batch: batchId },
+      attributes: { exclude: ['password'] },
+      order: [['name', 'ASC']]
+    });
+    
+    console.log(`Found ${students.length} students for batch ${batchId}`);
+    res.json(students);
+  } catch (error) {
+    console.error('Batch students fetch error:', error);
+    res.status(500).json({
+      message: 'Error fetching students for batch',
+      error: error.message,
+      batchId: req.params.batchId
     });
   }
 });
