@@ -268,7 +268,7 @@ app.get('/api/teachers', async (req, res) => {
     
     const { Teacher } = require('./models');
     const teachers = await Teacher.findAll({
-      attributes: ['id', 'name', 'email', 'phone', 'department'],
+      attributes: ['id', 'name', 'email', 'role'],
       order: [['name', 'ASC']]
     });
     
@@ -305,7 +305,7 @@ app.get('/api/students', async (req, res) => {
     
     const { Student } = require('./models');
     const students = await Student.findAll({
-      attributes: ['id', 'name', 'email', 'phone', 'batchId'],
+      attributes: ['id', 'name', 'email', 'section', 'batch'],
       order: [['name', 'ASC']]
     });
     
@@ -340,7 +340,7 @@ app.get('/api/batches', async (req, res) => {
     
     const { Batch } = require('./models');
     const batches = await Batch.findAll({
-      attributes: ['id', 'name', 'description', 'year', 'semester'],
+      attributes: ['id', 'name', 'startYear', 'endYear', 'department', 'active'],
       order: [['name', 'ASC']]
     });
     
@@ -375,7 +375,7 @@ app.get('/api/subjects', async (req, res) => {
     
     const { Subject } = require('./models');
     const subjects = await Subject.findAll({
-      attributes: ['id', 'name', 'code', 'description', 'credits'],
+      attributes: ['id', 'name', 'section', 'description', 'credits'],
       order: [['name', 'ASC']]
     });
     
