@@ -26,11 +26,14 @@ app.get('/api/health', (req, res) => {
   res.status(200).json({ 
     status: 'OK', 
     timestamp: new Date().toISOString(),
-    environment: 'serverless-robust',
+    environment: 'serverless-robust-v3-with-env',
     hasDbUrl: !!process.env.DATABASE_URL,
     hasJwtSecret: !!process.env.JWT_SECRET,
     nodeEnv: process.env.NODE_ENV,
-    isVercel: !!process.env.VERCEL
+    isVercel: !!process.env.VERCEL,
+    dbUrlLength: process.env.DATABASE_URL ? process.env.DATABASE_URL.length : 0,
+    envKeys: Object.keys(process.env).filter(k => k.includes('DATABASE')).join(','),
+    deploymentId: process.env.VERCEL_DEPLOYMENT_ID || 'unknown'
   });
 });
 

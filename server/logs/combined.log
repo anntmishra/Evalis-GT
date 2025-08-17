@@ -24171,3 +24171,7 @@
 {"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mFailed to bind candidate port 3000: EADDRINUSE\u001b[39m","timestamp":"2025-08-17 21:42:12:4212"}
 {"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mPort 3000 is in use (single-attempt mode); moving to next candidate if available.\u001b[39m","timestamp":"2025-08-17 21:43:52:4352"}
 {"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mFailed to bind candidate port 3000: EADDRINUSE\u001b[39m","timestamp":"2025-08-17 21:43:52:4352"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mPort 3000 is in use (single-attempt mode); moving to next candidate if available.\u001b[39m","timestamp":"2025-08-17 21:48:16:4816"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mFailed to bind candidate port 3000: EADDRINUSE\u001b[39m","timestamp":"2025-08-17 21:48:16:4816"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mPort 3000 is in use (single-attempt mode); moving to next candidate if available.\u001b[39m","timestamp":"2025-08-17 21:54:18:5418"}
+{"level":"\u001b[33mwarn\u001b[39m","message":"\u001b[33mFailed to bind candidate port 3000: EADDRINUSE\u001b[39m","timestamp":"2025-08-17 21:54:18:5418"}
