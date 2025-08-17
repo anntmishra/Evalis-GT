@@ -2,6 +2,9 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 
+// Database connection state
+let dbConnected = false;
+
 // Create Express app first
 const app = express();
 
@@ -241,8 +244,7 @@ try {
   console.error('❌ Environment loading failed:', error.message);
 }
 
-// Initialize database connection
-let dbConnected = false;
+//
 try {
   const { connectDB } = require('./config/db');
   connectDB().then(() => {
