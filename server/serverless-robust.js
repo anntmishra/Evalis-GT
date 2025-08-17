@@ -1006,6 +1006,452 @@ app.post('/api/admin/semesters/:semesterId/batch/:batchId', async (req, res) => 
   }
 });
 
+// Semester activate/deactivate endpoints
+app.put('/api/semesters/:id/activate', async (req, res) => {
+  try {
+    if (!dbConnected) {
+      console.log('🔌 Attempting database connection...');
+      const { connectDB } = require('./config/db');
+      await connectDB();
+      dbConnected = true;
+    }
+
+    const { Semester, Student } = require('./models');
+    const { id } = req.params;
+    
+    const semester = await Semester.findByPk(id);
+    if (!semester) {
+      return res.status(404).json({
+        message: 'Semester not found'
+      });
+    }
+
+    // Deactivate all other semesters in the same batch
+    await Semester.update(
+      { active: false },
+      { where: { batchId: semester.batchId } }
+    );
+
+    // Activate this semester
+    await semester.update({ active: true });
+
+    // Update all students in the batch to use this semester
+    const updatedStudents = await Student.update(
+      { activeSemesterId: id },
+      { where: { batch: semester.batchId } }
+    );
+
+    res.json({
+      message: `Semester ${semester.name} activated successfully`,
+      semesterId: id,
+      batchId: semester.batchId,
+      studentsUpdated: updatedStudents[0]
+    });
+  } catch (error) {
+    console.error('Error activating semester:', error);
+    res.status(500).json({
+      message: 'Failed to activate semester',
+      error: error.message
+    });
+  }
+});
+
+app.put('/api/semesters/:id/deactivate', async (req, res) => {
+  try {
+    if (!dbConnected) {
+      console.log('🔌 Attempting database connection...');
+      const { connectDB } = require('./config/db');
+      await connectDB();
+      dbConnected = true;
+    }
+
+    const { Semester } = require('./models');
+    const { id } = req.params;
+    
+    const semester = await Semester.findByPk(id);
+    if (!semester) {
+      return res.status(404).json({
+        message: 'Semester not found'
+      });
+    }
+
+    await semester.update({ active: false });
+
+    res.json({
+      message: `Semester ${semester.name} deactivated successfully`,
+      semesterId: id,
+      batchId: semester.batchId
+    });
+  } catch (error) {
+    console.error('Error deactivating semester:', error);
+    res.status(500).json({
+      message: 'Failed to deactivate semester',
+      error: error.message
+    });
+  }
+});
+
+// Admin batch creation endpoint
+app.post('/api/admin/batches', async (req, res) => {
+  try {
+    if (!dbConnected) {
+      console.log('🔌 Attempting database connection...');
+      const { connectDB } = require('./config/db');
+      await connectDB();
+      dbConnected = true;
+    }
+
+    const { Batch } = require('./models');
+    const { name, department, startYear, endYear, active = true } = req.body;
+
+    if (!name || !department || !startYear || !endYear) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide name, department, startYear, and endYear'
+      });
+    }
+
+    // Check if batch already exists
+    const existingBatch = await Batch.findOne({
+      where: { name, startYear, endYear }
+    });
+
+    if (existingBatch) {
+      return res.status(400).json({
+        success: false,
+        message: 'Batch with this name and years already exists'
+      });
+    }
+
+    const batch = await Batch.create({
+      name,
+      department,
+      startYear,
+      endYear,
+      active
+    });
+
+    res.status(201).json({
+      success: true,
+      data: batch
+    });
+  } catch (error) {
+    console.error('Error creating batch:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to create batch'
+    });
+  }
+});
+
+// Admin subject creation endpoint
+app.post('/api/admin/subjects', async (req, res) => {
+  try {
+    if (!dbConnected) {
+      console.log('🔌 Attempting database connection...');
+      const { connectDB } = require('./config/db');
+      await connectDB();
+      dbConnected = true;
+    }
+
+    const { Subject, Batch, Semester } = require('./models');
+    const { id, name, code, section, description, credits, batchId, semesterId } = req.body;
+
+    if (!name || !section) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide name and section'
+      });
+    }
+
+    // Check if batch exists if provided
+    if (batchId) {
+      const batchExists = await Batch.findByPk(batchId);
+      if (!batchExists) {
+        return res.status(400).json({
+          success: false,
+          message: 'Batch not found'
+        });
+      }
+    }
+
+    // Check if semester exists if provided
+    if (semesterId) {
+      const semesterExists = await Semester.findByPk(semesterId);
+      if (!semesterExists) {
+        return res.status(400).json({
+          success: false,
+          message: 'Semester not found'
+        });
+      }
+    }
+
+    const subject = await Subject.create({
+      id,
+      name,
+      code,
+      section,
+      description,
+      credits: credits || 3,
+      batchId,
+      semesterId
+    });
+
+    res.status(201).json({
+      success: true,
+      data: subject
+    });
+  } catch (error) {
+    console.error('Error creating subject:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to create subject'
+    });
+  }
+});
+
+// Admin teacher creation endpoint
+app.post('/api/admin/teachers', async (req, res) => {
+  try {
+    if (!dbConnected) {
+      console.log('🔌 Attempting database connection...');
+      const { connectDB } = require('./config/db');
+      await connectDB();
+      dbConnected = true;
+    }
+
+    const { Teacher } = require('./models');
+    const { name, email, password } = req.body;
+
+    if (!name || !email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide name and email'
+      });
+    }
+
+    // Check if teacher already exists
+    const existingTeacher = await Teacher.findOne({ where: { email } });
+    if (existingTeacher) {
+      return res.status(400).json({
+        success: false,
+        message: 'Teacher with this email already exists'
+      });
+    }
+
+    // Generate teacher ID
+    const teacherId = `T${String(Date.now()).slice(-6)}`;
+    
+    // Generate password if not provided
+    const teacherPassword = password || 'teacher123';
+
+    // Hash password
+    const bcrypt = require('bcryptjs');
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(teacherPassword, salt);
+
+    const teacher = await Teacher.create({
+      id: teacherId,
+      name,
+      email,
+      password: hashedPassword
+    });
+
+    res.status(201).json({
+      success: true,
+      data: {
+        id: teacher.id,
+        name: teacher.name,
+        email: teacher.email
+      }
+    });
+  } catch (error) {
+    console.error('Error creating teacher:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to create teacher'
+    });
+  }
+});
+
+// Student update endpoint
+app.put('/api/admin/students/:id', async (req, res) => {
+  try {
+    if (!dbConnected) {
+      console.log('🔌 Attempting database connection...');
+      const { connectDB } = require('./config/db');
+      await connectDB();
+      dbConnected = true;
+    }
+
+    const { Student, Batch } = require('./models');
+    const { id } = req.params;
+    const { name, email, batch, section } = req.body;
+
+    const student = await Student.findByPk(id);
+    if (!student) {
+      return res.status(404).json({
+        success: false,
+        message: 'Student not found'
+      });
+    }
+
+    // Check if batch exists if being updated
+    if (batch && batch !== student.batch) {
+      const batchExists = await Batch.findByPk(batch);
+      if (!batchExists) {
+        return res.status(400).json({
+          success: false,
+          message: 'Batch not found'
+        });
+      }
+    }
+
+    await student.update({ name, email, batch, section });
+
+    res.json({
+      success: true,
+      data: {
+        id: student.id,
+        name: student.name,
+        email: student.email,
+        batch: student.batch,
+        section: student.section
+      }
+    });
+  } catch (error) {
+    console.error('Error updating student:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update student'
+    });
+  }
+});
+
+// Student delete endpoint
+app.delete('/api/admin/students/:id', async (req, res) => {
+  try {
+    if (!dbConnected) {
+      console.log('🔌 Attempting database connection...');
+      const { connectDB } = require('./config/db');
+      await connectDB();
+      dbConnected = true;
+    }
+
+    const { Student } = require('./models');
+    const { id } = req.params;
+
+    const student = await Student.findByPk(id);
+    if (!student) {
+      return res.status(404).json({
+        success: false,
+        message: 'Student not found'
+      });
+    }
+
+    await student.destroy();
+
+    res.json({
+      success: true,
+      message: 'Student deleted successfully'
+    });
+  } catch (error) {
+    console.error('Error deleting student:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete student'
+    });
+  }
+});
+
+// Teacher update endpoint
+app.put('/api/admin/teachers/:id', async (req, res) => {
+  try {
+    if (!dbConnected) {
+      console.log('🔌 Attempting database connection...');
+      const { connectDB } = require('./config/db');
+      await connectDB();
+      dbConnected = true;
+    }
+
+    const { Teacher } = require('./models');
+    const { id } = req.params;
+    const { name, email } = req.body;
+
+    const teacher = await Teacher.findByPk(id);
+    if (!teacher) {
+      return res.status(404).json({
+        success: false,
+        message: 'Teacher not found'
+      });
+    }
+
+    // Check if email is being changed and if it already exists
+    if (email && email !== teacher.email) {
+      const existingTeacher = await Teacher.findOne({ where: { email } });
+      if (existingTeacher) {
+        return res.status(400).json({
+          success: false,
+          message: 'Teacher with this email already exists'
+        });
+      }
+    }
+
+    await teacher.update({ name, email });
+
+    res.json({
+      success: true,
+      data: {
+        id: teacher.id,
+        name: teacher.name,
+        email: teacher.email
+      }
+    });
+  } catch (error) {
+    console.error('Error updating teacher:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update teacher'
+    });
+  }
+});
+
+// Teacher delete endpoint
+app.delete('/api/admin/teachers/:id', async (req, res) => {
+  try {
+    if (!dbConnected) {
+      console.log('🔌 Attempting database connection...');
+      const { connectDB } = require('./config/db');
+      await connectDB();
+      dbConnected = true;
+    }
+
+    const { Teacher } = require('./models');
+    const { id } = req.params;
+
+    const teacher = await Teacher.findByPk(id);
+    if (!teacher) {
+      return res.status(404).json({
+        success: false,
+        message: 'Teacher not found'
+      });
+    }
+
+    await teacher.destroy();
+
+    res.json({
+      success: true,
+      message: 'Teacher deleted successfully'
+    });
+  } catch (error) {
+    console.error('Error deleting teacher:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete teacher'
+    });
+  }
+});
+
 // Error handling
 app.use((error, req, res, next) => {
   console.error('Express error:', error);
