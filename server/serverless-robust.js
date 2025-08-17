@@ -425,6 +425,292 @@ app.get('/api/semesters', async (req, res) => {
   }
 });
 
+// Admin routes
+app.get('/api/admin/students', async (req, res) => {
+  try {
+    if (!dbConnected) {
+      console.log('🔌 Attempting database connection...');
+      const { connectDB } = require('./config/db');
+      await connectDB();
+      dbConnected = true;
+    }
+
+    const { Student, Batch } = require('./models');
+    const { batch } = req.query;
+    
+    const whereClause = batch ? { batch } : {};
+    
+    const students = await Student.findAll({
+      where: whereClause,
+      attributes: { exclude: ['password'] },
+      include: [
+        {
+          model: Batch,
+          attributes: ['name', 'department']
+        }
+      ],
+      order: [['name', 'ASC']]
+    });
+
+    res.json(students);
+  } catch (error) {
+    console.error('Error fetching admin students:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch students'
+    });
+  }
+});
+
+app.get('/api/admin/teachers', async (req, res) => {
+  try {
+    if (!dbConnected) {
+      console.log('🔌 Attempting database connection...');
+      const { connectDB } = require('./config/db');
+      await connectDB();
+      dbConnected = true;
+    }
+
+    const { Teacher, Subject } = require('./models');
+    
+    const teachers = await Teacher.findAll({
+      attributes: { exclude: ['password'] },
+      include: [
+        {
+          model: Subject,
+          through: { attributes: [] },
+          attributes: ['id', 'name', 'code']
+        }
+      ]
+    });
+
+    res.json(teachers);
+  } catch (error) {
+    console.error('Error fetching admin teachers:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch teachers'
+    });
+  }
+});
+
+app.get('/api/admin/subjects', async (req, res) => {
+  try {
+    if (!dbConnected) {
+      console.log('🔌 Attempting database connection...');
+      const { connectDB } = require('./config/db');
+      await connectDB();
+      dbConnected = true;
+    }
+
+    const { Subject, Batch, Semester } = require('./models');
+    
+    const subjects = await Subject.findAll({
+      include: [
+        {
+          model: Batch,
+          attributes: ['name', 'department']
+        },
+        {
+          model: Semester,
+          attributes: ['name', 'number']
+        }
+      ],
+      order: [['name', 'ASC']]
+    });
+
+    res.json(subjects);
+  } catch (error) {
+    console.error('Error fetching admin subjects:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch subjects'
+    });
+  }
+});
+
+app.get('/api/admin/batches', async (req, res) => {
+  try {
+    if (!dbConnected) {
+      console.log('🔌 Attempting database connection...');
+      const { connectDB } = require('./config/db');
+      await connectDB();
+      dbConnected = true;
+    }
+
+    const { Batch } = require('./models');
+    
+    const batches = await Batch.findAll({
+      order: [['name', 'ASC']]
+    });
+
+    res.json(batches);
+  } catch (error) {
+    console.error('Error fetching admin batches:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch batches'
+    });
+  }
+});
+
+// Admin POST routes for creating entities
+app.post('/api/admin/students', async (req, res) => {
+  try {
+    if (!dbConnected) {
+      console.log('🔌 Attempting database connection...');
+      const { connectDB } = require('./config/db');
+      await connectDB();
+      dbConnected = true;
+    }
+
+    const { Student, Batch } = require('./models');
+    const { id, name, email, batch, section, password } = req.body;
+
+    if (!id || !name || !email || !batch) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide id, name, email, and batch'
+      });
+    }
+
+    // Check if student already exists
+    const existingStudent = await Student.findByPk(id);
+    if (existingStudent) {
+      return res.status(400).json({
+        success: false,
+        message: 'Student with this ID already exists'
+      });
+    }
+
+    // Check if batch exists
+    const batchExists = await Batch.findByPk(batch);
+    if (!batchExists) {
+      return res.status(400).json({
+        success: false,
+        message: 'Batch not found'
+      });
+    }
+
+    // Hash password
+    const bcrypt = require('bcryptjs');
+    const studentPassword = password || 'student123'; // Default password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(studentPassword, salt);
+
+    const student = await Student.create({
+      id,
+      name,
+      email,
+      batch,
+      section,
+      password: hashedPassword
+    });
+
+    res.status(201).json({
+      success: true,
+      data: {
+        id: student.id,
+        name: student.name,
+        email: student.email,
+        batch: student.batch,
+        section: student.section
+      }
+    });
+  } catch (error) {
+    console.error('Error creating admin student:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to create student'
+    });
+  }
+});
+
+app.post('/api/admin/assign/subject', async (req, res) => {
+  try {
+    if (!dbConnected) {
+      console.log('🔌 Attempting database connection...');
+      const { connectDB } = require('./config/db');
+      await connectDB();
+      dbConnected = true;
+    }
+
+    const { Teacher, Subject, TeacherSubject, Semester } = require('./models');
+    const { teacherId, subjectId } = req.body;
+
+    // Validate teacher exists
+    const teacher = await Teacher.findByPk(teacherId);
+    if (!teacher) {
+      return res.status(404).json({
+        success: false,
+        message: 'Teacher not found'
+      });
+    }
+
+    // Validate subject exists
+    const subject = await Subject.findByPk(subjectId, {
+      include: [
+        {
+          model: Semester,
+          attributes: ['id', 'name', 'number']
+        }
+      ]
+    });
+    
+    if (!subject) {
+      return res.status(404).json({
+        success: false,
+        message: 'Subject not found'
+      });
+    }
+
+    // Check if assignment already exists
+    const existingAssignment = await TeacherSubject.findOne({
+      where: {
+        teacherId,
+        subjectId
+      }
+    });
+
+    if (existingAssignment) {
+      return res.status(400).json({
+        success: false,
+        message: 'Teacher is already assigned to this subject'
+      });
+    }
+
+    // Create teacher-subject assignment
+    const assignment = await TeacherSubject.create({
+      teacherId,
+      subjectId
+    });
+
+    res.status(201).json({
+      success: true,
+      data: {
+        id: assignment.id,
+        teacherId: assignment.teacherId,
+        teacherName: teacher.name,
+        subjectId: assignment.subjectId,
+        subjectName: subject.name,
+        subjectSection: subject.section,
+        semester: subject.Semester ? {
+          id: subject.Semester.id,
+          name: subject.Semester.name,
+          number: subject.Semester.number
+        } : null,
+        createdAt: assignment.createdAt
+      }
+    });
+  } catch (error) {
+    console.error('Error assigning subject to teacher:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to assign subject'
+    });
+  }
+});
+
 // Error handling
 app.use((error, req, res, next) => {
   console.error('Express error:', error);
