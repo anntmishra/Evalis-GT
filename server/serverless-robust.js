@@ -390,6 +390,41 @@ app.get('/api/subjects', async (req, res) => {
   }
 });
 
+// Semesters endpoint
+app.get('/api/semesters', async (req, res) => {
+  try {
+    // Ensure database connection
+    if (!dbConnected) {
+      try {
+        const { connectDB } = require('./config/db');
+        await connectDB();
+        dbConnected = true;
+      } catch (dbError) {
+        console.error('DB connection failed:', dbError);
+        return res.status(500).json({
+          message: 'Database connection failed',
+          error: dbError.message
+        });
+      }
+    }
+    
+    const { Semester } = require('./models');
+    const semesters = await Semester.findAll({
+      attributes: ['id', 'name', 'number', 'batchId'],
+      order: [['name', 'ASC']]
+    });
+    
+    res.json(semesters);
+  } catch (error) {
+    console.error('Semesters fetch error:', error);
+    res.status(500).json({
+      message: 'Error fetching semesters',
+      error: error.message,
+      details: 'Please check database connection and models'
+    });
+  }
+});
+
 // Error handling
 app.use((error, req, res, next) => {
   console.error('Express error:', error);

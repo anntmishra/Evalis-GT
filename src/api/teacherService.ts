@@ -230,10 +230,10 @@ export const deleteTeacher = async (id: string) => {
 // Assign subject to teacher
 export const assignSubject = async (teacherId: string, subjectId: string) => {
   try {
-    const API_URL = getApiUrl();
+    const API_BASE_URL = getApiBaseUrl();
     const response = await axios.post(
-      `${API_URL}/${teacherId}/subjects`,
-      { subjectId },
+      `${API_BASE_URL}/admin/assign/subject`,
+      { teacherId, subjectId },
       authConfig()
     );
     return response.data;
@@ -245,9 +245,9 @@ export const assignSubject = async (teacherId: string, subjectId: string) => {
 // Remove subject from teacher
 export const removeSubject = async (teacherId: string, subjectId: string) => {
   try {
-    const API_URL = getApiUrl();
+    const API_BASE_URL = getApiBaseUrl();
     const response = await axios.delete(
-      `${API_URL}/${teacherId}/subjects/${subjectId}`,
+      `${API_BASE_URL}/teachers/${teacherId}/subjects/${subjectId}`,
       authConfig()
     );
     return response.data;
