@@ -258,6 +258,56 @@ async function handleAdminLogin(req, res) {
 // Inline admin login route
 app.post('/api/auth/admin/login', handleAdminLogin);
 
+// Teacher login handler
+app.post('/api/auth/teacher/login', async (req, res) => {
+  try {
+    const { email, id, password } = req.body || {};
+    if ((!email && !id) || !password) {
+      return res.status(400).json({ message: 'Provide email (or id) and password' });
+    }
+
+    // Ensure DB
+    if (!dbConnected) {
+      try { const { connectDB } = require('./config/db'); await connectDB(); dbConnected = true; } catch (e) {
+        return res.status(500).json({ message: 'Database unavailable', error: e.message });
+      }
+    }
+
+    const { Teacher } = require('./models');
+    const where = email ? { email } : { id };
+    const teacher = await Teacher.findOne({ where });
+    if (!teacher) return res.status(401).json({ message: 'Invalid credentials' });
+
+    const bcrypt = require('bcryptjs');
+    const match = await bcrypt.compare(password, teacher.password);
+    if (!match) return res.status(401).json({ message: 'Invalid credentials' });
+
+    const jwt = require('jsonwebtoken');
+    const token = jwt.sign({ id: teacher.id, email: teacher.email, role: 'teacher' }, process.env.JWT_SECRET || 'fallback-secret', { expiresIn: '30d' });
+
+    res.json({ id: teacher.id, name: teacher.name, email: teacher.email, role: 'teacher', token });
+  } catch (error) {
+    console.error('Teacher login error:', error);
+    res.status(500).json({ message: 'Teacher login failed', error: error.message });
+  }
+});
+
+// Auth profile (admin/teacher) - returns decoded token user
+app.get('/api/auth/profile', (req, res) => {
+  try {
+    const auth = req.headers.authorization || '';
+    if (!auth.startsWith('Bearer ')) return res.status(401).json({ message: 'No token' });
+    const token = auth.slice(7);
+    const jwt = require('jsonwebtoken');
+    const secret = process.env.JWT_SECRET || 'fallback-secret';
+    let decoded;
+    try { decoded = jwt.verify(token, secret); } catch (e) { return res.status(401).json({ message: 'Invalid token', error: e.message }); }
+    res.json({ user: decoded, issuedAt: decoded.iat, expiresAt: decoded.exp });
+  } catch (e) {
+    res.status(500).json({ message: 'Profile fetch failed', error: e.message });
+  }
+});
+
 // General login route (alias for frontend compatibility)
 app.post('/api/auth/login', handleAdminLogin);
 
