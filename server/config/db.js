@@ -14,10 +14,10 @@ function resolveDatabaseUrl() {
   return raw.trim();
 }
 
-// Determine if we're running in a serverless platform (Vercel) to tune pooling & failure behavior
-const isServerless = !!process.env.VERCEL || process.env.SERVERLESS === 'true';
+// Determine if we're running in a serverless platform (Vercel) to tune connection pooling
+const isVercelServerless = !!process.env.VERCEL;
 
-// Lazy singleton so serverless cold starts only create one connection
+// Lazy singleton for database connection
 let sequelize;
 let initialized = false;
 
@@ -28,7 +28,6 @@ function buildSequelize() {
   if (!dbUrl) {
     console.error('❌ Database URL not found in environment variables (DATABASE_URL / POSTGRES_URL / PG_URL)'.red.bold);
     console.error('   Current keys present:', Object.keys(process.env).filter(k => /(DATABASE_URL|POSTGRES|PG_?URL)/i.test(k)).join(', ') || 'none');
-    // Do NOT attempt to instantiate Sequelize with an invalid placeholder; this caused internal .replace() on null
     throw new Error('Missing database connection string');
   }
 
@@ -36,10 +35,12 @@ function buildSequelize() {
     throw new Error(`Database URL is not a string (type=${typeof dbUrl})`);
   }
 
-  // Smaller pool for serverless to avoid connection exhaustion; larger for long-lived server
-  const poolConfig = isServerless ? { max: 1, min: 0, idle: 5000, acquire: 20000 } : { max: 10, min: 0, acquire: 60000, idle: 10000, evict: 1000 };
+  // AWS RDS connection pooling - smaller pool for Vercel serverless functions, larger for traditional servers
+  const poolConfig = isVercelServerless 
+    ? { max: 2, min: 0, idle: 10000, acquire: 30000, evict: 5000 } // Vercel serverless
+    : { max: 10, min: 2, acquire: 60000, idle: 10000, evict: 1000 }; // Traditional server
 
-  console.log(`[DB] Initializing Sequelize (serverless=${isServerless})`.gray);
+  console.log(`[DB] Initializing AWS RDS connection (Vercel=${isVercelServerless})`.gray);
   const enableSqlLogs = (process.env.DB_LOG_SQL === 'true');
   sequelize = new Sequelize(dbUrl, {
     dialect: 'postgres',
@@ -50,7 +51,10 @@ function buildSequelize() {
         rejectUnauthorized: false
       }
     },
-    pool: poolConfig
+    pool: poolConfig,
+    retry: {
+      max: 3
+    }
   });
   return sequelize;
 }
@@ -71,22 +75,22 @@ const connectDB = async () => {
       throw new Error('Missing database connection string (set DATABASE_URL / NEON_DB_URL in environment)');
     }
     console.log('Database configuration:'.yellow);
-    console.log(`Using AWS RDS PostgreSQL${isServerless ? ' (serverless mode)' : ''}`.cyan);
+    console.log(`Using AWS RDS PostgreSQL (always-on instance)${isVercelServerless ? ' via Vercel serverless' : ''}`.cyan);
     const redacted = activeUrl.replace(/(:\/\/[^:]+:)([^@]+)(@)/, '$1********$3');
     console.log(`Connecting with URL (redacted): ${redacted}`.gray);
     await instance.authenticate();
-    console.log('AWS RDS PostgreSQL Connected'.cyan.underline);
+    console.log('✅ AWS RDS PostgreSQL Connected'.cyan.underline);
     initialized = true;
     return instance;
   } catch (error) {
     console.error(`Error connecting to AWS RDS PostgreSQL: ${error.message}`.red.bold);
     console.error('Troubleshooting checklist:');
     console.error('1. Ensure the DATABASE_URL is set in Vercel project settings');
-    console.error('2. Confirm the AWS RDS security group allows connections');
-    console.error('3. Make sure AWS RDS instance is running and accessible');
-    console.error('4. If using serverless, reduce pool size (handled automatically)');
-    if (isServerless) {
-      // In serverless do NOT exit; throw so the platform can return a 500 and we can retry on next invocation
+    console.error('2. Confirm the AWS RDS security group allows connections from 0.0.0.0/0');
+    console.error('3. Make sure AWS RDS instance is running and publicly accessible');
+    console.error('4. Verify the connection string format and credentials');
+    if (isVercelServerless) {
+      // In Vercel serverless do NOT exit; throw so the platform can return a 500 and we can retry on next invocation
       throw error;
     } else {
       process.exit(1);

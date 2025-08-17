@@ -30,6 +30,17 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Debug endpoint to check environment variables
+app.get('/api/debug/env', (req, res) => {
+  res.json({
+    hasDbUrl: !!process.env.DATABASE_URL,
+    hasJwtSecret: !!process.env.JWT_SECRET,
+    nodeEnv: process.env.NODE_ENV,
+    dbUrlLength: process.env.DATABASE_URL ? process.env.DATABASE_URL.length : 0,
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Admin login handler function
 async function handleAdminLogin(req, res) {
   try {
@@ -204,11 +215,16 @@ app.get('/api/auth/status', (req, res) => {
   }
 });
 
-// Load environment variables
+// Load environment variables (Vercel handles this automatically, but load .env for local dev)
 try {
   const dotenv = require('dotenv');
   dotenv.config({ path: path.join(__dirname, '../.env') });
   console.log('✅ Environment loaded');
+  
+  // Debug environment variables in serverless
+  console.log('DATABASE_URL present:', !!process.env.DATABASE_URL);
+  console.log('NODE_ENV:', process.env.NODE_ENV);
+  console.log('JWT_SECRET present:', !!process.env.JWT_SECRET);
 } catch (error) {
   console.error('❌ Environment loading failed:', error.message);
 }
@@ -232,17 +248,24 @@ try {
 // Basic teachers endpoint for compatibility
 app.get('/api/teachers', async (req, res) => {
   try {
+    console.log('Teachers endpoint called');
+    console.log('DATABASE_URL available:', !!process.env.DATABASE_URL);
+    
     // Ensure database connection
     if (!dbConnected) {
       try {
+        console.log('Attempting database connection...');
         const { connectDB } = require('./config/db');
         await connectDB();
         dbConnected = true;
+        console.log('Database connected successfully');
       } catch (dbError) {
         console.error('DB connection failed:', dbError);
         return res.status(500).json({
           message: 'Database connection failed',
-          error: dbError.message
+          error: dbError.message,
+          details: 'Check DATABASE_URL environment variable',
+          hasDbUrl: !!process.env.DATABASE_URL
         });
       }
     }
@@ -253,13 +276,15 @@ app.get('/api/teachers', async (req, res) => {
       order: [['name', 'ASC']]
     });
     
+    console.log(`Found ${teachers.length} teachers`);
     res.json(teachers);
   } catch (error) {
     console.error('Teachers fetch error:', error);
     res.status(500).json({
       message: 'Error fetching teachers',
       error: error.message,
-      details: 'Please check database connection and models'
+      details: 'Please check database connection and models',
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 });
