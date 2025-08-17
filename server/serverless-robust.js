@@ -112,6 +112,18 @@ async function requireAdmin(req, res, next) {
 async function extractTeacherFromRequest(req) {
   const diag = { stage: 'extractTeacher' };
   try {
+    // Ensure DB connection (in case helper used before endpoint connects)
+    if (!dbConnected) {
+      try {
+        const { connectDB } = require('./config/db');
+        await connectDB();
+        dbConnected = true;
+        diag.connectedInHelper = true;
+      } catch (connErr) {
+        diag.connectionError = connErr.message;
+        return { teacher:null, diag };
+      }
+    }
     const auth = req.headers.authorization || '';
     if (!auth.startsWith('Bearer ')) { diag.missingBearer = true; return { teacher:null, diag }; }
     const token = auth.slice(7);
@@ -694,6 +706,22 @@ app.get('/api/teachers/:id/students', async (req, res) => {
     const students = batchIds.length ? await Student.findAll({ where:{ batch: batchIds }, attributes:['id','name','email','batch','section','activeSemesterId'] }) : [];
     res.json({ success:true, teacherId, students, subjectIds, diag });
   } catch (e) { console.error('Teacher students fetch error:', e); res.status(500).json({ success:false, message:'Failed to fetch students for teacher', error:e.message }); }
+});
+
+// Placeholder submissions endpoints (avoid 500/404 on frontend while feature not implemented)
+app.get('/api/submissions/teacher/:id', async (req, res) => {
+  try {
+    if (!dbConnected) { const { connectDB } = require('./config/db'); await connectDB(); dbConnected = true; }
+    // Later: fetch real submissions by teacherId
+    res.json({ success:true, teacherId: req.params.id, submissions: [] });
+  } catch (e) { console.error('Teacher submissions fetch error:', e); res.status(500).json({ success:false, message:'Failed to fetch submissions', error:e.message }); }
+});
+
+app.get('/api/submissions/student/:id', async (req, res) => {
+  try {
+    if (!dbConnected) { const { connectDB } = require('./config/db'); await connectDB(); dbConnected = true; }
+    res.json({ success:true, studentId: req.params.id, submissions: [] });
+  } catch (e) { console.error('Student submissions fetch error:', e); res.status(500).json({ success:false, message:'Failed to fetch submissions', error:e.message }); }
 });
 
 // ===== Assignments CRUD =====
