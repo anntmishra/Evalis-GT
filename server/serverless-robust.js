@@ -832,8 +832,12 @@ app.post('/api/subjects', requireAdmin, async (req, res) => {
     const { Subject, Semester, Batch } = require('./models');
     let { id, name, code, section, description, credits, batchId, semesterId } = req.body;
 
+    // Basic validation
     if (!name || !section) {
       return res.status(400).json({ success:false, message:'Please provide name and section' });
+    }
+    if (!batchId && !semesterId) {
+      return res.status(400).json({ success:false, message:'Provide either batchId or semesterId (context required)' });
     }
 
     // Auto-generate subject id if absent
@@ -843,23 +847,34 @@ app.post('/api/subjects', requireAdmin, async (req, res) => {
       id = `SUB-${ts}-${rand}`.toUpperCase();
     }
 
+    // Validate context entities
     if (batchId) {
       const batch = await Batch.findByPk(batchId);
-      if (!batch) return res.status(400).json({ success:false, message:'Batch not found' });
+      if (!batch) return res.status(400).json({ success:false, field:'batchId', message:'Batch not found' });
     }
     if (semesterId) {
       const sem = await Semester.findByPk(semesterId);
-      if (!sem) return res.status(400).json({ success:false, message:'Semester not found' });
+      if (!sem) return res.status(400).json({ success:false, field:'semesterId', message:'Semester not found' });
     }
 
-    // Ensure uniqueness (name + section within optional semester)
-    const existing = await Subject.findOne({ where:{ name, section, semesterId: semesterId || null } });
-    if (existing) return res.status(409).json({ success:false, message:'Subject already exists for this section/semester' });
+    // Build uniqueness scope: prefer semesterId if provided else batchId
+    const where = { name, section };
+    if (semesterId) where.semesterId = semesterId; else if (batchId) where.batchId = batchId; else where.semesterId = null;
+
+    const existing = await Subject.findOne({ where });
+    if (existing) {
+      return res.status(409).json({
+        success:false,
+        message:'Subject already exists in this section for the specified context',
+        context: semesterId ? 'semester' : (batchId ? 'batch' : 'global'),
+        existingId: existing.id
+      });
+    }
 
     const subject = await Subject.create({ id, name, code, section, description, credits: credits || 3, batchId: batchId || null, semesterId: semesterId || null });
     res.status(201).json({ success:true, data:subject });
   } catch (error) {
-    console.error('Subject creation error:', error);
+    console.error('Subject creation error:', { message: error.message, stack: error.stack });
     res.status(500).json({ success:false, message:'Failed to create subject', error:error.message });
   }
 });
