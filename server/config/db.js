@@ -69,16 +69,27 @@ const connectDB = async () => {
     throw e; // serverless will surface this
   }
   if (initialized) return instance;
+  
   try {
     const activeUrl = resolveDatabaseUrl();
     if (!activeUrl) {
       throw new Error('Missing database connection string (set DATABASE_URL in environment)');
     }
+    
     console.log('Database configuration:'.yellow);
     console.log(`Using AWS RDS PostgreSQL (always-on instance)${isVercelServerless ? ' via Vercel serverless' : ''}`.cyan);
     const redacted = activeUrl.replace(/(:\/\/[^:]+:)([^@]+)(@)/, '$1********$3');
     console.log(`Connecting with URL (redacted): ${redacted}`.gray);
-    await instance.authenticate();
+    
+    // Add connection timeout for serverless environment
+    const connectTimeout = isVercelServerless ? 15000 : 30000; // 15s for Vercel, 30s for others
+    const authPromise = instance.authenticate();
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error(`Database connection timeout after ${connectTimeout}ms`)), connectTimeout);
+    });
+    
+    await Promise.race([authPromise, timeoutPromise]);
+    
     console.log('✅ AWS RDS PostgreSQL Connected'.cyan.underline);
     initialized = true;
     return instance;
@@ -89,6 +100,15 @@ const connectDB = async () => {
     console.error('2. Confirm the AWS RDS security group allows connections from 0.0.0.0/0');
     console.error('3. Make sure AWS RDS instance is running and publicly accessible');
     console.error('4. Verify the connection string format and credentials');
+    console.error('5. Check if the database accepts new connections (connection limit)');
+    
+    // Log additional debug info for serverless
+    if (isVercelServerless) {
+      console.error('Vercel serverless environment detected');
+      console.error('DATABASE_URL length:', process.env.DATABASE_URL?.length || 0);
+      console.error('Available memory:', process.env.AWS_LAMBDA_FUNCTION_MEMORY_SIZE || 'unknown');
+    }
+    
     if (isVercelServerless) {
       // In Vercel serverless do NOT exit; throw so the platform can return a 500 and we can retry on next invocation
       throw error;
