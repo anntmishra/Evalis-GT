@@ -164,19 +164,64 @@ async function extractTeacherFromRequest(req) {
 }
 
 // Health check route (most important)
-app.get('/api/health', (req, res) => {
-  res.status(200).json({ 
-    status: 'OK', 
-    timestamp: new Date().toISOString(),
-    environment: 'serverless-robust-v3-with-env',
-    hasDbUrl: !!process.env.DATABASE_URL,
-    hasJwtSecret: !!process.env.JWT_SECRET,
-    nodeEnv: process.env.NODE_ENV,
-    isVercel: !!process.env.VERCEL,
-    dbUrlLength: process.env.DATABASE_URL ? process.env.DATABASE_URL.length : 0,
-    envKeys: Object.keys(process.env).filter(k => k.includes('DATABASE')).join(','),
-    deploymentId: process.env.VERCEL_DEPLOYMENT_ID || 'unknown'
-  });
+app.get('/api/health', async (req, res) => {
+  try {
+    // Test database connectivity
+    let dbHealth = 'unknown';
+    let dbError = null;
+    
+    try {
+      if (!dbConnected) {
+        const { connectDB } = require('./config/db');
+        const connectPromise = connectDB();
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Health check DB timeout')), 5000);
+        });
+        
+        await Promise.race([connectPromise, timeoutPromise]);
+        dbConnected = true;
+      }
+      
+      // Test a simple query
+      const { sequelize } = require('./config/db');
+      await sequelize.query('SELECT 1');
+      dbHealth = 'connected';
+    } catch (error) {
+      dbHealth = 'error';
+      dbError = error.message;
+    }
+    
+    res.status(200).json({ 
+      status: 'OK', 
+      timestamp: new Date().toISOString(),
+      environment: 'serverless-robust-v4-enhanced',
+      database: {
+        status: dbHealth,
+        error: dbError,
+        connected: dbConnected
+      },
+      config: {
+        hasDbUrl: !!process.env.DATABASE_URL,
+        hasJwtSecret: !!process.env.JWT_SECRET,
+        nodeEnv: process.env.NODE_ENV,
+        isVercel: !!process.env.VERCEL,
+        dbUrlLength: process.env.DATABASE_URL ? process.env.DATABASE_URL.length : 0,
+        envKeys: Object.keys(process.env).filter(k => k.includes('DATABASE')).join(',')
+      },
+      deployment: {
+        id: process.env.VERCEL_DEPLOYMENT_ID || 'unknown',
+        region: process.env.VERCEL_REGION || 'unknown',
+        url: process.env.VERCEL_URL || 'unknown'
+      }
+    });
+  } catch (error) {
+    console.error('Health check error:', error);
+    res.status(500).json({
+      status: 'ERROR',
+      message: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
 });
 
 // Admin login handler function
@@ -375,8 +420,10 @@ app.get('/api/auth/health', (req, res) => {
 });
 
 // Auth status endpoint
-app.get('/api/auth/status', (req, res) => {
+app.get('/api/auth/status', async (req, res) => {
   try {
+    console.log('Auth status endpoint called');
+    
     const authHeader = req.headers.authorization;
     const token = authHeader?.replace('Bearer ', '');
     
@@ -384,7 +431,8 @@ app.get('/api/auth/status', (req, res) => {
       return res.status(401).json({
         valid: false,
         message: 'No token provided',
-        authHeader: !!authHeader
+        authHeader: !!authHeader,
+        timestamp: new Date().toISOString()
       });
     }
     
@@ -394,41 +442,48 @@ app.get('/api/auth/status', (req, res) => {
     try {
       const decoded = jwt.verify(token, jwtSecret);
       
+      // Basic database connectivity check
+      let dbStatus = 'unknown';
+      try {
+        if (!dbConnected) {
+          const { connectDB } = require('./config/db');
+          await connectDB();
+          dbConnected = true;
+        }
+        dbStatus = 'connected';
+      } catch (dbError) {
+        console.error('DB status check failed:', dbError);
+        dbStatus = 'disconnected';
+      }
+      
       res.json({
         valid: true,
         user: decoded,
+        dbStatus,
+        environment: process.env.NODE_ENV || 'unknown',
         timestamp: new Date().toISOString()
       });
     } catch (jwtError) {
-      // If JWT verification fails, try to decode without verification to see the payload
-      try {
-        const decoded = jwt.decode(token);
-        return res.status(401).json({
-          valid: false,
-          message: 'Token verification failed',
-          error: jwtError.message,
-          tokenPayload: decoded,
-          hasSecret: !!process.env.JWT_SECRET
-        });
-      } catch (decodeError) {
-        return res.status(401).json({
-          valid: false,
-          message: 'Invalid token format',
-          error: jwtError.message,
-          hasSecret: !!process.env.JWT_SECRET
-        });
-      }
+      console.error('JWT verification failed:', jwtError);
+      res.status(401).json({
+        valid: false,
+        message: 'Invalid token',
+        error: jwtError.message,
+        timestamp: new Date().toISOString()
+      });
     }
-    
   } catch (error) {
+    console.error('Auth status error:', error);
     res.status(500).json({
       valid: false,
-      message: 'Auth status check failed',
-      error: error.message
+      message: 'Server error during token validation',
+      error: error.message,
+      timestamp: new Date().toISOString()
     });
   }
 });
 
+// Health check endpoint
 // Load environment variables (Vercel handles this automatically, but load .env for local dev)
 try {
   const dotenv = require('dotenv');
@@ -464,13 +519,21 @@ app.get('/api/teachers', async (req, res) => {
   try {
     console.log('Teachers endpoint called');
     console.log('DATABASE_URL available:', !!process.env.DATABASE_URL);
+    console.log('Environment:', process.env.NODE_ENV);
     
-    // Ensure database connection
+    // Ensure database connection with timeout
     if (!dbConnected) {
       try {
         console.log('Attempting database connection...');
         const { connectDB } = require('./config/db');
-        await connectDB();
+        
+        // Add timeout for database connection in serverless environment
+        const connectPromise = connectDB();
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Database connection timeout')), 10000);
+        });
+        
+        await Promise.race([connectPromise, timeoutPromise]);
         dbConnected = true;
         console.log('Database connected successfully');
       } catch (dbError) {
@@ -478,13 +541,22 @@ app.get('/api/teachers', async (req, res) => {
         return res.status(500).json({
           message: 'Database connection failed',
           error: dbError.message,
-          details: 'Check DATABASE_URL environment variable',
-          hasDbUrl: !!process.env.DATABASE_URL
+          details: 'Check DATABASE_URL environment variable and network connectivity',
+          hasDbUrl: !!process.env.DATABASE_URL,
+          dbUrlLength: process.env.DATABASE_URL ? process.env.DATABASE_URL.length : 0,
+          timestamp: new Date().toISOString()
         });
       }
     }
     
+    // Initialize models with explicit connection
     const { Teacher, Subject, Semester } = require('./models');
+    
+    // Verify models are properly initialized
+    if (!Teacher || !Subject || !Semester) {
+      throw new Error('Models not properly initialized');
+    }
+    
     const teachers = await Teacher.findAll({
       attributes: { exclude: ['password'] },
       include: [
@@ -492,21 +564,24 @@ app.get('/api/teachers', async (req, res) => {
           model: Subject,
           through: { attributes: [] },
           attributes: ['id', 'name', 'section'],
-          include: [ { model: Semester, attributes: ['id','number','name'] } ]
+          include: [ { model: Semester, attributes: ['id','number','name'], required: false } ],
+          required: false
         }
       ],
       order: [['name', 'ASC']]
     });
     
     console.log(`Found ${teachers.length} teachers`);
-  res.json(teachers);
+    res.json(teachers);
   } catch (error) {
     console.error('Teachers fetch error:', error);
+    console.error('Error stack:', error.stack);
     res.status(500).json({
       message: 'Error fetching teachers',
       error: error.message,
-      details: 'Please check database connection and models',
-      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      details: 'Database or model initialization error',
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
+      timestamp: new Date().toISOString()
     });
   }
 });
@@ -664,48 +739,229 @@ app.get('/api/teachers/:id/subjects', async (req, res) => {
 
 // Authenticated teacher subjects (token-based, no id in path)
 app.get('/api/teachers/subjects', async (req, res) => {
-  try { if (!dbConnected) { const { connectDB } = require('./config/db'); await connectDB(); dbConnected = true; }
+  try {
+    console.log('Teacher subjects endpoint called');
+    if (!dbConnected) { 
+      console.log('Connecting to database for teacher subjects...');
+      const { connectDB } = require('./config/db'); 
+      await connectDB(); 
+      dbConnected = true; 
+    }
+    
     const { teacher, diag } = await extractTeacherFromRequest(req);
-    if (!teacher) return res.status(403).json({ success:false, message:'Teacher auth failed', diag });
-    const { Subject, Semester } = require('./models');
-    const subjects = await teacher.getSubjects({ include:[ { model: Semester, attributes:['id','name','number','active'] } ] });
-    res.json({ success:true, teacherId: teacher.id, subjects });
-  } catch (e) { console.error('Auth teacher subjects error:', e); res.status(500).json({ success:false, message:'Failed to fetch teacher subjects', error:e.message }); }
+    if (!teacher) {
+      console.log('Teacher authentication failed:', diag);
+      return res.status(403).json({ 
+        success: false, 
+        message: 'Teacher authentication failed', 
+        diag,
+        timestamp: new Date().toISOString()
+      });
+    }
+    
+    console.log(`Fetching subjects for teacher: ${teacher.id}`);
+    const { Subject, Semester, Batch } = require('./models');
+    const subjects = await teacher.getSubjects({ 
+      include: [
+        { 
+          model: Semester, 
+          attributes: ['id','name','number','active'],
+          required: false
+        },
+        {
+          model: Batch,
+          attributes: ['id', 'name'],
+          required: false
+        }
+      ]
+    });
+    
+    console.log(`Found ${subjects.length} subjects for teacher ${teacher.id}`);
+    res.json(subjects);
+  } catch (e) { 
+    console.error('Auth teacher subjects error:', e);
+    console.error('Error stack:', e.stack);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to fetch teacher subjects', 
+      error: e.message,
+      timestamp: new Date().toISOString()
+    }); 
+  }
 });
 
 // Authenticated teacher accessible batches (derived from subject batchId)
 app.get('/api/teachers/batches', async (req, res) => {
-  try { if (!dbConnected) { const { connectDB } = require('./config/db'); await connectDB(); dbConnected = true; }
+  try {
+    console.log('Teacher batches endpoint called');
+    if (!dbConnected) { 
+      console.log('Connecting to database for teacher batches...');
+      const { connectDB } = require('./config/db'); 
+      await connectDB(); 
+      dbConnected = true; 
+    }
+    
     const { teacher, diag } = await extractTeacherFromRequest(req);
-    if (!teacher) return res.status(403).json({ success:false, message:'Teacher auth failed', diag });
-    const { Subject, Batch } = require('./models');
-    const subjects = await teacher.getSubjects({ attributes:['id','batchId'], include:[] });
-    const batchIds = [...new Set(subjects.filter(s => s.batchId).map(s => s.batchId))];
-    if (batchIds.length === 0) return res.json({ success:true, batches:[], teacherId: teacher.id });
-    const batches = await Batch.findAll({ where:{ id: batchIds } });
-    res.json({ success:true, teacherId: teacher.id, batches });
-  } catch (e) { console.error('Teacher batches error:', e); res.status(500).json({ success:false, message:'Failed to fetch batches', error:e.message }); }
+    if (!teacher) {
+      console.log('Teacher authentication failed for batches:', diag);
+      return res.status(403).json({ 
+        success: false, 
+        message: 'Teacher authentication failed', 
+        diag,
+        timestamp: new Date().toISOString()
+      });
+    }
+    
+    console.log(`Fetching accessible batches for teacher: ${teacher.id}`);
+    const { Subject, Batch, Semester } = require('./models');
+    
+    // Get subjects with their batch and semester information
+    const subjects = await teacher.getSubjects({ 
+      attributes: ['id','batchId','semesterId'], 
+      include: [
+        {
+          model: Semester,
+          attributes: ['id', 'batchId'],
+          required: false
+        }
+      ]
+    });
+    
+    // Extract batch IDs from multiple sources
+    const batchIdSet = new Set();
+    subjects.forEach(subject => {
+      if (subject.batchId) batchIdSet.add(subject.batchId);
+      if (subject.Semester && subject.Semester.batchId) batchIdSet.add(subject.Semester.batchId);
+    });
+    
+    const batchIds = [...batchIdSet];
+    console.log(`Found batch IDs for teacher ${teacher.id}:`, batchIds);
+    
+    if (batchIds.length === 0) {
+      console.log(`No batches found for teacher ${teacher.id}`);
+      return res.json([]);
+    }
+    
+    const batches = await Batch.findAll({ 
+      where: { id: batchIds },
+      attributes: ['id', 'name', 'startYear', 'endYear', 'department']
+    });
+    
+    console.log(`Found ${batches.length} accessible batches for teacher ${teacher.id}`);
+    res.json(batches);
+  } catch (e) { 
+    console.error('Teacher batches error:', e);
+    console.error('Error stack:', e.stack);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to fetch accessible batches', 
+      error: e.message,
+      timestamp: new Date().toISOString()
+    }); 
+  }
 });
 
 // ===== Teacher students (students in batches/semesters related to teacher's subjects) =====
 app.get('/api/teachers/:id/students', async (req, res) => {
-  try { if (!dbConnected) { const { connectDB } = require('./config/db'); await connectDB(); dbConnected = true; }
-    const teacherId = req.params.id; const { teacher, diag } = await extractTeacherFromRequest(req);
-    // Allow if token teacher matches path or admin (admin would have role=admin in decoded token but reuse helper returns null) so just allow path if no token teacher
-    if (!teacher || teacher.id !== teacherId) {
-      // attempt fallback direct model lookup when token missing
-      const { Teacher } = require('./models'); const exists = await Teacher.findByPk(teacherId); if (!exists) return res.status(404).json({ success:false, message:'Teacher not found', diag });
+  try {
+    console.log(`Teacher students endpoint called for teacher: ${req.params.id}`);
+    if (!dbConnected) { 
+      console.log('Connecting to database for teacher students...');
+      const { connectDB } = require('./config/db'); 
+      await connectDB(); 
+      dbConnected = true; 
     }
-    const { Subject, Student, TeacherSubject } = require('./models');
-    const links = await TeacherSubject.findAll({ where:{ teacherId }, attributes:['subjectId'] });
+    
+    const teacherId = req.params.id;
+    const { teacher, diag } = await extractTeacherFromRequest(req);
+    
+    // Allow if token teacher matches path or if we can find the teacher
+    if (!teacher || teacher.id !== teacherId) {
+      console.log(`Teacher auth mismatch or not found. Token teacher: ${teacher?.id}, Requested: ${teacherId}`);
+      // attempt fallback direct model lookup when token missing
+      const { Teacher } = require('./models');
+      const exists = await Teacher.findByPk(teacherId);
+      if (!exists) {
+        return res.status(404).json({ 
+          success: false, 
+          message: 'Teacher not found', 
+          diag,
+          timestamp: new Date().toISOString()
+        });
+      }
+    }
+    
+    console.log(`Fetching students for teacher: ${teacherId}`);
+    const { Subject, Student, TeacherSubject, Batch, Semester } = require('./models');
+    
+    // Get subject assignments for this teacher
+    const links = await TeacherSubject.findAll({ 
+      where: { teacherId }, 
+      attributes: ['subjectId'] 
+    });
     const subjectIds = links.map(l => l.subjectId);
-    if (subjectIds.length === 0) return res.json({ success:true, students:[], subjectIds, teacherId });
-    const subjects = await Subject.findAll({ where:{ id: subjectIds }, attributes:['id','batchId','semesterId'] });
-    const batchIds = [...new Set(subjects.filter(s => s.batchId).map(s => s.batchId))];
-    const { Student } = require('./models');
-    const students = batchIds.length ? await Student.findAll({ where:{ batch: batchIds }, attributes:['id','name','email','batch','section','activeSemesterId'] }) : [];
-    res.json({ success:true, teacherId, students, subjectIds, diag });
-  } catch (e) { console.error('Teacher students fetch error:', e); res.status(500).json({ success:false, message:'Failed to fetch students for teacher', error:e.message }); }
+    
+    console.log(`Teacher ${teacherId} has subjects:`, subjectIds);
+    
+    if (subjectIds.length === 0) {
+      console.log(`No subjects found for teacher ${teacherId}`);
+      return res.json([]);
+    }
+    
+    // Get subjects with their batch information
+    const subjects = await Subject.findAll({ 
+      where: { id: subjectIds }, 
+      attributes: ['id','batchId','semesterId'],
+      include: [
+        {
+          model: Semester,
+          attributes: ['id', 'batchId'],
+          required: false
+        }
+      ]
+    });
+    
+    // Extract batch IDs from multiple sources
+    const batchIdSet = new Set();
+    subjects.forEach(subject => {
+      if (subject.batchId) batchIdSet.add(subject.batchId);
+      if (subject.Semester && subject.Semester.batchId) batchIdSet.add(subject.Semester.batchId);
+    });
+    
+    const batchIds = [...batchIdSet];
+    console.log(`Found batch IDs for teacher ${teacherId}:`, batchIds);
+    
+    if (batchIds.length === 0) {
+      console.log(`No batches found for teacher ${teacherId}`);
+      return res.json([]);
+    }
+    
+    // Get students from these batches
+    const students = await Student.findAll({ 
+      where: { batch: batchIds }, 
+      attributes: ['id','name','email','batch','section','activeSemesterId'],
+      include: [
+        {
+          model: Batch,
+          attributes: ['id', 'name'],
+          required: false
+        }
+      ],
+      order: [['name', 'ASC']]
+    });
+    
+    console.log(`Found ${students.length} students for teacher ${teacherId}`);
+    res.json(students);
+  } catch (e) { 
+    console.error('Teacher students fetch error:', e);
+    console.error('Error stack:', e.stack);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to fetch students for teacher', 
+      error: e.message,
+      timestamp: new Date().toISOString()
+    }); 
+  }
 });
 
 // Placeholder submissions endpoints (avoid 500/404 on frontend while feature not implemented)
@@ -929,34 +1185,54 @@ app.get('/api/students', async (req, res) => {
 // Basic batches endpoint
 app.get('/api/batches', async (req, res) => {
   try {
-    // Ensure database connection
+    console.log('Batches endpoint called');
+    
+    // Ensure database connection with timeout
     if (!dbConnected) {
       try {
+        console.log('Attempting database connection for batches...');
         const { connectDB } = require('./config/db');
-        await connectDB();
+        
+        const connectPromise = connectDB();
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Database connection timeout')), 10000);
+        });
+        
+        await Promise.race([connectPromise, timeoutPromise]);
         dbConnected = true;
+        console.log('Database connected for batches');
       } catch (dbError) {
-        console.error('DB connection failed:', dbError);
+        console.error('DB connection failed for batches:', dbError);
         return res.status(500).json({
           message: 'Database connection failed',
-          error: dbError.message
+          error: dbError.message,
+          timestamp: new Date().toISOString()
         });
       }
     }
     
     const { Batch } = require('./models');
+    
+    if (!Batch) {
+      throw new Error('Batch model not properly initialized');
+    }
+    
     const batches = await Batch.findAll({
       attributes: ['id', 'name', 'startYear', 'endYear', 'department', 'active'],
       order: [['name', 'ASC']]
     });
     
+    console.log(`Found ${batches.length} batches`);
     res.json(batches);
   } catch (error) {
     console.error('Batches fetch error:', error);
+    console.error('Error stack:', error.stack);
     res.status(500).json({
       message: 'Error fetching batches',
       error: error.message,
-      details: 'Please check database connection and models'
+      details: 'Database or model initialization error',
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
+      timestamp: new Date().toISOString()
     });
   }
 });
@@ -1003,34 +1279,72 @@ app.get('/api/batches/:batchId/students', async (req, res) => {
 // Basic subjects endpoint
 app.get('/api/subjects', async (req, res) => {
   try {
-    // Ensure database connection
+    console.log('Subjects endpoint called');
+    
+    // Ensure database connection with timeout
     if (!dbConnected) {
       try {
+        console.log('Attempting database connection for subjects...');
         const { connectDB } = require('./config/db');
-        await connectDB();
+        
+        const connectPromise = connectDB();
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Database connection timeout')), 10000);
+        });
+        
+        await Promise.race([connectPromise, timeoutPromise]);
         dbConnected = true;
+        console.log('Database connected for subjects');
       } catch (dbError) {
-        console.error('DB connection failed:', dbError);
+        console.error('DB connection failed for subjects:', dbError);
         return res.status(500).json({
           message: 'Database connection failed',
-          error: dbError.message
+          error: dbError.message,
+          timestamp: new Date().toISOString()
         });
       }
     }
     
-    const { Subject } = require('./models');
+    const { Subject, Teacher, Batch, Semester } = require('./models');
+    
+    if (!Subject) {
+      throw new Error('Subject model not properly initialized');
+    }
+    
     const subjects = await Subject.findAll({
-      attributes: ['id', 'name', 'section', 'description', 'credits'],
+      attributes: ['id', 'name', 'section', 'description', 'credits', 'batchId', 'semesterId'],
+      include: [
+        {
+          model: Teacher,
+          through: { attributes: [] },
+          attributes: ['id', 'name', 'email'],
+          required: false
+        },
+        {
+          model: Batch,
+          attributes: ['id', 'name'],
+          required: false
+        },
+        {
+          model: Semester,
+          attributes: ['id', 'name', 'number'],
+          required: false
+        }
+      ],
       order: [['name', 'ASC']]
     });
     
+    console.log(`Found ${subjects.length} subjects`);
     res.json(subjects);
   } catch (error) {
     console.error('Subjects fetch error:', error);
+    console.error('Error stack:', error.stack);
     res.status(500).json({
       message: 'Error fetching subjects',
       error: error.message,
-      details: 'Please check database connection and models'
+      details: 'Database or model initialization error',
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
+      timestamp: new Date().toISOString()
     });
   }
 });
