@@ -581,43 +581,30 @@ app.get('/api/admin/students', async (req, res) => {
 
 app.get('/api/admin/teachers', async (req, res) => {
   try {
-    console.log('Admin teachers endpoint called');
-    console.log('DATABASE_URL available:', !!process.env.DATABASE_URL);
-    
-    // Ensure database connection
     if (!dbConnected) {
-      try {
-        console.log('Attempting database connection...');
-        const { connectDB } = require('./config/db');
-        await connectDB();
-        dbConnected = true;
-        console.log('Database connected successfully');
-      } catch (dbError) {
-        console.error('DB connection failed:', dbError);
-        return res.status(500).json({
-          success: false,
-          message: 'Database connection failed',
-          error: dbError.message
-        });
-      }
+      console.log('🔌 Attempting database connection...');
+      const { connectDB } = require('./config/db');
+      await connectDB();
+      dbConnected = true;
     }
 
-    const { Teacher } = require('./models');
-    
+    const { Teacher, Subject, Semester } = require('./models');
     const teachers = await Teacher.findAll({
       attributes: { exclude: ['password'] },
+      include: [
+        {
+          model: Subject,
+            through: { attributes: [] },
+            attributes: ['id', 'name', 'code', 'section'],
+            include: [ { model: Semester, attributes: ['id', 'name', 'number'] } ]
+        }
+      ],
       order: [['name', 'ASC']]
     });
-
-    console.log(`Found ${teachers.length} admin teachers`);
     res.json(teachers);
   } catch (error) {
     console.error('Error fetching admin teachers:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch teachers',
-      error: error.message
-    });
+    res.status(500).json({ success: false, message: 'Failed to fetch teachers', error: error.message });
   }
 });
 
@@ -691,37 +678,33 @@ app.post('/api/admin/students', async (req, res) => {
       dbConnected = true;
     }
 
-    const { Student, Batch } = require('./models');
-    const { id, name, email, batch, section, password } = req.body;
+    const { Student, Batch, Semester } = require('./models');
+    let { id, name, email, batch, section, password, activeSemesterId } = req.body;
 
-    if (!id || !name || !email || !batch) {
-      return res.status(400).json({
-        success: false,
-        message: 'Please provide id, name, email, and batch'
-      });
+    if (!name || !email || !batch) {
+      return res.status(400).json({ success: false, message: 'Please provide at least name, email, and batch' });
     }
 
-    // Check if student already exists
+    if (!id) id = `S${String(Date.now()).slice(-6)}`;
+
     const existingStudent = await Student.findByPk(id);
     if (existingStudent) {
-      return res.status(400).json({
-        success: false,
-        message: 'Student with this ID already exists'
-      });
+      return res.status(400).json({ success: false, message: 'Student with this ID already exists' });
     }
 
-    // Check if batch exists
     const batchExists = await Batch.findByPk(batch);
     if (!batchExists) {
-      return res.status(400).json({
-        success: false,
-        message: 'Batch not found'
-      });
+      return res.status(400).json({ success: false, message: 'Batch not found' });
     }
 
-    // Hash password
+    if (activeSemesterId) {
+      const sem = await Semester.findByPk(activeSemesterId);
+      if (!sem) return res.status(400).json({ success: false, message: 'Active semester not found' });
+      if (sem.batchId !== batch) return res.status(400).json({ success: false, message: 'Semester does not belong to batch' });
+    }
+
     const bcrypt = require('bcryptjs');
-    const studentPassword = password || 'student123'; // Default password
+    const studentPassword = password || 'student123';
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(studentPassword, salt);
 
@@ -730,26 +713,15 @@ app.post('/api/admin/students', async (req, res) => {
       name,
       email,
       batch,
-      section,
-      password: hashedPassword
+      section: section || 'A',
+      password: hashedPassword,
+      activeSemesterId: activeSemesterId || null
     });
 
-    res.status(201).json({
-      success: true,
-      data: {
-        id: student.id,
-        name: student.name,
-        email: student.email,
-        batch: student.batch,
-        section: student.section
-      }
-    });
+    res.status(201).json({ success: true, data: { id: student.id, name: student.name, email: student.email, batch: student.batch, section: student.section, activeSemesterId: student.activeSemesterId } });
   } catch (error) {
     console.error('Error creating admin student:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to create student'
-    });
+    res.status(500).json({ success: false, message: 'Failed to create student', error: error.message });
   }
 });
 
@@ -1102,19 +1074,21 @@ app.post('/api/admin/batches', async (req, res) => {
     }
 
     const { Batch } = require('./models');
-    const { name, department, startYear, endYear, active = true } = req.body;
+    const { name, department, startYear, endYear, active = true, id } = req.body;
 
     if (!name || !department || !startYear || !endYear) {
-      return res.status(400).json({
-        success: false,
-        message: 'Please provide name, department, startYear, and endYear'
-      });
+      return res.status(400).json({ success: false, message: 'Please provide name, department, startYear, and endYear' });
     }
 
-    // Check if batch already exists
-    const existingBatch = await Batch.findOne({
-      where: { name, startYear, endYear }
-    });
+    // Auto id if not passed
+    const batchId = id || `${startYear}-${endYear}`;
+
+    if (!/^[0-9]{4}-[0-9]{4}$/.test(batchId)) {
+      console.warn('Batch id not in expected pattern YYYY-YYYY, continuing but recommend consistent IDs');
+    }
+
+  // Check if batch already exists
+  const existingBatch = await Batch.findByPk(batchId);
 
     if (existingBatch) {
       return res.status(400).json({
@@ -1123,24 +1097,12 @@ app.post('/api/admin/batches', async (req, res) => {
       });
     }
 
-    const batch = await Batch.create({
-      name,
-      department,
-      startYear,
-      endYear,
-      active
-    });
+  const batch = await Batch.create({ id: batchId, name, department, startYear, endYear, active });
 
-    res.status(201).json({
-      success: true,
-      data: batch
-    });
+  res.status(201).json({ success: true, data: batch });
   } catch (error) {
     console.error('Error creating batch:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to create batch'
-    });
+  res.status(500).json({ success: false, message: 'Failed to create batch', error: error.message });
   }
 });
 
@@ -1155,58 +1117,36 @@ app.post('/api/admin/subjects', async (req, res) => {
     }
 
     const { Subject, Batch, Semester } = require('./models');
-    const { id, name, code, section, description, credits, batchId, semesterId } = req.body;
+    let { id, name, code, section, description, credits, batchId, semesterId } = req.body;
 
     if (!name || !section) {
-      return res.status(400).json({
-        success: false,
-        message: 'Please provide name and section'
-      });
+      return res.status(400).json({ success: false, message: 'Please provide name and section' });
     }
 
-    // Check if batch exists if provided
+    if (!id) {
+      if (code) id = code; else id = `SUB-${Date.now().toString(36)}`;
+    }
+
+    // Id uniqueness
+    const existing = await Subject.findByPk(id);
+    if (existing) {
+      return res.status(400).json({ success: false, message: 'Subject with this id already exists' });
+    }
+
     if (batchId) {
       const batchExists = await Batch.findByPk(batchId);
-      if (!batchExists) {
-        return res.status(400).json({
-          success: false,
-          message: 'Batch not found'
-        });
-      }
+      if (!batchExists) return res.status(400).json({ success: false, message: 'Batch not found' });
     }
-
-    // Check if semester exists if provided
     if (semesterId) {
       const semesterExists = await Semester.findByPk(semesterId);
-      if (!semesterExists) {
-        return res.status(400).json({
-          success: false,
-          message: 'Semester not found'
-        });
-      }
+      if (!semesterExists) return res.status(400).json({ success: false, message: 'Semester not found' });
     }
 
-    const subject = await Subject.create({
-      id,
-      name,
-      code,
-      section,
-      description,
-      credits: credits || 3,
-      batchId,
-      semesterId
-    });
-
-    res.status(201).json({
-      success: true,
-      data: subject
-    });
+    const subject = await Subject.create({ id, name, code, section, description, credits: credits || 3, batchId, semesterId });
+    res.status(201).json({ success: true, data: subject });
   } catch (error) {
     console.error('Error creating subject:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to create subject'
-    });
+    res.status(500).json({ success: false, message: 'Failed to create subject', error: error.message });
   }
 });
 
