@@ -798,6 +798,120 @@ app.get('/api/subjects', async (req, res) => {
   }
 });
 
+// Get single subject
+app.get('/api/subjects/:id', async (req, res) => {
+  try {
+    if (!dbConnected) {
+      const { connectDB } = require('./config/db');
+      await connectDB();
+      dbConnected = true;
+    }
+    const { Subject, Semester, Batch } = require('./models');
+    const subject = await Subject.findByPk(req.params.id, {
+      include: [
+        { model: Semester, attributes: ['id','name','number','active'] },
+        { model: Batch, attributes: ['id','name','department'] }
+      ]
+    });
+    if (!subject) return res.status(404).json({ success:false, message:'Subject not found' });
+    res.json({ success:true, data:subject });
+  } catch (error) {
+    console.error('Subject fetch error:', error);
+    res.status(500).json({ success:false, message:'Failed to fetch subject', error:error.message });
+  }
+});
+
+// Create subject (admin)
+app.post('/api/subjects', requireAdmin, async (req, res) => {
+  try {
+    if (!dbConnected) {
+      const { connectDB } = require('./config/db');
+      await connectDB();
+      dbConnected = true;
+    }
+    const { Subject, Semester, Batch } = require('./models');
+    let { id, name, code, section, description, credits, batchId, semesterId } = req.body;
+
+    if (!name || !section) {
+      return res.status(400).json({ success:false, message:'Please provide name and section' });
+    }
+
+    // Auto-generate subject id if absent
+    if (!id) {
+      const ts = Date.now().toString(36);
+      const rand = Math.random().toString(36).slice(2,6);
+      id = `SUB-${ts}-${rand}`.toUpperCase();
+    }
+
+    if (batchId) {
+      const batch = await Batch.findByPk(batchId);
+      if (!batch) return res.status(400).json({ success:false, message:'Batch not found' });
+    }
+    if (semesterId) {
+      const sem = await Semester.findByPk(semesterId);
+      if (!sem) return res.status(400).json({ success:false, message:'Semester not found' });
+    }
+
+    // Ensure uniqueness (name + section within optional semester)
+    const existing = await Subject.findOne({ where:{ name, section, semesterId: semesterId || null } });
+    if (existing) return res.status(409).json({ success:false, message:'Subject already exists for this section/semester' });
+
+    const subject = await Subject.create({ id, name, code, section, description, credits: credits || 3, batchId: batchId || null, semesterId: semesterId || null });
+    res.status(201).json({ success:true, data:subject });
+  } catch (error) {
+    console.error('Subject creation error:', error);
+    res.status(500).json({ success:false, message:'Failed to create subject', error:error.message });
+  }
+});
+
+// Update subject (admin)
+app.put('/api/subjects/:id', requireAdmin, async (req, res) => {
+  try {
+    if (!dbConnected) {
+      const { connectDB } = require('./config/db');
+      await connectDB();
+      dbConnected = true;
+    }
+    const { Subject, Semester, Batch } = require('./models');
+    const subject = await Subject.findByPk(req.params.id);
+    if (!subject) return res.status(404).json({ success:false, message:'Subject not found' });
+
+    const { name, code, section, description, credits, batchId, semesterId } = req.body;
+
+    if (batchId) {
+      const batch = await Batch.findByPk(batchId); if (!batch) return res.status(400).json({ success:false, message:'Batch not found' });
+    }
+    if (semesterId) {
+      const sem = await Semester.findByPk(semesterId); if (!sem) return res.status(400).json({ success:false, message:'Semester not found' });
+    }
+
+    await subject.update({ name, code, section, description, credits, batchId, semesterId });
+    res.json({ success:true, data:subject });
+  } catch (error) {
+    console.error('Subject update error:', error);
+    res.status(500).json({ success:false, message:'Failed to update subject', error:error.message });
+  }
+});
+
+// Delete subject (admin)
+app.delete('/api/subjects/:id', requireAdmin, async (req, res) => {
+  try {
+    if (!dbConnected) {
+      const { connectDB } = require('./config/db');
+      await connectDB();
+      dbConnected = true;
+    }
+    const { Subject } = require('./models');
+    const subject = await Subject.findByPk(req.params.id);
+    if (!subject) return res.status(404).json({ success:false, message:'Subject not found' });
+    await subject.destroy();
+    res.json({ success:true, message:'Subject deleted' });
+  } catch (error) {
+    console.error('Subject deletion error:', error);
+    res.status(500).json({ success:false, message:'Failed to delete subject', error:error.message });
+  }
+});
+
 // Semesters endpoint
 app.get('/api/semesters', async (req, res) => {
   try {
