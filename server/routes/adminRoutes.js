@@ -1,6 +1,19 @@
 const express = require('express');
 const router = express.Router();
 const {
+  getDashboardStats,
+  getBatches,
+  createBatch,
+  getTeachers,
+  createTeacher,
+  updateTeacher,
+  deleteTeacher,
+  getStudents,
+  createStudent,
+  updateStudent,
+  deleteStudent,
+  getSubjects,
+  createSubject,
   addStudentsBatch,
   addTeacher,
   assignSubjectToTeacher,
@@ -20,9 +33,31 @@ router.use(admin);
 // Mount monitoring routes
 router.use('/', monitoringRoutes);
 
-// Admin routes for managing students and teachers
+// Dashboard stats
+router.get('/dashboard', getDashboardStats);
+
+// Batch management routes
+router.get('/batches', getBatches);
+router.post('/batches', createBatch);
+
+// Teacher management routes
+router.get('/teachers', getTeachers);
+router.post('/teachers', createTeacher);
+router.put('/teachers/:id', updateTeacher);
+router.delete('/teachers/:id', deleteTeacher);
+
+// Student management routes
+router.get('/students', getStudents);
+router.post('/students', createStudent);
+router.put('/students/:id', updateStudent);
+router.delete('/students/:id', deleteStudent);
 router.post('/students/batch', addStudentsBatch);
-router.post('/teachers', addTeacher);
+
+// Subject management routes
+router.get('/subjects', getSubjects);
+router.post('/subjects', createSubject);
+
+// Teacher-Subject assignment routes
 router.post('/assign/subject', assignSubjectToTeacher);
 router.get('/assignments', getTeacherSubjectAssignments);
 
