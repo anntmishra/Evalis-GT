@@ -21,6 +21,29 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false }));
 
+// Simple admin auth middleware for generic CRUD endpoints (uses JWT role)
+function requireAdmin(req, res, next) {
+  try {
+    const auth = req.headers.authorization || '';
+    if (!auth.startsWith('Bearer ')) return res.status(401).json({ success:false, message:'No token provided' });
+    const token = auth.slice(7);
+    const jwt = require('jsonwebtoken');
+    const secret = process.env.JWT_SECRET || 'fallback-secret';
+    let decoded;
+    try {
+      decoded = jwt.verify(token, secret);
+    } catch (e) {
+      return res.status(401).json({ success:false, message:'Invalid token', error:e.message });
+    }
+    if (decoded.role !== 'admin') return res.status(403).json({ success:false, message:'Admin privileges required' });
+    req.admin = decoded;
+    next();
+  } catch (err) {
+    console.error('requireAdmin error:', err);
+    res.status(500).json({ success:false, message:'Auth middleware failed', error: err.message });
+  }
+}
+
 // Health check route (most important)
 app.get('/api/health', (req, res) => {
   res.status(200).json({ 
@@ -309,6 +332,262 @@ app.get('/api/teachers', async (req, res) => {
       stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
+});
+
+// ===== Generic Teacher CRUD (admin protected) =====
+app.post('/api/teachers', requireAdmin, async (req, res) => {
+  try {
+    if (!dbConnected) { const { connectDB } = require('./config/db'); await connectDB(); dbConnected = true; }
+    const { Teacher } = require('./models');
+    const { name, email, password } = req.body;
+    if (!name || !email) return res.status(400).json({ success:false, message:'Name and email required' });
+    const existing = await Teacher.findOne({ where:{ email } });
+    if (existing) return res.status(400).json({ success:false, message:'Teacher with this email already exists' });
+    const bcrypt = require('bcryptjs');
+    const teacherId = `T${String(Date.now()).slice(-6)}`;
+    const rawPassword = password || 'teacher123';
+    const salt = await bcrypt.genSalt(10); const hashed = await bcrypt.hash(rawPassword, salt);
+    const teacher = await Teacher.create({ id: teacherId, name, email, password: hashed });
+    res.status(201).json({ success:true, data:{ id: teacher.id, name: teacher.name, email: teacher.email } });
+  } catch (e) { console.error('Create teacher error:', e); res.status(500).json({ success:false, message:'Failed to create teacher', error:e.message }); }
+});
+
+app.put('/api/teachers/:id', requireAdmin, async (req, res) => {
+  try {
+    if (!dbConnected) { const { connectDB } = require('./config/db'); await connectDB(); dbConnected = true; }
+    const { Teacher } = require('./models'); const { name, email } = req.body; const teacher = await Teacher.findByPk(req.params.id);
+    if (!teacher) return res.status(404).json({ success:false, message:'Teacher not found' });
+    if (email && email !== teacher.email) { const exists = await Teacher.findOne({ where:{ email } }); if (exists) return res.status(400).json({ success:false, message:'Email already in use' }); }
+    await teacher.update({ name, email });
+    res.json({ success:true, data:{ id: teacher.id, name: teacher.name, email: teacher.email } });
+  } catch (e) { console.error('Update teacher error:', e); res.status(500).json({ success:false, message:'Failed to update teacher', error:e.message }); }
+});
+
+app.delete('/api/teachers/:id', requireAdmin, async (req, res) => {
+  try {
+    if (!dbConnected) { const { connectDB } = require('./config/db'); await connectDB(); dbConnected = true; }
+    const { Teacher, TeacherSubject } = require('./models'); const teacher = await Teacher.findByPk(req.params.id);
+    if (!teacher) return res.status(404).json({ success:false, message:'Teacher not found' });
+    await TeacherSubject.destroy({ where:{ teacherId: teacher.id } });
+    await teacher.destroy();
+    res.json({ success:true, message:'Teacher deleted' });
+  } catch (e) { console.error('Delete teacher error:', e); res.status(500).json({ success:false, message:'Failed to delete teacher', error:e.message }); }
+});
+
+// Teacher details (with subjects)
+app.get('/api/teachers/:id', requireAdmin, async (req, res) => {
+  try {
+    if (!dbConnected) { const { connectDB } = require('./config/db'); await connectDB(); dbConnected = true; }
+    const { Teacher, Subject, Semester } = require('./models');
+    const teacher = await Teacher.findByPk(req.params.id, { attributes:{ exclude:['password'] }, include:[ { model: Subject, through:{ attributes:[] }, attributes:['id','name','code','section'], include:[ { model: Semester, attributes:['id','name','number'] } ] } ] });
+    if (!teacher) return res.status(404).json({ success:false, message:'Teacher not found' });
+    res.json(teacher);
+  } catch (e) { console.error('Get teacher detail error:', e); res.status(500).json({ success:false, message:'Failed to fetch teacher', error:e.message }); }
+});
+
+// Remove subject assignment generic route (frontend removeSubject)
+app.delete('/api/teachers/:teacherId/subjects/:subjectId', requireAdmin, async (req, res) => {
+  try {
+    if (!dbConnected) { const { connectDB } = require('./config/db'); await connectDB(); dbConnected = true; }
+    const { TeacherSubject } = require('./models'); const { teacherId, subjectId } = req.params;
+    const deleted = await TeacherSubject.destroy({ where:{ teacherId, subjectId } });
+    if (!deleted) return res.status(404).json({ success:false, message:'Assignment not found' });
+    res.json({ success:true, message:'Assignment removed' });
+  } catch (e) { console.error('Remove assignment error:', e); res.status(500).json({ success:false, message:'Failed to remove assignment', error:e.message }); }
+});
+
+// ===== Generic Student Create (admin protected) =====
+app.post('/api/students', requireAdmin, async (req, res) => {
+  try {
+    if (!dbConnected) { const { connectDB } = require('./config/db'); await connectDB(); dbConnected = true; }
+    const { Student, Batch } = require('./models');
+    let { id, name, email, batch, section, password } = req.body;
+    if (!name || !email || !batch) return res.status(400).json({ success:false, message:'name, email, batch required' });
+    if (!id) id = `S${String(Date.now()).slice(-6)}`;
+    const exists = await Student.findByPk(id); if (exists) return res.status(400).json({ success:false, message:'Student ID exists' });
+    const batchRow = await Batch.findByPk(batch); if (!batchRow) return res.status(400).json({ success:false, message:'Batch not found' });
+    const bcrypt = require('bcryptjs'); const rawPassword = password || 'student123'; const salt = await bcrypt.genSalt(10); const hashed = await bcrypt.hash(rawPassword, salt);
+    const student = await Student.create({ id, name, email, batch, section: section || 'A', password: hashed });
+    res.status(201).json({ success:true, data:{ id: student.id, name: student.name, email: student.email, batch: student.batch, section: student.section } });
+  } catch (e) { console.error('Create student error:', e); res.status(500).json({ success:false, message:'Failed to create student', error:e.message }); }
+});
+
+// ===== Generic Batch Create (admin protected) =====
+app.post('/api/batches', requireAdmin, async (req, res) => {
+  try {
+    if (!dbConnected) { const { connectDB } = require('./config/db'); await connectDB(); dbConnected = true; }
+    const { Batch } = require('./models');
+    const { name, department, startYear, endYear, active = true, id } = req.body;
+    if (!name || !department || !startYear || !endYear) return res.status(400).json({ success:false, message:'name, department, startYear, endYear required' });
+    const batchId = id || `${startYear}-${endYear}`;
+    const exists = await Batch.findByPk(batchId); if (exists) return res.status(400).json({ success:false, message:'Batch already exists' });
+    const batch = await Batch.create({ id: batchId, name, department, startYear, endYear, active });
+    res.status(201).json({ success:true, data: batch });
+  } catch (e) { console.error('Create batch error:', e); res.status(500).json({ success:false, message:'Failed to create batch', error:e.message }); }
+});
+
+// ========= Generic (non-admin) Teacher CRUD for frontend compatibility =========
+app.post('/api/teachers', async (req, res) => {
+  try {
+    if (!dbConnected) { const { connectDB } = require('./config/db'); await connectDB(); dbConnected = true; }
+    const { Teacher } = require('./models');
+    const { name, email, password } = req.body;
+    if (!name || !email) return res.status(400).json({ success:false, message:'Name and email required' });
+    const existing = await Teacher.findOne({ where:{ email } });
+    if (existing) return res.status(400).json({ success:false, message:'Teacher with this email already exists' });
+    const bcrypt = require('bcryptjs');
+    const teacherId = `T${String(Date.now()).slice(-6)}`;
+    const rawPassword = password || 'teacher123';
+    const salt = await bcrypt.genSalt(10); const hashed = await bcrypt.hash(rawPassword, salt);
+    const teacher = await Teacher.create({ id: teacherId, name, email, password: hashed });
+    res.status(201).json({ success:true, data:{ id: teacher.id, name: teacher.name, email: teacher.email } });
+  } catch (e) { console.error('Create teacher (generic) error:', e); res.status(500).json({ success:false, message:'Failed to create teacher', error:e.message }); }
+});
+
+app.get('/api/teachers/:id', async (req, res) => {
+  try { if (!dbConnected) { const { connectDB } = require('./config/db'); await connectDB(); dbConnected = true; }
+    const { Teacher, Subject } = require('./models');
+    const teacher = await Teacher.findByPk(req.params.id, { attributes:{ exclude:['password'] }, include:[ { model: Subject, through:{ attributes:[] }, attributes:['id','name','code','section'] } ] });
+    if (!teacher) return res.status(404).json({ success:false, message:'Teacher not found' });
+    res.json(teacher);
+  } catch(e){ console.error('Fetch teacher error:', e); res.status(500).json({ success:false, message:'Failed to fetch teacher', error:e.message }); }
+});
+
+app.put('/api/teachers/:id', async (req, res) => {
+  try { if (!dbConnected) { const { connectDB } = require('./config/db'); await connectDB(); dbConnected = true; }
+    const { Teacher } = require('./models'); const { name, email } = req.body; const teacher = await Teacher.findByPk(req.params.id);
+    if (!teacher) return res.status(404).json({ success:false, message:'Teacher not found' });
+    if (email && email !== teacher.email) { const exists = await Teacher.findOne({ where:{ email } }); if (exists) return res.status(400).json({ success:false, message:'Email already in use' }); }
+    await teacher.update({ name, email });
+    res.json({ success:true, data:{ id: teacher.id, name: teacher.name, email: teacher.email } });
+  } catch(e){ console.error('Update teacher error:', e); res.status(500).json({ success:false, message:'Failed to update teacher', error:e.message }); }
+});
+
+app.delete('/api/teachers/:id', async (req, res) => {
+  try { if (!dbConnected) { const { connectDB } = require('./config/db'); await connectDB(); dbConnected = true; }
+    const { Teacher, TeacherSubject } = require('./models'); const teacher = await Teacher.findByPk(req.params.id);
+    if (!teacher) return res.status(404).json({ success:false, message:'Teacher not found' });
+    // Clean assignments
+    await TeacherSubject.destroy({ where:{ teacherId: teacher.id } });
+    await teacher.destroy();
+    res.json({ success:true, message:'Teacher deleted' });
+  } catch(e){ console.error('Delete teacher error:', e); res.status(500).json({ success:false, message:'Failed to delete teacher', error:e.message }); }
+});
+
+// Get subjects for a teacher (generic)
+app.get('/api/teachers/:id/subjects', async (req, res) => {
+  try { if (!dbConnected) { const { connectDB } = require('./config/db'); await connectDB(); dbConnected = true; }
+    const { Teacher, Subject, Semester } = require('./models');
+    const teacher = await Teacher.findByPk(req.params.id);
+    if (!teacher) return res.status(404).json({ success:false, message:'Teacher not found' });
+    const subjects = await teacher.getSubjects({ include:[ { model: Semester, attributes:['id','name','number','active'] } ] });
+    res.json(subjects);
+  } catch(e){ console.error('List teacher subjects error:', e); res.status(500).json({ success:false, message:'Failed to fetch subjects', error:e.message }); }
+});
+
+// Remove subject assignment (generic) aligns with frontend removeSubject()
+app.delete('/api/teachers/:teacherId/subjects/:subjectId', async (req, res) => {
+  try { if (!dbConnected) { const { connectDB } = require('./config/db'); await connectDB(); dbConnected = true; }
+    const { TeacherSubject } = require('./models'); const { teacherId, subjectId } = req.params;
+    const deleted = await TeacherSubject.destroy({ where:{ teacherId, subjectId } });
+    if (!deleted) return res.status(404).json({ success:false, message:'Assignment not found' });
+    res.json({ success:true, message:'Assignment removed' });
+  } catch(e){ console.error('Remove assignment error:', e); res.status(500).json({ success:false, message:'Failed to remove assignment', error:e.message }); }
+});
+
+// Optional: assign subject via generic route POST /api/teachers/:id/subjects
+app.post('/api/teachers/:id/subjects', async (req, res) => {
+  try { if (!dbConnected) { const { connectDB } = require('./config/db'); await connectDB(); dbConnected = true; }
+    const { Teacher, Subject, TeacherSubject } = require('./models'); const teacherId = req.params.id; const { subjectId } = req.body;
+    if (!subjectId) return res.status(400).json({ success:false, message:'subjectId required' });
+    const teacher = await Teacher.findByPk(teacherId); if (!teacher) return res.status(404).json({ success:false, message:'Teacher not found' });
+    const subject = await Subject.findByPk(subjectId); if (!subject) return res.status(404).json({ success:false, message:'Subject not found' });
+    const exists = await TeacherSubject.findOne({ where:{ teacherId, subjectId } }); if (exists) return res.status(400).json({ success:false, message:'Already assigned' });
+    await TeacherSubject.create({ teacherId, subjectId });
+    res.status(201).json({ success:true, message:'Subject assigned' });
+  } catch(e){ console.error('Assign subject (generic) error:', e); res.status(500).json({ success:false, message:'Failed to assign subject', error:e.message }); }
+});
+
+// ========= Generic Student CRUD =========
+app.post('/api/students', async (req, res) => {
+  try { if (!dbConnected) { const { connectDB } = require('./config/db'); await connectDB(); dbConnected = true; }
+    const { Student, Batch } = require('./models'); let { id, name, email, batch, section, password } = req.body;
+    if (!name || !email || !batch) return res.status(400).json({ success:false, message:'name, email, batch required' });
+    if (!id) id = `S${String(Date.now()).slice(-6)}`;
+    const exists = await Student.findByPk(id); if (exists) return res.status(400).json({ success:false, message:'Student ID exists' });
+    const batchRow = await Batch.findByPk(batch); if (!batchRow) return res.status(400).json({ success:false, message:'Batch not found' });
+    const bcrypt = require('bcryptjs'); const rawPassword = password || 'student123'; const salt = await bcrypt.genSalt(10); const hashed = await bcrypt.hash(rawPassword, salt);
+    const student = await Student.create({ id, name, email, batch, section: section || 'A', password: hashed });
+    res.status(201).json({ success:true, data:{ id: student.id, name: student.name, email: student.email, batch: student.batch, section: student.section } });
+  } catch(e){ console.error('Create student error:', e); res.status(500).json({ success:false, message:'Failed to create student', error:e.message }); }
+});
+
+app.get('/api/students/:id', async (req, res) => {
+  try { if (!dbConnected) { const { connectDB } = require('./config/db'); await connectDB(); dbConnected = true; }
+    const { Student, Batch } = require('./models'); const student = await Student.findByPk(req.params.id, { attributes:{ exclude:['password'] }, include:[ { model: Batch, attributes:['name','department'] } ] });
+    if (!student) return res.status(404).json({ success:false, message:'Student not found' });
+    res.json(student);
+  } catch(e){ console.error('Fetch student error:', e); res.status(500).json({ success:false, message:'Failed to fetch student', error:e.message }); }
+});
+
+app.put('/api/students/:id', async (req, res) => {
+  try { if (!dbConnected) { const { connectDB } = require('./config/db'); await connectDB(); dbConnected = true; }
+    const { Student, Batch } = require('./models'); const { name, email, batch, section } = req.body; const student = await Student.findByPk(req.params.id);
+    if (!student) return res.status(404).json({ success:false, message:'Student not found' });
+    if (batch && batch !== student.batch) { const batchRow = await Batch.findByPk(batch); if (!batchRow) return res.status(400).json({ success:false, message:'Batch not found' }); }
+    await student.update({ name, email, batch, section });
+    res.json({ success:true, data:{ id: student.id, name: student.name, email: student.email, batch: student.batch, section: student.section } });
+  } catch(e){ console.error('Update student error:', e); res.status(500).json({ success:false, message:'Failed to update student', error:e.message }); }
+});
+
+app.delete('/api/students/:id', async (req, res) => {
+  try { if (!dbConnected) { const { connectDB } = require('./config/db'); await connectDB(); dbConnected = true; }
+    const { Student } = require('./models'); const student = await Student.findByPk(req.params.id); if (!student) return res.status(404).json({ success:false, message:'Student not found' }); await student.destroy();
+    res.json({ success:true, message:'Student deleted' });
+  } catch(e){ console.error('Delete student error:', e); res.status(500).json({ success:false, message:'Failed to delete student', error:e.message }); }
+});
+
+// ========= Generic Batch CRUD =========
+app.post('/api/batches', async (req, res) => {
+  try { if (!dbConnected) { const { connectDB } = require('./config/db'); await connectDB(); dbConnected = true; }
+    const { Batch } = require('./models'); const { name, department, startYear, endYear, active = true, id } = req.body;
+    if (!name || !department || !startYear || !endYear) return res.status(400).json({ success:false, message:'name, department, startYear, endYear required' });
+    const batchId = id || `${startYear}-${endYear}`;
+    const exists = await Batch.findByPk(batchId); if (exists) return res.status(400).json({ success:false, message:'Batch already exists' });
+    const batch = await Batch.create({ id: batchId, name, department, startYear, endYear, active });
+    res.status(201).json({ success:true, data: batch });
+  } catch(e){ console.error('Create batch error:', e); res.status(500).json({ success:false, message:'Failed to create batch', error:e.message }); }
+});
+
+app.get('/api/batches/:id', async (req, res) => {
+  try { if (!dbConnected) { const { connectDB } = require('./config/db'); await connectDB(); dbConnected = true; }
+    const { Batch } = require('./models'); const batch = await Batch.findByPk(req.params.id); if (!batch) return res.status(404).json({ success:false, message:'Batch not found' }); res.json(batch);
+  } catch(e){ console.error('Fetch batch error:', e); res.status(500).json({ success:false, message:'Failed to fetch batch', error:e.message }); }
+});
+
+app.put('/api/batches/:id', async (req, res) => {
+  try { if (!dbConnected) { const { connectDB } = require('./config/db'); await connectDB(); dbConnected = true; }
+    const { Batch } = require('./models'); const { name, department, startYear, endYear, active } = req.body; const batch = await Batch.findByPk(req.params.id);
+    if (!batch) return res.status(404).json({ success:false, message:'Batch not found' });
+    await batch.update({ name, department, startYear, endYear, active });
+    res.json({ success:true, data: batch });
+  } catch(e){ console.error('Update batch error:', e); res.status(500).json({ success:false, message:'Failed to update batch', error:e.message }); }
+});
+
+app.delete('/api/batches/:id', async (req, res) => {
+  try { if (!dbConnected) { const { connectDB } = require('./config/db'); await connectDB(); dbConnected = true; }
+    const { Batch, Student, Subject, Semester } = require('./models'); const batch = await Batch.findByPk(req.params.id);
+    if (!batch) return res.status(404).json({ success:false, message:'Batch not found' });
+    // Prevent deletion if related rows exist (safety)
+    const studentCount = await Student.count({ where:{ batch: batch.id } });
+    const subjectCount = await Subject.count({ where:{ batchId: batch.id } });
+    const semesterCount = await Semester.count({ where:{ batchId: batch.id } });
+    if (studentCount || subjectCount || semesterCount) {
+      return res.status(400).json({ success:false, message:`Cannot delete batch with related records (students:${studentCount}, subjects:${subjectCount}, semesters:${semesterCount})` });
+    }
+    await batch.destroy();
+    res.json({ success:true, message:'Batch deleted' });
+  } catch(e){ console.error('Delete batch error:', e); res.status(500).json({ success:false, message:'Failed to delete batch', error:e.message }); }
 });
 
 // Basic students endpoint for compatibility  
