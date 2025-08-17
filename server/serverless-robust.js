@@ -607,6 +607,100 @@ app.get('/api/teachers/:id/subjects', async (req, res) => {
   } catch(e){ console.error('List teacher subjects error:', e); res.status(500).json({ success:false, message:'Failed to fetch subjects', error:e.message }); }
 });
 
+// ===== Teacher students (students in batches/semesters related to teacher's subjects) =====
+app.get('/api/teachers/:id/students', async (req, res) => {
+  try {
+    if (!dbConnected) { const { connectDB } = require('./config/db'); await connectDB(); dbConnected = true; }
+    const { Teacher, Subject, Student, TeacherSubject } = require('./models');
+    const teacherId = req.params.id;
+    // Ensure teacher
+    const teacher = await Teacher.findByPk(teacherId); if (!teacher) return res.status(404).json({ success:false, message:'Teacher not found' });
+    // Get subject ids
+    const links = await TeacherSubject.findAll({ where:{ teacherId }, attributes:['subjectId'] });
+    const subjectIds = links.map(l => l.subjectId);
+    if (subjectIds.length === 0) return res.json({ success:true, students:[], subjectIds:[] });
+    // Determine batches from subjects (if batchId column exists)
+    const subjects = await Subject.findAll({ where:{ id: subjectIds }, attributes:['id','batchId','semesterId'] });
+    const batchIds = [...new Set(subjects.filter(s => s.batchId).map(s => s.batchId))];
+    let students = [];
+    if (batchIds.length) {
+      students = await Student.findAll({ where:{ batch: batchIds }, attributes:['id','name','email','batch','section','activeSemesterId'] });
+    }
+    res.json({ success:true, students, subjectIds });
+  } catch (e) {
+    console.error('Teacher students fetch error:', e);
+    res.status(500).json({ success:false, message:'Failed to fetch students for teacher', error:e.message });
+  }
+});
+
+// ===== Assignments CRUD =====
+// Create assignment (teacher)
+app.post('/api/assignments', async (req, res) => {
+  try {
+    if (!dbConnected) { const { connectDB } = require('./config/db'); await connectDB(); dbConnected = true; }
+    const auth = req.headers.authorization || '';
+    const jwt = require('jsonwebtoken');
+    let teacherId = req.body.teacherId; // allow explicit teacherId (admin) or derive from token
+    if (!teacherId && auth.startsWith('Bearer ')) {
+      try { const decoded = jwt.verify(auth.slice(7), process.env.JWT_SECRET || 'fallback-secret'); if (decoded.role === 'teacher') teacherId = decoded.id; } catch(_){}
+    }
+    const { title, description, subjectId, dueDate, examType = 'Assignment' } = req.body;
+    if (!title || !subjectId || !teacherId) return res.status(400).json({ success:false, message:'title, subjectId, teacherId required' });
+    const { Subject, Teacher, Assignment } = require('./models');
+    const subject = await Subject.findByPk(subjectId); if (!subject) return res.status(400).json({ success:false, message:'Subject not found' });
+    const teacher = await Teacher.findByPk(teacherId); if (!teacher) return res.status(400).json({ success:false, message:'Teacher not found' });
+    const assignment = await Assignment.create({ title, description, subjectId, teacherId, dueDate: dueDate ? new Date(dueDate) : null, examType });
+    res.status(201).json({ success:true, data: assignment });
+  } catch (e) {
+    console.error('Assignment creation error:', e);
+    res.status(500).json({ success:false, message:'Failed to create assignment', error:e.message });
+  }
+});
+
+// List assignments for teacher
+app.get('/api/assignments/teacher', async (req, res) => {
+  try {
+    if (!dbConnected) { const { connectDB } = require('./config/db'); await connectDB(); dbConnected = true; }
+    const auth = req.headers.authorization || '';
+    const jwt = require('jsonwebtoken');
+    let teacherId = req.query.teacherId;
+    if (!teacherId && auth.startsWith('Bearer ')) { try { const decoded = jwt.verify(auth.slice(7), process.env.JWT_SECRET || 'fallback-secret'); if (decoded.role==='teacher') teacherId = decoded.id; } catch(_){} }
+    if (!teacherId) return res.status(400).json({ success:false, message:'teacherId required' });
+    const { Assignment, Subject } = require('./models');
+    const assignments = await Assignment.findAll({ where:{ teacherId }, include:[ { model: Subject, attributes:['id','name','section'] } ], order:[['createdAt','DESC']] });
+    res.json({ success:true, assignments });
+  } catch (e) {
+    console.error('Teacher assignments fetch error:', e);
+    res.status(500).json({ success:false, message:'Failed to fetch assignments', error:e.message });
+  }
+});
+
+// List assignments for subject (student view)
+app.get('/api/assignments/subject/:subjectId', async (req, res) => {
+  try { if (!dbConnected) { const { connectDB } = require('./config/db'); await connectDB(); dbConnected = true; }
+    const { Assignment } = require('./models');
+    const assignments = await Assignment.findAll({ where:{ subjectId: req.params.subjectId }, order:[['createdAt','DESC']] });
+    res.json({ success:true, assignments });
+  } catch(e){ console.error('Subject assignments fetch error:', e); res.status(500).json({ success:false, message:'Failed to fetch subject assignments', error:e.message }); }
+});
+
+// Delete assignment (teacher)
+app.delete('/api/assignments/:id', async (req, res) => {
+  try { if (!dbConnected) { const { connectDB } = require('./config/db'); await connectDB(); dbConnected = true; }
+    const auth = req.headers.authorization || '';
+    const jwt = require('jsonwebtoken');
+    let requesterId;
+    if (auth.startsWith('Bearer ')) { try { const decoded = jwt.verify(auth.slice(7), process.env.JWT_SECRET || 'fallback-secret'); requesterId = decoded.id; } catch(_){} }
+    const { Assignment } = require('./models');
+    const assignment = await Assignment.findByPk(req.params.id);
+    if (!assignment) return res.status(404).json({ success:false, message:'Assignment not found' });
+    if (requesterId && assignment.teacherId !== requesterId) {
+      return res.status(403).json({ success:false, message:'Not allowed to delete this assignment' });
+    }
+    await assignment.destroy(); res.json({ success:true, message:'Assignment deleted' });
+  } catch(e){ console.error('Assignment delete error:', e); res.status(500).json({ success:false, message:'Failed to delete assignment', error:e.message }); }
+});
+
 // Remove subject assignment (generic) aligns with frontend removeSubject()
 app.delete('/api/teachers/:teacherId/subjects/:subjectId', async (req, res) => {
   try { if (!dbConnected) { const { connectDB } = require('./config/db'); await connectDB(); dbConnected = true; }
