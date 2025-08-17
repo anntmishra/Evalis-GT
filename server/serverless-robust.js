@@ -379,14 +379,22 @@ app.get('/api/teachers', async (req, res) => {
       }
     }
     
-    const { Teacher } = require('./models');
+    const { Teacher, Subject, Semester } = require('./models');
     const teachers = await Teacher.findAll({
-      attributes: ['id', 'name', 'email', 'role'],
+      attributes: { exclude: ['password'] },
+      include: [
+        {
+          model: Subject,
+          through: { attributes: [] },
+          attributes: ['id', 'name', 'section'],
+          include: [ { model: Semester, attributes: ['id','number','name'] } ]
+        }
+      ],
       order: [['name', 'ASC']]
     });
     
     console.log(`Found ${teachers.length} teachers`);
-    res.json(teachers);
+  res.json(teachers);
   } catch (error) {
     console.error('Teachers fetch error:', error);
     res.status(500).json({
