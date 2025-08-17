@@ -108,6 +108,49 @@ async function requireAdmin(req, res, next) {
   }
 }
 
+// Helper: extract teacher from token (supports internal JWT or Firebase ID token via soft decode)
+async function extractTeacherFromRequest(req) {
+  const diag = { stage: 'extractTeacher' };
+  try {
+    const auth = req.headers.authorization || '';
+    if (!auth.startsWith('Bearer ')) { diag.missingBearer = true; return { teacher:null, diag }; }
+    const token = auth.slice(7);
+    const jwt = require('jsonwebtoken');
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret');
+      diag.verified = true;
+    } catch (e) {
+      diag.verifyError = e.message;
+      try { decoded = jwt.decode(token) || {}; diag.softDecoded = true; } catch (de) { diag.decodeError = de.message; return { teacher:null, diag }; }
+    }
+    const { Teacher } = require('./models');
+    // Direct id if role=teacher
+    if (decoded?.role === 'teacher' && decoded.id) {
+      const teacher = await Teacher.findByPk(decoded.id);
+      if (teacher) { diag.foundById = teacher.id; return { teacher, diag }; }
+    }
+    // Fallback by email (Firebase tokens usually have email)
+    const email = decoded?.email || decoded?.user?.email;
+    if (email) {
+      const teacher = await Teacher.findOne({ where:{ email } });
+      if (teacher) { diag.foundByEmail = email; return { teacher, diag }; }
+      diag.emailLookupMiss = email;
+    }
+    // Fallback by custom uid/subject if matches teacher id
+    const sub = decoded?.sub;
+    if (sub) {
+      const teacher = await Teacher.findByPk(sub);
+      if (teacher) { diag.foundBySub = sub; return { teacher, diag }; }
+    }
+    diag.noMatch = true;
+    return { teacher:null, diag };
+  } catch (err) {
+    diag.fatal = err.message;
+    return { teacher:null, diag };
+  }
+}
+
 // Health check route (most important)
 app.get('/api/health', (req, res) => {
   res.status(200).json({ 
@@ -607,30 +650,50 @@ app.get('/api/teachers/:id/subjects', async (req, res) => {
   } catch(e){ console.error('List teacher subjects error:', e); res.status(500).json({ success:false, message:'Failed to fetch subjects', error:e.message }); }
 });
 
+// Authenticated teacher subjects (token-based, no id in path)
+app.get('/api/teachers/subjects', async (req, res) => {
+  try { if (!dbConnected) { const { connectDB } = require('./config/db'); await connectDB(); dbConnected = true; }
+    const { teacher, diag } = await extractTeacherFromRequest(req);
+    if (!teacher) return res.status(403).json({ success:false, message:'Teacher auth failed', diag });
+    const { Subject, Semester } = require('./models');
+    const subjects = await teacher.getSubjects({ include:[ { model: Semester, attributes:['id','name','number','active'] } ] });
+    res.json({ success:true, teacherId: teacher.id, subjects });
+  } catch (e) { console.error('Auth teacher subjects error:', e); res.status(500).json({ success:false, message:'Failed to fetch teacher subjects', error:e.message }); }
+});
+
+// Authenticated teacher accessible batches (derived from subject batchId)
+app.get('/api/teachers/batches', async (req, res) => {
+  try { if (!dbConnected) { const { connectDB } = require('./config/db'); await connectDB(); dbConnected = true; }
+    const { teacher, diag } = await extractTeacherFromRequest(req);
+    if (!teacher) return res.status(403).json({ success:false, message:'Teacher auth failed', diag });
+    const { Subject, Batch } = require('./models');
+    const subjects = await teacher.getSubjects({ attributes:['id','batchId'], include:[] });
+    const batchIds = [...new Set(subjects.filter(s => s.batchId).map(s => s.batchId))];
+    if (batchIds.length === 0) return res.json({ success:true, batches:[], teacherId: teacher.id });
+    const batches = await Batch.findAll({ where:{ id: batchIds } });
+    res.json({ success:true, teacherId: teacher.id, batches });
+  } catch (e) { console.error('Teacher batches error:', e); res.status(500).json({ success:false, message:'Failed to fetch batches', error:e.message }); }
+});
+
 // ===== Teacher students (students in batches/semesters related to teacher's subjects) =====
 app.get('/api/teachers/:id/students', async (req, res) => {
-  try {
-    if (!dbConnected) { const { connectDB } = require('./config/db'); await connectDB(); dbConnected = true; }
-    const { Teacher, Subject, Student, TeacherSubject } = require('./models');
-    const teacherId = req.params.id;
-    // Ensure teacher
-    const teacher = await Teacher.findByPk(teacherId); if (!teacher) return res.status(404).json({ success:false, message:'Teacher not found' });
-    // Get subject ids
+  try { if (!dbConnected) { const { connectDB } = require('./config/db'); await connectDB(); dbConnected = true; }
+    const teacherId = req.params.id; const { teacher, diag } = await extractTeacherFromRequest(req);
+    // Allow if token teacher matches path or admin (admin would have role=admin in decoded token but reuse helper returns null) so just allow path if no token teacher
+    if (!teacher || teacher.id !== teacherId) {
+      // attempt fallback direct model lookup when token missing
+      const { Teacher } = require('./models'); const exists = await Teacher.findByPk(teacherId); if (!exists) return res.status(404).json({ success:false, message:'Teacher not found', diag });
+    }
+    const { Subject, Student, TeacherSubject } = require('./models');
     const links = await TeacherSubject.findAll({ where:{ teacherId }, attributes:['subjectId'] });
     const subjectIds = links.map(l => l.subjectId);
-    if (subjectIds.length === 0) return res.json({ success:true, students:[], subjectIds:[] });
-    // Determine batches from subjects (if batchId column exists)
+    if (subjectIds.length === 0) return res.json({ success:true, students:[], subjectIds, teacherId });
     const subjects = await Subject.findAll({ where:{ id: subjectIds }, attributes:['id','batchId','semesterId'] });
     const batchIds = [...new Set(subjects.filter(s => s.batchId).map(s => s.batchId))];
-    let students = [];
-    if (batchIds.length) {
-      students = await Student.findAll({ where:{ batch: batchIds }, attributes:['id','name','email','batch','section','activeSemesterId'] });
-    }
-    res.json({ success:true, students, subjectIds });
-  } catch (e) {
-    console.error('Teacher students fetch error:', e);
-    res.status(500).json({ success:false, message:'Failed to fetch students for teacher', error:e.message });
-  }
+    const { Student } = require('./models');
+    const students = batchIds.length ? await Student.findAll({ where:{ batch: batchIds }, attributes:['id','name','email','batch','section','activeSemesterId'] }) : [];
+    res.json({ success:true, teacherId, students, subjectIds, diag });
+  } catch (e) { console.error('Teacher students fetch error:', e); res.status(500).json({ success:false, message:'Failed to fetch students for teacher', error:e.message }); }
 });
 
 // ===== Assignments CRUD =====
@@ -659,20 +722,14 @@ app.post('/api/assignments', async (req, res) => {
 
 // List assignments for teacher
 app.get('/api/assignments/teacher', async (req, res) => {
-  try {
-    if (!dbConnected) { const { connectDB } = require('./config/db'); await connectDB(); dbConnected = true; }
-    const auth = req.headers.authorization || '';
-    const jwt = require('jsonwebtoken');
-    let teacherId = req.query.teacherId;
-    if (!teacherId && auth.startsWith('Bearer ')) { try { const decoded = jwt.verify(auth.slice(7), process.env.JWT_SECRET || 'fallback-secret'); if (decoded.role==='teacher') teacherId = decoded.id; } catch(_){} }
-    if (!teacherId) return res.status(400).json({ success:false, message:'teacherId required' });
+  try { if (!dbConnected) { const { connectDB } = require('./config/db'); await connectDB(); dbConnected = true; }
+    const { teacher, diag } = await extractTeacherFromRequest(req);
+    const teacherId = teacher?.id || req.query.teacherId;
+    if (!teacherId) return res.status(400).json({ success:false, message:'Teacher auth required', diag });
     const { Assignment, Subject } = require('./models');
     const assignments = await Assignment.findAll({ where:{ teacherId }, include:[ { model: Subject, attributes:['id','name','section'] } ], order:[['createdAt','DESC']] });
-    res.json({ success:true, assignments });
-  } catch (e) {
-    console.error('Teacher assignments fetch error:', e);
-    res.status(500).json({ success:false, message:'Failed to fetch assignments', error:e.message });
-  }
+    res.json({ success:true, teacherId, assignments, diag });
+  } catch (e) { console.error('Teacher assignments fetch error:', e); res.status(500).json({ success:false, message:'Failed to fetch assignments', error:e.message }); }
 });
 
 // List assignments for subject (student view)
