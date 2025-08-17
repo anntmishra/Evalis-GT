@@ -473,12 +473,19 @@ app.get('/api/semesters', async (req, res) => {
       }
     }
     
-    const { Semester } = require('./models');
+    const { Semester, Batch } = require('./models');
     const semesters = await Semester.findAll({
-      attributes: ['id', 'name', 'number', 'batchId'],
-      order: [['name', 'ASC']]
+      attributes: ['id', 'name', 'number', 'batchId', 'startDate', 'endDate', 'active'],
+      include: [
+        {
+          model: Batch,
+          attributes: ['id', 'name', 'department']
+        }
+      ],
+      order: [['batchId', 'ASC'], ['number', 'ASC']]
     });
     
+    console.log(`Found ${semesters.length} semesters`);
     res.json(semesters);
   } catch (error) {
     console.error('Semesters fetch error:', error);
@@ -486,6 +493,51 @@ app.get('/api/semesters', async (req, res) => {
       message: 'Error fetching semesters',
       error: error.message,
       details: 'Please check database connection and models'
+    });
+  }
+});
+
+// Batch-specific semesters endpoint
+app.get('/api/semesters/batch/:batchId', async (req, res) => {
+  try {
+    // Ensure database connection
+    if (!dbConnected) {
+      try {
+        const { connectDB } = require('./config/db');
+        await connectDB();
+        dbConnected = true;
+      } catch (dbError) {
+        console.error('DB connection failed:', dbError);
+        return res.status(500).json({
+          message: 'Database connection failed',
+          error: dbError.message
+        });
+      }
+    }
+    
+    const { Semester, Batch } = require('./models');
+    const { batchId } = req.params;
+    
+    const semesters = await Semester.findAll({
+      where: { batchId },
+      attributes: ['id', 'name', 'number', 'batchId', 'startDate', 'endDate', 'active'],
+      include: [
+        {
+          model: Batch,
+          attributes: ['id', 'name', 'department']
+        }
+      ],
+      order: [['number', 'ASC']]
+    });
+    
+    console.log(`Found ${semesters.length} semesters for batch ${batchId}`);
+    res.json(semesters);
+  } catch (error) {
+    console.error('Batch semesters fetch error:', error);
+    res.status(500).json({
+      message: 'Error fetching semesters for batch',
+      error: error.message,
+      batchId: req.params.batchId
     });
   }
 });
@@ -782,6 +834,174 @@ app.post('/api/admin/assign/subject', async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to assign subject'
+    });
+  }
+});
+
+// Admin semester management endpoints
+app.post('/api/admin/semesters/generate/:batchId', async (req, res) => {
+  try {
+    if (!dbConnected) {
+      console.log('🔌 Attempting database connection...');
+      const { connectDB } = require('./config/db');
+      await connectDB();
+      dbConnected = true;
+    }
+
+    const { Batch, Semester } = require('./models');
+    const { batchId } = req.params;
+    
+    // Validate batch exists
+    const batch = await Batch.findByPk(batchId);
+    if (!batch) {
+      return res.status(404).json({
+        success: false,
+        message: 'Batch not found'
+      });
+    }
+
+    // Check if semesters already exist for this batch
+    const existingSemesters = await Semester.findAll({
+      where: { batchId }
+    });
+
+    if (existingSemesters.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: `Semesters already exist for batch ${batch.name}`,
+        count: existingSemesters.length
+      });
+    }
+
+    // Generate 8 semesters
+    const semesters = [];
+    const startYear = parseInt(batch.startYear);
+    
+    for (let i = 1; i <= 8; i++) {
+      const yearOffset = Math.floor((i - 1) / 2);
+      const currentYear = startYear + yearOffset;
+      const isOdd = i % 2 === 1;
+      const season = isOdd ? 'Fall' : 'Spring';
+      const seasonYear = isOdd ? currentYear : currentYear + 1;
+      
+      const semesterData = {
+        id: `${batchId}-S-${i}`,
+        name: `Semester ${i} (${season} ${seasonYear})`,
+        number: i,
+        batchId: batchId,
+        startDate: new Date(`${seasonYear}-${isOdd ? '08' : '01'}-01`),
+        endDate: new Date(`${seasonYear}-${isOdd ? '12' : '05'}-31`),
+        active: i === 1 // First semester is active by default
+      };
+      
+      semesters.push(semesterData);
+    }
+
+    // Create all semesters
+    const createdSemesters = await Semester.bulkCreate(semesters);
+
+    res.status(201).json({
+      success: true,
+      created: createdSemesters.length,
+      total: 8,
+      message: `Generated 8 semesters for batch ${batch.name}`,
+      semesters: createdSemesters
+    });
+  } catch (error) {
+    console.error('Error generating semesters:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to generate semesters',
+      error: error.message
+    });
+  }
+});
+
+app.post('/api/admin/semesters/:semesterId/batch/:batchId', async (req, res) => {
+  try {
+    if (!dbConnected) {
+      console.log('🔌 Attempting database connection...');
+      const { connectDB } = require('./config/db');
+      await connectDB();
+      dbConnected = true;
+    }
+
+    const { Semester, Student, Batch } = require('./models');
+    const { semesterId, batchId } = req.params;
+    
+    // Validate semester exists
+    const semester = await Semester.findByPk(semesterId);
+    if (!semester) {
+      return res.status(404).json({
+        success: false,
+        message: 'Semester not found'
+      });
+    }
+    
+    // Validate batch exists
+    const batch = await Batch.findByPk(batchId);
+    if (!batch) {
+      return res.status(404).json({
+        success: false,
+        message: 'Batch not found'
+      });
+    }
+    
+    // Check if semester belongs to the batch
+    if (semester.batchId !== batchId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Semester does not belong to this batch'
+      });
+    }
+    
+    // Get all students in the batch
+    const students = await Student.findAll({
+      where: { batch: batchId }
+    });
+    
+    if (students.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'No students found in this batch'
+      });
+    }
+    
+    // Update all students' active semester
+    const updatedCount = await Student.update(
+      { activeSemesterId: semesterId },
+      { where: { batch: batchId } }
+    );
+    
+    // Set this semester as active and others as inactive for this batch
+    await Semester.update(
+      { active: false },
+      { where: { batchId } }
+    );
+    
+    await Semester.update(
+      { active: true },
+      { where: { id: semesterId } }
+    );
+    
+    res.json({
+      success: true,
+      message: `Active semester for ${updatedCount[0]} students in batch ${batch.name} updated to ${semester.name}`,
+      data: {
+        batchId,
+        batchName: batch.name,
+        semesterId,
+        semesterName: semester.name,
+        semesterNumber: semester.number,
+        studentsUpdated: updatedCount[0]
+      }
+    });
+  } catch (error) {
+    console.error('Error setting active semester for batch:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to set active semester',
+      error: error.message
     });
   }
 });
