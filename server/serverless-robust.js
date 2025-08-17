@@ -26,18 +26,11 @@ app.get('/api/health', (req, res) => {
   res.status(200).json({ 
     status: 'OK', 
     timestamp: new Date().toISOString(),
-    environment: 'serverless-robust'
-  });
-});
-
-// Debug endpoint to check environment variables
-app.get('/api/debug/env', (req, res) => {
-  res.json({
+    environment: 'serverless-robust',
     hasDbUrl: !!process.env.DATABASE_URL,
     hasJwtSecret: !!process.env.JWT_SECRET,
     nodeEnv: process.env.NODE_ENV,
-    dbUrlLength: process.env.DATABASE_URL ? process.env.DATABASE_URL.length : 0,
-    timestamp: new Date().toISOString()
+    isVercel: !!process.env.VERCEL
   });
 });
 

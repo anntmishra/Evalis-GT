@@ -72,7 +72,7 @@ const connectDB = async () => {
   try {
     const activeUrl = resolveDatabaseUrl();
     if (!activeUrl) {
-      throw new Error('Missing database connection string (set DATABASE_URL / NEON_DB_URL in environment)');
+      throw new Error('Missing database connection string (set DATABASE_URL in environment)');
     }
     console.log('Database configuration:'.yellow);
     console.log(`Using AWS RDS PostgreSQL (always-on instance)${isVercelServerless ? ' via Vercel serverless' : ''}`.cyan);
