@@ -30,8 +30,8 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Inline admin login route
-app.post('/api/auth/admin/login', async (req, res) => {
+// Admin login handler function
+async function handleAdminLogin(req, res) {
   try {
     console.log('Admin login attempt:', req.body);
     
@@ -47,6 +47,20 @@ app.post('/api/auth/admin/login', async (req, res) => {
     try {
       // Ensure database connection
       if (!dbConnected) {
+        console.log('🔌 Attempting database connection...');
+        
+        // Explicitly check for pg package
+        try {
+          require('pg');
+          console.log('✅ pg package found');
+        } catch (pgError) {
+          console.error('❌ pg package error:', pgError.message);
+          return res.status(500).json({
+            message: 'Database driver not available',
+            error: 'pg package not found in serverless environment'
+          });
+        }
+        
         const { connectDB } = require('./config/db');
         await connectDB();
         dbConnected = true;
@@ -112,91 +126,13 @@ app.post('/api/auth/admin/login', async (req, res) => {
       stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
-});
+}
+
+// Inline admin login route
+app.post('/api/auth/admin/login', handleAdminLogin);
 
 // General login route (alias for frontend compatibility)
-app.post('/api/auth/login', async (req, res) => {
-  try {
-    console.log('General login attempt:', req.body);
-    
-    const { username, password, email } = req.body;
-    
-    if ((!username && !email) || !password) {
-      return res.status(400).json({
-        message: 'Please provide username/email and password'
-      });
-    }
-    
-    // Try to load database models
-    try {
-      // Ensure database connection
-      if (!dbConnected) {
-        const { connectDB } = require('./config/db');
-        await connectDB();
-        dbConnected = true;
-        console.log('✅ Database connected for login');
-      }
-      
-      const { Admin } = require('./models');
-      
-      // Look up admin
-      const whereClause = username ? { username } : { email };
-      const admin = await Admin.findOne({ where: whereClause });
-      
-      if (!admin) {
-        return res.status(401).json({
-          message: 'Invalid username/email or password'
-        });
-      }
-      
-      // Check password
-      const isMatch = await admin.matchPassword(password);
-      
-      if (!isMatch) {
-        return res.status(401).json({
-          message: 'Invalid username/email or password'
-        });
-      }
-      
-      // Generate token
-      const jwt = require('jsonwebtoken');
-      const token = jwt.sign(
-        { 
-          id: admin.id,
-          username: admin.username,
-          role: 'admin'
-        },
-        process.env.JWT_SECRET,
-        { expiresIn: '30d' }
-      );
-      
-      res.json({
-        id: admin.id,
-        username: admin.username,
-        name: admin.name,
-        email: admin.email,
-        role: 'admin',
-        token: token,
-        authMethod: 'database'
-      });
-      
-    } catch (dbError) {
-      console.error('Database error:', dbError);
-      return res.status(500).json({
-        message: 'Database connection error',
-        error: dbError.message
-      });
-    }
-    
-  } catch (error) {
-    console.error('General login error:', error);
-    res.status(500).json({
-      message: 'Internal server error',
-      error: error.message,
-      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
-    });
-  }
-});
+app.post('/api/auth/login', handleAdminLogin);
 
 // Auth health check
 app.get('/api/auth/health', (req, res) => {
