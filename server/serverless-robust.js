@@ -810,6 +810,44 @@ app.post('/api/admin/assign/subject', async (req, res) => {
   }
 });
 
+// List teacher-subject assignments (admin)
+app.get('/api/admin/assignments', async (req, res) => {
+  try {
+    if (!dbConnected) {
+      const { connectDB } = require('./config/db');
+      await connectDB();
+      dbConnected = true;
+    }
+    const { TeacherSubject, Teacher, Subject, Semester } = require('./models');
+    const assignments = await TeacherSubject.findAll({
+      include: [
+        { model: Teacher, attributes: ['id','name','email'] },
+        { model: Subject, include: [ { model: Semester, attributes: ['id','name','number'] } ] }
+      ]
+    });
+
+    const data = assignments.map(a => ({
+      id: a.id,
+      teacherId: a.teacherId,
+      teacherName: a.Teacher ? a.Teacher.name : null,
+      teacherEmail: a.Teacher ? a.Teacher.email : null,
+      subjectId: a.subjectId,
+      subjectName: a.Subject ? a.Subject.name : null,
+      subjectSection: a.Subject ? a.Subject.section : null,
+      semester: a.Subject && a.Subject.Semester ? {
+        id: a.Subject.Semester.id,
+        name: a.Subject.Semester.name,
+        number: a.Subject.Semester.number
+      } : null,
+      createdAt: a.createdAt
+    }));
+    res.json({ count: data.length, assignments: data });
+  } catch (error) {
+    console.error('Error listing assignments:', error);
+    res.status(500).json({ success:false, message:'Failed to fetch assignments', error: error.message });
+  }
+});
+
 // Admin semester management endpoints
 app.post('/api/admin/semesters/generate/:batchId', async (req, res) => {
   try {
