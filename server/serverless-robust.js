@@ -474,14 +474,7 @@ app.get('/api/admin/teachers', async (req, res) => {
     const { Teacher, Subject } = require('./models');
     
     const teachers = await Teacher.findAll({
-      attributes: { exclude: ['password'] },
-      include: [
-        {
-          model: Subject,
-          through: { attributes: [] },
-          attributes: ['id', 'name', 'code']
-        }
-      ]
+      attributes: { exclude: ['password'] }
     });
 
     res.json(teachers);
