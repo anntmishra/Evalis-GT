@@ -38,6 +38,7 @@ import config from '../config/environment';
 import TeacherAssignmentCreator from '../components/TeacherAssignmentCreator';
 import TeacherQuestionPaperCreator from '../components/TeacherQuestionPaperCreator';
 import PDFAnnotator from '../components/PDFAnnotator';
+import TeacherGovernanceWidget from '../components/TeacherGovernanceWidget';
 
 const TeacherPortal: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -424,6 +425,8 @@ const TeacherPortal: React.FC = () => {
                 trend="+3 today"
               />
             </div>
+            {/* Governance widget */}
+            <TeacherGovernanceWidget />
 
             {/* Quick Actions */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

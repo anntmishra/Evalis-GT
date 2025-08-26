@@ -32,6 +32,8 @@ const submissionRoutes = require('./routes/submissionRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const semesterRoutes = require('./routes/semesterRoutes');
 const assignmentRoutes = require('./routes/assignmentRoutes');
+const governanceRoutes = require('./routes/governanceRoutes');
+const { startGovernanceListener } = require('./web3/governanceListener');
 
 // Function to try binding to ports recursively
 const startServerOnPort = (app, port, maxAttempts = 10) => {
@@ -292,7 +294,15 @@ const startServer = async () => {
     app.use('/api/admin', adminRoutes);
     app.use('/api/semesters', semesterRoutes);
     app.use('/api/assignments', assignmentRoutes);
+  app.use('/api/governance', governanceRoutes);
     
+    // Optionally start on-chain governance listener
+    if (process.env.GOVERNOR_ADDRESS && process.env.CHAIN_RPC_URL) {
+      startGovernanceListener({ rpcUrl: process.env.CHAIN_RPC_URL, governorAddress: process.env.GOVERNOR_ADDRESS })
+        .then(() => logger.info('Governance listener started'))
+        .catch((e) => logger.warn('Governance listener failed to start: ' + e.message));
+    }
+
     // Test route for debugging CORS issues
     app.get('/api/test', (req, res) => {
       res.json({ message: 'CORS is working properly!' });

@@ -1,6 +1,6 @@
 import axios from 'axios';
 import config from '../config/environment';
-import { refreshFirebaseToken } from './authUtils';
+import { refreshFirebaseToken, getToken as getPreferredToken } from './authUtils';
 import { auth } from '../config/firebase';
 
 // Create axios instance with base URL
@@ -26,18 +26,8 @@ if (typeof window !== 'undefined') {
   console.log('[api] Effective baseURL:', api.defaults.baseURL);
 }
 
-// Get the latest token from storage
-const getAuthToken = () => {
-  // First try to get Firebase token since that's more likely to be valid
-  let token = localStorage.getItem('firebaseToken');
-  
-  // Then fall back to our stored token
-  if (!token) {
-    token = localStorage.getItem(config.AUTH.TOKEN_STORAGE_KEY);
-  }
-  
-  return token;
-};
+// Get the latest token from storage (prefer app JWT over firebase)
+const getAuthToken = () => getPreferredToken();
 
 // Add response interceptor for better error handling
 api.interceptors.response.use(
