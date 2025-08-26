@@ -7,6 +7,9 @@ const Admin = require('./adminModel');
 const TeacherSubject = require('./teacherSubjectModel');
 const Semester = require('./semesterModel');
 const Assignment = require('./assignmentModel');
+const Proposal = require('./proposalModel');
+const ProposalVote = require('./proposalVoteModel');
+const Notification = require('./notificationModel');
 const { sequelize } = require('../config/db');
 
 // Define relationships
@@ -66,6 +69,16 @@ Assignment.belongsTo(Subject, { foreignKey: 'subjectId', targetKey: 'id' });
 Assignment.hasMany(Submission, { foreignKey: 'assignmentId', sourceKey: 'id' });
 Submission.belongsTo(Assignment, { foreignKey: 'assignmentId', targetKey: 'id' });
 
+// Governance: Proposals and Votes
+Proposal.belongsTo(Admin, { foreignKey: 'createdByAdminId', targetKey: 'id' });
+Admin.hasMany(Proposal, { foreignKey: 'createdByAdminId', sourceKey: 'id' });
+
+Proposal.hasMany(ProposalVote, { foreignKey: 'proposalId', sourceKey: 'id' });
+ProposalVote.belongsTo(Proposal, { foreignKey: 'proposalId', targetKey: 'id' });
+
+Teacher.hasMany(ProposalVote, { foreignKey: 'teacherId', sourceKey: 'id' });
+ProposalVote.belongsTo(Teacher, { foreignKey: 'teacherId', targetKey: 'id' });
+
 // Export models
 module.exports = {
   Student,
@@ -77,5 +90,8 @@ module.exports = {
   TeacherSubject,
   Semester,
   Assignment,
+  Proposal,
+  ProposalVote,
+  Notification,
   sequelize
 }; 

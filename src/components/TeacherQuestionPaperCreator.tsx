@@ -49,7 +49,8 @@ import { EXAM_TYPES } from '../constants/universityData';
 import questionEnhancerService, { 
   Question as EnhancerQuestion, 
   EnhancePaperResponse,
-  CognitiveLevel
+  CognitiveLevel,
+  BloomTextAnomalyResponse
 } from '../api/questionEnhancerService';
 import { generateQuestionPaperPDF, PDFQuestion } from '../api/pdfExportService';
 
@@ -123,6 +124,12 @@ const TeacherQuestionPaperCreator: React.FC<QuestionPaperCreatorProps> = ({
   const [enhancePromptOpen, setEnhancePromptOpen] = useState<boolean>(false);
   const [enhancePromptText, setEnhancePromptText] = useState<string>('');
   const [customEnhancing, setCustomEnhancing] = useState<boolean>(false);
+
+  // Bloom Taxonomy state
+  const [bloomAnomalyAnalyzing, setBloomAnomalyAnalyzing] = useState<boolean>(false);
+  const [bloomAnalysisResult, setBloomAnalysisResult] = useState<BloomTextAnomalyResponse | null>(null);
+  const [showBloomAnalysis, setShowBloomAnalysis] = useState<boolean>(false);
+  const [targetBloomLevel, setTargetBloomLevel] = useState<CognitiveLevel>('application');
 
   // Check if AI service is available on component mount
   useEffect(() => {
@@ -594,6 +601,47 @@ const TeacherQuestionPaperCreator: React.FC<QuestionPaperCreatorProps> = ({
     }
   };
 
+  const analyzeBloomTextAnomaly = async () => {
+    if (!currentQuestion.trim()) {
+      setError('Please enter a question to analyze for Bloom text anomalies');
+      return;
+    }
+
+    setBloomAnomalyAnalyzing(true);
+    setError(null);
+
+    try {
+      const analysisResult = await questionEnhancerService.analyzeBloomTextAnomaly({
+        text: currentQuestion,
+        type: currentQuestionType,
+        marks: currentQuestionMarks
+      }, targetBloomLevel);
+
+      setBloomAnalysisResult(analysisResult);
+      setShowBloomAnalysis(true);
+    } catch (err: any) {
+      console.error('Error analyzing Bloom taxonomy:', err);
+      const errorMessage = err?.message || 'Unknown error';
+      setError(`Failed to analyze question: ${errorMessage}. Please try again.`);
+    } finally {
+      setBloomAnomalyAnalyzing(false);
+    }
+  };
+
+  const applyBloomRevision = () => {
+    if (bloomAnalysisResult) {
+      setCurrentQuestion(bloomAnalysisResult.revised_question);
+      setShowBloomAnalysis(false);
+      setBloomAnalysisResult(null);
+    }
+  };
+
+  const applyBloomAlternative = (alternative: string) => {
+    setCurrentQuestion(alternative);
+    setShowBloomAnalysis(false);
+    setBloomAnalysisResult(null);
+  };
+
   return (
     <Paper sx={{ p: 3 }}>
       <Typography variant="h6" gutterBottom>
@@ -843,7 +891,7 @@ const TeacherQuestionPaperCreator: React.FC<QuestionPaperCreatorProps> = ({
                   onChange={(e) => setCurrentQuestion(e.target.value)}
                 />
               </Grid>
-              <Grid item xs={12} md={4}>
+              <Grid item xs={12} md={3}>
                 <FormControl fullWidth>
                   <InputLabel>Question Type</InputLabel>
                   <Select
@@ -857,7 +905,7 @@ const TeacherQuestionPaperCreator: React.FC<QuestionPaperCreatorProps> = ({
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid item xs={12} md={4}>
+              <Grid item xs={12} md={3}>
                 <TextField
                   label="Marks"
                   type="number"
@@ -867,7 +915,24 @@ const TeacherQuestionPaperCreator: React.FC<QuestionPaperCreatorProps> = ({
                   inputProps={{ min: 0 }}
                 />
               </Grid>
-              <Grid item xs={12} md={4}>
+              <Grid item xs={12} md={3}>
+                <FormControl fullWidth>
+                  <InputLabel>Target Bloom Level</InputLabel>
+                  <Select
+                    value={targetBloomLevel}
+                    onChange={(e) => setTargetBloomLevel(e.target.value as CognitiveLevel)}
+                    label="Target Bloom Level"
+                  >
+                    <MenuItem value="knowledge">Knowledge</MenuItem>
+                    <MenuItem value="comprehension">Comprehension</MenuItem>
+                    <MenuItem value="application">Application</MenuItem>
+                    <MenuItem value="analysis">Analysis</MenuItem>
+                    <MenuItem value="synthesis">Synthesis</MenuItem>
+                    <MenuItem value="evaluation">Evaluation</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} md={3}>
                 <Button
                   variant="contained"
                   color="primary"
@@ -891,7 +956,7 @@ const TeacherQuestionPaperCreator: React.FC<QuestionPaperCreatorProps> = ({
                     fullWidth
                     sx={{ 
                       mt: 2, 
-                      mb: 2, 
+                      mb: 1, 
                       py: 1.5,
                       fontSize: '1rem',
                       fontWeight: 'bold',
@@ -911,6 +976,40 @@ const TeacherQuestionPaperCreator: React.FC<QuestionPaperCreatorProps> = ({
                     disabled={customEnhancing || !currentQuestion.trim()}
                   >
                     {customEnhancing ? 'Enhancing Question...' : 'Enhance with AI'}
+                  </Button>
+                </Grid>
+              )}
+
+              {/* Bloom Taxonomy Button */}
+              {aiServiceAvailable && (
+                <Grid item xs={12}>
+                  <Button
+                    variant="contained"
+                    startIcon={bloomAnomalyAnalyzing ? <CircularProgress size={24} /> : <Psychology />}
+                    endIcon={<School />}
+                    onClick={analyzeBloomTextAnomaly}
+                    fullWidth
+                    sx={{ 
+                      mb: 2, 
+                      py: 1.5,
+                      fontSize: '1rem',
+                      fontWeight: 'bold',
+                      boxShadow: 3,
+                      bgcolor: '#2E7D32', // Dark green for education/analysis theme
+                      color: 'white',
+                      border: '2px solid #2E7D32',
+                      '&:hover': {
+                        bgcolor: '#1B5E20',
+                        boxShadow: 4
+                      },
+                      '&:disabled': {
+                        bgcolor: '#aaa',
+                        color: '#eee'
+                      }
+                    }}
+                    disabled={bloomAnomalyAnalyzing || !currentQuestion.trim()}
+                  >
+                    {bloomAnomalyAnalyzing ? 'Analyzing Question...' : 'Bloom Taxonomy'}
                   </Button>
                 </Grid>
               )}
@@ -1315,6 +1414,214 @@ const TeacherQuestionPaperCreator: React.FC<QuestionPaperCreatorProps> = ({
             }}
           >
             {customEnhancing ? 'Enhancing...' : 'Enhance Question'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Bloom Taxonomy Analysis Dialog */}
+      <Dialog
+        open={showBloomAnalysis}
+        onClose={() => setShowBloomAnalysis(false)}
+        aria-labelledby="bloom-analysis-dialog-title"
+        fullWidth
+        maxWidth="lg"
+      >
+        <DialogTitle id="bloom-analysis-dialog-title">
+          <Box display="flex" alignItems="center" gap={1}>
+            <Psychology color="primary" />
+            <Typography variant="h6">
+              Bloom's Taxonomy Analysis
+            </Typography>
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          {bloomAnalysisResult && (
+            <Grid container spacing={3}>
+              {/* Original vs Revised Question */}
+              <Grid item xs={12}>
+                <Typography variant="h6" gutterBottom color="primary">
+                  Question Comparison
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} md={6}>
+                    <Paper sx={{ p: 2, bgcolor: '#fff3e0' }}>
+                      <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                        Original Question:
+                      </Typography>
+                      <Typography variant="body1">
+                        "{bloomAnalysisResult.original_question}"
+                      </Typography>
+                    </Paper>
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <Paper sx={{ p: 2, bgcolor: '#e8f5e8' }}>
+                      <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                        Revised Question:
+                      </Typography>
+                      <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
+                        "{bloomAnalysisResult.revised_question}"
+                      </Typography>
+                    </Paper>
+                  </Grid>
+                </Grid>
+              </Grid>
+
+              {/* Analysis Results */}
+              <Grid item xs={12} md={6}>
+                <Typography variant="h6" gutterBottom color="primary">
+                  Analysis Results
+                </Typography>
+                <Box sx={{ mb: 2 }}>
+                  <Typography variant="subtitle2" gutterBottom>
+                    Bloom's Taxonomy Level:
+                  </Typography>
+                  <Box display="flex" alignItems="center" gap={2}>
+                    <Chip 
+                      label={`Current: ${bloomAnalysisResult.anomaly_analysis.bloom_level_current}`}
+                      color="default"
+                      size="small"
+                    />
+                    <Typography>→</Typography>
+                    <Chip 
+                      label={`Improved: ${bloomAnalysisResult.anomaly_analysis.bloom_level_improved}`}
+                      color="primary"
+                      size="small"
+                    />
+                  </Box>
+                </Box>
+                
+                <Box sx={{ mb: 2 }}>
+                  <Typography variant="subtitle2" gutterBottom>
+                    Clarity Score:
+                  </Typography>
+                  <Box display="flex" alignItems="center" gap={1}>
+                    <Typography variant="h6" color="primary">
+                      {(bloomAnalysisResult.anomaly_analysis.clarity_score * 100).toFixed(0)}%
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      (0-100% scale)
+                    </Typography>
+                  </Box>
+                </Box>
+
+                <Box sx={{ mb: 2 }}>
+                  <Typography variant="subtitle2" gutterBottom>
+                    Cognitive Alignment:
+                  </Typography>
+                  <Typography variant="body2">
+                    {bloomAnalysisResult.anomaly_analysis.cognitive_alignment}
+                  </Typography>
+                </Box>
+              </Grid>
+
+              {/* Issues and Improvements */}
+              <Grid item xs={12} md={6}>
+                <Typography variant="h6" gutterBottom color="primary">
+                  Detected Issues
+                </Typography>
+                
+                {bloomAnalysisResult.anomaly_analysis.detected_issues.length > 0 && (
+                  <Box sx={{ mb: 2 }}>
+                    <Typography variant="subtitle2" gutterBottom>
+                      General Issues:
+                    </Typography>
+                    {bloomAnalysisResult.anomaly_analysis.detected_issues.map((issue, index) => (
+                      <Chip 
+                        key={index}
+                        label={issue}
+                        size="small"
+                        color="error"
+                        sx={{ mr: 1, mb: 1 }}
+                      />
+                    ))}
+                  </Box>
+                )}
+
+                {bloomAnalysisResult.anomaly_analysis.ambiguity_issues.length > 0 && (
+                  <Box sx={{ mb: 2 }}>
+                    <Typography variant="subtitle2" gutterBottom>
+                      Ambiguity Issues:
+                    </Typography>
+                    {bloomAnalysisResult.anomaly_analysis.ambiguity_issues.map((issue, index) => (
+                      <Chip 
+                        key={index}
+                        label={issue}
+                        size="small"
+                        color="warning"
+                        sx={{ mr: 1, mb: 1 }}
+                      />
+                    ))}
+                  </Box>
+                )}
+
+                <Box>
+                  <Typography variant="subtitle2" gutterBottom>
+                    Improvements Made:
+                  </Typography>
+                  {bloomAnalysisResult.anomaly_analysis.improvement_summary.map((improvement, index) => (
+                    <Chip 
+                      key={index}
+                      label={improvement}
+                      size="small"
+                      color="success"
+                      sx={{ mr: 1, mb: 1 }}
+                    />
+                  ))}
+                </Box>
+              </Grid>
+
+              {/* Alternative Suggestions */}
+              {bloomAnalysisResult.suggested_alternatives.length > 0 && (
+                <Grid item xs={12}>
+                  <Typography variant="h6" gutterBottom color="primary">
+                    Alternative Question Versions
+                  </Typography>
+                  <Grid container spacing={2}>
+                    {bloomAnalysisResult.suggested_alternatives.map((alternative, index) => (
+                      <Grid item xs={12} md={4} key={index}>
+                        <Paper sx={{ p: 2, bgcolor: '#f5f5f5' }}>
+                          <Typography variant="subtitle2" gutterBottom>
+                            Alternative {index + 1}:
+                          </Typography>
+                          <Typography variant="body2" sx={{ mb: 2 }}>
+                            "{alternative}"
+                          </Typography>
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            onClick={() => applyBloomAlternative(alternative)}
+                            startIcon={<Add />}
+                          >
+                            Use This Version
+                          </Button>
+                        </Paper>
+                      </Grid>
+                    ))}
+                  </Grid>
+                </Grid>
+              )}
+            </Grid>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button 
+            onClick={() => setShowBloomAnalysis(false)}
+          >
+            Close
+          </Button>
+          <Button 
+            onClick={applyBloomRevision}
+            variant="contained"
+            startIcon={<AutoAwesome />}
+            sx={{ 
+              bgcolor: '#2E7D32', 
+              color: 'white',
+              '&:hover': {
+                bgcolor: '#1B5E20'
+              }
+            }}
+          >
+            Apply Revised Question
           </Button>
         </DialogActions>
       </Dialog>

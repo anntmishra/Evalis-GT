@@ -36,6 +36,7 @@ import { getStudentsByBatch, createStudent, updateStudent, deleteStudent } from 
 import { getAllBatches } from "../api/batchService";
 import SemesterManagement from '../components/SemesterManagement';
 import config from "../config/environment";
+import GovernanceAdminPanel from "../components/GovernanceAdminPanel";
 
 const AdminPortal: React.FC = (): React.ReactElement => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -454,7 +455,7 @@ const AdminPortal: React.FC = (): React.ReactElement => {
         )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8 bg-white border border-gray-200">
+          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-9 bg-white border border-gray-200">
             <TabsTrigger value="overview" className="flex items-center gap-2 data-[state=active]:bg-black data-[state=active]:text-white">
               <BarChart3 className="h-4 w-4" />
               <span className="hidden sm:inline">Overview</span>
@@ -486,6 +487,10 @@ const AdminPortal: React.FC = (): React.ReactElement => {
             <TabsTrigger value="semesters" className="flex items-center gap-2 data-[state=active]:bg-black data-[state=active]:text-white">
               <Calendar className="h-4 w-4" />
               <span className="hidden sm:inline">Semesters</span>
+            </TabsTrigger>
+            <TabsTrigger value="governance" className="flex items-center gap-2 data-[state=active]:bg-black data-[state=active]:text-white">
+              <TrendingUp className="h-4 w-4" />
+              <span className="hidden sm:inline">Governance</span>
             </TabsTrigger>
           </TabsList>
 
@@ -1218,6 +1223,11 @@ const AdminPortal: React.FC = (): React.ReactElement => {
                 />
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Governance Tab */}
+          <TabsContent value="governance" className="space-y-6">
+            <GovernanceAdminPanel />
           </TabsContent>
         </Tabs>
       {/* Subject Form Modal */}

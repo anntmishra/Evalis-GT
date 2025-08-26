@@ -39,6 +39,10 @@ export interface Config {
     USER_STORAGE_KEY: string;
     CURRENT_USER_KEY: string;
   };
+  AI: {
+    GOOGLE_API_KEY: string;
+    GOOGLE_API_URL: string;
+  };
   getFileUrl: (fileUrl: string) => string;
 }
 

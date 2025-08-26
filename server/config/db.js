@@ -42,14 +42,12 @@ function buildSequelize() {
 
   console.log(`[DB] Initializing AWS RDS connection (Vercel=${isVercelServerless})`.gray);
   const enableSqlLogs = (process.env.DB_LOG_SQL === 'true');
+  const useSsl = (process.env.POSTGRES_SSL || process.env.DB_SSL || 'true').toLowerCase() === 'true';
   sequelize = new Sequelize(dbUrl, {
     dialect: 'postgres',
     logging: enableSqlLogs ? (msg) => console.log('[SQL]', msg) : (process.env.NODE_ENV === 'development' ? console.log : false),
     dialectOptions: {
-      ssl: {
-        require: true,
-        rejectUnauthorized: false
-      }
+      ssl: useSsl ? { require: true, rejectUnauthorized: false } : false
     },
     pool: poolConfig,
     retry: {

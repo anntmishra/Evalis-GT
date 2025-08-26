@@ -125,6 +125,10 @@ const config = {
     USER_STORAGE_KEY: 'user',
     CURRENT_USER_KEY: 'currentUser',
   },
+  AI: {
+    GOOGLE_API_KEY: viteEnv?.VITE_GOOGLE_API_KEY || 'AIzaSyAJWaYgEsLh6siG5rpb91GaEh662J-lvFM',
+    GOOGLE_API_URL: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
+  },
   // Helper function to get file URLs with correct base
   getFileUrl: (fileUrl) => {
     if (!fileUrl) return '';

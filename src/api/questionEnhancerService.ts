@@ -1,9 +1,9 @@
 import axios from 'axios';
 import config from '../config/environment';
 
-// Google API key for enhanced AI capabilities
-const GOOGLE_API_KEY = 'AIzaSyAJWaYgEsLh6siG5rpb91GaEh662J-lvFM';
-const GOOGLE_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
+// Google API configuration from centralized config
+const GOOGLE_API_KEY = config.AI.GOOGLE_API_KEY;
+const GOOGLE_API_URL = config.AI.GOOGLE_API_URL;
 
 // Define types for the API
 export type QuestionType = 'mcq' | 'short' | 'long';
@@ -64,6 +64,21 @@ export interface PromptGenerationResponse {
     suitable_for: string;
     topics_covered: string[];
   };
+}
+
+export interface BloomTextAnomalyResponse {
+  original_question: string;
+  revised_question: string;
+  anomaly_analysis: {
+    detected_issues: string[];
+    bloom_level_current: CognitiveLevel;
+    bloom_level_improved: CognitiveLevel;
+    clarity_score: number; // 0-1 scale
+    ambiguity_issues: string[];
+    cognitive_alignment: string;
+    improvement_summary: string[];
+  };
+  suggested_alternatives: string[];
 }
 
 class QuestionEnhancerService {
@@ -609,6 +624,108 @@ Provide your response as a JSON object with the following structure:
       .slice(0, 5);
     
     return lines.length > 0 ? lines : [];
+  }
+
+  /**
+   * Analyze and revise a question for Bloom's Taxonomy alignment and text anomalies
+   * 
+   * @param question The question object to analyze
+   * @param targetBloomLevel Optional target Bloom's taxonomy level
+   * @returns Analysis and revised question
+   */
+  async analyzeBloomTextAnomaly(
+    question: Question,
+    targetBloomLevel?: CognitiveLevel
+  ): Promise<BloomTextAnomalyResponse> {
+    try {
+      console.log(`Analyzing question for Bloom text anomalies: "${question.text}"`);
+      
+      // Use Google API for analysis
+      const prompt = `
+You are an educational assessment expert specializing in Bloom's Taxonomy and question quality analysis.
+
+Analyze the following question for text anomalies, clarity issues, and Bloom's Taxonomy alignment:
+
+Question: "${question.text}"
+Question Type: ${question.type.toUpperCase()}
+Marks: ${question.marks}
+${targetBloomLevel ? `Target Bloom Level: ${targetBloomLevel}` : ''}
+
+Perform a comprehensive analysis and provide a revised version that addresses:
+1. Text clarity and ambiguity issues
+2. Bloom's Taxonomy cognitive level alignment
+3. Question structure and language precision
+4. Educational assessment best practices
+
+Provide your response as a JSON object with this exact structure:
+{
+  "original_question": "${question.text}",
+  "revised_question": "A clear, well-structured revision of the question",
+  "anomaly_analysis": {
+    "detected_issues": ["List specific issues found in the original question"],
+    "bloom_level_current": "current cognitive level (knowledge/comprehension/application/analysis/synthesis/evaluation)",
+    "bloom_level_improved": "improved cognitive level after revision",
+    "clarity_score": 0.85,
+    "ambiguity_issues": ["List any ambiguous phrases or unclear terms"],
+    "cognitive_alignment": "Explanation of how well the question aligns with its intended cognitive level",
+    "improvement_summary": ["List of key improvements made"]
+  },
+  "suggested_alternatives": ["Alternative version 1", "Alternative version 2", "Alternative version 3"]
+}
+
+Focus on:
+- Removing vague language and ambiguous terms
+- Ensuring the question tests the appropriate cognitive level
+- Improving clarity and specificity
+- Maintaining educational validity
+- Providing measurable and fair assessment criteria
+      `;
+
+      const response = await axios.post(`${GOOGLE_API_URL}?key=${GOOGLE_API_KEY}`, {
+        contents: [{
+          parts: [{
+            text: prompt
+          }]
+        }]
+      });
+
+      if (!response.data || !response.data.candidates || !response.data.candidates[0]) {
+        throw new Error("Invalid response format from Google API");
+      }
+
+      // Extract JSON from response
+      const text = response.data.candidates[0].content.parts[0].text;
+      console.log("Raw Bloom analysis response:", text);
+
+      // More robust JSON extraction
+      let jsonText = text;
+      const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/) || text.match(/{[\s\S]*}/);
+      
+      if (jsonMatch) {
+        jsonText = jsonMatch[1] || jsonMatch[0];
+      }
+
+      // Clean up the text before parsing
+      jsonText = jsonText.trim().replace(/```json|```/g, '');
+      
+      console.log("Extracted JSON text:", jsonText);
+
+      let analysisData: BloomTextAnomalyResponse;
+      try {
+        analysisData = JSON.parse(jsonText);
+      } catch (parseError) {
+        console.error("JSON parse error:", parseError, "for text:", jsonText);
+        throw new Error("Failed to parse JSON from Google API response");
+      }
+
+      console.log("Successfully parsed Bloom analysis:", analysisData);
+
+      return analysisData;
+    } catch (error) {
+      console.error('Error in Bloom text anomaly analysis:', error);
+      this.handleError('Error analyzing Bloom text anomaly', error);
+      throw error;
+    }
   }
 
   /**
