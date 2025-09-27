@@ -21,29 +21,39 @@ const getApiBaseUrl = () => {
 
 const getApiUrl = () => `${getApiBaseUrl()}/teachers`;
 
-// Get token from storage
+// Get token from storage with better debugging
 const getToken = () => {
   // First try the main token storage
   let token = localStorage.getItem(config.AUTH.TOKEN_STORAGE_KEY);
   
+  console.log('Token lookup:');
+  console.log('- Main token storage (' + config.AUTH.TOKEN_STORAGE_KEY + '):', !!token);
+  
   // If not found, check if we have a currentUser with token
   if (!token) {
     const userData = localStorage.getItem(config.AUTH.CURRENT_USER_KEY);
+    console.log('- Current user data exists:', !!userData);
+    
     if (userData) {
       try {
         const user = JSON.parse(userData);
         if (user && user.token) {
           token = user.token;
-          console.log('Found token in currentUser object');
+          console.log('- Found token in currentUser object, updating main storage');
           
           // Update the main token storage for future requests
           localStorage.setItem(config.AUTH.TOKEN_STORAGE_KEY, user.token);
+        } else {
+          console.log('- Current user object exists but has no token property');
         }
       } catch (error) {
         console.error('Error parsing user data:', error);
       }
     }
   }
+  
+  // Log final result without exposing actual token
+  console.log('- Final token found:', !!token);
   
   return token;
 };
@@ -59,7 +69,7 @@ export const checkSessionValidity = async (): Promise<boolean> => {
   try {
     // Make a lightweight API call to check if the token is still valid
     const response = await axios.get(
-      `${config.API_ENDPOINTS.AUTH}/status`,
+      `${config.API_BASE_URL}/auth/profile`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
     
@@ -147,26 +157,34 @@ const authConfig = () => {
       // Only dispatch an auth error event if we're not already in recovery mode
       if (!sessionStorage.getItem('auth:recovering')) {
         window.dispatchEvent(new CustomEvent('auth:warning', {
-          detail: { message: 'Your session may have expired. Please select a batch to continue.' }
+          detail: { message: 'Your session may have expired. Please log in again.' }
         }));
       }
     }
+    
+    // Throw an error to prevent API calls without authentication
+    throw new Error('Authentication required - no token available');
   }
   
   return {
     headers: {
       'Content-Type': 'application/json',
-      Authorization: token ? `Bearer ${token}` : '',
+      Authorization: `Bearer ${token}`,
     },
   };
 };
 
 // Set multipart form config
 const multipartConfig = () => {
+  const token = getToken();
+  if (!token) {
+    throw new Error('Authentication required for file uploads');
+  }
+  
   return {
     headers: {
       'Content-Type': 'multipart/form-data',
-      Authorization: `Bearer ${getToken()}`,
+      Authorization: `Bearer ${token}`,
     },
   };
 };
@@ -498,17 +516,30 @@ export const getTeacherSubmissions = async () => {
   }
 };
 
-// Grade a submission
-export const gradeSubmission = async (submissionId: number, score: number, feedback: string) => {
+// Grade a submission with optional EVT token awarding
+export const gradeSubmission = async (submissionId: number, score: number, feedback: string, tokenAward?: {
+  awardTokens: boolean;
+  tokenAmount: number;
+  tokenReason?: string;
+}) => {
   try {
-    console.log('Grading submission:', submissionId, score, feedback);
+    console.log('Grading submission:', submissionId, score, feedback, tokenAward);
+    const requestBody: any = {
+      score,
+      feedback,
+      plagiarismScore: 0 // Default for now
+    };
+
+    // Add token awarding parameters if provided
+    if (tokenAward?.awardTokens && tokenAward.tokenAmount > 0) {
+      requestBody.awardTokens = true;
+      requestBody.tokenAmount = tokenAward.tokenAmount;
+      requestBody.tokenReason = tokenAward.tokenReason;
+    }
+
     const response = await axios.put(
       `${config.API_ENDPOINTS.SUBMISSIONS}/${submissionId}`,
-      {
-        score,
-        feedback,
-        plagiarismScore: 0 // Default for now
-      },
+      requestBody,
       authConfig()
     );
     return response.data;
@@ -527,8 +558,18 @@ export const deleteAssignment = async (assignmentId: string) => {
       authConfig()
     );
     return response.data;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error deleting assignment:', error);
+    
+    // Handle authentication errors specifically
+    if (error.message === 'Authentication required - no token available') {
+      throw new Error('Please log in again to delete assignments');
+    }
+    
+    if (error.response?.status === 401) {
+      throw new Error('Your session has expired. Please log in again.');
+    }
+    
     throw error;
   }
 };
@@ -552,6 +593,185 @@ export const saveAnnotatedPDF = async (submissionId: number, annotations: any[],
   }
 };
 
+// Web3 Rewards Functions
+
+// Award EVT tokens to a student
+export const awardEvtTokens = async (studentId: string, amount: number, reason?: string) => {
+  try {
+    console.log('Awarding EVT tokens:', studentId, amount, reason);
+    const response = await axios.post(
+      `${config.API_BASE_URL}/web3/award/tokens`,
+      {
+        studentId,
+        amount,
+        reason
+      },
+      authConfig()
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error awarding EVT tokens:', error);
+    throw error;
+  }
+};
+
+// Award NFT certificate to a student
+export const awardNftCertificate = async (submissionId: number, metadataUri: string) => {
+  try {
+    console.log('Awarding NFT certificate:', submissionId, metadataUri);
+    const response = await axios.post(
+      `${config.API_BASE_URL}/web3/award/certificate`,
+      {
+        submissionId,
+        metadataUri
+      },
+      authConfig()
+    );
+    return response.data;
+  } catch (error: any) {
+    console.error('Error awarding NFT certificate:', error);
+    
+    // Handle authentication errors specifically
+    if (error.message === 'Authentication required - no token available') {
+      throw new Error('Please log in again to award NFT certificates');
+    }
+    
+    if (error.response?.status === 401) {
+      throw new Error('Your session has expired. Please log in again.');
+    }
+    
+    throw error;
+  }
+};
+
+// Award badge-based EVT tokens and optional NFT certificate based on grade
+export const awardBadgeBasedRewards = async (submissionId: number, awardCertificate: boolean = false) => {
+  try {
+    console.log('Awarding badge-based rewards:', submissionId, awardCertificate);
+    const response = await axios.post(
+      `${config.API_BASE_URL}/web3/award/badge-rewards`,
+      {
+        submissionId,
+        awardCertificate
+      },
+      authConfig()
+    );
+    return response.data;
+  } catch (error: any) {
+    console.error('Error awarding badge-based rewards:', error);
+    
+    // Handle authentication errors specifically
+    if (error.message === 'Authentication required - no token available') {
+      throw new Error('Please log in again to award badge rewards');
+    }
+    
+    if (error.response?.status === 401) {
+      throw new Error('Your session has expired. Please log in again.');
+    }
+    
+    throw error;
+  }
+};
+
+// Award manual NFT certificate (can be used regardless of grade)
+export const awardManualCertificate = async (submissionId: number, reason?: string) => {
+  try {
+    console.log('Awarding manual NFT certificate:', submissionId, reason);
+    const response = await axios.post(
+      `${config.API_BASE_URL}/web3/award/certificate/manual`,
+      {
+        submissionId,
+        reason
+      },
+      authConfig()
+    );
+    return response.data;
+  } catch (error: any) {
+    console.error('Error awarding manual NFT certificate:', error);
+    
+    // Handle authentication errors specifically
+    if (error.message === 'Authentication required - no token available') {
+      throw new Error('Please log in again to award certificates');
+    }
+    
+    if (error.response?.status === 401) {
+      throw new Error('Your session has expired. Please log in again.');
+    }
+    
+    throw error;
+  }
+};
+
+// Get available badge tiers
+export const getBadgeTiers = async () => {
+  try {
+    const response = await axios.get(`${config.API_BASE_URL}/web3/badges`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching badge tiers:', error);
+    throw error;
+  }
+};
+
+// Get badge for specific grade
+export const getBadgeForGrade = async (grade: number) => {
+  try {
+    const response = await axios.get(`${config.API_BASE_URL}/web3/badge/grade/${grade}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching badge for grade:', error);
+    throw error;
+  }
+};
+
+// Get student's token balance
+export const getStudentTokenBalance = async (studentId: string) => {
+  try {
+    const response = await axios.get(
+      `${config.API_BASE_URL}/web3/student/${studentId}/balance`,
+      authConfig()
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching student token balance:', error);
+    throw error;
+  }
+};
+
+// Get student's certificates
+export const getStudentCertificates = async (studentId: string) => {
+  try {
+    const response = await axios.get(
+      `${config.API_BASE_URL}/web3/student/${studentId}/certificates`,
+      authConfig()
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching student certificates:', error);
+    throw error;
+  }
+};
+
+// Batch award tokens to multiple students
+export const batchAwardTokens = async (awards: Array<{
+  studentId: string;
+  amount: number;
+  reason?: string;
+}>) => {
+  try {
+    console.log('Batch awarding EVT tokens:', awards);
+    const response = await axios.post(
+      `${config.API_BASE_URL}/web3/award/tokens/batch`,
+      { awards },
+      authConfig()
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error batch awarding tokens:', error);
+    throw error;
+  }
+};
+
 export default {
   getTeachers,
   getTeacherById,
@@ -570,5 +790,53 @@ export default {
   getTeacherSubmissions,
   gradeSubmission,
   deleteAssignment,
-  saveAnnotatedPDF
+  saveAnnotatedPDF,
+  awardBadgeBasedRewards,
+  getBadgeTiers,
+  getBadgeForGrade
+};
+
+// Debug function to check authentication state
+export const checkAuthState = () => {
+  const token = localStorage.getItem(config.AUTH.TOKEN_STORAGE_KEY);
+  const currentUser = localStorage.getItem(config.AUTH.CURRENT_USER_KEY);
+  
+  console.log('=== Authentication State Debug ===');
+  console.log('Token in storage:', !!token);
+  console.log('Current user in storage:', !!currentUser);
+  
+  if (currentUser) {
+    try {
+      const userData = JSON.parse(currentUser);
+      console.log('User role:', userData.role);
+      console.log('User has token property:', !!userData.token);
+      console.log('Token matches storage:', userData.token === token);
+    } catch (e) {
+      console.log('Error parsing user data:', e);
+    }
+  }
+  
+  return {
+    hasToken: !!token,
+    hasUser: !!currentUser,
+    isValid: !!(token && currentUser)
+  };
+};
+
+// Function to restore authentication from user data
+export const restoreAuthFromUser = () => {
+  const currentUser = localStorage.getItem(config.AUTH.CURRENT_USER_KEY);
+  if (currentUser) {
+    try {
+      const userData = JSON.parse(currentUser);
+      if (userData.token) {
+        localStorage.setItem(config.AUTH.TOKEN_STORAGE_KEY, userData.token);
+        console.log('Auth restored from user data');
+        return true;
+      }
+    } catch (e) {
+      console.error('Error restoring auth:', e);
+    }
+  }
+  return false;
 }; 

@@ -19,6 +19,19 @@ const GovernanceAdminPanel: React.FC = () => {
   const [proposals, setProposals] = useState<any[]>([]);
   const [selectedProposal, setSelectedProposal] = useState<any | null>(null);
   const [voters, setVoters] = useState<any[]>([]);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+
+  // Check user authentication status on mount
+  useEffect(() => {
+    const userData = localStorage.getItem('currentUser');
+    if (userData) {
+      try {
+        setCurrentUser(JSON.parse(userData));
+      } catch (e) {
+        console.error('Error parsing user data:', e);
+      }
+    }
+  }, []);
 
   const load = async () => {
     try { setProposals(await listProposals()); } catch {}
@@ -54,6 +67,29 @@ const GovernanceAdminPanel: React.FC = () => {
       setError('Title, description and at least two options are required.');
       return;
     }
+    
+    // Debug: Check authentication status
+    const token = localStorage.getItem('userToken');
+    const userData = localStorage.getItem('currentUser');
+    console.log('Creating proposal with auth status:', {
+      hasToken: !!token,
+      tokenPreview: token ? token.substring(0, 20) + '...' : 'none',
+      hasUserData: !!userData,
+      userRole: userData ? JSON.parse(userData)?.role : 'unknown'
+    });
+    
+    // Early validation: Check if user has admin role
+    if (userData) {
+      const user = JSON.parse(userData);
+      if (user.role !== 'admin') {
+        setError('Only administrators can create governance proposals. Current role: ' + (user.role || 'unknown'));
+        return;
+      }
+    } else {
+      setError('No user session found. Please log in as an administrator.');
+      return;
+    }
+    
     try {
       setSaving(true);
       await createProposal({ title, description, type, options });
@@ -61,7 +97,21 @@ const GovernanceAdminPanel: React.FC = () => {
       setTitle(''); setDescription(''); setOptions(['Yes', 'No']);
       await load();
     } catch (err: any) {
-      setError(err?.message || 'Failed to create proposal');
+      console.error('Governance proposal creation error:', err);
+      console.error('Error response:', err?.response?.data);
+      
+      let errorMessage = 'Failed to create proposal';
+      if (err?.response?.status === 401) {
+        errorMessage = 'Authentication failed. Please ensure you are logged in as an admin and try again.';
+      } else if (err?.response?.status === 403) {
+        errorMessage = 'Access denied. Only admins can create governance proposals.';
+      } else if (err?.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      } else if (err?.message) {
+        errorMessage = err.message;
+      }
+      
+      setError(errorMessage);
     } finally {
       setSaving(false);
     }
@@ -74,6 +124,23 @@ const GovernanceAdminPanel: React.FC = () => {
           <BarChart3 className="h-5 w-5" /> Governance (DAO-lite)
         </CardTitle>
         <CardDescription>Create proposals and request votes from teachers</CardDescription>
+        {currentUser && (
+          <div className="mt-2 px-3 py-2 bg-blue-50 border border-blue-200 rounded-md">
+            <div className="text-sm">
+              <span className="font-medium">Current User:</span> {currentUser.name || currentUser.username || 'Unknown'} 
+              <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
+                {currentUser.role || 'No Role'}
+              </span>
+            </div>
+          </div>
+        )}
+        {!currentUser && (
+          <div className="mt-2 px-3 py-2 bg-red-50 border border-red-200 rounded-md">
+            <div className="text-sm text-red-800">
+              <span className="font-medium">⚠️ Not authenticated</span> - Please log in as an admin to create proposals
+            </div>
+          </div>
+        )}
       </CardHeader>
       <CardContent>
         {error && (
@@ -89,11 +156,23 @@ const GovernanceAdminPanel: React.FC = () => {
         <form onSubmit={handleCreate} className="space-y-4">
           <div>
             <Label htmlFor="g-title">Title</Label>
-            <Input id="g-title" value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g., Add Data Ethics course to Semester 5" />
+            <Input 
+              id="g-title" 
+              value={title} 
+              onChange={e => setTitle(e.target.value)} 
+              placeholder="e.g., Add Data Ethics course to Semester 5"
+              disabled={!currentUser || currentUser.role !== 'admin'}
+            />
           </div>
           <div>
             <Label htmlFor="g-type">Type</Label>
-            <select id="g-type" className="w-full px-3 py-2 border border-gray-200 rounded-md" value={type} onChange={e => setType(e.target.value)}>
+            <select 
+              id="g-type" 
+              className="w-full px-3 py-2 border border-gray-200 rounded-md disabled:bg-gray-100 disabled:cursor-not-allowed" 
+              value={type} 
+              onChange={e => setType(e.target.value)}
+              disabled={!currentUser || currentUser.role !== 'admin'}
+            >
               <option value="course_addition">Course Addition</option>
               <option value="curriculum_update">Curriculum Update</option>
               <option value="resource_allocation">Resource Allocation</option>
@@ -107,30 +186,59 @@ const GovernanceAdminPanel: React.FC = () => {
               value={description}
               onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setDescription(e.target.value)}
               placeholder="Provide context, options impact, and relevant links"
-              className="w-full px-3 py-2 border border-gray-200 rounded-md focus:border-black focus:ring-black min-h-[120px]"
+              className="w-full px-3 py-2 border border-gray-200 rounded-md focus:border-black focus:ring-black min-h-[120px] disabled:bg-gray-100 disabled:cursor-not-allowed"
+              disabled={!currentUser || currentUser.role !== 'admin'}
             />
           </div>
           <div>
             <Label>Options</Label>
             <div className="flex gap-2 mt-2">
-              <Input value={newOption} onChange={e => setNewOption(e.target.value)} placeholder="Add an option" />
-              <Button type="button" onClick={addOption} className="bg-black text-white">Add</Button>
+              <Input 
+                value={newOption} 
+                onChange={e => setNewOption(e.target.value)} 
+                placeholder="Add an option"
+                disabled={!currentUser || currentUser.role !== 'admin'}
+              />
+              <Button 
+                type="button" 
+                onClick={addOption} 
+                className="bg-black text-white"
+                disabled={!currentUser || currentUser.role !== 'admin'}
+              >
+                Add
+              </Button>
             </div>
             <div className="flex flex-wrap gap-2 mt-2">
               {options.map((opt, idx) => (
                 <span key={idx} className="px-2 py-1 bg-gray-100 rounded text-sm">
                   {opt}
                   {options.length > 2 && (
-                    <button type="button" className="ml-2 text-red-500" onClick={() => removeOption(idx)}>x</button>
+                    <button 
+                      type="button" 
+                      className="ml-2 text-red-500 disabled:text-red-300" 
+                      onClick={() => removeOption(idx)}
+                      disabled={!currentUser || currentUser.role !== 'admin'}
+                    >
+                      x
+                    </button>
                   )}
                 </span>
               ))}
             </div>
           </div>
           <div className="flex gap-3">
-            <Button type="submit" disabled={saving} className="bg-black text-white">
+            <Button 
+              type="submit" 
+              disabled={saving || !currentUser || currentUser.role !== 'admin'} 
+              className="bg-black text-white disabled:bg-gray-400"
+            >
               {saving ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Creating...</> : <><Plus className="h-4 w-4 mr-2"/>Create Proposal</>}
             </Button>
+            {(!currentUser || currentUser.role !== 'admin') && (
+              <div className="text-sm text-gray-600">
+                ⚠️ Admin access required to create proposals
+              </div>
+            )}
           </div>
         </form>
 

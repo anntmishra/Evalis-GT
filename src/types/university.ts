@@ -87,4 +87,52 @@ export interface Teacher {
   email: string;
   subjects: string[];
   initialPassword?: string;
+  password?: string;
+  role?: string;
+  clerkId?: string;
+  Subjects?: Subject[]; // For when populated from backend
 } 
+
+export interface TimetableSlot {
+  id: string;
+  timetableId: number;
+  subjectId: string;
+  teacherId: string;
+  section?: string | null;
+  semesterId?: string | null;
+  dayOfWeek: number;
+  dayName: string;
+  slotIndex: number;
+  startTime: string;
+  endTime: string;
+  sessionLabel?: string | null;
+  color?: string | null;
+  subject?: Subject;
+  teacher?: Teacher;
+  info?: Record<string, unknown>;
+}
+
+export interface TimetableMetrics {
+  requestedSessions: number;
+  scheduledSessions: number;
+  slotCount: number;
+  unscheduledSessions: number;
+  generatedAt: string;
+  generationStrategy: string;
+}
+
+export interface Timetable {
+  id: number;
+  name: string;
+  semesterId?: string;
+  batchId?: string;
+  generatedBy?: string;
+  status: 'draft' | 'active' | 'published' | 'completed' | 'archived';
+  generationMethod?: string;
+  version?: number;
+  metadata?: Record<string, any>;
+  metrics?: TimetableMetrics;
+  slots?: TimetableSlot[];
+  createdAt?: string;
+  updatedAt?: string;
+}

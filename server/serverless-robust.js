@@ -2485,4 +2485,14 @@ app.use('*', (req, res) => {
   });
 });
 
+// Attach additional routers that may not be present if server/server.js load order differs
+try {
+  const web3Routes = require('./routes/web3Routes');
+  app.use('/api/web3', web3Routes);
+  const certificateRoutes = require('./routes/certificateRoutes');
+  app.use('/api/certificates', certificateRoutes);
+} catch (e) {
+  console.warn('web3Routes not attached in serverless build:', e?.message);
+}
+
 module.exports = app;

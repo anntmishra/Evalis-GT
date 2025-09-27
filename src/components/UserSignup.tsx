@@ -13,10 +13,7 @@ import {
   MenuItem,
   SelectChangeEvent
 } from '@mui/material';
-import { registerWithEmailAndPassword } from '../config/firebase';
-import { createStudent } from '../api/studentService';
 import { BATCHES } from '../data/universityData';
-import { sendPasswordReset } from '../config/firebase';
 
 interface UserSignupProps {
   onSuccess?: () => void;
@@ -84,28 +81,18 @@ const UserSignup: React.FC<UserSignupProps> = ({ onSuccess, onCancel }) => {
     setError(null);
     
     try {
-      // First register with Firebase
-      const userCredential = await registerWithEmailAndPassword(formData.email, formData.password);
-      const user = userCredential.user;
+      // Firebase registration is disabled - using Clerk only
+      setError('User registration is currently disabled. Please contact an administrator.');
+      return;
       
-      // Then create student record in our database
-      await createStudent({
-        id: formData.id,
-        name: formData.name,
-        email: formData.email,
-        section: formData.section,
-        batch: formData.batch,
-        firebaseUid: user.uid
-      });
-      
-      // Send password reset email to let the user set their own password
-      try {
-        const resetResult = await sendPasswordReset(formData.email);
-        console.log('Password reset email sent:', resetResult);
-      } catch (resetError) {
-        console.error('Error sending password reset email:', resetError);
-        // Continue with success flow even if reset email fails
-      }
+      // Create student record in database would go here
+      // await createStudent({
+      //   id: formData.id,
+      //   name: formData.name,
+      //   email: formData.email,
+      //   section: formData.section,
+      //   batch: formData.batch
+      // });
       
       setSuccess(true);
       if (onSuccess) {

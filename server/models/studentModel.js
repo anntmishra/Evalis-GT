@@ -25,6 +25,11 @@ const Student = sequelize.define('Student', {
     allowNull: true,
     unique: true,
   },
+  clerkId: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    unique: true,
+  },
   password: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -32,6 +37,18 @@ const Student = sequelize.define('Student', {
   role: {
     type: DataTypes.STRING,
     defaultValue: 'student',
+  },
+  walletAddress: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    unique: true,
+    validate: {
+      isEthAddressOrNull(value) {
+        if (value && !/^0x[a-fA-F0-9]{40}$/.test(value)) {
+          throw new Error('Invalid Ethereum address');
+        }
+      }
+    }
   },
   activeSemesterId: {
     type: DataTypes.STRING,
