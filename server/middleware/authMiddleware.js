@@ -1,14 +1,14 @@
 const jwt = require('jsonwebtoken');
 const asyncHandler = require('express-async-handler');
 const { Student, Teacher, Admin } = require('../models');
-const firebaseAdmin = require('firebase-admin');
 const { validateSession } = require('../utils/sessionManager');
+const { verifyClerkToken, mapClerkUserToLocal } = require('../utils/clerk');
 const { logger } = require('../utils/logger');
 
 // Enhanced token cache with user role separation to prevent conflicts
 // Key format: "token:role" to ensure different user types don't conflict
 const tokenCache = new Map();
-const CACHE_TTL = 15 * 60 * 1000; // 15 minutes in milliseconds
+const CACHE_TTL = 60 * 60 * 1000; // 1 hour in milliseconds (increased from 15 minutes)
 
 // Periodically clean expired cache entries
 setInterval(() => {
@@ -73,299 +73,205 @@ const protect = asyncHandler(async (req, res, next) => {
       
       if (isDev) console.log('Token extracted from header: [REDACTED]');
       
-      // First try to verify as a Firebase token
+      // First try Clerk session token (primary auth provider)
       try {
-        // Check if Firebase Admin is initialized
-        if (!firebaseAdmin.apps.length) {
-          console.warn('Firebase Admin SDK not initialized, skipping Firebase token verification');
-          throw new Error('Firebase not initialized');
+        const desiredRoleHeader = req.headers['x-portal-role'] || req.headers['x-user-role'] || '';
+        const desiredRole = Array.isArray(desiredRoleHeader) ? desiredRoleHeader[0] : desiredRoleHeader;
+        const clerkUser = await verifyClerkToken(token);
+        if (clerkUser) {
+          const mapped = await mapClerkUserToLocal(clerkUser, { Student, Teacher, Admin }, { desiredRole });
+          if (mapped) {
+            const { user, role } = mapped;
+            req.user = user;
+            req.user.role = role;
+            if (role === 'student') req.student = user;
+            if (role === 'teacher') req.teacher = user;
+            if (role === 'admin') req.admin = user;
+            // Cache
+            const cacheKey = `${token}:${role}`;
+            tokenCache.set(cacheKey, { user, role, expiresAt: Date.now() + CACHE_TTL });
+            if (isDev) logger.debug(`User authenticated via Clerk: ${user.id}, role: ${role}`);
+            return next();
+          } else {
+            // If Clerk verified but no DB match, don't fall through to JWT
+            if (isDev) logger.debug('Valid Clerk session but no matching DB user for desired role:', desiredRole || '(none)');
+            return res.status(403).json({ message: 'Access denied: account not linked to this portal' });
+          }
         }
+      } catch (clerkErr) {
+        if (isDev) logger.debug(`Clerk verification failed: ${clerkErr.message || clerkErr}`);
+        // continue to JWT
+      }
+
+      // Then try to verify as a JWT token (legacy)
+      try {
+        // Decode JWT token
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        console.log('JWT token verified, user role:', decoded.role);
         
-        // Try Firebase token verification with timeout
-        const tokenVerificationPromise = firebaseAdmin.auth().verifyIdToken(token);
+        // Check if the user exists in any of the models
+        // Check user role from the token to determine which model to use
+        const role = decoded.role || '';
+        let user;
         
-        // Add timeout to prevent hanging on Firebase verification
-        const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => {
-            reject(new Error('Firebase token verification timeout'));
-          }, 5000); // 5 second timeout
-        });
-        
-        // Race the verification against the timeout
-        const decodedFirebaseToken = await Promise.race([
-          tokenVerificationPromise,
-          timeoutPromise
-        ]);
-        
-        console.log('Firebase token verified, uid:', decodedFirebaseToken.uid);
-        console.log('Firebase token email:', decodedFirebaseToken.email);
-        
-        // Check if this Firebase user exists in our database
-        let user = await Student.findOne({
-          where: { email: decodedFirebaseToken.email },
-          attributes: { exclude: ['password'] }
-        });
-        
-        if (user) {
-          // For students
-          req.user = user;
-          req.user.role = 'student';
-          req.student = user;
-          logger.info('Firebase user authenticated as student:', user.id);
-          
-          // Cache the user with role-specific key
-          const cacheKey = `${token}:student`;
-          tokenCache.set(cacheKey, {
-            user,
-            role: 'student',
-            expiresAt: Date.now() + CACHE_TTL
-          });
-          
-          return next();
-        }
-        
-        // If not found in students, try teacher model
-        user = await Teacher.findOne({
-          where: { email: decodedFirebaseToken.email },
-          attributes: { exclude: ['password'] }
-        });
-        
-        if (user) {
-          // For teachers
-          req.user = user;
-          req.user.role = 'teacher';
-          req.teacher = user;
-          logger.info('Firebase user authenticated as teacher:', user.id);
-          
-          // Cache the user with role-specific key
-          const cacheKey = `${token}:teacher`;
-          tokenCache.set(cacheKey, {
-            user,
-            role: 'teacher',
-            expiresAt: Date.now() + CACHE_TTL
-          });
-          
-          return next();
-        }
-        
-        // Try admin model (by email) before denying access
-        let adminUser = null;
-        try {
-          adminUser = await Admin.findOne({
-            where: { email: decodedFirebaseToken.email },
+        if (role === 'student') {
+          user = await Student.findOne({ 
+            where: { id: decoded.id },
             attributes: { exclude: ['password'] }
           });
-        } catch (e) {
-          logger.debug('Admin lookup error during Firebase auth:', e.message);
-        }
-
-        if (adminUser) {
-          req.user = adminUser;
-          req.user.role = 'admin';
-          req.admin = adminUser;
-          logger.info('Firebase user authenticated as admin:', adminUser.username || adminUser.email);
-
+          
+          if (user) {
+            req.user = user;
+            req.user.role = 'student';
+            req.student = user;
+            logger.info('User authenticated as student:', req.user.id);
+            
+            // Cache the user with role-specific key
+            const cacheKey = `${token}:student`;
+            tokenCache.set(cacheKey, {
+              user,
+              role: 'student',
+              expiresAt: Date.now() + CACHE_TTL
+            });
+            
+            return next();
+          }
+        } else if (role === 'teacher') {
+          user = await Teacher.findOne({ 
+            where: { id: decoded.id },
+            attributes: { exclude: ['password'] }
+          });
+          
+          if (user) {
+            req.user = user;
+            req.user.role = 'teacher';
+            req.teacher = user;
+            logger.info('User authenticated as teacher:', req.user.id);
+            
+            // Cache the user with role-specific key
+            const cacheKey = `${token}:teacher`;
+            tokenCache.set(cacheKey, {
+              user,
+              role: 'teacher',
+              expiresAt: Date.now() + CACHE_TTL
+            });
+            
+            return next();
+          }
+        } else if (role === 'admin') {
+          // Support both legacy tokens (using admin numeric id) and new tokens (using username)
+          user = await Admin.findOne({ 
+            where: { username: decoded.id },
+            attributes: { exclude: ['password'] }
+          });
+          if (!user) {
+            // Fallback: try by primary key id if decoded.id was numeric ID
+            user = await Admin.findOne({
+              where: { id: decoded.id },
+              attributes: { exclude: ['password'] }
+            });
+          }
+          
+          if (user) {
+            req.user = user;
+            req.user.role = 'admin';
+            req.admin = user;
+            logger.info('User authenticated as admin:', req.user.username);
+            
             // Cache the user with role-specific key
             const cacheKey = `${token}:admin`;
             tokenCache.set(cacheKey, {
-              user: adminUser,
+              user,
               role: 'admin',
               expiresAt: Date.now() + CACHE_TTL
             });
-
-          return next();
-        }
-
-        // If no exact match but we have a validated Firebase token, we could create a new user record
-        console.log('Firebase token valid, but no matching user in database (student/teacher/admin). Email:', decodedFirebaseToken.email);
-        res.status(403);
-        throw new Error('Valid Firebase token, but no matching user in our system');
-        
-        // Option 2: Auto-provision the user (uncomment if you want to implement this)
-        // const newUser = await Student.create({
-        //   email: decodedFirebaseToken.email,
-        //   name: decodedFirebaseToken.name || decodedFirebaseToken.email.split('@')[0],
-        //   // Add any other required fields with default values
-        // });
-        // req.user = newUser;
-        // req.user.role = 'student';
-        // req.student = newUser;
-        // console.log('Auto-provisioned new student from Firebase token:', newUser.id);
-        // return next();
-        
-      } catch (firebaseError) {
-        // If it's not a valid Firebase token, try as a JWT token
-        console.log('Firebase token verification failed:', firebaseError.message);
-        
-        try {
-          // Decode JWT token
-          const decoded = jwt.verify(token, process.env.JWT_SECRET);
-          console.log('JWT token verified, user role:', decoded.role);
+            
+            return next();
+          }
+        } else {
+          // If no role or unrecognized role, try all models
+          logger.debug('No specific role found in token, trying all models...');
           
-          // Check if the user exists in any of the models
-          // Check user role from the token to determine which model to use
-          const role = decoded.role || '';
-          let user;
+          // First try student model
+          user = await Student.findOne({ 
+            where: { id: decoded.id },
+            attributes: { exclude: ['password'] }
+          });
           
-          if (role === 'student') {
-            user = await Student.findOne({ 
-              where: { id: decoded.id },
-              attributes: { exclude: ['password'] }
+          if (user) {
+            req.user = user;
+            req.user.role = 'student';
+            req.student = user;
+            logger.info('User authenticated as student:', req.user.id);
+            
+            // Cache the user with role-specific key
+            const cacheKey = `${token}:student`;
+            tokenCache.set(cacheKey, {
+              user,
+              role: 'student',
+              expiresAt: Date.now() + CACHE_TTL
             });
             
-            if (user) {
-              req.user = user;
-              req.user.role = 'student';
-              req.student = user;
-              logger.info('User authenticated as student:', req.user.id);
-              
-              // Cache the user with role-specific key
-              const cacheKey = `${token}:student`;
-              tokenCache.set(cacheKey, {
-                user,
-                role: 'student',
-                expiresAt: Date.now() + CACHE_TTL
-              });
-              
-              return next();
-            }
-          } else if (role === 'teacher') {
-            user = await Teacher.findOne({ 
-              where: { id: decoded.id },
-              attributes: { exclude: ['password'] }
-            });
-            
-            if (user) {
-              req.user = user;
-              req.user.role = 'teacher';
-              req.teacher = user;
-              logger.info('User authenticated as teacher:', req.user.id);
-              
-              // Cache the user with role-specific key
-              const cacheKey = `${token}:teacher`;
-              tokenCache.set(cacheKey, {
-                user,
-                role: 'teacher',
-                expiresAt: Date.now() + CACHE_TTL
-              });
-              
-              return next();
-            }
-          } else if (role === 'admin') {
-            // Support both legacy tokens (using admin numeric id) and new tokens (using username)
-            user = await Admin.findOne({ 
-              where: { username: decoded.id },
-              attributes: { exclude: ['password'] }
-            });
-            if (!user) {
-              // Fallback: try by primary key id if decoded.id was numeric ID
-              user = await Admin.findOne({
-                where: { id: decoded.id },
-                attributes: { exclude: ['password'] }
-              });
-            }
-            
-            if (user) {
-              req.user = user;
-              req.user.role = 'admin';
-              req.admin = user;
-              logger.info('User authenticated as admin:', req.user.username);
-              
-              // Cache the user with role-specific key
-              const cacheKey = `${token}:admin`;
-              tokenCache.set(cacheKey, {
-                user,
-                role: 'admin',
-                expiresAt: Date.now() + CACHE_TTL
-              });
-              
-              return next();
-            }
-          } else {
-            // If no role or unrecognized role, try all models
-            logger.debug('No specific role found in token, trying all models...');
-            
-            // First try student model
-            user = await Student.findOne({ 
-              where: { id: decoded.id },
-              attributes: { exclude: ['password'] }
-            });
-            
-            if (user) {
-              req.user = user;
-              req.user.role = 'student';
-              req.student = user;
-              logger.info('User authenticated as student:', req.user.id);
-              
-              // Cache the user with role-specific key
-              const cacheKey = `${token}:student`;
-              tokenCache.set(cacheKey, {
-                user,
-                role: 'student',
-                expiresAt: Date.now() + CACHE_TTL
-              });
-              
-              return next();
-            }
-
-            // If not found in students, try teacher model
-            user = await Teacher.findOne({ 
-              where: { id: decoded.id },
-              attributes: { exclude: ['password'] }
-            });
-
-            if (user) {
-              req.user = user;
-              req.user.role = 'teacher';
-              req.teacher = user;
-              logger.info('User authenticated as teacher:', req.user.id);
-              
-              // Cache the user with role-specific key
-              const cacheKey = `${token}:teacher`;
-              tokenCache.set(cacheKey, {
-                user,
-                role: 'teacher',
-                expiresAt: Date.now() + CACHE_TTL
-              });
-              
-              return next();
-            }
-
-            // Finally try admin model (by username first, then id fallback)
-            user = await Admin.findOne({ 
-              where: { username: decoded.id },
-              attributes: { exclude: ['password'] }
-            }) || await Admin.findOne({
-              where: { id: decoded.id },
-              attributes: { exclude: ['password'] }
-            });
-
-            if (user) {
-              req.user = user;
-              req.user.role = 'admin';
-              req.admin = user;
-              logger.info('User authenticated as admin:', req.user.username);
-              
-              // Cache the user with role-specific key
-              const cacheKey = `${token}:admin`;
-              tokenCache.set(cacheKey, {
-                user,
-                role: 'admin',
-                expiresAt: Date.now() + CACHE_TTL
-              });
-              
-              return next();
-            }
+            return next();
           }
 
-          // If user not found in any model
-          console.log('No user found with decoded ID:', decoded.id);
-          res.status(404);
-          throw new Error('User not found');
-        } catch (jwtError) {
-          console.error('JWT token verification error:', jwtError.message);
-          throw new Error('Invalid token format');
+          // If not found in students, try teacher model
+          user = await Teacher.findOne({ 
+            where: { id: decoded.id },
+            attributes: { exclude: ['password'] }
+          });
+
+          if (user) {
+            req.user = user;
+            req.user.role = 'teacher';
+            req.teacher = user;
+            logger.info('User authenticated as teacher:', req.user.id);
+            
+            // Cache the user with role-specific key
+            const cacheKey = `${token}:teacher`;
+            tokenCache.set(cacheKey, {
+              user,
+              role: 'teacher',
+              expiresAt: Date.now() + CACHE_TTL
+            });
+            
+            return next();
+          }
+
+          // Finally try admin model (by username first, then id fallback)
+          user = await Admin.findOne({ 
+            where: { username: decoded.id },
+            attributes: { exclude: ['password'] }
+          }) || await Admin.findOne({
+            where: { id: decoded.id },
+            attributes: { exclude: ['password'] }
+          });
+
+          if (user) {
+            req.user = user;
+            req.user.role = 'admin';
+            req.admin = user;
+            logger.info('User authenticated as admin:', req.user.username);
+            
+            // Cache the user with role-specific key
+            const cacheKey = `${token}:admin`;
+            tokenCache.set(cacheKey, {
+              user,
+              role: 'admin',
+              expiresAt: Date.now() + CACHE_TTL
+            });
+            
+            return next();
+          }
         }
+
+        // If user not found in any model
+        console.log('No user found with decoded ID:', decoded.id);
+        res.status(404);
+        throw new Error('User not found');
+      } catch (jwtError) {
+        if (isDev) logger.debug(`JWT token verification error: ${jwtError.message}`);
+        throw new Error('Invalid token format');
       }
     } catch (error) {
       console.error('Token verification error:', error.message);

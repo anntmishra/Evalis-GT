@@ -10,6 +10,11 @@ const Assignment = require('./assignmentModel');
 const Proposal = require('./proposalModel');
 const ProposalVote = require('./proposalVoteModel');
 const Notification = require('./notificationModel');
+const PasswordResetToken = require('./passwordResetTokenModel');
+const Certificate = require('./certificateModel');
+const RedemptionHistory = require('./redemptionHistoryModel');
+const Timetable = require('./timetableModel');
+const TimetableSlot = require('./timetableSlotModel');
 const { sequelize } = require('../config/db');
 
 // Define relationships
@@ -31,6 +36,25 @@ Semester.hasMany(Subject, { foreignKey: 'semesterId' });
 // Keep backward compatibility relationship for Subject-Batch
 Subject.belongsTo(Batch, { foreignKey: 'batchId', targetKey: 'id' });
 Batch.hasMany(Subject, { foreignKey: 'batchId', sourceKey: 'id' });
+
+// Timetable relationships
+Semester.hasMany(Timetable, { foreignKey: 'semesterId', sourceKey: 'id' });
+Timetable.belongsTo(Semester, { foreignKey: 'semesterId', targetKey: 'id' });
+
+Batch.hasMany(Timetable, { foreignKey: 'batchId', sourceKey: 'id' });
+Timetable.belongsTo(Batch, { foreignKey: 'batchId', targetKey: 'id' });
+
+Timetable.hasMany(TimetableSlot, { foreignKey: 'timetableId', as: 'slots', onDelete: 'CASCADE', hooks: true });
+TimetableSlot.belongsTo(Timetable, { foreignKey: 'timetableId', as: 'timetable' });
+
+TimetableSlot.belongsTo(Subject, { foreignKey: 'subjectId', as: 'subject' });
+Subject.hasMany(TimetableSlot, { foreignKey: 'subjectId', as: 'timetableSlots' });
+
+TimetableSlot.belongsTo(Teacher, { foreignKey: 'teacherId', as: 'teacher' });
+Teacher.hasMany(TimetableSlot, { foreignKey: 'teacherId', as: 'scheduledSlots' });
+
+TimetableSlot.belongsTo(Semester, { foreignKey: 'semesterId', as: 'semester' });
+Semester.hasMany(TimetableSlot, { foreignKey: 'semesterId', as: 'scheduledSlots' });
 
 // Teacher-Subject many-to-many relationship
 Teacher.belongsToMany(Subject, { 
@@ -79,6 +103,12 @@ ProposalVote.belongsTo(Proposal, { foreignKey: 'proposalId', targetKey: 'id' });
 Teacher.hasMany(ProposalVote, { foreignKey: 'teacherId', sourceKey: 'id' });
 ProposalVote.belongsTo(Teacher, { foreignKey: 'teacherId', targetKey: 'id' });
 
+// Certificates
+Certificate.belongsTo(Submission, { foreignKey: 'submissionId', targetKey: 'id' });
+Submission.hasOne(Certificate, { foreignKey: 'submissionId', sourceKey: 'id' });
+Certificate.belongsTo(Student, { foreignKey: 'studentId', targetKey: 'id' });
+Student.hasMany(Certificate, { foreignKey: 'studentId', sourceKey: 'id' });
+
 // Export models
 module.exports = {
   Student,
@@ -93,5 +123,10 @@ module.exports = {
   Proposal,
   ProposalVote,
   Notification,
+  PasswordResetToken,
+  Certificate,
+  RedemptionHistory,
+  Timetable,
+  TimetableSlot,
   sequelize
 }; 

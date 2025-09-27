@@ -2455,6 +2455,26 @@ app.delete('/api/admin/teachers/:id', async (req, res) => {
   }
 });
 
+// Attach modular routers that share logic with the monolithic server build
+const attachOptionalRoutes = () => {
+  const routesToAttach = [
+    { path: '/api/timetables', loader: () => require('./routes/timetableRoutes') },
+    { path: '/api/web3', loader: () => require('./routes/web3Routes') },
+    { path: '/api/certificates', loader: () => require('./routes/certificateRoutes') }
+  ];
+
+  routesToAttach.forEach(({ path, loader }) => {
+    try {
+      const router = loader();
+      app.use(path, router);
+    } catch (error) {
+      console.warn(`${path} not attached in serverless build:`, error?.message || error);
+    }
+  });
+};
+
+attachOptionalRoutes();
+
 // Error handling
 app.use((error, req, res, next) => {
   console.error('Express error:', error);
@@ -2480,7 +2500,10 @@ app.use('*', (req, res) => {
       '/api/submissions/*',
       '/api/admin/*',
       '/api/semesters/*',
-      '/api/assignments/*'
+      '/api/assignments/*',
+      '/api/timetables/*',
+      '/api/web3/*',
+      '/api/certificates/*'
     ]
   });
 });

@@ -23,6 +23,14 @@ async function main() {
   console.log('\nExport env:');
   console.log(`GOVERNOR_ADDRESS=${governorAddr}`);
   console.log(`TOKEN_ADDRESS=${tokenAddr}`);
+
+  console.log('Deploying EvalisCertificate...');
+  const Cert = await ethers.getContractFactory('EvalisCertificate');
+  const cert = await Cert.deploy();
+  await cert.waitForDeployment();
+  const certAddr = await cert.getAddress();
+  console.log('Certificate deployed at:', certAddr);
+  console.log(`CERTIFICATE_ADDRESS=${certAddr}`);
 }
 
 main().catch((err) => {

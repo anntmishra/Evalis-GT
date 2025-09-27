@@ -26,7 +26,8 @@
     "export:neondb": "node server/scripts/exportNeonDB.js",
     "import:awsrds": "node server/scripts/importToAWSRDS.js",
     "verify:awsrds": "node server/scripts/verifyAWSRDS.js",
-    "migrate:awsrds": "node server/scripts/migrateToAWSRDS.js",
+  "migrate:awsrds": "node server/scripts/migrateToAWSRDS.js",
+  "migrate:clerk": "node server/scripts/migrateUsersToClerk.js",
     "setup:awsrds": "node server/scripts/setupAWSRDS.js",
     "health:check": "node server/scripts/healthCheck.js",
     "create:admin": "node server/createAdmin.js",
@@ -51,6 +52,8 @@
     "production:stop": "npm run pm2:stop"
   },
   "dependencies": {
+  "@clerk/backend": "^1.1.2",
+    "@clerk/clerk-react": "^5.44.0",
     "@emotion/react": "^11.11.3",
     "@emotion/styled": "^11.11.0",
     "@mui/icons-material": "^5.15.10",
@@ -81,6 +84,7 @@
     "cors": "^2.8.5",
     "date-fns": "^4.1.0",
     "dotenv": "^16.5.0",
+    "ethers": "^6.13.4",
     "express": "^4.18.2",
     "express-async-handler": "^1.2.0",
     "express-fileupload": "^1.4.3",
@@ -113,8 +117,7 @@
     "tailwindcss-animate": "^1.0.7",
     "vite": "^5.4.19",
     "winston": "^3.17.0",
-  "xlsx": "^0.18.5",
-  "ethers": "^6.13.4"
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@eslint/js": "^8.57.1",

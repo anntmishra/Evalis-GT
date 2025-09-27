@@ -24,6 +24,7 @@ const {
 } = require('../controllers/adminController');
 const { protect, admin } = require('../middleware/authMiddleware');
 const monitoringRoutes = require('./monitoringRoutes');
+// Remove the adminUserRoutes import - we don't want Clerk user creation
 
 // All routes use the protect middleware to ensure authentication
 // and the admin middleware to ensure only admins can access these routes
@@ -32,6 +33,9 @@ router.use(admin);
 
 // Mount monitoring routes
 router.use('/', monitoringRoutes);
+
+// Remove Clerk user management routes
+// router.use('/users', adminUserRoutes);
 
 // Dashboard stats
 router.get('/dashboard', getDashboardStats);
