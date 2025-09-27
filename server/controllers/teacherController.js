@@ -54,16 +54,26 @@ const createTeacher = asyncHandler(async (req, res) => {
     console.log('Teacher creation request received');
     console.log('Request body:', req.body);
     
-  const { name, email, subjects, password, role } = req.body;
+    const { name, email, subjects, password, role } = req.body;
     let { id } = req.body;
 
     console.log('Extracted fields:', { id, name, email, subjectsLength: subjects?.length });
 
-    // Validate required name
+    // Validate required fields
     if (!name) {
       console.log('Missing required name field');
-      res.status(400);
-      throw new Error('Please provide the teacher name');
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide the teacher name'
+      });
+    }
+
+    if (!email) {
+      console.log('Missing required email field');
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide the teacher email'
+      });
     }
 
     // Generate teacher ID if not provided
@@ -72,47 +82,78 @@ const createTeacher = asyncHandler(async (req, res) => {
       console.log('Generated teacher ID:', id);
     }
 
-  // Generate email if not provided (optional flow)
-  const teacherEmail = email || null; // allow null now; generation removed to avoid accidental duplicates
-    console.log('Teacher email:', teacherEmail);
-
-    // Import generateRandomPassword
-    const { generateRandomPassword } = require('../utils/passwordUtils');
-    
-    // Generate random password if email is provided, otherwise use default
-    const generatedPassword = email ? generateRandomPassword(10) : Teacher.generatePassword(id);
-    console.log(`Generated password for teacher ${id}: ${generatedPassword.substring(0, 3)}***`);
-    
-    // Use the generated password
-    const teacherPassword = password || generatedPassword;
-
     // Check if teacher already exists
     const teacherExists = await Teacher.findOne({ where: { id } });
-
     if (teacherExists) {
       console.log('Teacher already exists with id:', id);
-      res.status(400);
-      throw new Error('Teacher already exists');
+      return res.status(400).json({
+        success: false,
+        message: 'Teacher already exists'
+      });
     }
 
     // Check if email already exists
-    if (teacherEmail) {
-      const emailExists = await Teacher.findOne({ where: { email: teacherEmail } });
-      if (emailExists) {
-        console.log('Email already in use:', teacherEmail);
-        res.status(400);
-        throw new Error('Email already in use');
+    const emailExists = await Teacher.findOne({ where: { email } });
+    if (emailExists) {
+      console.log('Email already in use:', email);
+      return res.status(400).json({
+        success: false,
+        message: 'Email already in use'
+      });
+    }
+
+    // Check if user already exists in Clerk
+    let clerkUser = null;
+    try {
+      const { clerkClient } = require('@clerk/express');
+      const existingClerkUsers = await clerkClient.users.getUserList({ emailAddress: [email] });
+      if (existingClerkUsers && existingClerkUsers.length > 0) {
+        clerkUser = existingClerkUsers[0];
+      }
+    } catch (clerkError) {
+      console.warn('Error checking existing Clerk user:', clerkError.message);
+    }
+
+    // Create user in Clerk if doesn't exist
+    if (!clerkUser) {
+      try {
+        const { clerkClient } = require('@clerk/express');
+        clerkUser = await clerkClient.users.createUser({
+          emailAddress: [email],
+          username: email.split('@')[0] + '_teacher_' + Date.now(),
+          firstName: name.split(' ')[0] || name,
+          lastName: name.split(' ').slice(1).join(' ') || undefined,
+          skipPasswordChecks: true,
+          skipPasswordRequirement: true
+        });
+        console.log(`Created Clerk user for teacher: ${email}`);
+      } catch (clerkError) {
+        console.error('Failed to create Clerk user:', clerkError.message);
+        return res.status(500).json({
+          success: false,
+          message: 'Failed to create user account. Please try again.'
+        });
       }
     }
+
+    // Generate secure temporary password
+    const { generateSecurePassword, generateResetToken, sendWelcomeEmail } = require('../utils/emailUtils');
+    const temporaryPassword = generateSecurePassword();
+    
+    // Hash password for database storage
+    const bcrypt = require('bcryptjs');
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(temporaryPassword, salt);
 
     console.log('Creating teacher in database...');
     // Create the teacher
     const teacher = await Teacher.create({
       id,
       name,
-  email: teacherEmail,
-      password: teacherPassword,
-      role: role || 'teacher', // Ensure role is set
+      email,
+      password: hashedPassword,
+      role: role || 'teacher',
+      clerkId: clerkUser.id // Link to Clerk user
     });
 
     // If subjects were provided, assign them
@@ -134,97 +175,63 @@ const createTeacher = asyncHandler(async (req, res) => {
       });
     }
 
-    if (teacher) {
-      console.log('Teacher created successfully:', teacher.id);
-      
-      // If email is provided, create Firebase user and send password reset link
-      if (teacherEmail) {
-        try {
-          console.log(`Attempting to create Firebase user for teacher ${id} with email ${teacherEmail}`);
-          
-          // Import Firebase functions
-          const { createFirebaseUser, generatePasswordResetLink } = require('../utils/firebaseUtils');
-          const { sendPasswordResetLink, sendLoginCredentials } = require('../utils/emailUtils');
-          
-          // Check if Firebase Admin SDK is available
-          let resetLinkSent = false;
-          
-          try {
-            // Create Firebase user
-            const firebaseResult = await createFirebaseUser(teacherEmail, teacherPassword, {
-              id: teacher.id,
-              name: teacher.name,
-            });
-            
-            if (firebaseResult.success) {
-              console.log(`Firebase user created successfully with UID: ${firebaseResult.uid}`);
-              
-              // Generate password reset link using Admin SDK
-              console.log(`Generating password reset link for ${teacherEmail}`);
-              const resetLinkResult = await generatePasswordResetLink(teacherEmail);
-              
-              if (resetLinkResult.success) {
-                console.log(`Password reset link generated successfully`);
-                
-                // Send password reset email
-                console.log(`Sending password reset email to ${teacherEmail}`);
-                await sendPasswordResetLink({
-                  email: teacherEmail,
-                  name: teacher.name,
-                }, resetLinkResult.resetLink);
-                
-                console.log(`Password reset link sent to ${teacherEmail}`);
-                resetLinkSent = true;
-              } else {
-                console.warn(`Failed to generate reset link: ${resetLinkResult.error}`);
-              }
-            } else {
-              console.warn(`Failed to create Firebase user: ${firebaseResult.error}`);
-            }
-          } catch (firebaseError) {
-            console.warn(`Firebase operations failed for teacher ${id}:`, firebaseError.message);
-            console.log(`Falling back to direct credentials email for ${teacherEmail}`);
-          }
-          
-          // Always send login credentials for reference (or as fallback if Firebase failed)
-          await sendLoginCredentials({
-            email: teacherEmail,
-            name: teacher.name,
-            id: teacher.id
-          }, teacherPassword);
-          
-          console.log(`Login credentials sent to ${teacherEmail}`);
-          
-          if (resetLinkSent) {
-            console.log(`All Firebase operations completed successfully for teacher ${id}`);
-          } else {
-            console.log(`Teacher ${id} created with direct password delivery (Firebase unavailable)`);
-          }
-        } catch (error) {
-          console.error(`Error with Firebase operations for teacher ${id}:`, error);
-          // Don't fail the whole operation if Firebase operations fail
-        }
-      }
-      
-      res.status(201).json({
+    // Generate password reset token
+    const { PasswordResetToken } = require('../models');
+    const resetToken = generateResetToken();
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+    // Save reset token
+    await PasswordResetToken.create({
+      userId: teacher.id,
+      userRole: 'teacher',
+      token: resetToken,
+      expiresAt
+    });
+
+    // Generate reset link
+    const resetLink = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/teacher/reset-password?token=${resetToken}`;
+
+    // Send welcome email with password setup
+    try {
+      await sendWelcomeEmail(
+        { ...teacher.toJSON(), role: 'teacher' },
+        temporaryPassword,
+        resetLink
+      );
+      console.log(`Welcome email sent to ${email}`);
+    } catch (emailError) {
+      console.warn('Failed to send welcome email:', emailError.message);
+      // Don't fail the creation if email fails
+    }
+
+    console.log('Teacher created successfully:', teacher.id);
+
+    res.status(201).json({
+      success: true,
+      data: {
         id: teacher.id,
         name: teacher.name,
         email: teacher.email,
-        Subjects: teacher.Subjects || [],
+        subjects: teacher.Subjects || [],
         role: teacher.role,
-        initialPassword: teacherEmail ? teacherPassword : undefined
+        clerkId: teacher.clerkId,
+        message: 'Teacher created successfully in both database and Clerk. Welcome email sent with password setup instructions.'
+      }
+    });
+
+  } catch (error) {
+    console.error('Error in createTeacher:', error);
+    if (error.name === 'SequelizeUniqueConstraintError') {
+      res.status(400).json({
+        success: false,
+        message: 'Teacher with this ID or email already exists'
       });
     } else {
-      console.log('Failed to create teacher');
-      res.status(400);
-      throw new Error('Invalid teacher data');
+      res.status(500).json({
+        success: false,
+        message: error.message || 'Failed to create teacher'
+      });
     }
-  } catch (error) {
-    console.error('Error in teacher creation:', error);
-    if (!res.statusCode || res.statusCode === 200) {
-      res.status(500);
-    }
-    throw error;
   }
 });
 

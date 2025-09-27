@@ -7,20 +7,32 @@ const { connectDB } = require('./config/db');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 const { rateLimit, authRateLimit } = require('./middleware/rateLimitMiddleware');
 const models = require('./models');
-const { DEFAULT_PORT } = require('./config/constants');
+const { DEFAULT_PORT } = require('./config/constants') ;
 const fs = require('fs');
 const { logger, requestLogger } = require('./utils/logger');
 const healthRoutes = require('./routes/healthRoutes');
 const { validateSession } = require('./utils/sessionManager');
 
-// Load env vars from root directory
+// Load environment variables (order matters: base -> env-specific -> local -> extras)
 dotenv.config({ path: path.join(__dirname, '../.env') });
+// Load environment-specific files if present
+const nodeEnv = process.env.NODE_ENV || 'development';
+if (nodeEnv === 'development') {
+  dotenv.config({ path: path.join(__dirname, '../.env.development') });
+} else if (nodeEnv === 'production') {
+  dotenv.config({ path: path.join(__dirname, '../.env.production') });
+}
+// Load local overrides last
+dotenv.config({ path: path.join(__dirname, '../.env.local') });
+// Optionally load dedicated Clerk env file if present
+dotenv.config({ path: path.join(__dirname, '../.env.clerk') });
 
 // Log environment variables
 logger.info('Starting Evalis Server...');
 logger.info(`Environment: ${process.env.NODE_ENV}`);
 logger.info(`Database configured: ${process.env.DATABASE_URL ? 'Yes' : 'No'}`);
 logger.info(`Port: ${process.env.PORT || DEFAULT_PORT}`);
+logger.info(`Clerk secret configured: ${process.env.CLERK_SECRET_KEY ? 'Yes' : 'No'}`);
 
 // Routes
 const authRoutes = require('./routes/authRoutes');
@@ -33,6 +45,9 @@ const adminRoutes = require('./routes/adminRoutes');
 const semesterRoutes = require('./routes/semesterRoutes');
 const assignmentRoutes = require('./routes/assignmentRoutes');
 const governanceRoutes = require('./routes/governanceRoutes');
+const aiAnalyzerRoutes = require('./routes/aiAnalyzerRoutes');
+const merchandiseRoutes = require('./routes/merchandiseRoutes');
+const timetableRoutes = require('./routes/timetableRoutes');
 const { startGovernanceListener } = require('./web3/governanceListener');
 
 // Function to try binding to ports recursively
@@ -196,7 +211,7 @@ const startServer = async () => {
       origin: corsOriginFn,
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Portal-Role', 'X-User-Role'],
       exposedHeaders: ['Content-Type'],
       maxAge: 86400
     }));
@@ -217,7 +232,7 @@ const startServer = async () => {
         }
         res.header('Access-Control-Allow-Credentials', 'true');
         res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,PATCH,OPTIONS');
-        res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Portal-Role, X-User-Role');
         res.sendStatus(204);
       });
     });
@@ -234,6 +249,10 @@ const startServer = async () => {
     const uploadsPath = path.join(__dirname, 'uploads');
     logger.debug('Serving uploads from:', uploadsPath);
     app.use('/uploads', express.static(uploadsPath));
+    
+    // Also serve from /api/uploads to handle frontend requests that include /api prefix
+    app.use('/api/uploads', express.static(uploadsPath));
+    logger.debug('Also serving uploads from /api/uploads (for frontend compatibility)');
     
     // Also try with relative path as fallback
     app.use('/uploads', express.static('server/uploads'));
@@ -294,6 +313,13 @@ const startServer = async () => {
     app.use('/api/admin', adminRoutes);
     app.use('/api/semesters', semesterRoutes);
     app.use('/api/assignments', assignmentRoutes);
+    app.use('/api/ai-analyzer', aiAnalyzerRoutes);
+    app.use('/api/merchandise', merchandiseRoutes);
+  app.use('/api/timetables', timetableRoutes);
+    const web3Routes = require('./routes/web3Routes');
+    app.use('/api/web3', web3Routes);
+    const certificateRoutes = require('./routes/certificateRoutes');
+    app.use('/api/certificates', certificateRoutes);
   app.use('/api/governance', governanceRoutes);
     
     // Optionally start on-chain governance listener

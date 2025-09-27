@@ -8,30 +8,16 @@ import { Badge } from '../components/ui/badge';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { 
-  GraduationCap,
-  Users,
-  FileText,
-  BarChart3,
-  Plus,
-  Upload,
-  Download,
-  Filter,
-  Clock,
-  CheckCircle,
-  AlertCircle,
-  Loader2,
-  BookOpen,
-  PenTool,
-  Eye,
-  User,
-  Calendar,
-  Edit3,
-  Trash2
+  BarChart3, BookOpen, Calendar, CheckCircle, Clock, Download, Edit, Edit3,
+  Eye, FileText, Filter, GraduationCap, Loader2, PenTool, Plus, 
+  Trash2, Upload, User, Users, Award, AlertCircle, RefreshCw
 } from 'lucide-react';
 import Header from '../components/Header';
-import { Subject } from '../types/university';
+import { SignIn } from '@clerk/clerk-react';
+import { useAuth } from '@clerk/clerk-react';
+import { Subject, Timetable } from '../types/university';
 import { EXAM_TYPES } from '../constants/universityData';
-import { getStudentsByTeacher, getTeacherSubjects, getAccessibleBatches, getTeacherSubmissions, getTeacherAssignments, gradeSubmission, saveAnnotatedPDF, deleteAssignment } from '../api/teacherService';
+import { getStudentsByTeacher, getTeacherSubjects, getAccessibleBatches, getTeacherSubmissions, getTeacherAssignments, gradeSubmission, saveAnnotatedPDF, deleteAssignment, checkAuthState, restoreAuthFromUser } from '../api/teacherService';
 import { getLetterGrade, getGradePoints } from '../utils/gradeCalculator';
 import { getStudentsByBatch } from '../api/studentService';
 import config from '../config/environment';
@@ -39,8 +25,57 @@ import TeacherAssignmentCreator from '../components/TeacherAssignmentCreator';
 import TeacherQuestionPaperCreator from '../components/TeacherQuestionPaperCreator';
 import PDFAnnotator from '../components/PDFAnnotator';
 import TeacherGovernanceWidget from '../components/TeacherGovernanceWidget';
+import TeacherWeb3Panel from '../components/TeacherWeb3Panel';
+import BadgeGradingInterface from '../components/BadgeGradingInterface';
+import BadgePreview from '../components/BadgePreview';
+import { awardNftCertificate, awardBadgeBasedRewards, awardManualCertificate } from '../api/teacherService';
+import TimetableGrid from '../components/timetable/TimetableGrid';
+import { fetchTeacherTimetable } from '../api/timetableService';
 
 const TeacherPortal: React.FC = () => {
+  const { isSignedIn, isLoaded } = useAuth();
+
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  if (!isSignedIn) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+        <div className="max-w-md w-full space-y-8">
+          <div className="text-center">
+            <h1 className="text-3xl font-bold text-gray-900">Teacher Portal</h1>
+            <p className="mt-2 text-gray-600">Sign in to access your dashboard</p>
+          </div>
+          
+          <div className="bg-white rounded-lg shadow-lg p-8">
+            <SignIn 
+              routing="hash"
+              signUpUrl="/teacher/signup"
+              redirectUrl="/teacher"
+              appearance={{
+                elements: {
+                  formButtonPrimary: 'bg-blue-600 hover:bg-blue-700 text-white',
+                  card: 'shadow-none border-0',
+                  headerTitle: 'text-xl font-semibold text-gray-900',
+                  headerSubtitle: 'text-gray-600'
+                }
+              }}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return <TeacherPortalContent />;
+};
+
+const TeacherPortalContent: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [students, setStudents] = useState<any[]>([]);
@@ -56,6 +91,10 @@ const TeacherPortal: React.FC = () => {
   const [batches, setBatches] = useState<any[]>([]);
   const [showPDFAnnotator, setShowPDFAnnotator] = useState(false);
   const [selectedSubmission, setSelectedSubmission] = useState<any>(null);
+  const [gradingScores, setGradingScores] = useState<{[key: number]: number}>({});
+  const [timetable, setTimetable] = useState<Timetable | null>(null);
+  const [timetableLoading, setTimetableLoading] = useState(false);
+  const [timetableError, setTimetableError] = useState<string | null>(null);
   
   const navigate = useNavigate();
 
@@ -84,6 +123,20 @@ const TeacherPortal: React.FC = () => {
         return;
       }
       
+      // Debug authentication state
+      const authState = checkAuthState();
+      console.log('Teacher Portal Auth State:', authState);
+      
+      // Try to restore auth if token is missing but user data exists
+      if (!authState.hasToken && authState.hasUser) {
+        console.log('Attempting to restore authentication...');
+        if (restoreAuthFromUser()) {
+          console.log('Authentication restored successfully');
+        } else {
+          console.warn('Could not restore authentication - user may need to log in again');
+        }
+      }
+      
       initializeData();
     } catch (error) {
       console.error('Error parsing user data:', error);
@@ -108,7 +161,8 @@ const TeacherPortal: React.FC = () => {
         fetchBatches(),
         fetchStudents(),
         fetchAssignments(),
-        fetchSubmissions()
+        fetchSubmissions(),
+        fetchTimetable()
       ]);
     } catch (error) {
       console.error('Error initializing data:', error);
@@ -196,24 +250,174 @@ const TeacherPortal: React.FC = () => {
   // Grading handlers
   const handleGradeSubmission = async (submissionId: number) => {
     const gradeInput = document.getElementById(`grade-${submissionId}`) as HTMLInputElement;
+  
+    async function fetchTimetable() {
+      try {
+        setTimetableLoading(true);
+        setTimetableError(null);
+        const response = await fetchTeacherTimetable();
+        setTimetable(response?.data || null);
+      } catch (error: any) {
+        console.error('Error fetching timetable:', error);
+        setTimetableError(error?.response?.data?.message || error.message || 'Failed to load timetable');
+      } finally {
+        setTimetableLoading(false);
+      }
+    }
     const feedbackInput = document.getElementById(`feedback-${submissionId}`) as HTMLInputElement;
+    const awardTokensInput = document.getElementById(`award-tokens-${submissionId}`) as HTMLInputElement;
+    const tokenAmountInput = document.getElementById(`token-amount-${submissionId}`) as HTMLInputElement;
+    const tokenReasonInput = document.getElementById(`token-reason-${submissionId}`) as HTMLInputElement;
     
     const grade = gradeInput?.value;
     const feedback = feedbackInput?.value || '';
+    const shouldAwardTokens = awardTokensInput?.checked || false;
+    const tokenAmount = tokenAmountInput?.value ? parseFloat(tokenAmountInput.value) : 0;
+    const tokenReason = tokenReasonInput?.value || '';
     
     if (!grade || isNaN(Number(grade)) || Number(grade) < 0 || Number(grade) > 100) {
       showNotification('Please enter a valid grade between 0 and 100', 'error');
       return;
     }
 
+    if (shouldAwardTokens && (!tokenAmount || tokenAmount <= 0)) {
+      showNotification('Please enter a valid token amount', 'error');
+      return;
+    }
+
+    // Check wallet connection for automatic rewards
+    const gradeNumber = Number(grade);
+    if (gradeNumber >= 75) {
+      // Will automatically award badge-based rewards, so student must have wallet linked
+      const submission = submissions.find(s => s.id === submissionId);
+      if (submission && !submission.Student?.walletAddress) {
+        showNotification('Student must link their wallet to receive automatic badge rewards. Ask them to connect their wallet in the Student Portal first.', 'error');
+        return;
+      }
+    }
+
     try {
-      // Call the grading API - we'll need to implement this in teacherService
-      await gradeSubmission(submissionId, Number(grade), feedback);
-      showNotification('Grade submitted successfully!', 'success');
+      // Call the grading API with optional token awarding
+      const tokenAward = shouldAwardTokens ? {
+        awardTokens: true,
+        tokenAmount,
+        tokenReason: tokenReason || `Great work! Score: ${grade}%`
+      } : undefined;
+
+      const result = await gradeSubmission(submissionId, Number(grade), feedback, tokenAward);
+      
+      let successMessage = 'Grade submitted successfully!';
+      
+      // Check for automatic badge rewards
+      if (result.badgeReward && !result.badgeReward.error) {
+        const badge = result.badgeReward.results?.badge;
+        const tokens = result.badgeReward.results?.tokens;
+        const certificate = result.badgeReward.results?.certificate;
+        
+        successMessage += ` ${badge?.name} badge awarded with ${tokens?.amount || 0} EVLT tokens!`;
+        
+        if (certificate) {
+          successMessage += ` NFT certificate also awarded!`;
+        }
+      } else if (result.badgeReward?.error) {
+        successMessage += ` Note: Automatic rewards failed - ${result.badgeReward.error}`;
+      }
+      
+      // Check for manual token awards
+      if (result.tokenAward && !result.tokenAward.error) {
+        successMessage += ` ${tokenAmount} EVT tokens awarded to student.`;
+      } else if (result.tokenAward?.error) {
+        successMessage += ` Note: Token awarding failed - ${result.tokenAward.error}`;
+      }
+      
+      showNotification(successMessage, 'success');
       fetchSubmissions(); // Refresh the submissions list
     } catch (error) {
       console.error('Error grading submission:', error);
       showNotification('Failed to submit grade. Please try again.', 'error');
+    }
+  };
+
+  const handleAwardCertificate = async (submissionId: number, studentName: string) => {
+    try {
+      const result = await awardNftCertificate(submissionId, ''); // Empty string for auto-generated metadata
+      showNotification(`NFT certificate successfully awarded to ${studentName}! Transaction: ${result.txHash?.slice(0, 10)}...`, 'success');
+      fetchSubmissions(); // Refresh to show updated status
+    } catch (error: any) {
+      console.error('Error awarding NFT certificate:', error);
+      
+      // Handle authentication errors specifically
+      if (error.message?.includes('Authentication required') || 
+          error.message?.includes('session has expired') ||
+          error.response?.status === 401) {
+        showNotification('Your session has expired. Please refresh the page and log in again.', 'error');
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      } else {
+        const errorMessage = error.response?.data?.message || error.message || 'Failed to award certificate';
+        showNotification(`Certificate awarding failed: ${errorMessage}`, 'error');
+      }
+    }
+  };
+
+  const handleAwardManualCertificate = async (submissionId: number, studentName: string, reason?: string) => {
+    try {
+      const certificateReason = reason || `Manual NFT certificate award for exceptional work`;
+      const result = await awardManualCertificate(submissionId, certificateReason);
+      showNotification(`NFT certificate manually awarded to ${studentName}! Transaction: ${result.txHash?.slice(0, 10)}...`, 'success');
+      fetchSubmissions(); // Refresh to show updated status
+    } catch (error: any) {
+      console.error('Error manually awarding NFT certificate:', error);
+      
+      // Handle authentication errors specifically
+      if (error.message?.includes('Authentication required') || 
+          error.message?.includes('session has expired') ||
+          error.response?.status === 401) {
+        showNotification('Your session has expired. Please refresh the page and log in again.', 'error');
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      } else {
+        const errorMessage = error.response?.data?.message || error.message || 'Failed to award manual certificate';
+        showNotification(`Manual certificate awarding failed: ${errorMessage}`, 'error');
+      }
+    }
+  };
+
+  const handleAwardBadgeRewards = async (submissionId: number, awardCertificate: boolean) => {
+    try {
+      const result = await awardBadgeBasedRewards(submissionId, awardCertificate);
+      const message = result.message || 'Badge rewards awarded successfully!';
+      const badge = result.results?.badge;
+      const tokens = result.results?.tokens;
+      const certificate = result.results?.certificate;
+      
+      let detailMessage = message;
+      if (badge && tokens) {
+        detailMessage += ` ${badge.name} badge with ${tokens.amount} EVLT tokens awarded.`;
+      }
+      if (certificate) {
+        detailMessage += ` NFT certificate included!`;
+      }
+      
+      showNotification(detailMessage, 'success');
+      fetchSubmissions(); // Refresh to show updated status
+    } catch (error: any) {
+      console.error('Error awarding badge rewards:', error);
+      
+      // Handle authentication errors specifically
+      if (error.message?.includes('Authentication required') || 
+          error.message?.includes('session has expired') ||
+          error.response?.status === 401) {
+        showNotification('Your session has expired. Please refresh the page and log in again.', 'error');
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      } else {
+        const errorMessage = error.response?.data?.message || error.message || 'Failed to award badge rewards';
+        showNotification(`Badge reward awarding failed: ${errorMessage}`, 'error');
+      }
     }
   };
 
@@ -267,9 +471,22 @@ const TeacherPortal: React.FC = () => {
       
       // Refresh assignments and submissions
       await Promise.all([fetchAssignments(), fetchSubmissions()]);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting assignment:', error);
-      showNotification('Failed to delete assignment. Please try again.', 'error');
+      
+      // Handle authentication errors specifically
+      if (error.message?.includes('Authentication required') || 
+          error.message?.includes('session has expired') ||
+          error.response?.status === 401) {
+        showNotification('Your session has expired. Please refresh the page and log in again.', 'error');
+        // Optionally redirect to login
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      } else {
+        const errorMessage = error.response?.data?.message || error.message || 'Failed to delete assignment';
+        showNotification(`Failed to delete assignment: ${errorMessage}`, 'error');
+      }
     }
   };
 
@@ -327,11 +544,10 @@ const TeacherPortal: React.FC = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Header title="Teacher Portal" />
+        <Header title="Teacher Portal" showLogout={true} />
         <div className="container mx-auto px-6 py-8">
           <div className="flex items-center justify-center py-20">
             <Loader2 className="h-8 w-8 animate-spin mr-3" />
-            <span className="text-lg text-gray-600">Loading your dashboard...</span>
           </div>
         </div>
       </div>
@@ -340,7 +556,7 @@ const TeacherPortal: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header title="Teacher Portal" />
+      <Header title="Teacher Portal" showLogout={true} />
 
       <div className="container mx-auto px-6 py-8">
         {/* Header Section */}
@@ -367,7 +583,7 @@ const TeacherPortal: React.FC = () => {
         )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-6 bg-white border border-gray-200">
+          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-7 bg-white border border-gray-200">
             <TabsTrigger value="dashboard" className="flex items-center gap-2 data-[state=active]:bg-black data-[state=active]:text-white">
               <BarChart3 className="h-4 w-4" />
               <span className="hidden sm:inline">Dashboard</span>
@@ -387,6 +603,10 @@ const TeacherPortal: React.FC = () => {
             <TabsTrigger value="questions" className="flex items-center gap-2 data-[state=active]:bg-black data-[state=active]:text-white">
               <BookOpen className="h-4 w-4" />
               <span className="hidden sm:inline">Questions</span>
+            </TabsTrigger>
+            <TabsTrigger value="timetable" className="flex items-center gap-2 data-[state=active]:bg-black data-[state=active]:text-white">
+              <Calendar className="h-4 w-4" />
+              <span className="hidden sm:inline">Timetable</span>
             </TabsTrigger>
             <TabsTrigger value="reports" className="flex items-center gap-2 data-[state=active]:bg-black data-[state=active]:text-white">
               <BarChart3 className="h-4 w-4" />
@@ -426,7 +646,10 @@ const TeacherPortal: React.FC = () => {
               />
             </div>
             {/* Governance widget */}
-            <TeacherGovernanceWidget />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <TeacherGovernanceWidget />
+              <TeacherWeb3Panel />
+            </div>
 
             {/* Quick Actions */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -1016,7 +1239,8 @@ const TeacherPortal: React.FC = () => {
                                     )}
                                   </div>
                                 ) : (
-                                  <div className="space-y-2 mt-3">
+                                  <div className="space-y-3 mt-3">
+                                    {/* Grade Input */}
                                     <div className="flex items-center gap-2">
                                       <Input 
                                         type="number" 
@@ -1026,29 +1250,122 @@ const TeacherPortal: React.FC = () => {
                                         max="100"
                                         id={`grade-${submission.id}`}
                                         onChange={(e) => {
-                                          const score = parseInt(e.target.value);
+                                          const score = parseInt(e.target.value) || 0;
+                                          setGradingScores(prev => ({
+                                            ...prev,
+                                            [submission.id]: score
+                                          }));
+                                          
                                           const previewElement = document.getElementById(`preview-${submission.id}`);
                                           if (previewElement && !isNaN(score)) {
                                             previewElement.textContent = `${getLetterGrade(score)} (${getGradePoints(score)} GP)`;
                                           } else if (previewElement) {
                                             previewElement.textContent = '';
                                           }
+                                          
+                                          // Show/hide badge preview
+                                          const badgePreviewElement = document.getElementById(`badge-preview-${submission.id}`);
+                                          if (badgePreviewElement) {
+                                            if (score >= 75) {
+                                              badgePreviewElement.style.display = 'block';
+                                            } else {
+                                              badgePreviewElement.style.display = 'none';
+                                            }
+                                          }
                                         }}
                                       />
                                       <span id={`preview-${submission.id}`} className="text-sm font-medium text-blue-600"></span>
                                     </div>
+                                    
+                                    {/* Feedback Input */}
                                     <div className="flex items-center gap-2">
                                       <Input 
                                         placeholder="Feedback (optional)" 
                                         className="flex-1 text-sm"
                                         id={`feedback-${submission.id}`}
                                       />
+                                    </div>
+
+                                    {/* Badge Preview */}
+                                    <div id={`badge-preview-${submission.id}`} style={{ display: 'none' }}>
+                                      <BadgePreview 
+                                        score={gradingScores[submission.id] || 0}
+                                        studentName={submission.Student?.name || 'Student'}
+                                        className="mt-2"
+                                      />
+                                    </div>
+
+                                    {/* Badge-Based Rewards Section */}
+                                    <div id={`badge-section-${submission.id}`}>
+                                      <BadgeGradingInterface
+                                        submissionId={submission.id}
+                                        currentGrade={submission.score || gradingScores[submission.id] || 0}
+                                        studentName={submission.Student?.name || 'Student'}
+                                        onAwardBadgeRewards={handleAwardBadgeRewards}
+                                        isGraded={submission.graded && submission.score !== null}
+                                      />
+                                    </div>
+
+                                    {/* EVT Token Award Section */}
+                                    <div className="p-3 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-200">
+                                      <div className="flex items-center gap-2 mb-2">
+                                        <input
+                                          type="checkbox"
+                                          id={`award-tokens-${submission.id}`}
+                                          className="rounded border-purple-300 text-purple-600 focus:ring-purple-500"
+                                          onChange={(e) => {
+                                            const tokenInputs = document.getElementById(`token-inputs-${submission.id}`);
+                                            if (tokenInputs) {
+                                              tokenInputs.style.display = e.target.checked ? 'block' : 'none';
+                                            }
+                                          }}
+                                        />
+                                        <label htmlFor={`award-tokens-${submission.id}`} className="text-sm font-medium text-purple-800">
+                                          🎁 Award EVT Tokens for Excellent Work
+                                        </label>
+                                      </div>
+                                      
+                                      <div id={`token-inputs-${submission.id}`} className="space-y-2 ml-6" style={{ display: 'none' }}>
+                                        <div className="flex items-center gap-2">
+                                          <Input 
+                                            type="number" 
+                                            placeholder="Token amount (e.g., 50)" 
+                                            className="w-40 text-sm"
+                                            min="1"
+                                            max="1000"
+                                            id={`token-amount-${submission.id}`}
+                                          />
+                                          <span className="text-xs text-purple-600 font-medium">EVT tokens</span>
+                                        </div>
+                                        <Input 
+                                          placeholder="Reason for award (optional)" 
+                                          className="text-sm"
+                                          id={`token-reason-${submission.id}`}
+                                        />
+                                        <p className="text-xs text-purple-600">
+                                          💡 Student must have linked wallet to receive tokens
+                                        </p>
+                                      </div>
+                                    </div>
+
+                                    {/* Submit Button */}
+                                    <div className="flex justify-end">
                                       <Button
                                         size="sm"
                                         className="bg-black hover:bg-gray-800 text-white"
                                         onClick={() => handleGradeSubmission(submission.id)}
                                       >
                                         Submit Grade
+                                        {gradingScores[submission.id] >= 80 && (
+                                          <span className="ml-2 text-xs bg-green-400 text-green-900 px-2 py-1 rounded">
+                                            + Badge + NFT
+                                          </span>
+                                        )}
+                                        {gradingScores[submission.id] >= 75 && gradingScores[submission.id] < 80 && (
+                                          <span className="ml-2 text-xs bg-yellow-400 text-yellow-900 px-2 py-1 rounded">
+                                            + Badge Only
+                                          </span>
+                                        )}
                                       </Button>
                                     </div>
                                   </div>
@@ -1065,6 +1382,52 @@ const TeacherPortal: React.FC = () => {
                                   <Eye className="h-4 w-4 mr-2" />
                                   View Full
                                 </Button>
+                                
+                                {/* NFT Certificate Award Section - Show for all graded submissions */}
+                                {submission.graded && (
+                                  <div className="mt-3 p-3 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg border border-yellow-200">
+                                    <div className="flex items-center justify-between">
+                                      <div className="flex-1">
+                                        <div className="flex items-center gap-2 mb-2">
+                                          <Award className="h-4 w-4 text-yellow-600" />
+                                          <span className="text-sm font-medium text-yellow-800">NFT Certificate Status</span>
+                                        </div>
+                                        {submission.score >= 80 ? (
+                                          <p className="text-xs text-yellow-700">
+                                            🎓 <strong>Silver+ League:</strong> Certificate automatically awarded for score ≥80%
+                                          </p>
+                                        ) : (
+                                          <p className="text-xs text-yellow-700">
+                                            ⭐ Manual certificate award available for exceptional work
+                                          </p>
+                                        )}
+                                      </div>
+                                      <div className="flex items-center gap-2">
+                                        {/* Show appropriate button based on score */}
+                                        {submission.score >= 80 ? (
+                                          <Badge className="bg-green-100 text-green-800 border-green-200">
+                                            Auto-Awarded ✓
+                                          </Badge>
+                                        ) : (
+                                          <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="border-yellow-300 text-yellow-700 hover:bg-yellow-50"
+                                            onClick={() => {
+                                              const reason = prompt('Enter reason for manual certificate award (optional):');
+                                              if (reason !== null) { // User didn't cancel
+                                                handleAwardManualCertificate(submission.id, submission.Student?.name || 'Student', reason);
+                                              }
+                                            }}
+                                          >
+                                            <Award className="h-4 w-4 mr-2" />
+                                            Award Certificate
+                                          </Button>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
                               </div>
                             </div>
                           </CardContent>

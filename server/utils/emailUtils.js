@@ -1,4 +1,5 @@
 const nodemailer = require('nodemailer');
+const crypto = require('crypto');
 const dotenv = require('dotenv');
 
 dotenv.config();
@@ -42,6 +43,90 @@ try {
     console.error('[emailUtils] Missing environment variables prevented transporter creation:', missingEmailVars.join(', '));
   }
 }
+
+/**
+ * Generate a secure random password
+ */
+const generateSecurePassword = (length = 12) => {
+  const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
+  let password = '';
+  for (let i = 0; i < length; i++) {
+    password += charset.charAt(Math.floor(Math.random() * charset.length));
+  }
+  return password;
+};
+
+/**
+ * Generate a secure reset token
+ */
+const generateResetToken = () => {
+  return crypto.randomBytes(32).toString('hex');
+};
+
+/**
+ * Send welcome email with password setup for new users
+ * @param {Object} user - User object with email, name, role
+ * @param {string} temporaryPassword - Generated temporary password  
+ * @param {string} resetLink - Password reset link
+ * @returns {Promise} - Promise that resolves when email is sent
+ */
+const sendWelcomeEmail = async (user, temporaryPassword, resetLink) => {
+  if (!user.email) {
+    throw new Error('User email is required');
+  }
+
+  const mailOptions = {
+    from: `"Evalis Admin" <${process.env.EMAIL_USER}>`,
+    to: user.email,
+    subject: 'Welcome to Evalis - Account Setup Required',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
+        <h2 style="color: #333;">Welcome to Evalis, ${user.name}!</h2>
+        
+        <p>Your ${user.role} account has been created successfully. To get started, you'll need to set up your password.</p>
+        
+        <div style="background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 20px; margin: 20px 0;">
+          <h3 style="margin-top: 0; color: #495057;">Account Details:</h3>
+          <p><strong>Email:</strong> ${user.email}</p>
+          <p><strong>Role:</strong> ${user.role.charAt(0).toUpperCase() + user.role.slice(1)}</p>
+          <p><strong>User ID:</strong> ${user.id || 'Generated automatically'}</p>
+          <p><strong>Temporary Password:</strong> <code style="background-color: #e9ecef; padding: 2px 6px; border-radius: 4px;">${temporaryPassword}</code></p>
+        </div>
+        
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${resetLink}" style="background-color: #007bff; color: white; text-decoration: none; padding: 12px 30px; border-radius: 5px; display: inline-block;">Set Up Your Password</a>
+        </div>
+        
+        <div style="background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 15px; margin: 20px 0;">
+          <p style="margin: 0;"><strong>Important:</strong> Please change your password after your first login for security reasons.</p>
+        </div>
+        
+        <p>If you're unable to click the button above, you can copy and paste this link into your browser:</p>
+        <p style="word-break: break-all; color: #007bff;">${resetLink}</p>
+        
+        <hr style="border: none; border-top: 1px solid #dee2e6; margin: 30px 0;">
+        
+        <p style="color: #6c757d; font-size: 14px;">
+          If you didn't expect this email, please contact your administrator.<br>
+          This email was sent from the Evalis administration system.
+        </p>
+      </div>
+    `,
+  };
+
+  try {
+    if (EMAIL_DRY_RUN || !transporter) {
+      console.log(`[emailUtils] DRY RUN - welcome email NOT sent to ${user.email}`);
+      return { messageId: 'dry-run', accepted: [user.email] };
+    }
+    const info = await transporter.sendMail(mailOptions);
+    console.log(`Welcome email sent to ${user.email}: ${info.messageId}`);
+    return info;
+  } catch (error) {
+    console.error('Error sending welcome email:', error);
+    throw error;
+  }
+};
 
 /**
  * Send an email with login credentials to a student
@@ -142,6 +227,9 @@ const sendPasswordResetLink = async (user, resetLink) => {
 };
 
 module.exports = {
+  generateSecurePassword,
+  generateResetToken,
+  sendWelcomeEmail,
   sendLoginCredentials,
   sendPasswordResetLink,
 }; 

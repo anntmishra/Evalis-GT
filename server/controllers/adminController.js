@@ -7,9 +7,12 @@ const {
   Batch, 
   Subject, 
   TeacherSubject, 
-  Semester 
+  Semester,
+  PasswordResetToken
 } = require('../models');
 const { createSemestersForBatch } = require('../utils/seedData');
+const { generateSecurePassword, generateResetToken, sendWelcomeEmail } = require('../utils/emailUtils');
+const { clerkClient } = require('@clerk/express');
 
 /**
  * @desc    Get dashboard statistics
@@ -148,7 +151,7 @@ const getTeachers = asyncHandler(async (req, res) => {
  */
 const createTeacher = asyncHandler(async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email } = req.body;
 
     if (!name || !email) {
       return res.status(400).json({
@@ -157,7 +160,7 @@ const createTeacher = asyncHandler(async (req, res) => {
       });
     }
 
-    // Check if teacher already exists
+    // Check if teacher already exists in database
     const existingTeacher = await Teacher.findOne({ where: { email } });
     if (existingTeacher) {
       return res.status(400).json({
@@ -166,29 +169,92 @@ const createTeacher = asyncHandler(async (req, res) => {
       });
     }
 
+    // Check if user already exists in Clerk
+    let clerkUser = null;
+    try {
+      const existingClerkUsers = await clerkClient.users.getUserList({ emailAddress: [email] });
+      if (existingClerkUsers && existingClerkUsers.length > 0) {
+        clerkUser = existingClerkUsers[0];
+      }
+    } catch (clerkError) {
+      console.warn('Error checking existing Clerk user:', clerkError.message);
+    }
+
+    // Create user in Clerk if doesn't exist
+    if (!clerkUser) {
+      try {
+        clerkUser = await clerkClient.users.createUser({
+          emailAddress: [email],
+          username: email.split('@')[0] + '_teacher_' + Date.now(), // Generate unique username
+          firstName: name.split(' ')[0] || name,
+          lastName: name.split(' ').slice(1).join(' ') || undefined,
+          skipPasswordChecks: true,
+          skipPasswordRequirement: true
+        });
+        console.log(`Created Clerk user for teacher: ${email}`);
+      } catch (clerkError) {
+        console.error('Failed to create Clerk user:', clerkError.message);
+        return res.status(500).json({
+          success: false,
+          message: 'Failed to create user account. Please try again.'
+        });
+      }
+    }
+
     // Generate teacher ID
     const teacherId = await Teacher.generateTeacherId();
     
-    // Generate password if not provided
-    const teacherPassword = password || Teacher.generatePassword(teacherId);
+    // Generate secure temporary password
+    const temporaryPassword = generateSecurePassword();
 
     // Hash password
     const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(teacherPassword, salt);
+    const hashedPassword = await bcrypt.hash(temporaryPassword, salt);
 
+    // Create teacher in database
     const teacher = await Teacher.create({
       id: teacherId,
       name,
       email,
-      password: hashedPassword
+      password: hashedPassword,
+      clerkId: clerkUser.id // Link to Clerk user
     });
+
+    // Generate password reset token
+    const resetToken = generateResetToken();
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+    // Save reset token
+    await PasswordResetToken.create({
+      userId: teacher.id,
+      userRole: 'teacher',
+      token: resetToken,
+      expiresAt
+    });
+
+    // Generate reset link
+    const resetLink = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/teacher/reset-password?token=${resetToken}`;
+
+    // Send welcome email with password setup
+    try {
+      await sendWelcomeEmail(
+        { ...teacher.toJSON(), role: 'teacher' },
+        temporaryPassword,
+        resetLink
+      );
+    } catch (emailError) {
+      console.warn('Failed to send welcome email:', emailError.message);
+      // Don't fail the creation if email fails
+    }
 
     res.status(201).json({
       success: true,
       data: {
         id: teacher.id,
         name: teacher.name,
-        email: teacher.email
+        email: teacher.email,
+        clerkId: teacher.clerkId,
+        message: 'Teacher created successfully in both database and Clerk. Welcome email sent with password setup instructions.'
       }
     });
   } catch (error) {
@@ -343,7 +409,7 @@ const getStudents = asyncHandler(async (req, res) => {
  */
 const createStudent = asyncHandler(async (req, res) => {
   try {
-    const { id, name, email, batch, section, password } = req.body;
+    const { id, name, email, batch, section } = req.body;
 
     if (!id || !name || !email || !batch) {
       return res.status(400).json({
@@ -352,12 +418,21 @@ const createStudent = asyncHandler(async (req, res) => {
       });
     }
 
-    // Check if student already exists
+    // Check if student already exists in database
     const existingStudent = await Student.findByPk(id);
     if (existingStudent) {
       return res.status(400).json({
         success: false,
         message: 'Student with this ID already exists'
+      });
+    }
+
+    // Check if email already exists in database
+    const existingEmail = await Student.findOne({ where: { email } });
+    if (existingEmail) {
+      return res.status(400).json({
+        success: false,
+        message: 'Student with this email already exists'
       });
     }
 
@@ -370,19 +445,82 @@ const createStudent = asyncHandler(async (req, res) => {
       });
     }
 
-    // Hash password
-    const studentPassword = password || 'student123'; // Default password
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(studentPassword, salt);
+    // Check if user already exists in Clerk
+    let clerkUser = null;
+    try {
+      const existingClerkUsers = await clerkClient.users.getUserList({ emailAddress: [email] });
+      if (existingClerkUsers && existingClerkUsers.length > 0) {
+        clerkUser = existingClerkUsers[0];
+      }
+    } catch (clerkError) {
+      console.warn('Error checking existing Clerk user:', clerkError.message);
+    }
 
+    // Create user in Clerk if doesn't exist
+    if (!clerkUser) {
+      try {
+        clerkUser = await clerkClient.users.createUser({
+          emailAddress: [email],
+          username: email.split('@')[0] + '_student_' + Date.now(), // Generate unique username
+          firstName: name.split(' ')[0] || name,
+          lastName: name.split(' ').slice(1).join(' ') || undefined,
+          skipPasswordChecks: true,
+          skipPasswordRequirement: true
+        });
+        console.log(`Created Clerk user for student: ${email}`);
+      } catch (clerkError) {
+        console.error('Failed to create Clerk user:', clerkError.message);
+        return res.status(500).json({
+          success: false,
+          message: 'Failed to create user account. Please try again.'
+        });
+      }
+    }
+
+    // Generate secure temporary password
+    const temporaryPassword = generateSecurePassword();
+
+    // Hash password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(temporaryPassword, salt);
+
+    // Create student in database
     const student = await Student.create({
       id,
       name,
       email,
       batch,
       section,
-      password: hashedPassword
+      password: hashedPassword,
+      clerkId: clerkUser.id // Link to Clerk user
     });
+
+    // Generate password reset token
+    const resetToken = generateResetToken();
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+    // Save reset token
+    await PasswordResetToken.create({
+      userId: student.id,
+      userRole: 'student',
+      token: resetToken,
+      expiresAt
+    });
+
+    // Generate reset link
+    const resetLink = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/student/reset-password?token=${resetToken}`;
+
+    // Send welcome email with password setup
+    try {
+      await sendWelcomeEmail(
+        { ...student.toJSON(), role: 'student' },
+        temporaryPassword,
+        resetLink
+      );
+    } catch (emailError) {
+      console.warn('Failed to send welcome email:', emailError.message);
+      // Don't fail the creation if email fails
+    }
 
     res.status(201).json({
       success: true,
@@ -391,7 +529,9 @@ const createStudent = asyncHandler(async (req, res) => {
         name: student.name,
         email: student.email,
         batch: student.batch,
-        section: student.section
+        section: student.section,
+        clerkId: student.clerkId,
+        message: 'Student created successfully in both database and Clerk. Welcome email sent with password setup instructions.'
       }
     });
   } catch (error) {

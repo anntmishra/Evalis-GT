@@ -21,7 +21,6 @@ import {
   Email as EmailIcon
 } from '@mui/icons-material';
 import { Teacher } from '../types/university';
-import { sendPasswordReset } from '../config/firebase';
 
 interface TeacherFormProps {
   open: boolean;
@@ -89,7 +88,11 @@ const TeacherForm: React.FC<TeacherFormProps> = ({
     e.preventDefault();
     // Include the generated password in the submission if it's a new teacher
     if (!teacher && generatedPassword) {
-      onSave({...form, initialPassword: generatedPassword});
+      onSave({
+        ...form, 
+        initialPassword: generatedPassword,
+        password: generatedPassword
+      });
     } else {
       onSave(form);
     }
@@ -107,18 +110,17 @@ const TeacherForm: React.FC<TeacherFormProps> = ({
 
     setPasswordResetStatus({ loading: true });
     try {
-      // Send the Firebase password reset email
-      const result = await sendPasswordReset(form.email);
+      // Firebase password reset is disabled - using Clerk only
       setPasswordResetStatus({
         loading: false,
-        success: result.success,
-        message: result.message
+        success: false,
+        message: 'Password reset is currently disabled. Please contact an administrator.'
       });
     } catch (error) {
       setPasswordResetStatus({
         loading: false,
         success: false,
-        message: 'An error occurred while sending the password reset email'
+        message: 'Password reset functionality is disabled'
       });
     }
   };
