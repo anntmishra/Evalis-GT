@@ -26,7 +26,7 @@ try {
 let explicitBase = viteEnv?.VITE_API_BASE_URL || null;
 const explicitPort = viteEnv?.VITE_API_PORT || null;
 
-// Detect dev API port dynamically: if running Vite (5173/5174 etc.) prefer 3000 (our server port)
+// Detect dev API port dynamically: if running Vite (5173/5174 etc.) prefer 3001 (our server port)
 let detectedDevPort = '3000';
 if (typeof window !== 'undefined') {
   const lp = window.location.port;
@@ -90,6 +90,9 @@ const config = {
   API_BASE_URL,
   FILE_BASE_URL,
   ADMIN_API_BASE_URL,
+  CLERK: {
+    PUBLISHABLE_KEY: viteEnv?.VITE_CLERK_PUBLISHABLE_KEY || undefined,
+  },
   API_ENDPOINTS: {
     AUTH: {
       STUDENT_LOGIN: `${API_BASE_URL}/auth/student/login`,

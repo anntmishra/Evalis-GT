@@ -9,7 +9,6 @@ import {
   Paper,
   CircularProgress
 } from '@mui/material';
-import { sendPasswordReset } from '../config/firebase';
 
 interface PasswordResetFormProps {
   onClose?: () => void;
@@ -39,12 +38,15 @@ const PasswordResetForm: React.FC<PasswordResetFormProps> = ({
 
     setLoading(true);
     try {
-      const resetResult = await sendPasswordReset(email);
-      setResult(resetResult);
+      // Firebase password reset is disabled - using Clerk only
+      setResult({
+        success: false,
+        message: 'Password reset is currently disabled. Please contact an administrator.'
+      });
     } catch (error) {
       setResult({
         success: false,
-        message: 'An error occurred while sending the password reset email'
+        message: 'Password reset functionality is disabled'
       });
     } finally {
       setLoading(false);

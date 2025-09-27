@@ -16,6 +16,7 @@ export interface AuthContextType {
   teacherLogin: (email: string, password: string) => Promise<User>;
   adminLogin: (username: string, password: string) => Promise<User>;
   logout: () => void;
+  updateUser: (userData: User | null) => void; // Updated to accept null for clearing user state
   setupTeacherPassword: (email: string, currentPassword: string, newPassword: string) => Promise<User>;
   requestPasswordReset: (email: string) => Promise<void>;
 }
