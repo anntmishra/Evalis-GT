@@ -36,7 +36,7 @@ const getSubmissions = asyncHandler(async (req, res) => {
     include: [
       {
         model: Student,
-        attributes: ['id', 'name', 'section', 'batch']
+        attributes: ['id', 'name', 'section', 'batch', 'walletAddress']
       },
       {
         model: Subject,
@@ -67,7 +67,7 @@ const getSubmissionById = asyncHandler(async (req, res) => {
     include: [
       {
         model: Student,
-        attributes: ['id', 'name', 'section', 'batch']
+        attributes: ['id', 'name', 'section', 'batch', 'walletAddress']
       },
       {
         model: Subject,
@@ -239,7 +239,7 @@ const updateSubmission = asyncHandler(async (req, res) => {
     include: [
       {
         model: Student,
-        attributes: ['id', 'name', 'section', 'batch']
+        attributes: ['id', 'name', 'section', 'batch', 'walletAddress']
       },
       {
         model: Subject,
@@ -256,7 +256,7 @@ const updateSubmission = asyncHandler(async (req, res) => {
     ]
   });
 
-  res.json(fullSubmission);
+  res.json({ submission: fullSubmission });
 });
 
 /**
@@ -318,7 +318,7 @@ const getSubmissionsBySubject = asyncHandler(async (req, res) => {
     include: [
       {
         model: Student,
-        attributes: ['id', 'name', 'section', 'batch']
+        attributes: ['id', 'name', 'section', 'batch', 'walletAddress']
       },
       {
         model: Subject,
@@ -383,7 +383,7 @@ const getSubmissionsByTeacher = asyncHandler(async (req, res) => {
     include: [
       {
         model: Student,
-        attributes: ['id', 'name', 'section', 'batch']
+        attributes: ['id', 'name', 'section', 'batch', 'walletAddress']
       },
       {
         model: Subject,
@@ -505,7 +505,7 @@ const saveAnnotatedPDF = asyncHandler(async (req, res) => {
       include: [
         {
           model: Student,
-          attributes: ['id', 'name', 'section', 'batch']
+          attributes: ['id', 'name', 'section', 'batch', 'walletAddress']
         },
         {
           model: Assignment,

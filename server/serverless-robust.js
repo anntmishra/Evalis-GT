@@ -620,6 +620,16 @@ app.delete('/api/teachers/:id', requireAdmin, async (req, res) => {
     if (!dbConnected) { const { connectDB } = require('./config/db'); await connectDB(); dbConnected = true; }
     const { Teacher, TeacherSubject } = require('./models'); const teacher = await Teacher.findByPk(req.params.id);
     if (!teacher) return res.status(404).json({ success:false, message:'Teacher not found' });
+    // Delete from Clerk if clerkId exists
+    if (teacher.clerkId) {
+      try {
+        const { clerkClient } = require('@clerk/express');
+        await clerkClient.users.deleteUser(teacher.clerkId);
+        console.log(`✅ Deleted Clerk user: ${teacher.clerkId}`);
+      } catch (clerkError) {
+        console.warn(`⚠️ Failed to delete Clerk user: ${clerkError.message}`);
+      }
+    }
     await TeacherSubject.destroy({ where:{ teacherId: teacher.id } });
     await teacher.destroy();
     res.json({ success:true, message:'Teacher deleted' });
@@ -719,6 +729,16 @@ app.delete('/api/teachers/:id', async (req, res) => {
   try { if (!dbConnected) { const { connectDB } = require('./config/db'); await connectDB(); dbConnected = true; }
     const { Teacher, TeacherSubject } = require('./models'); const teacher = await Teacher.findByPk(req.params.id);
     if (!teacher) return res.status(404).json({ success:false, message:'Teacher not found' });
+    // Delete from Clerk if clerkId exists
+    if (teacher.clerkId) {
+      try {
+        const { clerkClient } = require('@clerk/express');
+        await clerkClient.users.deleteUser(teacher.clerkId);
+        console.log(`✅ Deleted Clerk user: ${teacher.clerkId}`);
+      } catch (clerkError) {
+        console.warn(`⚠️ Failed to delete Clerk user: ${clerkError.message}`);
+      }
+    }
     // Clean assignments
     await TeacherSubject.destroy({ where:{ teacherId: teacher.id } });
     await teacher.destroy();
@@ -1099,7 +1119,18 @@ app.put('/api/students/:id', async (req, res) => {
 
 app.delete('/api/students/:id', async (req, res) => {
   try { if (!dbConnected) { const { connectDB } = require('./config/db'); await connectDB(); dbConnected = true; }
-    const { Student } = require('./models'); const student = await Student.findByPk(req.params.id); if (!student) return res.status(404).json({ success:false, message:'Student not found' }); await student.destroy();
+    const { Student } = require('./models'); const student = await Student.findByPk(req.params.id); if (!student) return res.status(404).json({ success:false, message:'Student not found' });
+    // Delete from Clerk if clerkId exists
+    if (student.clerkId) {
+      try {
+        const { clerkClient } = require('@clerk/express');
+        await clerkClient.users.deleteUser(student.clerkId);
+        console.log(`✅ Deleted Clerk user: ${student.clerkId}`);
+      } catch (clerkError) {
+        console.warn(`⚠️ Failed to delete Clerk user: ${clerkError.message}`);
+      }
+    }
+    await student.destroy();
     res.json({ success:true, message:'Student deleted' });
   } catch(e){ console.error('Delete student error:', e); res.status(500).json({ success:false, message:'Failed to delete student', error:e.message }); }
 });
@@ -2352,6 +2383,18 @@ app.delete('/api/admin/students/:id', async (req, res) => {
       });
     }
 
+    // Delete from Clerk if clerkId exists
+    if (student.clerkId) {
+      try {
+        const { clerkClient } = require('@clerk/express');
+        await clerkClient.users.deleteUser(student.clerkId);
+        console.log(`✅ Deleted Clerk user: ${student.clerkId} for student ${student.id}`);
+      } catch (clerkError) {
+        console.warn(`⚠️ Failed to delete Clerk user ${student.clerkId}: ${clerkError.message}`);
+        // Continue with database deletion even if Clerk deletion fails
+      }
+    }
+
     await student.destroy();
 
     res.json({
@@ -2429,7 +2472,7 @@ app.delete('/api/admin/teachers/:id', async (req, res) => {
       dbConnected = true;
     }
 
-    const { Teacher } = require('./models');
+    const { Teacher, TeacherSubject } = require('./models');
     const { id } = req.params;
 
     const teacher = await Teacher.findByPk(id);
@@ -2439,6 +2482,21 @@ app.delete('/api/admin/teachers/:id', async (req, res) => {
         message: 'Teacher not found'
       });
     }
+
+    // Delete from Clerk if clerkId exists
+    if (teacher.clerkId) {
+      try {
+        const { clerkClient } = require('@clerk/express');
+        await clerkClient.users.deleteUser(teacher.clerkId);
+        console.log(`✅ Deleted Clerk user: ${teacher.clerkId} for teacher ${teacher.id}`);
+      } catch (clerkError) {
+        console.warn(`⚠️ Failed to delete Clerk user ${teacher.clerkId}: ${clerkError.message}`);
+        // Continue with database deletion even if Clerk deletion fails
+      }
+    }
+
+    // Delete teacher-subject associations first
+    await TeacherSubject.destroy({ where: { teacherId: teacher.id } });
 
     await teacher.destroy();
 
@@ -2454,6 +2512,27 @@ app.delete('/api/admin/teachers/:id', async (req, res) => {
     });
   }
 });
+
+// Attach modular routers that share logic with the monolithic server build
+const attachOptionalRoutes = () => {
+  const routesToAttach = [
+    { path: '/api/timetables', loader: () => require('./routes/timetableRoutes') },
+    { path: '/api/web3', loader: () => require('./routes/web3Routes') },
+    { path: '/api/certificates', loader: () => require('./routes/certificateRoutes') },
+    { path: '/api/quizzes', loader: () => require('./routes/quizRoutes') }
+  ];
+
+  routesToAttach.forEach(({ path, loader }) => {
+    try {
+      const router = loader();
+      app.use(path, router);
+    } catch (error) {
+      console.warn(`${path} not attached in serverless build:`, error?.message || error);
+    }
+  });
+};
+
+attachOptionalRoutes();
 
 // Error handling
 app.use((error, req, res, next) => {
@@ -2480,7 +2559,11 @@ app.use('*', (req, res) => {
       '/api/submissions/*',
       '/api/admin/*',
       '/api/semesters/*',
-      '/api/assignments/*'
+      '/api/assignments/*',
+      '/api/timetables/*',
+      '/api/web3/*',
+      '/api/certificates/*',
+      '/api/quizzes/*'
     ]
   });
 });

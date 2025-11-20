@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
-import { sendPasswordReset } from '../config/firebase';
 
 export default function LoginForm() {
   const [userType, setUserType] = useState('student');
@@ -24,13 +23,13 @@ export default function LoginForm() {
     try {
       if (userType === 'student') {
         await studentLogin(id, password);
-        navigate('/student/dashboard');
+        navigate('/student');
       } else if (userType === 'teacher') {
         await teacherLogin(email, password);
-        navigate('/teacher/dashboard');
+        navigate('/teacher');
       } else {
         await adminLogin(username, password);
-        navigate('/admin/dashboard');
+        navigate('/admin');
       }
     } catch (err) {
       console.error('Login error:', err);
@@ -52,21 +51,21 @@ export default function LoginForm() {
       return;
     }
     
-    setResetStatus({ loading: true, success: false, message: 'Sending password reset email...' });
+    setResetStatus({ loading: true, success: false, message: 'Password reset is disabled...' });
     
     try {
-      const result = await sendPasswordReset(resetEmail);
+      // Firebase password reset is disabled - using Clerk only
       setResetStatus({
         loading: false,
-        success: result.success,
-        message: result.message || 'Password reset email sent successfully'
+        success: false,
+        message: 'Password reset is currently disabled. Please contact an administrator.'
       });
     } catch (err) {
       console.error('Password reset error:', err);
       setResetStatus({
         loading: false,
         success: false,
-        message: err.message || 'Failed to send password reset email'
+        message: 'Password reset functionality is disabled'
       });
     }
   };

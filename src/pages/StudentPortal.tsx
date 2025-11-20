@@ -26,22 +26,73 @@ import {
     Upload,
     Download,
     Eye,
-    Filter
+    Filter,
+    Coins,
+    HelpCircle
 } from "lucide-react";
 import Header from "../components/Header";
+import StudentAIAssistant from "../components/StudentAIAssistant";
+import { SignIn } from '@clerk/clerk-react';
+import { useAuth } from '@clerk/clerk-react';
 import { getStudentProfile, getStudentSubmissions } from "../api";
 import { getStudentAssignments, getStudentSubjects, submitAssignment } from "../api/studentService";
 import { Student, StudentSubmission, Subject } from "../types/university";
-import { useAuth } from "../context/AuthContext";
+import { useAuth as useCustomAuth } from "../hooks/useAuth";
 import config from "../config/environment";
 import { calculateCGPA } from "../utils/gradeCalculator";
+import { listMyCertificates } from "../api/certificatesService";
+import StudentQuizInterface from "../components/StudentQuizInterface";
 
 const StudentPortal: React.FC = () => {
+    const { isSignedIn, isLoaded } = useAuth();
+
+    if (!isLoaded) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-green-500"></div>
+            </div>
+        );
+    }
+
+    if (!isSignedIn) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center p-4">
+                <div className="max-w-md w-full space-y-8">
+                    <div className="text-center">
+                        <h1 className="text-3xl font-bold text-gray-900">Student Portal</h1>
+                        <p className="mt-2 text-gray-600">Sign in to access your assignments</p>
+                    </div>
+                    
+                    <div className="bg-white rounded-lg shadow-lg p-8">
+                        <SignIn 
+                            routing="hash"
+                            signUpUrl="/student/signup"
+                            redirectUrl="/student"
+                            appearance={{
+                                elements: {
+                                    formButtonPrimary: 'bg-green-600 hover:bg-green-700 text-white',
+                                    card: 'shadow-none border-0',
+                                    headerTitle: 'text-xl font-semibold text-gray-900',
+                                    headerSubtitle: 'text-gray-600'
+                                }
+                            }}
+                        />
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    return <StudentPortalContent />;
+};
+
+const StudentPortalContent: React.FC = () => {
     const [activeTab, setActiveTab] = useState("dashboard");
     const [student, setStudent] = useState<Student | null>(null);
     const [subjects, setSubjects] = useState<Subject[]>([]);
     const [submissions, setSubmissions] = useState<StudentSubmission[]>([]);
     const [assignments, setAssignments] = useState<any[]>([]);
+    const [certs, setCerts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [notification, setNotification] = useState({
         open: false,
@@ -66,7 +117,7 @@ const StudentPortal: React.FC = () => {
     });
 
     const navigate = useNavigate();
-    const { currentUser } = useAuth();
+    const { currentUser } = useCustomAuth();
 
     // Stats for dashboard
     const [stats, setStats] = useState({
@@ -109,7 +160,8 @@ const StudentPortal: React.FC = () => {
                 fetchStudentProfile(),
                 fetchSubjects(),
                 fetchSubmissions(),
-                fetchAssignments()
+                fetchAssignments(),
+                fetchCertificates()
             ]);
         } catch (error) {
             console.error('Error initializing data:', error);
@@ -117,6 +169,10 @@ const StudentPortal: React.FC = () => {
         } finally {
             setLoading(false);
         }
+    };
+
+    const fetchCertificates = async () => {
+        try { const list = await listMyCertificates(); setCerts(list || []); } catch (e) { /* ignore */ }
     };
 
     const fetchStudentProfile = async () => {
@@ -139,6 +195,48 @@ const StudentPortal: React.FC = () => {
             setStats(prev => ({ ...prev, totalSubjects: (subjectData || []).length }));
         } catch (error) {
             console.error('Error fetching subjects:', error);
+            // Add mock subjects for demo purposes when API fails
+            const mockSubjects: Subject[] = [
+                {
+                    id: '1',
+                    name: 'Mathematics',
+                    code: 'MATH101',
+                    credits: 3,
+                    description: 'Advanced mathematical concepts and problem solving',
+                    batchId: '1',
+                    semesterId: '1'
+                },
+                {
+                    id: '2',
+                    name: 'Computer Science',
+                    code: 'CS101',
+                    credits: 4,
+                    description: 'Introduction to programming and computer systems',
+                    batchId: '1',
+                    semesterId: '1'
+                },
+                {
+                    id: '3',
+                    name: 'Physics',
+                    code: 'PHY101',
+                    credits: 3,
+                    description: 'Fundamental principles of physics and laboratory work',
+                    batchId: '1',
+                    semesterId: '1'
+                },
+                {
+                    id: '4',
+                    name: 'English Literature',
+                    code: 'ENG101',
+                    credits: 2,
+                    description: 'Analysis of literary works and writing skills',
+                    batchId: '1',
+                    semesterId: '1'
+                }
+            ];
+            console.log('[StudentPortal] Using mock subjects due to API error');
+            setSubjects(mockSubjects);
+            setStats(prev => ({ ...prev, totalSubjects: mockSubjects.length }));
         }
     };
 
@@ -150,7 +248,7 @@ const StudentPortal: React.FC = () => {
             setSubmissions(submissionsData as StudentSubmission[]);
 
             // Calculate stats from submissions
-            const completed = submissionsData.filter(s => s.status === 'submitted').length;
+            const completed = submissionsData.length; // All submissions are completed
             const graded = submissionsData.filter(s => s.graded && s.score !== null).length;
             const grades = submissionsData.filter(s => s.graded && s.score !== null).map(s => s.score);
             const avgGrade = grades.length > 0 ? grades.reduce((a, b) => a + b, 0) / grades.length : 0;
@@ -322,22 +420,11 @@ const StudentPortal: React.FC = () => {
                 return;
             }
 
-            // Import Firebase auth functions
-            const { getAuth, sendPasswordResetEmail } = await import('firebase/auth');
-            
-            const auth = getAuth();
-            await sendPasswordResetEmail(auth, student.email);
-            
-            showNotification("Password reset email sent! Check your inbox.", "success");
+            // Firebase password reset is disabled - using Clerk only
+            showNotification("Password reset is disabled. Please contact an administrator.", "error");
         } catch (error: any) {
             console.error('Error sending password reset email:', error);
-            if (error.code === 'auth/user-not-found') {
-                showNotification("No account found with this email address", "error");
-            } else if (error.code === 'auth/too-many-requests') {
-                showNotification("Too many reset attempts. Please try again later.", "error");
-            } else {
-                showNotification("Failed to send reset email. Please try again.", "error");
-            }
+            showNotification("Password reset functionality is disabled", "error");
         }
     };
 
@@ -388,7 +475,7 @@ const StudentPortal: React.FC = () => {
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-50">
-                <Header title="Student Portal" />
+                <Header title="Student Portal" showLogout={true} />
                 <div className="container mx-auto px-6 py-8">
                     <div className="flex items-center justify-center py-20">
                         <Loader2 className="h-8 w-8 animate-spin mr-3" />
@@ -401,7 +488,7 @@ const StudentPortal: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            <Header title="Student Portal" />
+            <Header title="Student Portal" showLogout={true} />
 
             <div className="container mx-auto px-6 py-8">
                 {/* Header Section */}
@@ -415,6 +502,17 @@ const StudentPortal: React.FC = () => {
                             <p className="text-gray-600">Welcome back, {student?.name || currentUser?.name || 'Student'}!</p>
                         </div>
                     </div>
+                                        {certs.length > 0 && (
+                                            <div className="flex flex-wrap gap-2 mt-2">
+                                                {certs.slice(0,3).map((c: any) => (
+                                                    <Badge key={c.id} className={
+                                                        c.lastVerificationOk ? 'bg-green-100 text-green-800 border-green-200' : 'bg-yellow-100 text-yellow-800 border-yellow-200'
+                                                    }>
+                                                        Certificate #{c.tokenId || c.id}: {c.lastVerificationOk ? 'Authentic' : 'Unverified'}
+                                                    </Badge>
+                                                ))}
+                                            </div>
+                                        )}
                 </div>
 
                 {/* Notification */}
@@ -441,9 +539,17 @@ const StudentPortal: React.FC = () => {
                             <FileText className="h-4 w-4" />
                             Assignments
                         </TabsTrigger>
+                        <TabsTrigger value="quizzes" className="flex-1 flex items-center justify-center gap-2 data-[state=active]:bg-black data-[state=active]:text-white">
+                            <HelpCircle className="h-4 w-4" />
+                            Quizzes
+                        </TabsTrigger>
                         <TabsTrigger value="grades" className="flex-1 flex items-center justify-center gap-2 data-[state=active]:bg-black data-[state=active]:text-white">
                             <Award className="h-4 w-4" />
                             Grades
+                        </TabsTrigger>
+                        <TabsTrigger value="rewards" className="flex-1 flex items-center justify-center gap-2 data-[state=active]:bg-black data-[state=active]:text-white">
+                            <Coins className="h-4 w-4" />
+                            Rewards
                         </TabsTrigger>
                         <TabsTrigger value="profile" className="flex-1 flex items-center justify-center gap-2 data-[state=active]:bg-black data-[state=active]:text-white">
                             <User className="h-4 w-4" />
@@ -453,6 +559,9 @@ const StudentPortal: React.FC = () => {
 
                     {/* Dashboard Tab */}
                     <TabsContent value="dashboard" className="space-y-6">
+                        {/* Wallet Connection Banner */}
+                        {/* Wallet banner removed */}
+                        
                         {/* Stats Cards */}
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
                             <StatCard
@@ -466,7 +575,6 @@ const StudentPortal: React.FC = () => {
                                 value={stats.completedAssignments}
                                 icon={<CheckCircle className="h-4 w-4" />}
                                 description="Successfully submitted"
-                                trend="+2 this week"
                             />
                             <StatCard
                                 title="Pending Assignments"
@@ -485,7 +593,6 @@ const StudentPortal: React.FC = () => {
                                 value={stats.averageGrade > 0 ? `${stats.averageGrade.toFixed(1)}%` : 'N/A'}
                                 icon={<TrendingUp className="h-4 w-4" />}
                                 description="Overall performance"
-                                trend="↑ 5% from last month"
                             />
                             <StatCard
                                 title="CGPA"
@@ -583,6 +690,14 @@ const StudentPortal: React.FC = () => {
                             </Card>
                         </div>
 
+                        {/* AI Academic Assistant */}
+                        <StudentAIAssistant 
+                            studentId={student?.id || currentUser?.id || ''} 
+                            studentName={student?.name || currentUser?.name || 'Student'}
+                            subjects={subjects}
+                            stats={stats}
+                        />
+
                         {/* Recent Activity */}
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                             <Card className="border-0 shadow-md">
@@ -598,15 +713,18 @@ const StudentPortal: React.FC = () => {
                                         {submissions.length > 0 ? submissions.slice(0, 5).map((submission, index) => (
                                             <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                                                 <div className="flex-1">
-                                                    <p className="font-medium text-black">{submission.title || 'Assignment'}</p>
-                                                    <p className="text-sm text-gray-600">{submission.subject || 'Subject'} • {submission.submittedAt || 'Recently'}</p>
+                                                    <p className="font-medium text-black">
+                                                        {(submission as any).Assignment?.title || `Assignment ${submission.assignmentId}` || 'Assignment'}
+                                                    </p>
+                                                    <p className="text-sm text-gray-600">
+                                                        {(submission as any).subjectName || (submission as any).Subject?.name || 'Subject'} • {submission.submissionDate ? new Date(submission.submissionDate).toLocaleDateString() : 'Recently'}
+                                                    </p>
                                                 </div>
                                                 <Badge variant="outline" className={
-                                                    submission.status === 'submitted' ? 'border-green-200 text-green-800' :
-                                                        submission.status === 'graded' ? 'border-blue-200 text-blue-800' :
-                                                            'border-orange-200 text-orange-800'
+                                                    submission.graded ? 'border-blue-200 text-blue-800' :
+                                                        'border-green-200 text-green-800'
                                                 }>
-                                                    {submission.status || 'Pending'}
+                                                    {submission.graded ? 'Graded' : 'Pending'}
                                                 </Badge>
                                             </div>
                                         )) : (
@@ -711,7 +829,7 @@ const StudentPortal: React.FC = () => {
                                                     <div className="flex items-start justify-between mb-3">
                                                         <div className="flex-1">
                                                             <h3 className="font-semibold text-black">{subject.name}</h3>
-                                                            <p className="text-sm text-gray-600">{subject.code}</p>
+                                                            <p className="text-sm text-gray-600">{subject.section}</p>
                                                             <p className="text-sm text-gray-500">Credits: {subject.credits || 3}</p>
                                                         </div>
                                                         <Badge variant="outline" className="border-blue-200 text-blue-800">
@@ -805,7 +923,7 @@ const StudentPortal: React.FC = () => {
                                         <CardContent className="p-4 text-center">
                                             <Award className="h-8 w-8 text-blue-600 mx-auto mb-2" />
                                             <div className="text-2xl font-bold text-blue-600">
-                                                {submissions.filter(s => s.grade != null).length}
+                                                {stats.gradedAssignments}
                                             </div>
                                             <p className="text-sm text-blue-800 font-medium">Graded</p>
                                         </CardContent>
@@ -950,6 +1068,22 @@ const StudentPortal: React.FC = () => {
                                         </Button>
                                     </div>
                                 )}
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
+
+                    {/* Quizzes Tab */}
+                    <TabsContent value="quizzes" className="space-y-6">
+                        <Card className="border-0 shadow-md">
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2">
+                                    <HelpCircle className="h-5 w-5" />
+                                    Available Quizzes
+                                </CardTitle>
+                                <CardDescription>Take quizzes assigned by your teachers</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <StudentQuizInterface />
                             </CardContent>
                         </Card>
                     </TabsContent>
@@ -1161,6 +1295,17 @@ const StudentPortal: React.FC = () => {
                                     )}
                                 </div>
                             </CardContent>
+                        </Card>
+                    </TabsContent>
+
+                    {/* Web3 Rewards Tab */}
+                    <TabsContent value="rewards" className="space-y-6">
+                        {/* Web3 rewards removed */}
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Rewards</CardTitle>
+                                <CardDescription>Web3 rewards feature has been removed</CardDescription>
+                            </CardHeader>
                         </Card>
                     </TabsContent>
 

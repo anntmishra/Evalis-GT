@@ -26,7 +26,7 @@ try {
 let explicitBase = viteEnv?.VITE_API_BASE_URL || null;
 const explicitPort = viteEnv?.VITE_API_PORT || null;
 
-// Detect dev API port dynamically: if running Vite (5173/5174 etc.) prefer 3000 (our server port)
+// Detect dev API port dynamically: if running Vite (5173/5174 etc.) prefer 3001 (our server port)
 let detectedDevPort = '3000';
 if (typeof window !== 'undefined') {
   const lp = window.location.port;
@@ -90,6 +90,9 @@ const config = {
   API_BASE_URL,
   FILE_BASE_URL,
   ADMIN_API_BASE_URL,
+  CLERK: {
+    PUBLISHABLE_KEY: viteEnv?.VITE_CLERK_PUBLISHABLE_KEY || undefined,
+  },
   API_ENDPOINTS: {
     AUTH: {
       STUDENT_LOGIN: `${API_BASE_URL}/auth/student/login`,
@@ -126,8 +129,11 @@ const config = {
     CURRENT_USER_KEY: 'currentUser',
   },
   AI: {
-    GOOGLE_API_KEY: viteEnv?.VITE_GOOGLE_API_KEY || 'AIzaSyAJWaYgEsLh6siG5rpb91GaEh662J-lvFM',
-    GOOGLE_API_URL: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
+    GOOGLE_API_KEY: viteEnv?.VITE_GOOGLE_API_KEY || 'AIzaSyBpm6myAFele0VoFfuEMTApeyhVu57H5Zg',
+    GOOGLE_API_URL: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',
+    API_TIMEOUT: 30000, // 30 seconds timeout
+    MAX_RETRIES: 5, // Increased from 3 to 5 retries for rate limit errors
+    RETRY_DELAY: 3000, // Wait 3 seconds before first retry (quota resets in ~4 seconds per error)
   },
   // Helper function to get file URLs with correct base
   getFileUrl: (fileUrl) => {

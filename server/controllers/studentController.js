@@ -1,11 +1,10 @@
 const asyncHandler = require('express-async-handler');
-const { Student, Submission, Batch, Subject } = require('../models');
+const { Student, Submission, Batch, Subject, Assignment } = require('../models');
 const jwt = require('jsonwebtoken');
 const XLSX = require('xlsx');
 const { Op } = require('sequelize');
 const { generateRandomPassword } = require('../utils/passwordUtils');
 const { sendLoginCredentials, sendPasswordResetLink } = require('../utils/emailUtils');
-const { createFirebaseUser, generatePasswordResetLink, updateFirebaseUser } = require('../utils/firebaseUtils');
 
 /**
  * @desc    Get all students
@@ -63,123 +62,166 @@ const getStudentById = asyncHandler(async (req, res) => {
  * @access  Private/Admin
  */
 const createStudent = asyncHandler(async (req, res) => {
-  console.log('Creating student with data:', { 
-    ...req.body, 
-    password: req.body.password ? '[REDACTED]' : undefined 
-  });
-  
-  const { id, name, section, batch, email, password } = req.body;
+  try {
+    console.log('Creating student with data:', { 
+      ...req.body, 
+      password: req.body.password ? '[REDACTED]' : undefined 
+    });
+    
+    const { id, name, section, batch, email, password } = req.body;
 
-  const studentExists = await Student.findOne({ where: { id } });
+    // Validate required fields
+    if (!name) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide the student name'
+      });
+    }
 
-  if (studentExists) {
-    res.status(400);
-    throw new Error('Student already exists');
-  }
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide the student email'
+      });
+    }
 
-  // Generate a random password if not provided and email exists
-  const generatedPassword = password || (email ? generateRandomPassword(10) : id);
-  
-  console.log(`Generated password for student ${id}: ${generatedPassword.substring(0, 3)}***`);
+    if (!batch) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide the student batch'
+      });
+    }
 
-  const student = await Student.create({
-    id,
-    name,
-    section,
-    batch,
-    email,
-    password: generatedPassword,
-  });
+    // Check if student already exists
+    const studentExists = await Student.findOne({ where: { id } });
+    if (studentExists) {
+      return res.status(400).json({
+        success: false,
+        message: 'Student already exists'
+      });
+    }
 
-  console.log(`Student created in database with ID: ${student.id}`);
+    // Check if email already exists
+    const emailExists = await Student.findOne({ where: { email } });
+    if (emailExists) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email already in use'
+      });
+    }
 
-  if (student) {
-    // If email is provided, create Firebase user and send password reset link
-    if (email) {
+    // Check if user already exists in Clerk
+    let clerkUser = null;
+    try {
+      const { clerkClient } = require('@clerk/express');
+      const existingClerkUsers = await clerkClient.users.getUserList({ emailAddress: [email] });
+      if (existingClerkUsers && existingClerkUsers.length > 0) {
+        clerkUser = existingClerkUsers[0];
+      }
+    } catch (clerkError) {
+      console.warn('Error checking existing Clerk user:', clerkError.message);
+    }
+
+    // Create user in Clerk if doesn't exist
+    if (!clerkUser) {
       try {
-        console.log(`Attempting to create Firebase user for student ${id} with email ${email}`);
-        
-        // Create Firebase user
-        const firebaseResult = await createFirebaseUser(email, generatedPassword, {
-          id: student.id,
-          name: student.name,
+        const { clerkClient } = require('@clerk/express');
+        clerkUser = await clerkClient.users.createUser({
+          emailAddress: [email],
+          username: email.split('@')[0] + '_student_' + Date.now(),
+          firstName: name.split(' ')[0] || name,
+          lastName: name.split(' ').slice(1).join(' ') || undefined,
+          skipPasswordChecks: true,
+          skipPasswordRequirement: true
         });
-        
-        if (firebaseResult.success) {
-          console.log(`Firebase user created successfully with UID: ${firebaseResult.uid}`);
-          
-          // Generate password reset link
-          console.log(`Generating password reset link for ${email}`);
-          const resetLinkResult = await generatePasswordResetLink(email);
-          
-          if (resetLinkResult.success) {
-            console.log(`Password reset link generated successfully`);
-            
-            // Send password reset email
-            console.log(`Sending password reset email to ${email}`);
-            await sendPasswordResetLink({
-              email,
-              name: student.name,
-            }, resetLinkResult.resetLink);
-            
-            console.log(`Password reset link sent to ${email}`);
-            
-            // Also send login credentials for reference
-            console.log(`Sending login credentials to ${email}`);
-            await sendLoginCredentials(student, generatedPassword);
-            
-            console.log(`Login credentials sent to ${email}`);
-            console.log(`All Firebase operations completed successfully for student ${id}`);
-            
-            return res.status(201).json({
-              id: student.id,
-              name: student.name,
-              section: student.section,
-              batch: student.batch,
-              email: student.email,
-              initialPassword: generatedPassword,
-              firebaseUserCreated: true,
-              firebaseUserId: firebaseResult.uid
-            });
-          } else {
-            console.warn(`Failed to generate reset link: ${resetLinkResult.error}`);
-          }
-        } else {
-          console.warn(`Failed to create Firebase user: ${firebaseResult.error}`);
-        }
-      } catch (error) {
-        console.error('Error with Firebase operations:', error);
-        console.error('Stack trace:', error.stack);
-        
-        // Continue even if Firebase operations fail - don't block the API response
-        // But include the error in the response for troubleshooting
-        return res.status(201).json({
-          id: student.id,
-          name: student.name,
-          section: student.section,
-          batch: student.batch,
-          email: student.email,
-          initialPassword: generatedPassword,
-          firebaseError: {
-            message: error.message,
-            code: error.code || error.errorInfo?.code
-          }
+        console.log(`Created Clerk user for student: ${email}`);
+      } catch (clerkError) {
+        console.error('Failed to create Clerk user:', clerkError.message);
+        return res.status(500).json({
+          success: false,
+          message: 'Failed to create user account. Please try again.'
         });
       }
     }
 
-    console.log(`No email provided for student ${id}, skipping Firebase user creation`);
-    res.status(201).json({
-      id: student.id,
-      name: student.name,
-      section: student.section,
-      batch: student.batch,
-      email: student.email,
-      initialPassword: email ? generatedPassword : undefined, // Only include if email was provided
+    // Generate secure temporary password
+    const { generateSecurePassword, generateResetToken, sendWelcomeEmail } = require('../utils/emailUtils');
+    const temporaryPassword = generateSecurePassword();
+    
+    // Hash password for database storage
+    const bcrypt = require('bcryptjs');
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(temporaryPassword, salt);
+
+    console.log(`Creating student in database with ID: ${id}`);
+    
+    const student = await Student.create({
+      id,
+      name,
+      section,
+      batch,
+      email,
+      password: hashedPassword,
+      clerkId: clerkUser.id // Link to Clerk user
     });
-  } else {
-    res.status(400);
-    throw new Error('Invalid student data');
+
+    // Generate password reset token
+    const { PasswordResetToken } = require('../models');
+    const resetToken = generateResetToken();
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+    // Save reset token
+    await PasswordResetToken.create({
+      userId: student.id,
+      userRole: 'student',
+      token: resetToken,
+      expiresAt
+    });
+
+    // Generate reset link
+    const resetLink = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/student/reset-password?token=${resetToken}`;
+
+    // Send welcome email with password setup
+    try {
+      await sendWelcomeEmail(
+        { ...student.toJSON(), role: 'student' },
+        temporaryPassword,
+        resetLink
+      );
+      console.log(`Welcome email sent to ${email}`);
+    } catch (emailError) {
+      console.warn('Failed to send welcome email:', emailError.message);
+      // Don't fail the creation if email fails
+    }
+
+    console.log(`Student created successfully: ${student.id}`);
+
+    res.status(201).json({
+      success: true,
+      data: {
+        id: student.id,
+        name: student.name,
+        section: student.section,
+        batch: student.batch,
+        email: student.email,
+        clerkId: student.clerkId,
+        message: 'Student created successfully in both database and Clerk. Welcome email sent with password setup instructions.'
+      }
+    });
+
+  } catch (error) {
+    console.error('Error in createStudent:', error);
+    if (error.name === 'SequelizeUniqueConstraintError') {
+      res.status(400).json({
+        success: false,
+        message: 'Student with this ID or email already exists'
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        message: error.message || 'Failed to create student'
+      });
+    }
   }
 });
 
@@ -218,55 +260,15 @@ const updateStudent = asyncHandler(async (req, res) => {
 
     const updatedStudent = await student.save();
 
-    // Send login credentials if email was added or changed and create Firebase user
+    // Send login credentials if email was added or changed (no Firebase operations)
     if (passwordChanged && newEmail) {
       try {
-        // If changing email, first try to find if a Firebase user already exists
-        let firebaseUser;
-        try {
-          if (previousEmail) {
-            // Try to update the existing Firebase user with the new email
-            firebaseUser = await updateFirebaseUser(null, { 
-              email: newEmail,
-              password: generatedPassword
-            });
-          }
-        } catch (error) {
-          console.log('No existing Firebase user to update, creating new one');
-        }
-        
-        // If no existing user or couldn't update, create a new Firebase user
-        if (!firebaseUser) {
-          const firebaseResult = await createFirebaseUser(newEmail, generatedPassword, {
-            id: updatedStudent.id,
-            name: updatedStudent.name,
-          });
-          
-          if (firebaseResult.success) {
-            firebaseUser = { uid: firebaseResult.uid };
-          }
-        }
-        
-        // Generate password reset link
-        const resetLinkResult = await generatePasswordResetLink(newEmail);
-        
-        // Send password reset email
-        if (resetLinkResult.success) {
-          await sendPasswordResetLink({
-            email: newEmail,
-            name: updatedStudent.name,
-          }, resetLinkResult.resetLink);
-          
-          console.log(`Firebase user updated/created and password reset link sent to ${newEmail}`);
-          
-          // Also send login credentials for reference
-          await sendLoginCredentials(updatedStudent, generatedPassword);
-        } else {
-          console.warn(`Failed to generate reset link: ${resetLinkResult.error}`);
-        }
+        // Send login credentials to the student
+        await sendLoginCredentials(updatedStudent, generatedPassword);
+        console.log(`Login credentials sent to ${newEmail}`);
       } catch (error) {
-        console.error('Error with Firebase operations:', error);
-        // Continue even if Firebase operations fail
+        console.error('Error sending login credentials:', error);
+        // Continue even if email sending fails
       }
     }
 
@@ -295,38 +297,25 @@ const deleteStudent = asyncHandler(async (req, res) => {
   if (student) {
     console.log(`Deleting student: ${student.id} (${student.name})`);
     
-    // If student has an email, delete their Firebase account
-    if (student.email) {
+    // Delete from Clerk if clerkId exists
+    if (student.clerkId) {
       try {
-        console.log(`Attempting to delete Firebase user for email: ${student.email}`);
-        const { deleteFirebaseUserByEmail } = require('../utils/firebaseUtils');
-        
-        const deleteResult = await deleteFirebaseUserByEmail(student.email);
-        
-        if (deleteResult.success) {
-          console.log(`Firebase user deleted successfully for student ${student.id}: ${deleteResult.message}`);
-        } else {
-          console.warn(`Failed to delete Firebase user for student ${student.id}: ${deleteResult.error}`);
-        }
-      } catch (error) {
-        console.error(`Error deleting Firebase user for student ${student.id}:`, error);
-        // Continue with deletion even if Firebase operations fail
+        const { clerkClient } = require('@clerk/express');
+        await clerkClient.users.deleteUser(student.clerkId);
+        console.log(`✅ Deleted Clerk user: ${student.clerkId} for student ${student.id}`);
+      } catch (clerkError) {
+        console.warn(`⚠️ Failed to delete Clerk user ${student.clerkId}: ${clerkError.message}`);
+        // Continue with database deletion even if Clerk deletion fails
       }
-    } else {
-      console.log(`Student ${student.id} has no email, skipping Firebase deletion`);
     }
-    
-    // Delete any student submissions or related data if needed
-    // Note: You might want to add submission cleanup here if required
     
     // Delete the student from database
     console.log(`Deleting student ${student.id} from database`);
     await student.destroy();
     
-    console.log(`Student ${student.id} successfully deleted from system and Firebase`);
+    console.log(`Student ${student.id} successfully deleted from system`);
     res.json({ 
-      message: 'Student removed', 
-      firebaseDeleted: !!student.email 
+      message: 'Student removed'
     });
   } else {
     res.status(404);
@@ -355,11 +344,18 @@ const getStudentSubmissions = asyncHandler(async (req, res) => {
 
   const submissions = await Submission.findAll({
     where: { studentId: req.params.id },
-    include: [{
-      model: Subject,
-      attributes: ['name'],
-      required: true
-    }],
+    include: [
+      {
+        model: Subject,
+        attributes: ['name'],
+        required: true
+      },
+      {
+        model: Assignment,
+        attributes: ['title', 'description'],
+        required: false
+      }
+    ],
     order: [['submissionDate', 'DESC']]
   });
 
@@ -382,11 +378,18 @@ const getCurrentStudentSubmissions = asyncHandler(async (req, res) => {
 
   const submissions = await Submission.findAll({
     where: { studentId: student.id },
-    include: [{
-      model: Subject,
-      attributes: ['name'],
-      required: true
-    }],
+    include: [
+      {
+        model: Subject,
+        attributes: ['name'],
+        required: true
+      },
+      {
+        model: Assignment,
+        attributes: ['title', 'description'],
+        required: false
+      }
+    ],
     order: [['submissionDate', 'DESC']]
   });
 
@@ -418,14 +421,22 @@ const getStudentSubjects = asyncHandler(async (req, res) => {
     throw new Error('Not authorized to view these subjects');
   }
 
-  // Base where clause by batch
-  const whereClause = { batchId: student.batch };
-  // If student has active semester, include subjects from that semester or legacy null semester
+  // Base where clause: include subjects for student's batch OR legacy subjects with null batchId
+  const whereClause = {
+    [Op.or]: [
+      { batchId: student.batch },
+      { batchId: null } // Include legacy subjects not assigned to any batch
+    ]
+  };
+  
+  // If student has active semester, also filter by semester
   if (student.activeSemesterId) {
-    whereClause[Op.or] = [
-      { semesterId: student.activeSemesterId },
-      { semesterId: null }
-    ];
+    whereClause[Op.and] = {
+      [Op.or]: [
+        { semesterId: student.activeSemesterId },
+        { semesterId: null } // Include legacy subjects not assigned to any semester
+      ]
+    };
   }
 
   // Dynamically require to avoid circular reference issues
@@ -452,15 +463,15 @@ const getCurrentStudentSubjects = asyncHandler(async (req, res) => {
   const student = req.user; // From auth middleware
   console.log('[Diag:getCurrentStudentSubjects] START', { studentId: student.id, batch: student.batch, activeSemesterId: student.activeSemesterId });
 
-  // Base where clause by batch
-  const whereClause = { batchId: student.batch };
-  // If student has active semester, include subjects from that semester or legacy null semester
-  if (student.activeSemesterId) {
-    whereClause[Op.or] = [
-      { semesterId: student.activeSemesterId },
-      { semesterId: null }
-    ];
-  }
+  // Show subjects from student's batch (all semesters) + legacy subjects with null batchId
+  const whereClause = {
+    [Op.or]: [
+      { batchId: student.batch },
+      { batchId: null } // Include legacy subjects not assigned to any batch
+    ]
+  };
+
+  console.log('[Diag:getCurrentStudentSubjects] Query whereClause:', JSON.stringify(whereClause, null, 2));
 
   // Dynamically require to avoid circular reference issues
   const { Semester, Batch, Teacher } = require('../models');
@@ -470,6 +481,10 @@ const getCurrentStudentSubjects = asyncHandler(async (req, res) => {
       { model: Semester },
       { model: Batch },
       { model: Teacher, through: { attributes: [] } }
+    ],
+    order: [
+      [{ model: Semester }, 'number', 'ASC'], // Order by semester number
+      ['name', 'ASC'] // Then by subject name
     ]
   });
   console.log('[Diag:getCurrentStudentSubjects] Subjects fetched', subjects.length);
@@ -727,7 +742,7 @@ const importStudentsFromExcel = asyncHandler(async (req, res) => {
       try {
         const createdStudents = await Student.bulkCreate(studentsToCreate);
         
-        // Create Firebase users for students with emails
+        // Send login credentials for students with emails (no Firebase operations)
         for (const student of createdStudents) {
           if (student.email) {
             try {
@@ -737,32 +752,12 @@ const importStudentsFromExcel = asyncHandler(async (req, res) => {
               // Update student password in database
               await student.update({ password: generatedPassword });
               
-              // Create Firebase user
-              const firebaseUser = await createFirebaseUser(student.email, generatedPassword, {
-                id: student.id,
-                name: student.name,
-              });
-              
-              // Generate password reset link
-              const resetLinkResult = await generatePasswordResetLink(student.email);
-              
-              if (resetLinkResult.success) {
-                // Send password reset email
-                await sendPasswordResetLink({
-                  email: student.email,
-                  name: student.name,
-                }, resetLinkResult.resetLink);
-                
-                console.log(`Firebase user created and password reset link sent to ${student.email}`);
-                
-                // Also send login credentials for reference
-                await sendLoginCredentials(student, generatedPassword);
-              } else {
-                console.warn(`Failed to generate reset link for ${student.email}: ${resetLinkResult.error}`);
-              }
+              // Send login credentials
+              await sendLoginCredentials(student, generatedPassword);
+              console.log(`Login credentials sent to ${student.email}`);
             } catch (error) {
-              console.error(`Error with Firebase operations for student ${student.id}:`, error);
-              errors.push(`Failed to create Firebase user for student ${student.id}: ${error.message}`);
+              console.error(`Error sending credentials for student ${student.id}:`, error);
+              errors.push(`Failed to send credentials for student ${student.id}: ${error.message}`);
               // Continue with next student
             }
           }

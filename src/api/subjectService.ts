@@ -115,11 +115,26 @@ export const getSubjectsBySection = async (section: string) => {
   }
 };
 
+export const getSubjectsBySemester = async (semesterId: string) => {
+  if (!API_URL) {
+    throw new Error('API URL not configured');
+  }
+
+  try {
+    const response = await axios.get(`${API_URL}/semester/${semesterId}`, authConfig());
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching subjects by semester:', error);
+    throw error;
+  }
+};
+
 export default {
   getAllSubjects,
   getSubjectById,
   createSubject,
   updateSubject,
   deleteSubject,
-  getSubjectsBySection
+  getSubjectsBySection,
+  getSubjectsBySemester
 }; 

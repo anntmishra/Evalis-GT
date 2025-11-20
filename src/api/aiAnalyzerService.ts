@@ -151,55 +151,14 @@ export const getStudentDataForAnalysis = async (studentId: string): Promise<Stud
   } catch (error) {
     console.error('Error fetching student data:', error);
     
-    // For development, return mock data if API fails
-    if (process.env.NODE_ENV === 'development') {
-      console.log('Using mock student data in development');
-      
-      // Try to get the actual student name from local storage or session
-      let studentName = "Student";
-      try {
-        // Check if we have student data in localStorage
-        const userData = localStorage.getItem(config.AUTH.CURRENT_USER_KEY);
-        if (userData) {
-          const user = JSON.parse(userData);
-          if (user && user.name) {
-            studentName = user.name;
-          }
-        }
-      } catch (e) {
-        console.error('Error retrieving student name from storage:', e);
-      }
-      
-      return {
-        id: studentId,
-        name: studentName,
-        rollNumber: studentId,
-        grades: {
-          overall: 84,
-          bySubject: {
-            "CSE101": 94,
-            "CSE102": 85,
-            "MAT201": 73
-          }
-        },
-        submissions: {
-          onTime: 15,
-          late: 3,
-          bySubject: {
-            "CSE101": { onTime: 6, late: 0 },
-            "CSE102": { onTime: 5, late: 1 },
-            "MAT201": { onTime: 4, late: 2 }
-          }
-        },
-        performanceTrend: "improving"
-      };
-    }
-    throw error;
+    // For development, fall back to real-time data if server endpoint fails
+    console.log('Falling back to real-time data collection');
+    return getRealTimeStudentData(studentId);
   }
 };
 
 /**
- * Query OpenAI with student data and user message
+ * Query Gemini AI with student data and user message
  */
 export const queryGoogleAI = async (
   studentData: StudentDataForAnalysis, 
@@ -207,112 +166,122 @@ export const queryGoogleAI = async (
   subjects: Array<{id: string, name: string}> = []
 ): Promise<string> => {
   try {
-    // OpenAI API quota exceeded, just use mock responses
-    console.log('Using mock response system due to API quota limitations');
+    // Get Gemini API key from environment
+    const GEMINI_API_KEY = config.AI.GOOGLE_API_KEY;
     
-    // Always return mock response (don't attempt API call)
-    return generateMockResponse(studentData, userMessage, subjects);
-
-    /* API call code commented out to prevent quota errors
-    // Check if OpenAI key appears valid
-    if (!OPENAI_API_KEY || OPENAI_API_KEY.indexOf('sk-') !== 0) {
-      console.warn('OpenAI API key appears invalid or missing. Key format should start with "sk-"');
+    if (!GEMINI_API_KEY) {
+      console.warn('Gemini API key not found, using mock responses');
       return generateMockResponse(studentData, userMessage, subjects);
     }
     
-    // Prepare API call data
-    console.log('Preparing OpenAI API call for: ', userMessage);
-    
-    // Create a context with student data for the AI
+    // Create subject mapping for better context
     const subjectMapping = subjects.reduce((acc, subject) => {
       acc[subject.id] = subject.name;
       return acc;
     }, {} as Record<string, string>);
 
-    // Add timestamp to ensure response variation
-    const timestamp = new Date().toISOString();
+    // Prepare the detailed prompt for Gemini
+    const systemPrompt = `You are an intelligent AI academic advisor helping a university student. You must provide contextual, relevant responses based on what the student specifically asks about.
+
+    RESPONSE GUIDELINES:
+    - Answer the specific question asked - don't just give generic performance summaries
+    - Be conversational and natural, like a helpful tutor
+    - Use the student's actual data to support your advice
+    - If asked about specific subjects, focus on those subjects
+    - If asked about study tips, provide actionable strategies
+    - If asked about grades, explain patterns and suggest improvements
+    - If asked about time management, focus on submission patterns
+    - If asked about strengths/weaknesses, analyze their performance data
+    - Keep responses focused and relevant to the question
+    - Be encouraging but realistic about areas needing improvement
+
+    AVOID:
+    - Generic responses that don't address the specific question
+    - Repeating the same information regardless of what's asked
+    - Long summaries when a direct answer is needed
     
-    // Construct a prompt that gives context about the student data
-    const systemPrompt = `
-You are an educational AI assistant analyzing student data. You help students understand their academic performance and provide personalized advice.
-Your responses should be helpful, encouraging, and specific to the student's data.
+    Remember: Your goal is to have a helpful conversation, not just report statistics.`;
 
-Be concise but insightful, focusing on highlighting patterns and providing actionable advice.
-DO NOT mention attendance as it's not tracked in this system.
-IMPORTANT: Ensure each response is unique, personalized, and varies in structure even for similar questions.
-`;
+    const studentContext = `
+    STUDENT DATA FOR CONTEXT:
+    Name: ${studentData.name} (${studentData.rollNumber})
+    Overall Grade Average: ${studentData.grades.overall}%
+    Performance Trend: ${studentData.performanceTrend}
+    
+    SUBJECT PERFORMANCE:
+    ${Object.entries(studentData.grades.bySubject).map(([subjectId, grade]) => 
+      `- ${subjectMapping[subjectId] || subjectId}: ${grade}%`
+    ).join('\n')}
+    
+    SUBMISSION RECORD:
+    - On-time submissions: ${studentData.submissions.onTime}
+    - Late submissions: ${studentData.submissions.late}
+    
+    DETAILED SUBMISSION PATTERNS:
+    ${Object.entries(studentData.submissions.bySubject).map(([subjectId, submission]) => 
+      `- ${subjectMapping[subjectId] || subjectId}: ${submission.onTime} on-time, ${submission.late} late`
+    ).join('\n')}
+    
+    STUDENT'S QUESTION: "${userMessage}"
+    
+    Please provide a helpful, specific answer to their question using the data above as context. Focus on what they're actually asking about.`;
 
-    const userPrompt = `
-Here is my academic information:
+    const fullPrompt = systemPrompt + studentContext;
 
-Name: ${studentData.name} (${studentData.rollNumber})
-Overall grade average: ${studentData.grades.overall}%
-Submissions: ${studentData.submissions.onTime} on time, ${studentData.submissions.late} late
-Performance trend: ${studentData.performanceTrend}
+    console.log('Calling Gemini API for student analysis...');
 
-Subject grades:
-${Object.entries(studentData.grades.bySubject).map(([subjectId, grade]) => 
-  `- ${subjectMapping[subjectId] || subjectId}: ${grade}%`
-).join('\n')}
-
-Subject submissions:
-${Object.entries(studentData.submissions.bySubject).map(([subjectId, submission]) => 
-  `- ${subjectMapping[subjectId] || subjectId}: ${submission.onTime} on time, ${submission.late} late`
-).join('\n')}
-
-Current time: ${timestamp}
-Query: "${userMessage}"
-`;
-
-    console.log('Calling OpenAI API...');
-
-    try {
-      // Call OpenAI API
-      const response = await axios.post(
-        OPENAI_API_URL,
-        {
-          model: "gpt-3.5-turbo",
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: userPrompt }
-          ],
-          temperature: 0.9, // Increased for more variation
-          max_tokens: 800
-        },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${OPENAI_API_KEY}`
+    const response = await axios.post(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_API_KEY}`,
+      {
+        contents: [
+          {
+            parts: [
+              {
+                text: fullPrompt
+              }
+            ]
           }
+        ],
+        generationConfig: {
+          temperature: 0.7,
+          topK: 40,
+          topP: 0.95,
+          maxOutputTokens: 1024,
         }
-      );
-
-      console.log('OpenAI API response received successfully');
-
-      // Extract the response text from OpenAI API
-      if (response.data && 
-          response.data.choices && 
-          response.data.choices[0] && 
-          response.data.choices[0].message && 
-          response.data.choices[0].message.content) {
-        return response.data.choices[0].message.content;
-      } else {
-        console.error('Unexpected OpenAI API response structure:', response.data);
-        throw new Error('Invalid response from OpenAI API');
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        }
       }
-    } catch (apiError: any) {
-      console.error('OpenAI API request failed:', apiError.message);
-      if (apiError.response) {
-        console.error('API response status:', apiError.response.status);
-        console.error('API response data:', apiError.response.data);
-      }
-      throw apiError; // Re-throw for outer catch
+    );
+
+    console.log('Received response from Gemini API');
+
+    // Extract the response text from Gemini API
+    if (response.data && 
+        response.data.candidates && 
+        response.data.candidates[0] && 
+        response.data.candidates[0].content && 
+        response.data.candidates[0].content.parts &&
+        response.data.candidates[0].content.parts[0] &&
+        response.data.candidates[0].content.parts[0].text) {
+      
+      const aiResponse = response.data.candidates[0].content.parts[0].text;
+      console.log('Successfully received Gemini AI response');
+      return aiResponse;
+    } else {
+      console.error('Unexpected Gemini API response structure:', response.data);
+      throw new Error('Invalid response from Gemini API');
     }
-    */
   } catch (error: any) {
-    console.error('Error handling:', error.message);
+    console.error('Error calling Gemini API:', error.message);
+    if (error.response) {
+      console.error('API response status:', error.response.status);
+      console.error('API response data:', error.response.data);
+    }
     
-    // Fall back to mock responses if OpenAI API fails
+    // Fall back to mock responses if Gemini API fails
     console.log('Falling back to mock responses due to API error');
     return generateMockResponse(studentData, userMessage, subjects);
   }

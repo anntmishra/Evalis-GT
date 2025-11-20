@@ -14,6 +14,7 @@ import {
   Trash2,
   MessageCircle
 } from 'lucide-react';
+import config from '../config/environment';
 
 // Set up PDF.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
@@ -130,7 +131,10 @@ const PDFAnnotator: React.FC<PDFAnnotatorProps> = ({
       const formData = new FormData();
       formData.append('file', pdfBlob, `graded_${submissionId}_${Date.now()}.pdf`);
       
-      const response = await fetch('/api/submissions/upload/graded-pdf', {
+      // Use the proper API base URL from config
+      const uploadUrl = `${config.API_BASE_URL}/submissions/upload/graded-pdf`;
+      
+      const response = await fetch(uploadUrl, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token') || localStorage.getItem('authToken') || ''}`
@@ -139,7 +143,8 @@ const PDFAnnotator: React.FC<PDFAnnotatorProps> = ({
       });
       
       if (!response.ok) {
-        throw new Error('Failed to upload graded PDF');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to upload graded PDF');
       }
       
       const result = await response.json();

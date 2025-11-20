@@ -78,7 +78,7 @@ class QuestionEnhancer:
         
         # Analyze question complexity and cognitive level
         complexity = self._analyze_complexity(cleaned_text)
-        cognitive_level = self._determine_cognitive_level(cleaned_text)
+        cognitive_level = self.determine_cognitive_level(cleaned_text)
         
         # Check question quality
         quality_issues = self._check_quality(cleaned_text, question_type)
@@ -191,7 +191,7 @@ class QuestionEnhancer:
         
         return round(complexity, 2)
 
-    def _determine_cognitive_level(self, text: str) -> str:
+    def determine_cognitive_level(self, text: str) -> str:
         """
         Determine the cognitive level of the question based on Bloom's Taxonomy.
         
@@ -224,6 +224,10 @@ class QuestionEnhancer:
                 cognitive_level = level
         
         return cognitive_level
+    
+    def check_quality(self, text: str, question_type: str) -> List[str]:
+        """Check for common quality issues in questions."""
+        return self._check_quality(text, question_type)
     
     def _check_quality(self, text: str, question_type: str) -> List[str]:
         """Check for common quality issues in questions."""

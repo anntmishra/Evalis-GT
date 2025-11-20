@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import axios from 'axios';
 import config from '../config/environment';
 

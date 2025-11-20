@@ -1,7 +1,6 @@
 import axios from 'axios';
 import config from '../config/environment';
-import { refreshFirebaseToken, getToken as getPreferredToken } from './authUtils';
-import { auth } from '../config/firebase';
+import { getToken as getPreferredToken } from './authUtils';
 
 // Create axios instance with base URL
 const api = axios.create({
@@ -26,7 +25,7 @@ if (typeof window !== 'undefined') {
   console.log('[api] Effective baseURL:', api.defaults.baseURL);
 }
 
-// Get the latest token from storage (prefer app JWT over firebase)
+// Get the latest token from storage (Clerk JWT only)
 const getAuthToken = () => getPreferredToken();
 
 // Add response interceptor for better error handling
@@ -58,14 +57,8 @@ api.interceptors.response.use(
 // Add request interceptor to add auth token to headers
 api.interceptors.request.use(
   async (reqConfig) => {
-    // Get the latest token
-    let token = getAuthToken();
-    
-    // If we have a Firebase user but no token, try to refresh it
-    if (auth.currentUser && !token) {
-      console.log('Firebase user exists but no token found. Refreshing token...');
-      token = await refreshFirebaseToken();
-    }
+    // Get the latest token (Clerk only)
+    const token = getAuthToken();
     
     if (token) {
       console.log('Adding token to request:', token.substring(0, 15) + '...');
@@ -120,28 +113,7 @@ api.interceptors.response.use(
       originalRequest._retry = true;
       isRefreshing = true;
       
-      // If we have a Firebase user, try to refresh the token first
-      if (auth.currentUser) {
-        try {
-          console.log('401 response, refreshing Firebase token...');
-          const newToken = await refreshFirebaseToken();
-          
-          if (newToken) {
-            console.log('Firebase token refreshed, retrying request');
-            originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
-            
-            // Process any requests that came in while refreshing
-            processQueue(null, newToken);
-            isRefreshing = false;
-            
-            return axios(originalRequest);
-          }
-        } catch (refreshError) {
-          console.error('Firebase token refresh failed:', refreshError);
-        }
-      }
-      
-      // If Firebase refresh didn't work or user doesn't exist, try backend refresh
+      // Try backend token refresh with stored refresh token
       try {
         // Try to get the user data with refresh token
         const userData = localStorage.getItem(config.AUTH.CURRENT_USER_KEY);
@@ -303,6 +275,14 @@ export const createAssignment = (assignmentData) => api.post('/assignments', ass
 export const updateAssignment = (id, assignmentData) => api.put(`/assignments/${id}`, assignmentData);
 export const deleteAssignment = (id) => api.delete(`/assignments/${id}`);
 export const getAssignmentSubmissions = (assignmentId) => api.get(`/assignments/${assignmentId}/submissions`);
+export const uploadAssignment = (formData) => {
+  return api.post('/assignments/upload', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+    timeout: 60000, // 60 seconds timeout for large files
+  });
+};
 
 // Teacher Submission Upload API
 export const uploadTeacherSubmission = (formData) => {
@@ -317,7 +297,7 @@ export const uploadTeacherSubmission = (formData) => {
 // Student Portal API
 export const getStudentProfile = () => api.get('/students/profile');
 export const getStudentGrades = (studentId) => api.get(`/students/${studentId}/grades`);
-export const getStudentSubjects = (studentId) => api.get(`/students/${studentId}/subjects`);
+export const getStudentSubjectsById = (studentId) => api.get(`/students/${studentId}/subjects`); // Admin/Teacher access
 
 export const sendBulkPasswordResetEmails = (studentEmails) => api.post('/auth/bulk-password-reset', { emails: studentEmails });
 

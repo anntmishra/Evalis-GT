@@ -5,6 +5,46 @@ import config from '../config/environment';
 const GOOGLE_API_KEY = config.AI.GOOGLE_API_KEY;
 const GOOGLE_API_URL = config.AI.GOOGLE_API_URL;
 
+// Retry configuration optimized for speed
+const MAX_RETRIES = 1; // Reduced from 3 to 1 for faster responses
+const INITIAL_RETRY_DELAY = 500; // Reduced from 1000ms to 500ms
+
+// Helper function for exponential backoff retry
+const retryWithBackoff = async <T>(
+  fn: () => Promise<T>,
+  retries: number = MAX_RETRIES,
+  delay: number = INITIAL_RETRY_DELAY,
+  attempt: number = 1
+): Promise<T> => {
+  try {
+    return await fn();
+  } catch (error: any) {
+    // Normalize status and message
+    const status = error?.response?.status;
+    const message = (error?.message || '').toString().toLowerCase();
+
+    // Retry on rate limit (429), transient server errors (5xx) and network failures
+    const shouldRetry = status === 429 || (status >= 500 && status < 600) || message.includes('network') || message.includes('econn') || message.includes('timeout');
+
+    if (shouldRetry && attempt <= retries) {
+      const waitTime = delay * Math.pow(2, attempt - 1); // Exponential backoff
+      console.log(`Transient API error (status: ${status || 'n/a'}). Retrying in ${waitTime}ms... (Attempt ${attempt}/${retries})`);
+      await new Promise(resolve => setTimeout(resolve, waitTime));
+      return retryWithBackoff(fn, retries, delay, attempt + 1);
+    }
+
+    // Provide clearer messages for common cases
+    if (status === 429) {
+      throw new Error('API rate limit exceeded. Please wait a moment and try again.');
+    }
+    if (status && status >= 500 && status < 600) {
+      throw new Error(`Upstream service error (status ${status}). Please try again later.`);
+    }
+
+    throw error;
+  }
+};
+
 // Define types for the API
 export type QuestionType = 'mcq' | 'short' | 'long';
 export type CognitiveLevel = 'knowledge' | 'comprehension' | 'application' | 'analysis' | 'synthesis' | 'evaluation';
@@ -85,7 +125,23 @@ class QuestionEnhancerService {
   private apiUrl: string;
 
   constructor() {
-    this.apiUrl = `${config.API_BASE_URL}/api`;
+    this.apiUrl = config.API_BASE_URL.replace(/\/$/, '');
+    
+    // Log API key info (masked for security)
+    if (GOOGLE_API_KEY) {
+      console.log('Google API Key loaded:', GOOGLE_API_KEY.substring(0, 20) + '...');
+    } else {
+      console.warn('Warning: Google API Key is not configured!');
+    }
+  }
+
+  /**
+   * Check if Google API is properly configured
+   */
+  private checkApiKeyConfigured(): void {
+    if (!GOOGLE_API_KEY || GOOGLE_API_KEY.length < 30) {
+      throw new Error('Google API key is not properly configured. Please check your environment variables.');
+    }
   }
 
   /**
@@ -98,6 +154,8 @@ class QuestionEnhancerService {
     try {
       // First try to use Google API for better enhancement
       try {
+        this.checkApiKeyConfigured();
+        
         const prompt = `
 You are an educational expert specializing in creating high-quality assessment questions.
 Please analyze and enhance the following ${question.type.toUpperCase()} question worth ${question.marks} marks:
@@ -120,13 +178,15 @@ Provide your response as a JSON object with the following structure:
 }
         `;
 
-        const response = await axios.post(`${GOOGLE_API_URL}?key=${GOOGLE_API_KEY}`, {
-          contents: [{
-            parts: [{
-              text: prompt
+        const response = await retryWithBackoff(() => 
+          axios.post(`${GOOGLE_API_URL}?key=${GOOGLE_API_KEY}`, {
+            contents: [{
+              parts: [{
+                text: prompt
+              }]
             }]
-          }]
-        });
+          })
+        );
         
         // Extract JSON from response
         const text = response.data.candidates[0].content.parts[0].text;
@@ -205,13 +265,15 @@ Provide your response as a JSON object with the following structure:
 }
         `;
 
-        const response = await axios.post(`${GOOGLE_API_URL}?key=${GOOGLE_API_KEY}`, {
-          contents: [{
-            parts: [{
-              text: prompt
+        const response = await retryWithBackoff(() => 
+          axios.post(`${GOOGLE_API_URL}?key=${GOOGLE_API_KEY}`, {
+            contents: [{
+              parts: [{
+                text: prompt
+              }]
             }]
-          }]
-        });
+          })
+        );
         
         // Extract JSON from response
         const text = response.data.candidates[0].content.parts[0].text;
@@ -303,13 +365,15 @@ Please format your response as a JSON object with this structure:
 `;
 
         console.log("Sending prompt to Google API");
-        const response = await axios.post(`${GOOGLE_API_URL}?key=${GOOGLE_API_KEY}`, {
-          contents: [{
-            parts: [{
-              text: prompt
+        const response = await retryWithBackoff(() => 
+          axios.post(`${GOOGLE_API_URL}?key=${GOOGLE_API_KEY}`, {
+            contents: [{
+              parts: [{
+                text: prompt
+              }]
             }]
-          }]
-        });
+          })
+        );
         
         console.log("Received response from Google API");
         
@@ -369,13 +433,15 @@ Generate ${count} questions about ${topic} for the ${cognitiveLevel} cognitive l
 Return the response as a plain list of questions, one per line.`;
 
         try {
-          const fallbackResponse = await axios.post(`${GOOGLE_API_URL}?key=${GOOGLE_API_KEY}`, {
-            contents: [{
-              parts: [{
-                text: simplePrompt
+          const fallbackResponse = await retryWithBackoff(() => 
+            axios.post(`${GOOGLE_API_URL}?key=${GOOGLE_API_KEY}`, {
+              contents: [{
+                parts: [{
+                  text: simplePrompt
+                }]
               }]
-            }]
-          });
+            })
+          );
           
           if (fallbackResponse.data && 
               fallbackResponse.data.candidates && 
@@ -461,19 +527,21 @@ Provide your response as a JSON object with the following structure:
       `;
 
       console.log("Sending prompt to Google API");
-      const response = await axios.post(`${GOOGLE_API_URL}?key=${GOOGLE_API_KEY}`, {
-        contents: [{
-          parts: [{
-            text: fullPrompt
-          }]
-        }],
-        generationConfig: {
-          temperature: 0.7,
-          topK: 40,
-          topP: 0.95,
-          maxOutputTokens: 2048,
-        }
-      });
+      const response = await retryWithBackoff(() => 
+        axios.post(`${GOOGLE_API_URL}?key=${GOOGLE_API_KEY}`, {
+          contents: [{
+            parts: [{
+              text: fullPrompt
+            }]
+          }],
+          generationConfig: {
+            temperature: 0.7,
+            topK: 40,
+            topP: 0.95,
+            maxOutputTokens: 2048,
+          }
+        })
+      );
       
       console.log("Received response from Google API");
       
@@ -538,13 +606,15 @@ Provide your response as a JSON object with the following structure:
         const simplePrompt = `Generate educational questions based on this request: ${prompt}
         Please provide at least 3 questions, numbered 1, 2, 3, etc.`;
         
-        const fallbackResponse = await axios.post(`${GOOGLE_API_URL}?key=${GOOGLE_API_KEY}`, {
-          contents: [{
-            parts: [{
-              text: simplePrompt
+        const fallbackResponse = await retryWithBackoff(() => 
+          axios.post(`${GOOGLE_API_URL}?key=${GOOGLE_API_KEY}`, {
+            contents: [{
+              parts: [{
+                text: simplePrompt
+              }]
             }]
-          }]
-        });
+          })
+        );
         
         if (fallbackResponse.data && 
             fallbackResponse.data.candidates && 
@@ -638,9 +708,23 @@ Provide your response as a JSON object with the following structure:
     targetBloomLevel?: CognitiveLevel
   ): Promise<BloomTextAnomalyResponse> {
     try {
+      this.checkApiKeyConfigured();
       console.log(`Analyzing question for Bloom text anomalies: "${question.text}"`);
       
-      // Use Google API for analysis
+      // Try backend API first
+      try {
+        const response = await axios.post(`${this.apiUrl}/bloom-text-anomaly`, {
+          text: question.text,
+          type: question.type,
+          marks: question.marks,
+          target_bloom_level: targetBloomLevel
+        });
+        return response.data;
+      } catch (backendError) {
+        console.warn("Backend bloom analysis failed, trying Google API", backendError);
+      }
+      
+      // Fallback to Google API
       const prompt = `
 You are an educational assessment expert specializing in Bloom's Taxonomy and question quality analysis.
 
@@ -681,13 +765,17 @@ Focus on:
 - Providing measurable and fair assessment criteria
       `;
 
-      const response = await axios.post(`${GOOGLE_API_URL}?key=${GOOGLE_API_KEY}`, {
-        contents: [{
-          parts: [{
-            text: prompt
+      const response = await retryWithBackoff(() => 
+        axios.post(`${GOOGLE_API_URL}?key=${GOOGLE_API_KEY}`, {
+          contents: [{
+            parts: [{
+              text: prompt
+            }]
           }]
-        }]
-      });
+        }, {
+          timeout: 30000 // 30 second timeout for faster response
+        })
+      );
 
       if (!response.data || !response.data.candidates || !response.data.candidates[0]) {
         throw new Error("Invalid response format from Google API");
@@ -724,7 +812,24 @@ Focus on:
     } catch (error) {
       console.error('Error in Bloom text anomaly analysis:', error);
       this.handleError('Error analyzing Bloom text anomaly', error);
-      throw error;
+
+      // Return a safe fallback response so the UI can continue to function
+      const fallback: BloomTextAnomalyResponse = {
+        original_question: question.text,
+        revised_question: question.text,
+        anomaly_analysis: {
+          detected_issues: ['Analysis service unavailable. Please try again later.'],
+          bloom_level_current: (targetBloomLevel as CognitiveLevel) || 'application',
+          bloom_level_improved: (targetBloomLevel as CognitiveLevel) || 'application',
+          clarity_score: 0,
+          ambiguity_issues: ['Service unavailable'],
+          cognitive_alignment: 'Unknown - analysis unavailable',
+          improvement_summary: ['Analysis could not be completed because the AI service returned an error. Please try again later.']
+        },
+        suggested_alternatives: []
+      };
+
+      return fallback;
     }
   }
 
