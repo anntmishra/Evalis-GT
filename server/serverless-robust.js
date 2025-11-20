@@ -411,6 +411,107 @@ app.get('/api/auth/profile', (req, res) => {
 // General login route (alias for frontend compatibility)
 app.post('/api/auth/login', handleAdminLogin);
 
+// Signup route (added for admin creation)
+app.post('/api/auth/signup', async (req, res) => {
+  try {
+    console.log('Signup attempt:', req.body);
+    const { email, password, name, role } = req.body;
+
+    if (!email || !password || !name || !role) {
+      return res.status(400).json({ message: 'All fields are required' });
+    }
+
+    // Ensure DB connection
+    if (!dbConnected) {
+      try {
+        const { connectDB } = require('./config/db');
+        await connectDB();
+        dbConnected = true;
+      } catch (e) {
+        return res.status(500).json({ message: 'Database unavailable', error: e.message });
+      }
+    }
+
+    const { Student, Teacher, Admin } = require('./models');
+    let Model;
+
+    // Determine which model to use based on role
+    switch (role) {
+      case 'student':
+        Model = Student;
+        break;
+      case 'teacher':
+        Model = Teacher;
+        break;
+      case 'admin':
+        Model = Admin;
+        break;
+      default:
+        return res.status(400).json({ message: 'Invalid role' });
+    }
+
+    // Check if user already exists
+    const existingUser = await Model.findOne({ where: { email } });
+    if (existingUser) {
+      return res.status(400).json({ message: 'User already exists with this email' });
+    }
+
+    // Hash password
+    const bcrypt = require('bcryptjs');
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // Create user
+    const userData = {
+      email,
+      password: hashedPassword,
+      name
+    };
+
+    // Add role-specific fields
+    if (role === 'admin') {
+      userData.username = email; // For admin, use email as username
+    } else if (role === 'student') {
+        // Generate ID if not provided (though usually provided by admin)
+        userData.id = `S${String(Date.now()).slice(-6)}`;
+        userData.batch = '2024-2028'; // Default batch if not specified
+        userData.section = 'A';
+    } else if (role === 'teacher') {
+        userData.id = `T${String(Date.now()).slice(-6)}`;
+    }
+
+    const user = await Model.create(userData);
+
+    // Generate JWT token
+    const jwt = require('jsonwebtoken');
+    const token = jwt.sign(
+      {
+        id: user.id,
+        role: role,
+        email: user.email
+      },
+      process.env.JWT_SECRET || 'fallback-secret',
+      { expiresIn: '7d' }
+    );
+
+    res.status(201).json({
+      success: true,
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: role
+      },
+      message: 'Account created successfully'
+    });
+
+  } catch (error) {
+    console.error('Sign up error:', error);
+    res.status(500).json({ message: 'Server error during sign up', error: error.message });
+  }
+});
+
 // Auth health check
 app.get('/api/auth/health', (req, res) => {
   res.json({

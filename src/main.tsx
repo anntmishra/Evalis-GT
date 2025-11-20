@@ -6,7 +6,7 @@ import { ClerkProvider } from '@clerk/clerk-react'
 import ErrorBoundary from './components/ErrorBoundary.jsx'
 
 // Import your publishable key
-const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
+const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || 'pk_test_ZW5vdWdoLW1hcnRlbi01MC5jbGVyay5hY2NvdW50cy5kZXYk'
 
 if (!PUBLISHABLE_KEY) {
   throw new Error("Missing Publishable Key")
