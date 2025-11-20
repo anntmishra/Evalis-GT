@@ -14,16 +14,11 @@ const Notification = require('./notificationModel');
 const PasswordResetToken = require('./passwordResetTokenModel');
 const Certificate = require('./certificateModel');
 const RedemptionHistory = require('./redemptionHistoryModel');
-const Timetable = require('./timetableModel');
-const TimetableSlot = require('./timetableSlotModel');
-<<<<<<< HEAD
 const Quiz = require('./quizModel');
 const QuizQuestion = require('./quizQuestionModel');
 const QuizOption = require('./quizOptionModel');
 const QuizAttempt = require('./quizAttemptModel');
 const QuizAnswer = require('./quizAnswerModel');
-=======
->>>>>>> 49762404994bfa5a6c0729878ee8a2e4a67b2e95
 const { sequelize } = require('../config/db');
 
 // Define relationships
@@ -45,25 +40,6 @@ Semester.hasMany(Subject, { foreignKey: 'semesterId' });
 // Keep backward compatibility relationship for Subject-Batch
 Subject.belongsTo(Batch, { foreignKey: 'batchId', targetKey: 'id' });
 Batch.hasMany(Subject, { foreignKey: 'batchId', sourceKey: 'id' });
-
-// Timetable relationships
-Semester.hasMany(Timetable, { foreignKey: 'semesterId', sourceKey: 'id' });
-Timetable.belongsTo(Semester, { foreignKey: 'semesterId', targetKey: 'id' });
-
-Batch.hasMany(Timetable, { foreignKey: 'batchId', sourceKey: 'id' });
-Timetable.belongsTo(Batch, { foreignKey: 'batchId', targetKey: 'id' });
-
-Timetable.hasMany(TimetableSlot, { foreignKey: 'timetableId', as: 'slots', onDelete: 'CASCADE', hooks: true });
-TimetableSlot.belongsTo(Timetable, { foreignKey: 'timetableId', as: 'timetable' });
-
-TimetableSlot.belongsTo(Subject, { foreignKey: 'subjectId', as: 'subject' });
-Subject.hasMany(TimetableSlot, { foreignKey: 'subjectId', as: 'timetableSlots' });
-
-TimetableSlot.belongsTo(Teacher, { foreignKey: 'teacherId', as: 'teacher' });
-Teacher.hasMany(TimetableSlot, { foreignKey: 'teacherId', as: 'scheduledSlots' });
-
-TimetableSlot.belongsTo(Semester, { foreignKey: 'semesterId', as: 'semester' });
-Semester.hasMany(TimetableSlot, { foreignKey: 'semesterId', as: 'scheduledSlots' });
 
 // Teacher-Subject many-to-many relationship
 Teacher.belongsToMany(Subject, { 
@@ -118,7 +94,6 @@ Submission.hasOne(Certificate, { foreignKey: 'submissionId', sourceKey: 'id' });
 Certificate.belongsTo(Student, { foreignKey: 'studentId', targetKey: 'id' });
 Student.hasMany(Certificate, { foreignKey: 'studentId', sourceKey: 'id' });
 
-<<<<<<< HEAD
 // Quiz relationships
 Quiz.belongsTo(Teacher, { foreignKey: 'teacherId', targetKey: 'id' });
 Teacher.hasMany(Quiz, { foreignKey: 'teacherId', sourceKey: 'id' });
@@ -150,8 +125,6 @@ QuizQuestion.hasMany(QuizAnswer, { foreignKey: 'questionId', sourceKey: 'id' });
 QuizAnswer.belongsTo(QuizOption, { foreignKey: 'selectedOptionId', targetKey: 'id' });
 QuizOption.hasMany(QuizAnswer, { foreignKey: 'selectedOptionId', sourceKey: 'id' });
 
-=======
->>>>>>> 49762404994bfa5a6c0729878ee8a2e4a67b2e95
 // Export models
 module.exports = {
   Student,
@@ -169,15 +142,10 @@ module.exports = {
   PasswordResetToken,
   Certificate,
   RedemptionHistory,
-  Timetable,
-  TimetableSlot,
-<<<<<<< HEAD
   Quiz,
   QuizQuestion,
   QuizOption,
   QuizAttempt,
   QuizAnswer,
-=======
->>>>>>> 49762404994bfa5a6c0729878ee8a2e4a67b2e95
   sequelize
 }; 

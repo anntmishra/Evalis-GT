@@ -367,9 +367,6 @@ const updateSubmission = asyncHandler(async (req, res) => {
     ]
   });
 
-<<<<<<< HEAD
-  res.json({ submission: fullSubmission });
-=======
   const response = {
     submission: fullSubmission,
     tokenAward: tokenAwardResult,
@@ -377,7 +374,6 @@ const updateSubmission = asyncHandler(async (req, res) => {
   };
 
   res.json(response);
->>>>>>> 49762404994bfa5a6c0729878ee8a2e4a67b2e95
 });
 
 /**

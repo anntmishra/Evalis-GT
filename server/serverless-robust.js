@@ -2516,14 +2516,10 @@ app.delete('/api/admin/teachers/:id', async (req, res) => {
 // Attach modular routers that share logic with the monolithic server build
 const attachOptionalRoutes = () => {
   const routesToAttach = [
-    { path: '/api/timetables', loader: () => require('./routes/timetableRoutes') },
+
     { path: '/api/web3', loader: () => require('./routes/web3Routes') },
-<<<<<<< HEAD
     { path: '/api/certificates', loader: () => require('./routes/certificateRoutes') },
     { path: '/api/quizzes', loader: () => require('./routes/quizRoutes') }
-=======
-    { path: '/api/certificates', loader: () => require('./routes/certificateRoutes') }
->>>>>>> 49762404994bfa5a6c0729878ee8a2e4a67b2e95
   ];
 
   routesToAttach.forEach(({ path, loader }) => {
@@ -2564,14 +2560,10 @@ app.use('*', (req, res) => {
       '/api/admin/*',
       '/api/semesters/*',
       '/api/assignments/*',
-      '/api/timetables/*',
+
       '/api/web3/*',
-<<<<<<< HEAD
       '/api/certificates/*',
       '/api/quizzes/*'
-=======
-      '/api/certificates/*'
->>>>>>> 49762404994bfa5a6c0729878ee8a2e4a67b2e95
     ]
   });
 });

@@ -297,7 +297,6 @@ const deleteStudent = asyncHandler(async (req, res) => {
   if (student) {
     console.log(`Deleting student: ${student.id} (${student.name})`);
     
-<<<<<<< HEAD
     // Delete from Clerk if clerkId exists
     if (student.clerkId) {
       try {
@@ -309,9 +308,7 @@ const deleteStudent = asyncHandler(async (req, res) => {
         // Continue with database deletion even if Clerk deletion fails
       }
     }
-    
-=======
->>>>>>> 49762404994bfa5a6c0729878ee8a2e4a67b2e95
+     
     // Delete the student from database
     console.log(`Deleting student ${student.id} from database`);
     await student.destroy();
