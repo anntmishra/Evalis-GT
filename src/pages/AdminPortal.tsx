@@ -11,6 +11,7 @@ import {
   Database, 
   BookOpen, 
   Calendar,
+  CalendarClock,
   Settings,
   UserPlus,
   AlertCircle,
@@ -23,6 +24,8 @@ import {
   Eye
 } from "lucide-react";
 import Header from "../components/Header";
+import { SignIn } from '@clerk/clerk-react';
+import { useAuth } from '../hooks/useAuth';
 import { BATCHES } from "../data/universityData";
 import { Student, Subject, Teacher } from "../types/university";
 import TeacherAssignment from "../components/TeacherAssignment";
@@ -37,8 +40,70 @@ import { getAllBatches } from "../api/batchService";
 import SemesterManagement from '../components/SemesterManagement';
 import config from "../config/environment";
 import GovernanceAdminPanel from "../components/GovernanceAdminPanel";
+import AdminIssueCertificate from "../components/AdminIssueCertificate";
+import AdminTimetablePanel from "../components/timetable/AdminTimetablePanel";
+// Removed CreateUserForm (Create Users section) per request
 
 const AdminPortal: React.FC = (): React.ReactElement => {
+  const { isSignedIn, loading, currentUser } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-red-500"></div>
+      </div>
+    );
+  }
+
+  if (!isSignedIn || !currentUser) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-red-50 to-rose-100 flex items-center justify-center p-4">
+        <div className="max-w-md w-full space-y-8">
+          <div className="text-center">
+            <h1 className="text-3xl font-bold text-gray-900">Admin Portal</h1>
+            <p className="mt-2 text-gray-600">Sign in to access admin controls</p>
+          </div>
+          
+          <div className="bg-white rounded-lg shadow-lg p-8">
+            <SignIn 
+              routing="hash"
+              signUpUrl="/admin/signup"
+              redirectUrl="/admin"
+              appearance={{
+                elements: {
+                  formButtonPrimary: 'bg-red-600 hover:bg-red-700 text-white',
+                  card: 'shadow-none border-0',
+                  headerTitle: 'text-xl font-semibold text-gray-900',
+                  headerSubtitle: 'text-gray-600'
+                }
+              }}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Check if user has admin role
+  if (currentUser.role !== 'admin') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
+          <AlertCircle className="mx-auto h-12 w-12 text-red-500 mb-4" />
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Access Denied</h2>
+          <p className="text-gray-600 mb-4">You don't have permission to access the admin portal.</p>
+          <Button onClick={() => window.location.href = '/'} className="w-full">
+            Return to Home
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return <AdminPortalContent />;
+};
+
+const AdminPortalContent: React.FC = (): React.ReactElement => {
   const [activeTab, setActiveTab] = useState("overview");
   const [notification, setNotification] = useState({ 
     open: false, 
@@ -373,12 +438,18 @@ const AdminPortal: React.FC = (): React.ReactElement => {
 
   const handleAddTeacher = async (teacherData: any) => {
     try {
+      console.log('Adding teacher with data:', teacherData);
+      console.log('Current user:', localStorage.getItem('currentUser'));
+      console.log('Auth token:', localStorage.getItem('userToken'));
+      
       await createTeacher(teacherData);
       await fetchTeachers();
       showNotification("Teacher added successfully!", "success");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error adding teacher:", error);
-      showNotification("Failed to add teacher. Please try again.", "error");
+      console.error("Error details:", error.response?.data);
+      const errorMessage = error.response?.data?.message || error.message || "Failed to add teacher. Please try again.";
+      showNotification(errorMessage, "error");
     }
   };
 
@@ -428,7 +499,7 @@ const AdminPortal: React.FC = (): React.ReactElement => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header title="Admin Dashboard" />
+      <Header title="Admin Dashboard" showLogout={true} />
 
       <div className="container mx-auto px-6 py-8">
         {/* Header Section */}
@@ -488,10 +559,15 @@ const AdminPortal: React.FC = (): React.ReactElement => {
               <Calendar className="h-4 w-4" />
               <span className="hidden sm:inline">Semesters</span>
             </TabsTrigger>
+            <TabsTrigger value="timetables" className="flex items-center gap-2 data-[state=active]:bg-black data-[state=active]:text-white">
+              <CalendarClock className="h-4 w-4" />
+              <span className="hidden sm:inline">Timetables</span>
+            </TabsTrigger>
             <TabsTrigger value="governance" className="flex items-center gap-2 data-[state=active]:bg-black data-[state=active]:text-white">
               <TrendingUp className="h-4 w-4" />
               <span className="hidden sm:inline">Governance</span>
             </TabsTrigger>
+            {/* Create Users tab removed */}
           </TabsList>
 
           {/* Overview Tab */}
@@ -1225,10 +1301,30 @@ const AdminPortal: React.FC = (): React.ReactElement => {
             </Card>
           </TabsContent>
 
+          {/* Timetables Tab */}
+          <TabsContent value="timetables" className="space-y-6">
+            <Card className="border-0 shadow-md">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CalendarClock className="h-5 w-5" />
+                  Timetable Planner
+                </CardTitle>
+                <CardDescription>Generate and manage AI-powered class schedules</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <AdminTimetablePanel />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           {/* Governance Tab */}
           <TabsContent value="governance" className="space-y-6">
             <GovernanceAdminPanel />
+            {/* Web3 mint panel removed */}
+            <AdminIssueCertificate />
           </TabsContent>
+
+          {/* Create Users tab content removed */}
         </Tabs>
       {/* Subject Form Modal */}
       <SubjectForm 

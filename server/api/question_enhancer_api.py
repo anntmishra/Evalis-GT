@@ -181,6 +181,85 @@ def analyze_cognitive_levels() -> Dict[str, Any]:
         logger.error(f"Error analyzing cognitive levels: {e}", exc_info=True)
         return jsonify({"error": f"Failed to analyze cognitive levels: {str(e)}"}), 500
 
+@app.route('/api/bloom-text-anomaly', methods=['POST'])
+def analyze_bloom_text_anomaly() -> Dict[str, Any]:
+    """
+    Analyze a question for Bloom's Taxonomy alignment and text anomalies.
+    
+    Expected JSON payload:
+    {
+        "text": "What is artificial intelligence?",
+        "type": "short",
+        "marks": 5,
+        "target_bloom_level": "application"  // optional
+    }
+    """
+    try:
+        data = request.get_json()
+        
+        # Validate request data
+        if not data or not isinstance(data, dict):
+            return jsonify({"error": "Invalid request format"}), 400
+        
+        # Extract required fields
+        question_text = data.get('text')
+        question_type = data.get('type')
+        marks = data.get('marks')
+        target_bloom_level = data.get('target_bloom_level')
+        
+        if not question_text:
+            return jsonify({"error": "Question text is required"}), 400
+        
+        if not question_type or question_type not in ['mcq', 'short', 'long']:
+            return jsonify({"error": "Valid question type (mcq, short, long) is required"}), 400
+        
+        if not marks or not isinstance(marks, (int, float)) or marks <= 0:
+            return jsonify({"error": "Valid positive number of marks is required"}), 400
+        
+        # Analyze the question using the enhancer
+        current_bloom_level = enhancer.determine_cognitive_level(question_text)
+        
+        # Generate a revised question (simplified implementation)
+        revised_question = question_text
+        if not question_text.endswith('?') and question_type != 'long':
+            revised_question = question_text.rstrip('.') + '?'
+        
+        # Make the question more specific
+        if len(question_text.split()) < 5:
+            revised_question = f"Provide a detailed explanation of {revised_question.lower()}"
+        
+        # Detect common issues using the enhancer's quality check method
+        detected_issues = enhancer.check_quality(question_text, question_type)
+        
+        # Calculate clarity score (simplified)
+        clarity_score = max(0.3, min(1.0, len(question_text.split()) / 15.0))
+        
+        # Generate response
+        result = {
+            "original_question": question_text,
+            "revised_question": revised_question,
+            "anomaly_analysis": {
+                "detected_issues": detected_issues,
+                "bloom_level_current": current_bloom_level,
+                "bloom_level_improved": target_bloom_level or current_bloom_level,
+                "clarity_score": clarity_score,
+                "ambiguity_issues": [issue for issue in detected_issues if 'vague' in issue],
+                "cognitive_alignment": f"Question aligns with {current_bloom_level} level of Bloom's taxonomy",
+                "improvement_summary": ["Improved clarity and specificity", "Enhanced cognitive alignment"]
+            },
+            "suggested_alternatives": [
+                f"Rewrite: {revised_question}",
+                f"Alternative approach: How would you {question_text.lower().replace('what is', 'apply')}",
+                f"Higher-order thinking: Evaluate the significance of {question_text.lower().replace('what is', '').strip()}"
+            ]
+        }
+        
+        return jsonify(result)
+        
+    except Exception as e:
+        logger.error(f"Error analyzing bloom text anomaly: {e}", exc_info=True)
+        return jsonify({"error": f"Failed to analyze question: {str(e)}"}), 500
+
 @app.route('/api/question-suggestions', methods=['POST'])
 def get_question_suggestions() -> Dict[str, Any]:
     """

@@ -1,18 +1,17 @@
-// Load ethers in a way  compatible with both v6 (ESM) and v5 (CJS)
+
 async function loadEthers() {
   try {
     const mod = await import('ethers');
-    return mod.ethers ?? mod; // v6 exports named { ethers }, v5 CJS returns namespace when required
+    return mod.ethers ?? mod; 
   } catch (e) {
-    // Fallback for environments where ESM import isn't available
-    // eslint-disable-next-line global-require, import/no-extraneous-dependencies
+    
     return require('ethers');
   }
 }
 
 const { Proposal, ProposalVote, Notification } = require('../models');
 
-// Minimal ABI fragments
+
 const governorAbi = [
   'event ProposalCreated(uint256 proposalId, address proposer, address[] targets, uint256[] values, string[] signatures, bytes[] calldatas, uint256 startBlock, uint256 endBlock, string description)',
   'event VoteCast(address indexed voter, uint256 proposalId, uint8 support, uint256 weight, string reason)',
@@ -35,7 +34,7 @@ async function startGovernanceListener({ rpcUrl, governorAddress }) {
 
   governor.on('ProposalCreated', async (proposalId, proposer, targets, values, signatures, calldatas, startBlock, endBlock, description) => {
     try {
-      // Mirror into DB with on-chain id in description or metadata convention
+      
       await Proposal.create({
         title: description.split('\n')[0].slice(0, 120),
         description,

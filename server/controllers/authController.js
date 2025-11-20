@@ -10,9 +10,9 @@ const { logger } = require('../utils/logger');
  * @access  Public
  */
 const authStudent = asyncHandler(async (req, res) => {
-  const { id, password, email, firebaseToken } = req.body;
+  const { id, password, email } = req.body;
 
-  logger.info(`Student login attempt for ID: ${id}, Email: ${email}, Firebase token: ${firebaseToken ? 'Yes' : 'No'}`);
+  logger.info(`Student login attempt for ID: ${id}, Email: ${email}`);
 
   if ((!id && !email) || !password) {
     logger.warn('Student login rejected: Missing ID/email or password');
@@ -21,7 +21,6 @@ const authStudent = asyncHandler(async (req, res) => {
   }
 
   try {
-    const allowFallback = process.env.ALLOW_PASSWORD_FALLBACK === 'true';
     // Check for student by ID (primary method) or email (secondary method)
     const whereClause = id ? { id } : { email };
     logger.debug(`Searching for student with:`, whereClause);
@@ -38,45 +37,13 @@ const authStudent = asyncHandler(async (req, res) => {
 
     logger.debug(`Student ID: ${student.id}, Name: ${student.name}, Email: ${student.email}`);
     
-  // Try Firebase authentication first if we have an email
-    let isAuthenticated = false;
-    let authMethod = 'database';
+    // Use database password authentication
+    const isMatch = await student.matchPassword(password);
+    logger.debug(`Database password match result: ${isMatch}`);
     
-    if (student.email && email) {
-      try {
-        // Import Firebase auth functions
-        const { loginWithEmailAndPassword } = require('../config/firebase');
-        
-        // Try Firebase authentication
-        const userCredential = await loginWithEmailAndPassword(student.email, password);
-        if (userCredential && userCredential.user) {
-          logger.info(`Firebase authentication successful for student: ${student.email}`);
-          isAuthenticated = true;
-          authMethod = 'firebase';
-        }
-      } catch (firebaseError) {
-        logger.debug(`Firebase authentication failed: ${firebaseError.message}`);
-        // Continue to database authentication
-      }
-    }
-    
-    // If Firebase auth failed or not available, optionally try database password
-    if (!isAuthenticated) {
-      if (allowFallback || !email) {
-        const isMatch = await student.matchPassword(password);
-        logger.debug(`Database password match result: ${isMatch}`);
-        if (isMatch) {
-          isAuthenticated = true;
-          authMethod = 'database';
-        }
-      } else {
-        logger.warn('Database password fallback disabled for student (email present)');
-      }
-    }
-    
-    if (isAuthenticated) {
+    if (isMatch) {
       const { token, sessionId } = generateTokenWithSession(student, 'student');
-      logger.info(`Student authentication successful via ${authMethod}: ${student.id}`);
+      logger.info(`Student authentication successful: ${student.id}`);
       
       res.json({
         id: student.id,
@@ -110,10 +77,10 @@ const authStudent = asyncHandler(async (req, res) => {
  * @access  Public
  */
 const authTeacher = asyncHandler(async (req, res) => {
-  const { email, password, id, firebaseToken } = req.body;
-  
-  logger.info(`Teacher login attempt with email: ${email}, ID: ${id}, Firebase token: ${firebaseToken ? 'Yes' : 'No'}`);
-  
+  const { email, password, id } = req.body;
+
+  logger.info(`Teacher login attempt with email: ${email}, ID: ${id}`);
+
   if ((!email && !id) || !password) {
     logger.warn('Teacher login rejected: Missing email/ID or password');
     res.status(400);
@@ -121,7 +88,6 @@ const authTeacher = asyncHandler(async (req, res) => {
   }
 
   try {
-    const allowFallback = process.env.ALLOW_PASSWORD_FALLBACK === 'true';
     // Check for teacher by email (primary login method) or ID (secondary method)
     const whereClause = email ? { email } : { id };
     logger.debug(`Searching for teacher with:`, whereClause);
@@ -147,48 +113,14 @@ const authTeacher = asyncHandler(async (req, res) => {
 
     logger.debug(`Teacher ID: ${teacher.id}, Name: ${teacher.name}, Email: ${teacher.email}`);
     
-    // Try Firebase authentication first if we have Firebase available
-    let isAuthenticated = false;
-    let authMethod = 'database';
+    // Use database password authentication
+    const isMatch = await teacher.matchPassword(password);
+    logger.debug(`Database password match result: ${isMatch}`);
     
-    if (email) {
-      try {
-        // Import Firebase auth functions
-        const { loginWithEmailAndPassword } = require('../config/firebase');
-        
-        // Try Firebase authentication
-        const userCredential = await loginWithEmailAndPassword(email, password);
-        if (userCredential && userCredential.user) {
-          logger.info(`Firebase authentication successful for teacher: ${email}`);
-          isAuthenticated = true;
-          authMethod = 'firebase';
-        }
-      } catch (firebaseError) {
-        logger.debug(`Firebase authentication failed: ${firebaseError.message}`);
-        // Continue to database authentication
-      }
-    }
-    
-    // If Firebase auth failed or not available, optionally try database password
-    if (!isAuthenticated) {
-      if (allowFallback || !email) {
-        const isMatch = await teacher.matchPassword(password);
-        logger.debug(`Database password match result: ${isMatch}`);
-        if (isMatch) {
-          isAuthenticated = true;
-          authMethod = 'database';
-        }
-      } else {
-        logger.warn('Database password fallback disabled for teacher (email present)');
-      }
-    }
-    
-    if (isAuthenticated) {
+    if (isMatch) {
       // Generate token with session management
       const { token, sessionId } = generateTokenWithSession(teacher, 'teacher');
-      logger.info(`Teacher authentication successful via ${authMethod}: ${teacher.id}`);
-      
-      // Extract batch IDs from subjects
+      logger.info(`Teacher authentication successful: ${teacher.id}`);      // Extract batch IDs from subjects
       const batchIds = [...new Set(
         teacher.Subjects
           .map(subject => subject.batchId)

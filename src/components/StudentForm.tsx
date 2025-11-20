@@ -25,7 +25,6 @@ import {
   ContentCopy as CopyIcon
 } from '@mui/icons-material';
 import { Student } from '../types/university';
-import { sendPasswordReset } from '../config/firebase';
 import { resetStudentPassword } from '../api';
 
 interface StudentFormProps {
@@ -138,12 +137,11 @@ const StudentForm: React.FC<StudentFormProps> = ({
         await resetStudentPassword(form.id, null);
       }
       
-      // Then send the Firebase password reset email
-      const result = await sendPasswordReset(form.email);
+      // Firebase password reset is disabled - using Clerk only
       setPasswordResetStatus({
         loading: false,
-        success: result.success,
-        message: result.message
+        success: false,
+        message: 'Password reset is currently disabled. Please contact an administrator.'
       });
     } catch (error) {
       setPasswordResetStatus({

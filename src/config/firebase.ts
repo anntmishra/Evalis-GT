@@ -1,80 +1,36 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-import { 
-  getAuth, 
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  sendPasswordResetEmail,
-  signOut,
-  User,
-  UserCredential
-} from "firebase/auth";
+// This file is kept for backwards compatibility but Firebase functionality has been removed
+// All authentication is now handled by Clerk
 
-// Your web app's Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyDOyFOhXSYbtWrFCZMBwsF-7upRxYRlE9k",
-  authDomain: "evalis-d16f2.firebaseapp.com",
-  projectId: "evalis-d16f2",
-  storageBucket: "evalis-d16f2.firebasestorage.app",
-  messagingSenderId: "993676113888",
-  appId: "1:993676113888:web:21e93b506a90e0544e5d85",
-  measurementId: "G-CHPDVY165C"
-};
+// Placeholder objects
+export const auth = null;
+export const analytics = null;
+const app = null;
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const analytics = getAnalytics(app);
-
-// Authentication helper functions
+// Deprecated functions - these will no longer work and should be replaced with Clerk
 export const loginWithEmailAndPassword = async (
   email: string, 
   password: string
-): Promise<UserCredential> => {
-  console.log('Firebase login attempt with:', { email });
-  
-  // Trim any whitespace from email to prevent formatting issues
-  const trimmedEmail = email.trim();
-  
-  try {
-    return await signInWithEmailAndPassword(auth, trimmedEmail, password);
-  } catch (error: any) {
-    console.error('Firebase login error:', error.code, error.message);
-    throw error;
-  }
+): Promise<any> => {
+  throw new Error('Firebase authentication has been removed. Please use Clerk authentication.');
 };
 
 export const registerWithEmailAndPassword = async (
   email: string, 
   password: string
-): Promise<UserCredential> => {
-  return await createUserWithEmailAndPassword(auth, email, password);
+): Promise<any> => {
+  throw new Error('Firebase authentication has been removed. Please use Clerk authentication.');
 };
 
 export const sendPasswordReset = async (email: string): Promise<{ success: boolean; message: string }> => {
-  try {
-    await sendPasswordResetEmail(auth, email);
-    return { 
-      success: true, 
-      message: "Password reset email sent successfully" 
-    };
-  } catch (error: any) {
-    const errorMessage = error.message || "Failed to send password reset email";
-    return {
-      success: false,
-      message: errorMessage
-    };
-  }
+  throw new Error('Firebase authentication has been removed. Please use Clerk authentication.');
 };
 
 export const logoutUser = async (): Promise<void> => {
-  await signOut(auth);
+  throw new Error('Firebase authentication has been removed. Please use Clerk authentication.');
 };
 
-export const getCurrentUser = (): User | null => {
-  return auth.currentUser;
+export const getCurrentUser = (): any | null => {
+  return null;
 };
 
-export { auth, analytics };
-export default app; 
+export default app;

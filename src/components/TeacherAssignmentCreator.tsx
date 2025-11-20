@@ -16,6 +16,8 @@ import {
   SelectChangeEvent
 } from '@mui/material';
 import { Save, InsertPhoto, AttachFile } from '@mui/icons-material';
+import { useAuth } from '@clerk/clerk-react';
+import config from '../config/environment';
 
 interface Subject {
   id: string;
@@ -38,6 +40,7 @@ const TeacherAssignmentCreator: React.FC<TeacherAssignmentCreatorProps> = ({
   examTypes,
   onAssignmentCreated
 }) => {
+  const { getToken } = useAuth();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [subjectId, setSubjectId] = useState('');
@@ -53,7 +56,7 @@ const TeacherAssignmentCreator: React.FC<TeacherAssignmentCreatorProps> = ({
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
       setFile(selectedFile);
-      
+
       // Create preview for images
       if (selectedFile.type.startsWith('image/')) {
         const reader = new FileReader();
@@ -69,16 +72,16 @@ const TeacherAssignmentCreator: React.FC<TeacherAssignmentCreatorProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!title || !subjectId || !examType) {
       setError('Please fill in all required fields');
       return;
     }
-    
+
     try {
       setLoading(true);
       setError(null);
-      
+
       // Create FormData for file upload
       const formData = new FormData();
       formData.append('title', title);
@@ -87,55 +90,48 @@ const TeacherAssignmentCreator: React.FC<TeacherAssignmentCreatorProps> = ({
       formData.append('examType', examType);
       if (dueDate) formData.append('dueDate', dueDate);
       if (file) formData.append('file', file);
-      
+
       console.log('FormData contents:');
       console.log('- title:', title);
       console.log('- subjectId:', subjectId);
       console.log('- examType:', examType);
       console.log('- dueDate:', dueDate || 'not set');
       console.log('- file:', file ? file.name : 'not attached');
-      
+
       try {
-        // Try using the FormData approach for file upload first
-        const config = await import('../config/environment');
-        const token = localStorage.getItem(config.default.AUTH.TOKEN_STORAGE_KEY);
-        
-        console.log('Uploading with FormData to:', `${config.default.API_BASE_URL}/assignments/upload`);
-        console.log('Authorization token exists:', !!token);
-        
-        const response = await fetch(`${config.default.API_BASE_URL}/assignments/upload`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`
-          },
-          body: formData
-        });
-        
-        if (!response.ok) {
-          const errorData = await response.json();
-          console.error('Upload response error:', errorData);
-          throw new Error(errorData.message || `Server returned ${response.status}: ${response.statusText}`);
+        // Ensure we have a fresh token before making the request
+        // This fixes the issue where the token in localStorage might be expired
+        const token = await getToken();
+        if (token) {
+          localStorage.setItem(config.AUTH.TOKEN_STORAGE_KEY, token);
         }
-        
-        const data = await response.json();
-        console.log('Upload successful, response:', data);
-      } catch (uploadError: any) {
-        console.error('Error in file upload:', uploadError);
-        
-        // Fall back to standard API if there was an error with file upload
-        console.log('Falling back to standard API call without file...');
+
+        // Use the centralized API for file upload which handles auth tokens automatically
         const api = await import('../api');
-        await api.createAssignment({
-          title,
-          description,
-          subjectId,
-          examType,
-          dueDate: dueDate || null,
-        });
+
+        if (file) {
+          console.log('Uploading with FormData via API client');
+          await api.uploadAssignment(formData);
+        } else {
+          // Standard API call without file
+          console.log('Creating assignment without file via API client');
+          await api.createAssignment({
+            title,
+            description,
+            subjectId,
+            examType,
+            dueDate: dueDate || null,
+          });
+        }
+
+        console.log('Assignment created successfully');
+      } catch (apiError: any) {
+        console.error('Error in assignment creation:', apiError);
+        throw apiError;
       }
-      
+
       setSuccess(true);
-      
+
       // Reset form
       setTitle('');
       setDescription('');
@@ -144,12 +140,12 @@ const TeacherAssignmentCreator: React.FC<TeacherAssignmentCreatorProps> = ({
       setDueDate('');
       setFile(null);
       setFilePreview(null);
-      
+
       // Notify parent component
       if (onAssignmentCreated) {
         onAssignmentCreated();
       }
-      
+
       // Clear success message after a delay
       setTimeout(() => {
         setSuccess(false);
@@ -168,19 +164,19 @@ const TeacherAssignmentCreator: React.FC<TeacherAssignmentCreatorProps> = ({
         <Typography variant="h5" gutterBottom>
           Create New Assignment
         </Typography>
-        
+
         {error && (
           <Alert severity="error" sx={{ mb: 3 }}>
             {error}
           </Alert>
         )}
-        
+
         {success && (
           <Alert severity="success" sx={{ mb: 3 }}>
             Assignment created successfully!
           </Alert>
         )}
-        
+
         <form onSubmit={handleSubmit}>
           <Grid container spacing={3}>
             <Grid item xs={12}>
@@ -193,7 +189,7 @@ const TeacherAssignmentCreator: React.FC<TeacherAssignmentCreatorProps> = ({
                 disabled={loading}
               />
             </Grid>
-            
+
             <Grid item xs={12} md={6}>
               <FormControl fullWidth required>
                 <InputLabel>Subject</InputLabel>
@@ -211,7 +207,7 @@ const TeacherAssignmentCreator: React.FC<TeacherAssignmentCreatorProps> = ({
                 </Select>
               </FormControl>
             </Grid>
-            
+
             <Grid item xs={12} md={6}>
               <FormControl fullWidth required>
                 <InputLabel>Assignment Type</InputLabel>
@@ -229,7 +225,7 @@ const TeacherAssignmentCreator: React.FC<TeacherAssignmentCreatorProps> = ({
                 </Select>
               </FormControl>
             </Grid>
-            
+
             <Grid item xs={12} md={6}>
               <TextField
                 label="Due Date"
@@ -241,7 +237,7 @@ const TeacherAssignmentCreator: React.FC<TeacherAssignmentCreatorProps> = ({
                 disabled={loading}
               />
             </Grid>
-            
+
             <Grid item xs={12}>
               <TextField
                 label="Description"
@@ -254,7 +250,7 @@ const TeacherAssignmentCreator: React.FC<TeacherAssignmentCreatorProps> = ({
                 placeholder="Provide detailed instructions for the assignment..."
               />
             </Grid>
-            
+
             <Grid item xs={12}>
               <Box
                 sx={{
@@ -285,7 +281,7 @@ const TeacherAssignmentCreator: React.FC<TeacherAssignmentCreatorProps> = ({
                     {file ? 'Change File' : 'Upload Assignment File or Image'}
                   </Button>
                 </label>
-                
+
                 {file && (
                   <Box sx={{ mt: 2, textAlign: 'left' }}>
                     <Typography variant="subtitle2" gutterBottom>
@@ -299,18 +295,18 @@ const TeacherAssignmentCreator: React.FC<TeacherAssignmentCreatorProps> = ({
                     </Box>
                   </Box>
                 )}
-                
+
                 {filePreview && (
                   <Box sx={{ mt: 2, textAlign: 'center' }}>
                     <Typography variant="subtitle2" gutterBottom>
                       Preview:
                     </Typography>
-                    <Box 
-                      component="img" 
+                    <Box
+                      component="img"
                       src={filePreview}
-                      sx={{ 
-                        maxWidth: '100%', 
-                        maxHeight: '200px', 
+                      sx={{
+                        maxWidth: '100%',
+                        maxHeight: '200px',
                         objectFit: 'contain',
                         border: '1px solid #eee',
                         borderRadius: 1
@@ -321,7 +317,7 @@ const TeacherAssignmentCreator: React.FC<TeacherAssignmentCreatorProps> = ({
                 )}
               </Box>
             </Grid>
-            
+
             <Grid item xs={12}>
               <Button
                 type="submit"

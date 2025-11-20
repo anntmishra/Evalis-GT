@@ -7,31 +7,17 @@ import { Alert, AlertDescription } from '../components/ui/alert';
 import { Badge } from '../components/ui/badge';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
-import { 
-  GraduationCap,
-  Users,
-  FileText,
-  BarChart3,
-  Plus,
-  Upload,
-  Download,
-  Filter,
-  Clock,
-  CheckCircle,
-  AlertCircle,
-  Loader2,
-  BookOpen,
-  PenTool,
-  Eye,
-  User,
-  Calendar,
-  Edit3,
-  Trash2
+import {
+  BarChart3, BookOpen, Calendar, CheckCircle, Clock, Download, Edit3,
+  Eye, FileText, Filter, GraduationCap, Loader2, PenTool, Plus,
+  Trash2, Upload, User, Users, AlertCircle, RefreshCw, HelpCircle
 } from 'lucide-react';
 import Header from '../components/Header';
+import { SignIn } from '@clerk/clerk-react';
+import { useAuth } from '@clerk/clerk-react';
 import { Subject } from '../types/university';
 import { EXAM_TYPES } from '../constants/universityData';
-import { getStudentsByTeacher, getTeacherSubjects, getAccessibleBatches, getTeacherSubmissions, getTeacherAssignments, gradeSubmission, saveAnnotatedPDF, deleteAssignment } from '../api/teacherService';
+import { getStudentsByTeacher, getTeacherSubjects, getAccessibleBatches, getTeacherSubmissions, getTeacherAssignments, gradeSubmission, saveAnnotatedPDF, deleteAssignment, checkAuthState, restoreAuthFromUser } from '../api/teacherService';
 import { getLetterGrade, getGradePoints } from '../utils/gradeCalculator';
 import { getStudentsByBatch } from '../api/studentService';
 import config from '../config/environment';
@@ -39,24 +25,69 @@ import TeacherAssignmentCreator from '../components/TeacherAssignmentCreator';
 import TeacherQuestionPaperCreator from '../components/TeacherQuestionPaperCreator';
 import PDFAnnotator from '../components/PDFAnnotator';
 import TeacherGovernanceWidget from '../components/TeacherGovernanceWidget';
+import TeacherQuizManager from '../components/TeacherQuizManager';
 
 const TeacherPortal: React.FC = () => {
+  const { isSignedIn, isLoaded } = useAuth();
+
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  if (!isSignedIn) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+        <div className="max-w-md w-full space-y-8">
+          <div className="text-center">
+            <h1 className="text-3xl font-bold text-gray-900">Teacher Portal</h1>
+            <p className="mt-2 text-gray-600">Sign in to access your dashboard</p>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-lg p-8">
+            <SignIn
+              routing="hash"
+              signUpUrl="/teacher/signup"
+              redirectUrl="/teacher"
+              appearance={{
+                elements: {
+                  formButtonPrimary: 'bg-blue-600 hover:bg-blue-700 text-white',
+                  card: 'shadow-none border-0',
+                  headerTitle: 'text-xl font-semibold text-gray-900',
+                  headerSubtitle: 'text-gray-600'
+                }
+              }}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return <TeacherPortalContent />;
+};
+
+const TeacherPortalContent: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [students, setStudents] = useState<any[]>([]);
   const [submissions, setSubmissions] = useState<any[]>([]);
   const [assignments, setAssignments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [notification, setNotification] = useState({ 
-    open: false, 
-    message: '', 
-    severity: 'success' as 'success' | 'error' 
+  const [notification, setNotification] = useState({
+    open: false,
+    message: '',
+    severity: 'success' as 'success' | 'error'
   });
   const [selectedBatch, setSelectedBatch] = useState('');
   const [batches, setBatches] = useState<any[]>([]);
   const [showPDFAnnotator, setShowPDFAnnotator] = useState(false);
   const [selectedSubmission, setSelectedSubmission] = useState<any>(null);
-  
+  const [gradingScores, setGradingScores] = useState<{ [key: number]: number }>({});
+
   const navigate = useNavigate();
 
   // Stats for dashboard
@@ -70,7 +101,7 @@ const TeacherPortal: React.FC = () => {
   useEffect(() => {
     // Check authentication
     const userDataStr = localStorage.getItem(config.AUTH.CURRENT_USER_KEY);
-    
+
     if (!userDataStr) {
       navigate('/login');
       return;
@@ -78,12 +109,26 @@ const TeacherPortal: React.FC = () => {
 
     try {
       const userData = JSON.parse(userDataStr);
-      
+
       if (userData.role !== 'teacher') {
         navigate('/login');
         return;
       }
-      
+
+      // Debug authentication state
+      const authState = checkAuthState();
+      console.log('Teacher Portal Auth State:', authState);
+
+      // Try to restore auth if token is missing but user data exists
+      if (!authState.hasToken && authState.hasUser) {
+        console.log('Attempting to restore authentication...');
+        if (restoreAuthFromUser()) {
+          console.log('Authentication restored successfully');
+        } else {
+          console.warn('Could not restore authentication - user may need to log in again');
+        }
+      }
+
       initializeData();
     } catch (error) {
       console.error('Error parsing user data:', error);
@@ -158,14 +203,14 @@ const TeacherPortal: React.FC = () => {
     try {
       const response = await getTeacherSubmissions();
       setSubmissions(response);
-      
+
       // Update stats based on submissions
       const pendingGrading = response.filter((sub: any) => !sub.graded).length;
       const completedGrading = response.filter((sub: any) => sub.graded).length;
-      setStats(prev => ({ 
-        ...prev, 
-        pendingGrading, 
-        completedGrading 
+      setStats(prev => ({
+        ...prev,
+        pendingGrading,
+        completedGrading
       }));
     } catch (error) {
       console.error('Error fetching submissions:', error);
@@ -189,7 +234,11 @@ const TeacherPortal: React.FC = () => {
         totalAssignments: 0
       }));
     }
-  };  const showNotification = (message: string, severity: 'success' | 'error') => {
+  };
+
+
+
+  const showNotification = (message: string, severity: 'success' | 'error') => {
     setNotification({ open: true, message, severity });
   };
 
@@ -197,18 +246,19 @@ const TeacherPortal: React.FC = () => {
   const handleGradeSubmission = async (submissionId: number) => {
     const gradeInput = document.getElementById(`grade-${submissionId}`) as HTMLInputElement;
     const feedbackInput = document.getElementById(`feedback-${submissionId}`) as HTMLInputElement;
-    
+
     const grade = gradeInput?.value;
     const feedback = feedbackInput?.value || '';
-    
+
     if (!grade || isNaN(Number(grade)) || Number(grade) < 0 || Number(grade) > 100) {
       showNotification('Please enter a valid grade between 0 and 100', 'error');
       return;
     }
 
     try {
-      // Call the grading API - we'll need to implement this in teacherService
+      // Call the grading API
       await gradeSubmission(submissionId, Number(grade), feedback);
+
       showNotification('Grade submitted successfully!', 'success');
       fetchSubmissions(); // Refresh the submissions list
     } catch (error) {
@@ -238,14 +288,14 @@ const TeacherPortal: React.FC = () => {
     try {
       // Save the annotated PDF to the server
       await saveAnnotatedPDF(selectedSubmission.id, annotations, gradedPdfUrl);
-      
+
       console.log('PDF annotations saved:', annotations);
       console.log('Graded PDF URL:', gradedPdfUrl);
       showNotification('PDF annotations saved successfully!', 'success');
-      
+
       // Refresh submissions to get updated data
       await fetchSubmissions();
-      
+
       handleClosePDFAnnotator();
     } catch (error) {
       console.error('Error saving PDF annotations:', error);
@@ -261,22 +311,35 @@ const TeacherPortal: React.FC = () => {
     try {
       const response = await deleteAssignment(assignmentId);
       showNotification(
-        `Assignment deleted successfully. ${response.deletedSubmissions || 0} submissions were also removed.`, 
+        `Assignment deleted successfully. ${response.deletedSubmissions || 0} submissions were also removed.`,
         'success'
       );
-      
+
       // Refresh assignments and submissions
       await Promise.all([fetchAssignments(), fetchSubmissions()]);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting assignment:', error);
-      showNotification('Failed to delete assignment. Please try again.', 'error');
+
+      // Handle authentication errors specifically
+      if (error.message?.includes('Authentication required') ||
+        error.message?.includes('session has expired') ||
+        error.response?.status === 401) {
+        showNotification('Your session has expired. Please refresh the page and log in again.', 'error');
+        // Optionally redirect to login
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      } else {
+        const errorMessage = error.response?.data?.message || error.message || 'Failed to delete assignment';
+        showNotification(`Failed to delete assignment: ${errorMessage}`, 'error');
+      }
     }
   };
 
-  const StatCard = ({ title, value, icon, description, trend }: { 
-    title: string; 
-    value: number | string; 
-    icon: React.ReactNode; 
+  const StatCard = ({ title, value, icon, description, trend }: {
+    title: string;
+    value: number | string;
+    icon: React.ReactNode;
     description: string;
     trend?: string;
   }) => (
@@ -306,7 +369,7 @@ const TeacherPortal: React.FC = () => {
     onClick: () => void;
     disabled?: boolean;
   }) => (
-    <Card 
+    <Card
       className={`border-0 shadow-md hover:shadow-lg transition-all cursor-pointer ${disabled ? 'opacity-50' : ''}`}
       onClick={disabled ? undefined : onClick}
     >
@@ -327,11 +390,10 @@ const TeacherPortal: React.FC = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Header title="Teacher Portal" />
+        <Header title="Teacher Portal" showLogout={true} />
         <div className="container mx-auto px-6 py-8">
           <div className="flex items-center justify-center py-20">
             <Loader2 className="h-8 w-8 animate-spin mr-3" />
-            <span className="text-lg text-gray-600">Loading your dashboard...</span>
           </div>
         </div>
       </div>
@@ -340,7 +402,7 @@ const TeacherPortal: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header title="Teacher Portal" />
+      <Header title="Teacher Portal" showLogout={true} />
 
       <div className="container mx-auto px-6 py-8">
         {/* Header Section */}
@@ -367,7 +429,7 @@ const TeacherPortal: React.FC = () => {
         )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-6 bg-white border border-gray-200">
+          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-7 bg-white border border-gray-200">
             <TabsTrigger value="dashboard" className="flex items-center gap-2 data-[state=active]:bg-black data-[state=active]:text-white">
               <BarChart3 className="h-4 w-4" />
               <span className="hidden sm:inline">Dashboard</span>
@@ -387,6 +449,10 @@ const TeacherPortal: React.FC = () => {
             <TabsTrigger value="questions" className="flex items-center gap-2 data-[state=active]:bg-black data-[state=active]:text-white">
               <BookOpen className="h-4 w-4" />
               <span className="hidden sm:inline">Questions</span>
+            </TabsTrigger>
+            <TabsTrigger value="quizzes" className="flex items-center gap-2 data-[state=active]:bg-black data-[state=active]:text-white">
+              <HelpCircle className="h-4 w-4" />
+              <span className="hidden sm:inline">Quizzes</span>
             </TabsTrigger>
             <TabsTrigger value="reports" className="flex items-center gap-2 data-[state=active]:bg-black data-[state=active]:text-white">
               <BarChart3 className="h-4 w-4" />
@@ -426,7 +492,9 @@ const TeacherPortal: React.FC = () => {
               />
             </div>
             {/* Governance widget */}
-            <TeacherGovernanceWidget />
+            <div className="grid grid-cols-1 gap-6">
+              <TeacherGovernanceWidget />
+            </div>
 
             {/* Quick Actions */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -458,7 +526,7 @@ const TeacherPortal: React.FC = () => {
                 title="Upload Materials"
                 description="Share resources with students"
                 icon={<Upload className="h-5 w-5" />}
-                onClick={() => {}}
+                onClick={() => { }}
               />
               <QuickActionCard
                 title="View Reports"
@@ -482,9 +550,9 @@ const TeacherPortal: React.FC = () => {
                   <Label htmlFor="dashboard-batch-select" className="text-sm font-medium text-gray-700">
                     Filter by Batch:
                   </Label>
-                  <select 
+                  <select
                     id="dashboard-batch-select"
-                    value={selectedBatch} 
+                    value={selectedBatch}
                     onChange={(e) => setSelectedBatch(e.target.value)}
                     className="px-3 py-2 border border-gray-200 rounded-md focus:border-black focus:ring-black min-w-[200px]"
                   >
@@ -500,8 +568,8 @@ const TeacherPortal: React.FC = () => {
                     })}
                   </select>
                   {selectedBatch && (
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       size="sm"
                       onClick={() => setSelectedBatch('')}
                       className="border-gray-200 hover:bg-gray-50"
@@ -567,7 +635,7 @@ const TeacherPortal: React.FC = () => {
                       <div key={subject.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                         <div className="flex-1">
                           <p className="font-medium text-black">{subject.name}</p>
-                          <p className="text-sm text-gray-600">{subject.code}</p>
+                          <p className="text-sm text-gray-600">{subject.section}</p>
                         </div>
                         <Badge variant="outline" className="border-blue-200 text-blue-800">
                           Active
@@ -583,6 +651,8 @@ const TeacherPortal: React.FC = () => {
               </Card>
             </div>
           </TabsContent>
+
+
 
           {/* Students Tab */}
           <TabsContent value="students" className="space-y-6">
@@ -601,9 +671,9 @@ const TeacherPortal: React.FC = () => {
                       <Label htmlFor="batch-select" className="text-sm font-medium text-gray-700">
                         Select Batch:
                       </Label>
-                      <select 
+                      <select
                         id="batch-select"
-                        value={selectedBatch} 
+                        value={selectedBatch}
                         onChange={(e) => setSelectedBatch(e.target.value)}
                         className="px-3 py-2 border border-gray-200 rounded-md focus:border-black focus:ring-black min-w-[200px]"
                       >
@@ -620,8 +690,8 @@ const TeacherPortal: React.FC = () => {
                       </select>
                     </div>
                     <div className="flex-1">
-                      <Input 
-                        placeholder="Search students..." 
+                      <Input
+                        placeholder="Search students..."
                         className="border-gray-200 focus:border-black focus:ring-black"
                       />
                     </div>
@@ -634,7 +704,7 @@ const TeacherPortal: React.FC = () => {
                       Export
                     </Button>
                   </div>
-                  
+
                   <div className="flex items-center justify-between">
                     <p className="text-sm text-gray-600">
                       Showing {students.length} students
@@ -648,7 +718,7 @@ const TeacherPortal: React.FC = () => {
                       {selectedBatch ? 'Filtered' : 'All Students'}
                     </Badge>
                   </div>
-                  
+
                   {loading ? (
                     <div className="flex items-center justify-center py-8">
                       <Loader2 className="h-6 w-6 animate-spin mr-2" />
@@ -701,14 +771,14 @@ const TeacherPortal: React.FC = () => {
                       <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                       <h3 className="text-lg font-semibold text-gray-900 mb-2">No students found</h3>
                       <p className="text-gray-600 mb-4">
-                        {selectedBatch 
-                          ? 'No students found in the selected batch' 
+                        {selectedBatch
+                          ? 'No students found in the selected batch'
                           : 'No students assigned to you yet'
                         }
                       </p>
                       {selectedBatch && (
-                        <Button 
-                          variant="outline" 
+                        <Button
+                          variant="outline"
                           onClick={() => setSelectedBatch('')}
                           className="border-gray-200 hover:bg-gray-50"
                         >
@@ -733,7 +803,7 @@ const TeacherPortal: React.FC = () => {
                 <CardDescription>Create and manage assignments for your students</CardDescription>
               </CardHeader>
               <CardContent>
-                <TeacherAssignmentCreator 
+                <TeacherAssignmentCreator
                   subjects={subjects}
                   examTypes={EXAM_TYPES}
                   onAssignmentCreated={() => {
@@ -778,8 +848,8 @@ const TeacherPortal: React.FC = () => {
                               </Badge>
                               <Badge className={
                                 assignment.status === 'active' ? 'bg-green-100 text-green-800 border-green-200' :
-                                assignment.status === 'draft' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' :
-                                'bg-gray-100 text-gray-800 border-gray-200'
+                                  assignment.status === 'draft' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' :
+                                    'bg-gray-100 text-gray-800 border-gray-200'
                               }>
                                 {assignment.status || 'Active'}
                               </Badge>
@@ -793,7 +863,7 @@ const TeacherPortal: React.FC = () => {
                               </Button>
                             </div>
                           </div>
-                          
+
                           {/* Assignment File */}
                           {assignment.fileUrl && (
                             <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
@@ -830,7 +900,7 @@ const TeacherPortal: React.FC = () => {
                               </div>
                             </div>
                           )}
-                          
+
                           {/* Assignment Stats */}
                           <div className="mt-3 flex items-center gap-4 text-sm text-gray-600">
                             <span className="flex items-center gap-1">
@@ -878,8 +948,8 @@ const TeacherPortal: React.FC = () => {
                 <div className="space-y-4">
                   <div className="flex items-center gap-4">
                     <div className="flex-1">
-                      <Input 
-                        placeholder="Search submissions..." 
+                      <Input
+                        placeholder="Search submissions..."
                         className="border-gray-200 focus:border-black focus:ring-black"
                       />
                     </div>
@@ -888,7 +958,7 @@ const TeacherPortal: React.FC = () => {
                       Filter
                     </Button>
                   </div>
-                  
+
                   {/* Submissions List */}
                   {submissions.length > 0 ? (
                     <div className="space-y-4">
@@ -901,14 +971,14 @@ const TeacherPortal: React.FC = () => {
                                   <h3 className="font-semibold text-lg text-black">
                                     {submission.Assignment?.title || `Assignment ${submission.assignmentId}`}
                                   </h3>
-                                  <Badge 
-                                    variant="outline" 
+                                  <Badge
+                                    variant="outline"
                                     className={submission.graded ? 'border-green-200 text-green-800' : 'border-orange-200 text-orange-800'}
                                   >
                                     {submission.graded ? 'Graded' : 'Pending Review'}
                                   </Badge>
                                 </div>
-                                
+
                                 <div className="flex items-center gap-6 text-sm text-gray-600">
                                   <span className="flex items-center gap-1">
                                     <User className="h-4 w-4" />
@@ -1016,33 +1086,47 @@ const TeacherPortal: React.FC = () => {
                                     )}
                                   </div>
                                 ) : (
-                                  <div className="space-y-2 mt-3">
+                                  <div className="space-y-3 mt-3">
+                                    {/* Grade Input */}
                                     <div className="flex items-center gap-2">
-                                      <Input 
-                                        type="number" 
-                                        placeholder="Grade (0-100)" 
+                                      <Input
+                                        type="number"
+                                        placeholder="Grade (0-100)"
                                         className="w-32 text-sm"
                                         min="0"
                                         max="100"
                                         id={`grade-${submission.id}`}
                                         onChange={(e) => {
-                                          const score = parseInt(e.target.value);
+                                          const score = parseInt(e.target.value) || 0;
+                                          setGradingScores(prev => ({
+                                            ...prev,
+                                            [submission.id]: score
+                                          }));
+
                                           const previewElement = document.getElementById(`preview-${submission.id}`);
                                           if (previewElement && !isNaN(score)) {
                                             previewElement.textContent = `${getLetterGrade(score)} (${getGradePoints(score)} GP)`;
                                           } else if (previewElement) {
                                             previewElement.textContent = '';
                                           }
+
+                                          // Badge preview removed
                                         }}
                                       />
                                       <span id={`preview-${submission.id}`} className="text-sm font-medium text-blue-600"></span>
                                     </div>
+
+                                    {/* Feedback Input */}
                                     <div className="flex items-center gap-2">
-                                      <Input 
-                                        placeholder="Feedback (optional)" 
+                                      <Input
+                                        placeholder="Feedback (optional)"
                                         className="flex-1 text-sm"
                                         id={`feedback-${submission.id}`}
                                       />
+                                    </div>
+
+                                    {/* Submit Button */}
+                                    <div className="flex justify-end">
                                       <Button
                                         size="sm"
                                         className="bg-black hover:bg-gray-800 text-white"
@@ -1094,10 +1178,26 @@ const TeacherPortal: React.FC = () => {
                 <CardDescription>Create and manage question papers and tests</CardDescription>
               </CardHeader>
               <CardContent>
-                <TeacherQuestionPaperCreator 
+                <TeacherQuestionPaperCreator
                   subjects={subjects}
                   examTypes={EXAM_TYPES}
                 />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Quizzes Tab */}
+          <TabsContent value="quizzes" className="space-y-6">
+            <Card className="border-0 shadow-md">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <HelpCircle className="h-5 w-5" />
+                  Quiz Management
+                </CardTitle>
+                <CardDescription>Create and manage quizzes for your students</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <TeacherQuizManager />
               </CardContent>
             </Card>
           </TabsContent>

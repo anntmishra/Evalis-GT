@@ -345,6 +345,131 @@ export const submitAssignment = async (assignmentId: string, submissionData: {
   }
 };
 
+// Web3 Rewards Functions
+
+// Link student's wallet address
+export const linkWallet = async (walletAddress: string) => {
+  try {
+    const response = await axios.post(
+      `${config.API_BASE_URL}/web3/link-wallet`,
+      { walletAddress },
+      authConfig()
+    );
+    return response.data;
+  } catch (error: any) {
+    console.error('Error linking wallet:', error);
+    throw error;
+  }
+};
+
+// Get current student's token balance
+export const getMyTokenBalance = async () => {
+  try {
+    const response = await axios.get(
+      `${config.API_BASE_URL}/web3/me`,
+      authConfig()
+    );
+    return response.data;
+  } catch (error: any) {
+    console.error('Error fetching token balance:', error);
+    throw error;
+  }
+};
+
+// Get current student's NFT certificates
+export const getMyCertificates = async () => {
+  try {
+    console.log('🔍 getMyCertificates: Starting certificate fetch...');
+    
+    // First get current user info to get student ID
+    const currentUser = localStorage.getItem(config.AUTH.CURRENT_USER_KEY);
+    if (!currentUser) {
+      console.error('❌ getMyCertificates: User not logged in');
+      throw new Error('User not logged in');
+    }
+    
+    const userData = JSON.parse(currentUser);
+    const studentId = userData.id;
+    
+    console.log(`📋 getMyCertificates: Fetching certificates for student ID: ${studentId}`);
+    
+    const response = await axios.get(
+      `${config.API_BASE_URL}/web3/student/${studentId}/certificates`,
+      authConfig()
+    );
+    
+    console.log('✅ getMyCertificates: API response received:', response.data);
+    console.log(`📊 getMyCertificates: Found ${response.data?.length || 0} certificates`);
+    
+    return response.data;
+  } catch (error: any) {
+    console.error('❌ getMyCertificates: Error fetching certificates:', error);
+    
+    // Log more details about the error
+    if (error.response) {
+      console.error('  - Status:', error.response.status);
+      console.error('  - Data:', error.response.data);
+    } else if (error.request) {
+      console.error('  - Network error, no response received');
+    } else {
+      console.error('  - Error message:', error.message);
+    }
+    
+    throw error;
+  }
+};
+
+// Get current student's badges
+export const getMyBadges = async () => {
+  try {
+    // First get current user info to get student ID
+    const currentUser = localStorage.getItem(config.AUTH.CURRENT_USER_KEY);
+    if (!currentUser) {
+      throw new Error('User not logged in');
+    }
+    
+    const userData = JSON.parse(currentUser);
+    const studentId = userData.id;
+    
+    const response = await axios.get(
+      `${config.API_BASE_URL}/web3/student/${studentId}/badges`,
+      authConfig()
+    );
+    return response.data;
+  } catch (error: any) {
+    console.error('Error fetching badges:', error);
+    throw error;
+  }
+};
+
+// Get specific student's token balance (for admin/teacher use)
+export const getStudentTokenBalance = async (studentId: string) => {
+  try {
+    const response = await axios.get(
+      `${config.API_BASE_URL}/web3/student/${studentId}/balance`,
+      authConfig()
+    );
+    return response.data;
+  } catch (error: any) {
+    console.error('Error fetching student token balance:', error);
+    throw error;
+  }
+};
+
+// Get specific student's certificates (for admin/teacher use)
+export const getStudentCertificates = async (studentId: string) => {
+  try {
+    const response = await axios.get(
+      `${config.API_BASE_URL}/web3/student/${studentId}/certificates`,
+      authConfig()
+    );
+    return response.data;
+  } catch (error: any) {
+    console.error('Error fetching student certificates:', error);
+    throw error;
+  }
+};
+
 export default {
   getAllStudents,
   getStudentsByBatch,
@@ -352,5 +477,11 @@ export default {
   createStudent,
   updateStudent,
   deleteStudent,
-  submitAssignment
+  submitAssignment,
+  linkWallet,
+  getMyTokenBalance,
+  getMyCertificates,
+  getMyBadges,
+  getStudentTokenBalance,
+  getStudentCertificates
 }; 

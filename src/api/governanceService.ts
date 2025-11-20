@@ -18,8 +18,22 @@ export interface Proposal {
 }
 
 export const createProposal = async (data: Partial<Proposal>) => {
-  const res = await axios.post(`${API_URL}/proposals`, data, getAuthConfig());
-  return res.data;
+  const authConfig = getAuthConfig();
+  console.log('Creating governance proposal with auth config:', {
+    hasToken: !!(authConfig.headers?.Authorization),
+    tokenPreview: authConfig.headers?.Authorization ? 
+      authConfig.headers.Authorization.substring(0, 20) + '...' : 'none',
+    apiUrl: `${API_URL}/proposals`,
+    proposalData: data
+  });
+  
+  try {
+    const res = await axios.post(`${API_URL}/proposals`, data, authConfig);
+    return res.data;
+  } catch (error: any) {
+    console.error('Governance API error:', error?.response?.data || error?.message);
+    throw error;
+  }
 };
 
 export const listProposals = async (status?: string): Promise<Proposal[]> => {

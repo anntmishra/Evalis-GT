@@ -17,6 +17,11 @@ build/
 .env.development.local
 .env.test.local
 .env.production.local
+.env.development
+.env.production
+.env.clerk
+!.env.example
+!.env.production.example
 
 # Logs
 npm-debug.log*
@@ -39,3 +44,13 @@ yarn-error.log*
 firebase-admin-sdk.json
 *Firebase Admin SD*.json 
 .vercel
+
+# Environment Backups and Secrets
+PRODUCTION_ENV_FOR_VERCEL.txt
+VERCEL_ENV_VARIABLES.txt
+VERCEL_ENV_VARIABLES.md
+cleanup-backup/
+cleanup-report.json
+server.log
+*.log
+.venv/
