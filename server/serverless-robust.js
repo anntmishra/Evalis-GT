@@ -2518,8 +2518,12 @@ const attachOptionalRoutes = () => {
   const routesToAttach = [
     { path: '/api/timetables', loader: () => require('./routes/timetableRoutes') },
     { path: '/api/web3', loader: () => require('./routes/web3Routes') },
+<<<<<<< HEAD
     { path: '/api/certificates', loader: () => require('./routes/certificateRoutes') },
     { path: '/api/quizzes', loader: () => require('./routes/quizRoutes') }
+=======
+    { path: '/api/certificates', loader: () => require('./routes/certificateRoutes') }
+>>>>>>> 49762404994bfa5a6c0729878ee8a2e4a67b2e95
   ];
 
   routesToAttach.forEach(({ path, loader }) => {
@@ -2562,10 +2566,24 @@ app.use('*', (req, res) => {
       '/api/assignments/*',
       '/api/timetables/*',
       '/api/web3/*',
+<<<<<<< HEAD
       '/api/certificates/*',
       '/api/quizzes/*'
+=======
+      '/api/certificates/*'
+>>>>>>> 49762404994bfa5a6c0729878ee8a2e4a67b2e95
     ]
   });
 });
+
+// Attach additional routers that may not be present if server/server.js load order differs
+try {
+  const web3Routes = require('./routes/web3Routes');
+  app.use('/api/web3', web3Routes);
+  const certificateRoutes = require('./routes/certificateRoutes');
+  app.use('/api/certificates', certificateRoutes);
+} catch (e) {
+  console.warn('web3Routes not attached in serverless build:', e?.message);
+}
 
 module.exports = app;

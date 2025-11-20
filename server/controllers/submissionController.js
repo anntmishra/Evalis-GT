@@ -190,7 +190,7 @@ const createSubmission = asyncHandler(async (req, res) => {
  * @access  Private/Teacher, Admin
  */
 const updateSubmission = asyncHandler(async (req, res) => {
-  const { score, feedback, plagiarismScore } = req.body;
+  const { score, feedback, plagiarismScore, awardTokens, tokenAmount, tokenReason, useBadgeRewards, awardCertificate } = req.body;
 
   const submission = await Submission.findByPk(req.params.id);
 
@@ -234,6 +234,117 @@ const updateSubmission = asyncHandler(async (req, res) => {
 
   const updatedSubmission = await submission.save();
 
+  let tokenAwardResult = null;
+  let badgeRewardResult = null;
+
+  // Automatically award badge-based rewards when score qualifies (75% or higher)
+  if (score !== undefined && score >= 75) {
+    console.log('[DEBUG] Automatic badge awarding triggered:', {
+      submissionId: submission.id,
+      studentId: submission.studentId,
+      score: score,
+      awardCertificate: score >= 80
+    });
+    
+    try {
+      const rewardsCtrl = require('../web3/rewardsController');
+      
+      const badgeResult = await new Promise((resolve) => {
+        const mockReq = {
+          body: {
+            submissionId: submission.id,
+            awardCertificate: score >= 80 // Automatically award certificate for 80% or higher
+          },
+          user: req.user
+        };
+        
+        const mockRes = {
+          status: (code) => mockRes,
+          json: (data) => {
+            console.log('[DEBUG] Badge award result:', data);
+            resolve(data);
+            return mockRes;
+          }
+        };
+
+        rewardsCtrl.awardBadgeBasedRewards(mockReq, mockRes);
+      });
+      
+      badgeRewardResult = badgeResult;
+      
+    } catch (error) {
+      console.error('[DEBUG] Error awarding badge-based rewards:', error);
+      badgeRewardResult = { error: 'Badge reward awarding failed: ' + error.message };
+    }
+  }
+  // Badge-based rewards system (new) - only if explicitly requested
+  else if (useBadgeRewards && score !== undefined) {
+    try {
+      const rewardsCtrl = require('../web3/rewardsController');
+      
+      const badgeResult = await new Promise((resolve) => {
+        const mockReq = {
+          body: {
+            submissionId: submission.id,
+            awardCertificate: awardCertificate || false
+          },
+          user: req.user
+        };
+        
+        const mockRes = {
+          status: (code) => mockRes,
+          json: (data) => {
+            resolve(data);
+            return mockRes;
+          }
+        };
+
+        rewardsCtrl.awardBadgeBasedRewards(mockReq, mockRes);
+      });
+      
+      badgeRewardResult = badgeResult;
+      
+    } catch (error) {
+      console.error('Error awarding badge-based rewards:', error);
+      badgeRewardResult = { error: 'Badge reward awarding failed: ' + error.message };
+    }
+  }
+  // Manual token awarding system (existing) - only if not using automatic badge rewards
+  else if (awardTokens && tokenAmount && tokenAmount > 0 && !badgeRewardResult) {
+    try {
+      const rewardsCtrl = require('../web3/rewardsController');
+      
+      // Call the rewards controller directly
+      const awardResult = await new Promise((resolve) => {
+        const mockReq = {
+          body: {
+            studentId: submission.studentId,
+            amount: tokenAmount,
+            reason: tokenReason || `Excellent work on assignment (Score: ${score}%)`
+          },
+          user: req.user
+        };
+        
+        const mockRes = {
+          status: (code) => mockRes,
+          json: (data) => {
+            resolve(data);
+            return mockRes;
+          }
+        };
+
+        rewardsCtrl.awardEvtTokens(mockReq, mockRes);
+      });
+      
+      tokenAwardResult = awardResult;
+      
+    } catch (error) {
+      console.error('Error awarding EVT tokens:', error);
+      // Don't fail the grading if token awarding fails
+      tokenAwardResult = { error: 'Token awarding failed: ' + error.message };
+    }
+  }
+
   // Fetch the updated submission with associations for response
   const fullSubmission = await Submission.findByPk(updatedSubmission.id, {
     include: [
@@ -256,7 +367,17 @@ const updateSubmission = asyncHandler(async (req, res) => {
     ]
   });
 
+<<<<<<< HEAD
   res.json({ submission: fullSubmission });
+=======
+  const response = {
+    submission: fullSubmission,
+    tokenAward: tokenAwardResult,
+    badgeReward: badgeRewardResult
+  };
+
+  res.json(response);
+>>>>>>> 49762404994bfa5a6c0729878ee8a2e4a67b2e95
 });
 
 /**

@@ -27,10 +27,18 @@ import {
     Download,
     Eye,
     Filter,
+<<<<<<< HEAD
     Coins,
     HelpCircle
 } from "lucide-react";
 import Header from "../components/Header";
+=======
+    Coins
+} from "lucide-react";
+import Header from "../components/Header";
+import StudentWeb3Rewards from "../components/StudentWeb3Rewards";
+import WalletConnectionBanner from "../components/WalletConnectionBanner";
+>>>>>>> 49762404994bfa5a6c0729878ee8a2e4a67b2e95
 import StudentAIAssistant from "../components/StudentAIAssistant";
 import { SignIn } from '@clerk/clerk-react';
 import { useAuth } from '@clerk/clerk-react';
@@ -41,7 +49,10 @@ import { useAuth as useCustomAuth } from "../hooks/useAuth";
 import config from "../config/environment";
 import { calculateCGPA } from "../utils/gradeCalculator";
 import { listMyCertificates } from "../api/certificatesService";
+<<<<<<< HEAD
 import StudentQuizInterface from "../components/StudentQuizInterface";
+=======
+>>>>>>> 49762404994bfa5a6c0729878ee8a2e4a67b2e95
 
 const StudentPortal: React.FC = () => {
     const { isSignedIn, isLoaded } = useAuth();
@@ -560,7 +571,11 @@ const StudentPortalContent: React.FC = () => {
                     {/* Dashboard Tab */}
                     <TabsContent value="dashboard" className="space-y-6">
                         {/* Wallet Connection Banner */}
+<<<<<<< HEAD
                         {/* Wallet banner removed */}
+=======
+                        <WalletConnectionBanner onConnectWallet={() => setActiveTab('rewards')} />
+>>>>>>> 49762404994bfa5a6c0729878ee8a2e4a67b2e95
                         
                         {/* Stats Cards */}
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
@@ -1300,6 +1315,7 @@ const StudentPortalContent: React.FC = () => {
 
                     {/* Web3 Rewards Tab */}
                     <TabsContent value="rewards" className="space-y-6">
+<<<<<<< HEAD
                         {/* Web3 rewards removed */}
                         <Card>
                             <CardHeader>
@@ -1307,6 +1323,9 @@ const StudentPortalContent: React.FC = () => {
                                 <CardDescription>Web3 rewards feature has been removed</CardDescription>
                             </CardHeader>
                         </Card>
+=======
+                        <StudentWeb3Rewards />
+>>>>>>> 49762404994bfa5a6c0729878ee8a2e4a67b2e95
                     </TabsContent>
 
                     {/* Profile Tab */}

@@ -29,6 +29,7 @@ const DEFAULT_SLOTS = [
   { slotIndex: 6, startTime: '15:30', endTime: '16:20', label: 'Evening 1' }
 ];
 
+<<<<<<< HEAD
 const SUBJECT_COLOR_PALETTE = ['#2563eb', '#dc2626', '#16a34a', '#d97706', '#7c3aed', '#0891b2', '#9333ea', '#b91c1c'];
 
 function normalizeDays(days = DEFAULT_DAYS) {
@@ -127,6 +128,8 @@ async function validateSubjectAndTeacher({ timetable, subjectId, teacherId, tran
   return { subject, teacher, teacherMatchesSubject };
 }
 
+=======
+>>>>>>> 49762404994bfa5a6c0729878ee8a2e4a67b2e95
 function buildSessionNodes(subjects, options = {}) {
   const sessions = [];
   subjects.forEach(subject => {
@@ -383,10 +386,18 @@ async function generateTimetable(options) {
       });
     });
 
+<<<<<<< HEAD
   const colorMap = new Map();
   allocatedSlots.forEach(slot => {
     if (!colorMap.has(slot.subjectId)) {
       colorMap.set(slot.subjectId, SUBJECT_COLOR_PALETTE[colorMap.size % SUBJECT_COLOR_PALETTE.length]);
+=======
+  const palette = ['#2563eb', '#dc2626', '#16a34a', '#d97706', '#7c3aed', '#0891b2', '#9333ea', '#b91c1c'];
+  const colorMap = new Map();
+  allocatedSlots.forEach(slot => {
+    if (!colorMap.has(slot.subjectId)) {
+      colorMap.set(slot.subjectId, palette[colorMap.size % palette.length]);
+>>>>>>> 49762404994bfa5a6c0729878ee8a2e4a67b2e95
     }
     slot.color = colorMap.get(slot.subjectId);
   });
@@ -448,6 +459,7 @@ async function generateTimetable(options) {
   });
 }
 
+<<<<<<< HEAD
 async function createManualTimetableSlot(timetableId, payload) {
   const {
     dayOfWeek,
@@ -632,6 +644,8 @@ async function removeManualTimetableSlot(timetableId, slotId) {
   });
 }
 
+=======
+>>>>>>> 49762404994bfa5a6c0729878ee8a2e4a67b2e95
 async function listTimetables({ semesterId, batchId, status, includeSlots = false }) {
   const where = {};
   if (semesterId) where.semesterId = semesterId;
@@ -762,8 +776,12 @@ module.exports = {
   updateTimetableStatus,
   deleteTimetable,
   getTeacherTimetable,
+<<<<<<< HEAD
   getStudentTimetable,
   createManualTimetableSlot,
   updateManualTimetableSlot,
   removeManualTimetableSlot
+=======
+  getStudentTimetable
+>>>>>>> 49762404994bfa5a6c0729878ee8a2e4a67b2e95
 };

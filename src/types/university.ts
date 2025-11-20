@@ -136,6 +136,7 @@ export interface Timetable {
   slots?: TimetableSlot[];
   createdAt?: string;
   updatedAt?: string;
+<<<<<<< HEAD
 }
 
 export interface QuizOption {
@@ -260,4 +261,6 @@ export interface QuizAnalytics {
     timeSpent: number;
     submittedAt: string;
   }>;
+=======
+>>>>>>> 49762404994bfa5a6c0729878ee8a2e4a67b2e95
 }

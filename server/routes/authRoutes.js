@@ -27,6 +27,10 @@ const { verifyClerkToken, mapClerkUserToLocal } = require('../utils/clerk');
 router.post('/reset-password', authRateLimit, resetPasswordWithToken);
 router.get('/validate-reset-token/:token', validateResetToken);
 
+// Password reset routes (public)
+router.post('/reset-password', authRateLimit, resetPasswordWithToken);
+router.get('/validate-reset-token/:token', validateResetToken);
+
 // Auth routes with rate limiting
 router.post('/student/login', authRateLimit, authStudent);
 router.post('/teacher/login', authRateLimit, authTeacher);
@@ -170,14 +174,22 @@ router.post('/clear-session', (req, res) => {
 router.post('/signin', authRateLimit, async (req, res) => {
   try {
     const { email, password, role } = req.body;
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> 49762404994bfa5a6c0729878ee8a2e4a67b2e95
     if (!email || !password || !role) {
       return res.status(400).json({ message: 'Email, password, and role are required' });
     }
 
     let user;
     let Model;
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> 49762404994bfa5a6c0729878ee8a2e4a67b2e95
     // Determine which model to use based on role
     switch (role) {
       case 'student':
@@ -208,10 +220,17 @@ router.post('/signin', authRateLimit, async (req, res) => {
 
     // Generate JWT token
     const token = jwt.sign(
+<<<<<<< HEAD
       {
         id: user.id,
         role: role,
         email: user.email
+=======
+      { 
+        id: user.id, 
+        role: role,
+        email: user.email 
+>>>>>>> 49762404994bfa5a6c0729878ee8a2e4a67b2e95
       },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRE || '7d' }
@@ -237,13 +256,21 @@ router.post('/signin', authRateLimit, async (req, res) => {
 router.post('/signup', authRateLimit, async (req, res) => {
   try {
     const { email, password, name, role } = req.body;
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> 49762404994bfa5a6c0729878ee8a2e4a67b2e95
     if (!email || !password || !name || !role) {
       return res.status(400).json({ message: 'All fields are required' });
     }
 
     let Model;
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> 49762404994bfa5a6c0729878ee8a2e4a67b2e95
     // Determine which model to use based on role
     switch (role) {
       case 'student':
@@ -286,10 +313,17 @@ router.post('/signup', authRateLimit, async (req, res) => {
 
     // Generate JWT token
     const token = jwt.sign(
+<<<<<<< HEAD
       {
         id: user.id,
         role: role,
         email: user.email
+=======
+      { 
+        id: user.id, 
+        role: role,
+        email: user.email 
+>>>>>>> 49762404994bfa5a6c0729878ee8a2e4a67b2e95
       },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRE || '7d' }

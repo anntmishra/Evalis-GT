@@ -28,9 +28,12 @@ interface TimetableGridProps {
   slotTemplates?: { slotIndex: number; label: string; startTime?: string; endTime?: string }[];
   title?: string;
   highlightSection?: string | null;
+<<<<<<< HEAD
   editable?: boolean;
   onSlotClick?: (slot: TimetableSlot) => void;
   onEmptySlotClick?: (dayIndex: number, slotIndex: number) => void;
+=======
+>>>>>>> 49762404994bfa5a6c0729878ee8a2e4a67b2e95
 }
 
 const TimetableGrid: React.FC<TimetableGridProps> = ({
@@ -38,10 +41,14 @@ const TimetableGrid: React.FC<TimetableGridProps> = ({
   days = DEFAULT_DAYS,
   slotTemplates = DEFAULT_SLOTS,
   title = 'Weekly Schedule',
+<<<<<<< HEAD
   highlightSection,
   editable = false,
   onSlotClick,
   onEmptySlotClick
+=======
+  highlightSection
+>>>>>>> 49762404994bfa5a6c0729878ee8a2e4a67b2e95
 }) => {
   const slotMap: Record<string, TimetableSlot[]> = {};
   slots.forEach(slot => {
@@ -84,6 +91,7 @@ const TimetableGrid: React.FC<TimetableGridProps> = ({
                   return (
                     <td key={key} className="border border-gray-200 align-top">
                       {slotEntries.length === 0 ? (
+<<<<<<< HEAD
                         <div className="px-3 py-3">
                           {editable ? (
                             <button
@@ -149,6 +157,40 @@ const TimetableGrid: React.FC<TimetableGridProps> = ({
                               </button>
                             );
                           })}
+=======
+                        <div className="px-3 py-3 text-xs text-gray-400 italic">Free</div>
+                      ) : (
+                        <div className="space-y-2 px-3 py-3">
+                          {slotEntries.map(entry => (
+                            <div
+                              key={entry.id}
+                              className={clsx(
+                                'rounded-lg border p-3 text-xs shadow-sm transition-all',
+                                highlightSection && entry.section === highlightSection
+                                  ? 'border-blue-500 bg-blue-50'
+                                  : 'border-transparent bg-gray-50'
+                              )}
+                              style={{ borderLeft: `4px solid ${entry.color || '#6366f1'}` }}
+                            >
+                              <div className="flex items-center justify-between gap-2">
+                                <span className="font-semibold text-gray-900">
+                                  {entry.subject?.name || entry.subjectId}
+                                </span>
+                                <Badge variant="outline" className="text-[10px]">
+                                  {entry.section || 'Section'}
+                                </Badge>
+                              </div>
+                              <div className="mt-1 text-gray-600">
+                                {entry.teacher?.name || entry.teacherId}
+                              </div>
+                              {entry.sessionLabel && (
+                                <div className="mt-1 text-[11px] text-gray-500">
+                                  {entry.sessionLabel}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+>>>>>>> 49762404994bfa5a6c0729878ee8a2e4a67b2e95
                         </div>
                       )}
                     </td>
