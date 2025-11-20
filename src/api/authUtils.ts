@@ -23,10 +23,7 @@ export const getAuthConfig = () => {
 
 // Firebase token refresh removed - using Clerk only
 export const refreshFirebaseToken = async (): Promise<string | null> => {
-<<<<<<< HEAD
-=======
   console.warn('Firebase token refresh is disabled. Using Clerk authentication only.');
->>>>>>> 49762404994bfa5a6c0729878ee8a2e4a67b2e95
   return null;
 };
 

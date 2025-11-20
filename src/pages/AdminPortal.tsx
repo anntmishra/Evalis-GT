@@ -11,7 +11,6 @@ import {
   Database, 
   BookOpen, 
   Calendar,
-  CalendarClock,
   Settings,
   UserPlus,
   AlertCircle,
@@ -40,12 +39,7 @@ import { getAllBatches } from "../api/batchService";
 import SemesterManagement from '../components/SemesterManagement';
 import config from "../config/environment";
 import GovernanceAdminPanel from "../components/GovernanceAdminPanel";
-<<<<<<< HEAD
-=======
-import AdminWeb3MintPanel from "../components/AdminWeb3MintPanel";
->>>>>>> 49762404994bfa5a6c0729878ee8a2e4a67b2e95
 import AdminIssueCertificate from "../components/AdminIssueCertificate";
-import AdminTimetablePanel from "../components/timetable/AdminTimetablePanel";
 // Removed CreateUserForm (Create Users section) per request
 
 const AdminPortal: React.FC = (): React.ReactElement => {
@@ -562,10 +556,6 @@ const AdminPortalContent: React.FC = (): React.ReactElement => {
             <TabsTrigger value="semesters" className="flex items-center gap-2 data-[state=active]:bg-black data-[state=active]:text-white">
               <Calendar className="h-4 w-4" />
               <span className="hidden sm:inline">Semesters</span>
-            </TabsTrigger>
-            <TabsTrigger value="timetables" className="flex items-center gap-2 data-[state=active]:bg-black data-[state=active]:text-white">
-              <CalendarClock className="h-4 w-4" />
-              <span className="hidden sm:inline">Timetables</span>
             </TabsTrigger>
             <TabsTrigger value="governance" className="flex items-center gap-2 data-[state=active]:bg-black data-[state=active]:text-white">
               <TrendingUp className="h-4 w-4" />
@@ -1305,30 +1295,10 @@ const AdminPortalContent: React.FC = (): React.ReactElement => {
             </Card>
           </TabsContent>
 
-          {/* Timetables Tab */}
-          <TabsContent value="timetables" className="space-y-6">
-            <Card className="border-0 shadow-md">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <CalendarClock className="h-5 w-5" />
-                  Timetable Planner
-                </CardTitle>
-                <CardDescription>Generate and manage AI-powered class schedules</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <AdminTimetablePanel />
-              </CardContent>
-            </Card>
-          </TabsContent>
-
           {/* Governance Tab */}
           <TabsContent value="governance" className="space-y-6">
             <GovernanceAdminPanel />
-<<<<<<< HEAD
             {/* Web3 mint panel removed */}
-=======
-            <AdminWeb3MintPanel />
->>>>>>> 49762404994bfa5a6c0729878ee8a2e4a67b2e95
             <AdminIssueCertificate />
           </TabsContent>
 
