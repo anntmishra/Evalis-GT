@@ -70,6 +70,12 @@ axios.interceptors.response.use(
 
 const refreshToken = async (): Promise<string | null> => {
   try {
+<<<<<<< HEAD
+=======
+    // Firebase authentication is disabled - using Clerk only
+    console.warn('Firebase token refresh is disabled. Using Clerk authentication only.');
+    
+>>>>>>> 49762404994bfa5a6c0729878ee8a2e4a67b2e95
     // Check for Clerk token
     const clerkToken = localStorage.getItem(config.AUTH.TOKEN_STORAGE_KEY);
     if (clerkToken) {

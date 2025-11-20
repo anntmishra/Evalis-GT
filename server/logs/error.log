@@ -422,6 +422,7 @@
 {"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError starting server: foreign key constraint \"TimetableSlots_timetableId_fkey\" cannot be implemented\u001b[39m","timestamp":"2025-09-27 17:02:44:244"}
 {"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError starting server: foreign key constraint \"TimetableSlots_timetableId_fkey\" cannot be implemented\u001b[39m","timestamp":"2025-09-27 17:05:31:531"}
 {"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError starting server: foreign key constraint \"TimetableSlots_timetableId_fkey\" cannot be implemented\u001b[39m","timestamp":"2025-09-27 17:07:34:734"}
+<<<<<<< HEAD
 {"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError starting server: foreign key constraint \"quizzes_teacherId_fkey\" cannot be implemented\u001b[39m","timestamp":"2025-09-30 13:04:17:417"}
 {"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError starting server: foreign key constraint \"quizzes_teacherId_fkey\" cannot be implemented\u001b[39m","timestamp":"2025-09-30 13:06:52:652"}
 {"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError starting server: relation \"quizzes_teacher_id\" already exists\u001b[39m","timestamp":"2025-09-30 13:30:57:3057"}
@@ -440,3 +441,5 @@
 {"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError starting server: relation \"quizzes_teacher_id\" already exists\u001b[39m","timestamp":"2025-11-20 23:10:10:1010"}
 {"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError starting server: relation \"quizzes_teacher_id\" already exists\u001b[39m","timestamp":"2025-11-20 23:12:28:1228"}
 {"level":"\u001b[31merror\u001b[39m","message":"\u001b[31mError starting server: relation \"quizzes_teacher_id\" already exists\u001b[39m","timestamp":"2025-11-20 23:14:38:1438"}
+=======
+>>>>>>> 49762404994bfa5a6c0729878ee8a2e4a67b2e95

@@ -40,6 +40,10 @@ import { getAllBatches } from "../api/batchService";
 import SemesterManagement from '../components/SemesterManagement';
 import config from "../config/environment";
 import GovernanceAdminPanel from "../components/GovernanceAdminPanel";
+<<<<<<< HEAD
+=======
+import AdminWeb3MintPanel from "../components/AdminWeb3MintPanel";
+>>>>>>> 49762404994bfa5a6c0729878ee8a2e4a67b2e95
 import AdminIssueCertificate from "../components/AdminIssueCertificate";
 import AdminTimetablePanel from "../components/timetable/AdminTimetablePanel";
 // Removed CreateUserForm (Create Users section) per request
@@ -1320,7 +1324,11 @@ const AdminPortalContent: React.FC = (): React.ReactElement => {
           {/* Governance Tab */}
           <TabsContent value="governance" className="space-y-6">
             <GovernanceAdminPanel />
+<<<<<<< HEAD
             {/* Web3 mint panel removed */}
+=======
+            <AdminWeb3MintPanel />
+>>>>>>> 49762404994bfa5a6c0729878ee8a2e4a67b2e95
             <AdminIssueCertificate />
           </TabsContent>
 

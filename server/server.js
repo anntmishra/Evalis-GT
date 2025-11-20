@@ -48,7 +48,11 @@ const governanceRoutes = require('./routes/governanceRoutes');
 const aiAnalyzerRoutes = require('./routes/aiAnalyzerRoutes');
 const merchandiseRoutes = require('./routes/merchandiseRoutes');
 const timetableRoutes = require('./routes/timetableRoutes');
+<<<<<<< HEAD
 const quizRoutes = require('./routes/quizRoutes');
+=======
+const { startGovernanceListener } = require('./web3/governanceListener');
+>>>>>>> 49762404994bfa5a6c0729878ee8a2e4a67b2e95
 
 // Function to try binding to ports recursively
 const startServerOnPort = (app, port, maxAttempts = 10) => {
@@ -317,7 +321,14 @@ const startServer = async () => {
     app.use('/api/ai-analyzer', aiAnalyzerRoutes);
     app.use('/api/merchandise', merchandiseRoutes);
   app.use('/api/timetables', timetableRoutes);
+<<<<<<< HEAD
     app.use('/api/quizzes', quizRoutes);
+=======
+    const web3Routes = require('./routes/web3Routes');
+    app.use('/api/web3', web3Routes);
+    const certificateRoutes = require('./routes/certificateRoutes');
+    app.use('/api/certificates', certificateRoutes);
+>>>>>>> 49762404994bfa5a6c0729878ee8a2e4a67b2e95
   app.use('/api/governance', governanceRoutes);
 
     // Test route for debugging CORS issues

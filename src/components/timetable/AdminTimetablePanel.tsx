@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Loader2,
@@ -11,10 +12,15 @@ import {
   Pencil,
   PlusCircle
 } from 'lucide-react';
+=======
+import React, { useEffect, useMemo, useState } from 'react';
+import { Loader2, RefreshCw, Sparkles, UploadCloud, Trash2, CheckCircle2, Eye, AlertTriangle } from 'lucide-react';
+>>>>>>> 49762404994bfa5a6c0729878ee8a2e4a67b2e95
 import { Button } from '../ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { Input } from '../ui/input';
+<<<<<<< HEAD
 import { Label } from '../ui/label';
 import {
   Dialog,
@@ -26,6 +32,10 @@ import {
 } from '../ui/dialog';
 import TimetableGrid from './TimetableGrid';
 import { Timetable, TimetableSlot, Subject, Teacher } from '../../types/university';
+=======
+import TimetableGrid from './TimetableGrid';
+import { Timetable, TimetableSlot } from '../../types/university';
+>>>>>>> 49762404994bfa5a6c0729878ee8a2e4a67b2e95
 import { getAllSemesters } from '../../api/semesterService';
 import { getAllBatches } from '../../api/batchService';
 import {
@@ -33,6 +43,7 @@ import {
   fetchTimetableById,
   fetchTimetables,
   generateTimetable,
+<<<<<<< HEAD
   updateTimetableStatus,
   createTimetableSlot,
   updateTimetableSlot,
@@ -41,6 +52,10 @@ import {
 } from '../../api/timetableService';
 import { getSubjectsBySemester } from '../../api/subjectService';
 import { getTeachers } from '../../api/teacherService';
+=======
+  updateTimetableStatus
+} from '../../api/timetableService';
+>>>>>>> 49762404994bfa5a6c0729878ee8a2e4a67b2e95
 
 interface BatchOption {
   id: string;

@@ -86,6 +86,7 @@ export const fetchStudentTimetable = async () => {
 export const fetchTimetableSlots = async (timetableId: number | string) => {
   const response = await axios.get(`${API_BASE}/${timetableId}/slots`, authHeaders('admin'));
   return response.data as { success: boolean; data: Timetable['slots'] };
+<<<<<<< HEAD
 };
 
 export interface ManualTimetableSlotPayload {
@@ -130,4 +131,6 @@ export const removeTimetableSlot = async (timetableId: number | string, slotId: 
     authHeaders('admin')
   );
   return response.data;
+=======
+>>>>>>> 49762404994bfa5a6c0729878ee8a2e4a67b2e95
 };

@@ -6,10 +6,14 @@ const {
   updateTimetableStatus,
   deleteTimetable,
   getTeacherTimetable,
+<<<<<<< HEAD
   getStudentTimetable,
   createManualTimetableSlot,
   updateManualTimetableSlot,
   removeManualTimetableSlot
+=======
+  getStudentTimetable
+>>>>>>> 49762404994bfa5a6c0729878ee8a2e4a67b2e95
 } = require('../services/timetableService');
 
 const { Timetable, TimetableSlot } = require('../models');
@@ -84,6 +88,7 @@ const getTimetableSlots = asyncHandler(async (req, res) => {
   res.json({ success: true, data: slots });
 });
 
+<<<<<<< HEAD
 const createSlot = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const slot = await createManualTimetableSlot(id, req.body);
@@ -102,6 +107,8 @@ const deleteSlot = asyncHandler(async (req, res) => {
   res.json({ success: true });
 });
 
+=======
+>>>>>>> 49762404994bfa5a6c0729878ee8a2e4a67b2e95
 module.exports = {
   triggerGeneration,
   getAllTimetables,
@@ -110,8 +117,12 @@ module.exports = {
   removeTimetable,
   getMyTeacherTimetable,
   getMyStudentTimetable,
+<<<<<<< HEAD
   getTimetableSlots,
   createSlot,
   updateSlot,
   deleteSlot
+=======
+  getTimetableSlots
+>>>>>>> 49762404994bfa5a6c0729878ee8a2e4a67b2e95
 };
