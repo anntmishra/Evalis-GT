@@ -58,3 +58,16 @@ server.log
 # Markdown docs
 *.md
 !/README.md
+
+# Root utility scripts
+/auth-troubleshoot.js
+/check-*.js
+/create-*.js
+/debug-*.js
+/deploy.sh
+/find-*.js
+/monitor.sh
+/production-deploy.sh
+/test-*.js
+/test-*.sh
+/verify-web3-online.js
