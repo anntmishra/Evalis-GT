@@ -20,8 +20,9 @@ build/
 .env.development
 .env.production
 .env.clerk
-!.env.example
-!.env.production.example
+.env.example
+.env.production.example
+.env.sample
 
 # Logs
 npm-debug.log*
