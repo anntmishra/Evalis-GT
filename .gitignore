@@ -54,3 +54,7 @@ cleanup-report.json
 server.log
 *.log
 .venv/
+
+# Markdown docs
+*.md
+!/README.md
