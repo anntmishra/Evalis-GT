@@ -575,14 +575,15 @@ export const deleteAssignment = async (assignmentId: string) => {
 };
 
 // Save annotated PDF for a submission
-export const saveAnnotatedPDF = async (submissionId: number, annotations: any[], gradedPdfUrl: string) => {
+export const saveAnnotatedPDF = async (submissionId: number, annotations: any[], gradedPdfUrl: string, score?: number) => {
   try {
     console.log('Saving annotated PDF for submission:', submissionId);
     const response = await axios.post(
       `${config.API_ENDPOINTS.SUBMISSIONS}/${submissionId}/annotated-pdf`,
       {
         annotations,
-        gradedPdfUrl
+        gradedPdfUrl,
+        score
       },
       authConfig()
     );

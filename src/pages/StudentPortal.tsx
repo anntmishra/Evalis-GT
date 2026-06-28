@@ -28,7 +28,8 @@ import {
     Eye,
     Filter,
     Coins,
-    HelpCircle
+    HelpCircle,
+    RefreshCw
 } from "lucide-react";
 import Header from "../components/Header";
 import StudentWeb3Rewards from "../components/StudentWeb3Rewards";
@@ -96,6 +97,12 @@ const StudentPortalContent: React.FC = () => {
     const [assignments, setAssignments] = useState<any[]>([]);
     const [certs, setCerts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [errorState, setErrorState] = useState({
+        subjects: false,
+        submissions: false,
+        assignments: false,
+        profile: false
+    });
     const [notification, setNotification] = useState({
         open: false,
         message: "",
@@ -155,24 +162,6 @@ const StudentPortalContent: React.FC = () => {
         }
     }, [navigate]);
 
-    const initializeData = async () => {
-        try {
-            setLoading(true);
-            await Promise.all([
-                fetchStudentProfile(),
-                fetchSubjects(),
-                fetchSubmissions(),
-                fetchAssignments(),
-                fetchCertificates()
-            ]);
-        } catch (error) {
-            console.error('Error initializing data:', error);
-            showNotification('Failed to load data. Please try again.', 'error');
-        } finally {
-            setLoading(false);
-        }
-    };
-
     const fetchCertificates = async () => {
         try { const list = await listMyCertificates(); setCerts(list || []); } catch (e) { /* ignore */ }
     };
@@ -182,9 +171,11 @@ const StudentPortalContent: React.FC = () => {
             if (currentUser?.id) {
                 const response = await getStudentProfile();
                 setStudent(response.data || response);
+                setErrorState(prev => ({ ...prev, profile: false }));
             }
         } catch (error) {
             console.error('Error fetching student profile:', error);
+            setErrorState(prev => ({ ...prev, profile: true }));
         }
     };
 
@@ -195,8 +186,10 @@ const StudentPortalContent: React.FC = () => {
             console.log('[StudentPortal] Fetched subjects:', subjectData);
             setSubjects(subjectData as Subject[] || []);
             setStats(prev => ({ ...prev, totalSubjects: (subjectData || []).length }));
+            setErrorState(prev => ({ ...prev, subjects: false }));
         } catch (error) {
             console.error('Error fetching subjects:', error);
+            setErrorState(prev => ({ ...prev, subjects: true }));
             // Add mock subjects for demo purposes when API fails
             const mockSubjects: Subject[] = [
                 {
@@ -242,7 +235,7 @@ const StudentPortalContent: React.FC = () => {
         }
     };
 
-    const fetchSubmissions = async () => {
+    const fetchSubmissions = async (retryCount = 0) => {
         try {
             // Use the current student's endpoint without passing ID
             const submissionsResp: any = await getStudentSubmissions();
@@ -265,12 +258,21 @@ const StudentPortalContent: React.FC = () => {
                 averageGrade: avgGrade,
                 cgpa: cgpa
             }));
+            setErrorState(prev => ({ ...prev, submissions: false }));
         } catch (error) {
-            console.error('Error fetching submissions:', error);
+            console.error(`Error fetching submissions (attempt ${retryCount + 1}):`, error);
+            
+            // Retry logic for submissions
+            if (retryCount < 2) {
+                console.log(`Retrying fetchSubmissions in 1s...`);
+                setTimeout(() => fetchSubmissions(retryCount + 1), 1000);
+            } else {
+                setErrorState(prev => ({ ...prev, submissions: true }));
+            }
         }
     };
 
-    const fetchAssignments = async () => {
+    const fetchAssignments = async (retryCount = 0) => {
         try {
             console.log('[StudentPortal] Fetching assignments for current student');
             
@@ -285,9 +287,48 @@ const StudentPortalContent: React.FC = () => {
             ).length || 0;
             
             setStats(prev => ({ ...prev, pendingAssignments: pending }));
+            setErrorState(prev => ({ ...prev, assignments: false }));
         } catch (error) {
-            console.error('Error fetching assignments:', error);
+            console.error(`Error fetching assignments (attempt ${retryCount + 1}):`, error);
+            
+            // Retry logic for assignments
+            if (retryCount < 2) {
+                console.log(`Retrying fetchAssignments in 1s...`);
+                setTimeout(() => fetchAssignments(retryCount + 1), 1000);
+            } else {
+                setErrorState(prev => ({ ...prev, assignments: true }));
+            }
         }
+    };
+
+    const initializeData = async () => {
+        try {
+            setLoading(true);
+            
+            // Fetch profile first to ensure authentication is valid and token is refreshed if needed
+            await fetchStudentProfile();
+
+            // Then fetch the rest of the data in parallel
+            // We use Promise.allSettled to ensure one failure doesn't stop others
+            // (though individual functions catch their own errors, this is extra safety)
+            await Promise.all([
+                fetchSubjects(),
+                fetchSubmissions(),
+                fetchAssignments(),
+                fetchCertificates()
+            ]);
+        } catch (error) {
+            console.error('Error initializing data:', error);
+            showNotification('Failed to load data. Please try again.', 'error');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const refreshData = async () => {
+        showNotification("Refreshing data...", "success");
+        await initializeData();
+        showNotification("Data refreshed", "success");
     };
 
     const showNotification = (message: string, severity: "success" | "error") => {
@@ -494,27 +535,39 @@ const StudentPortalContent: React.FC = () => {
 
             <div className="container mx-auto px-6 py-8">
                 {/* Header Section */}
-                <div className="mb-8">
-                    <div className="flex items-center gap-3 mb-2">
-                        <div className="p-2 bg-black rounded-lg">
-                            <GraduationCap className="h-6 w-6 text-white" />
+                <div className="mb-8 flex justify-between items-start">
+                    <div>
+                        <div className="flex items-center gap-3 mb-2">
+                            <div className="p-2 bg-black rounded-lg">
+                                <GraduationCap className="h-6 w-6 text-white" />
+                            </div>
+                            <div>
+                                <h1 className="text-3xl font-bold text-black">Student Dashboard</h1>
+                                <p className="text-gray-600">Welcome back, {student?.name || currentUser?.name || 'Student'}!</p>
+                            </div>
                         </div>
-                        <div>
-                            <h1 className="text-3xl font-bold text-black">Student Dashboard</h1>
-                            <p className="text-gray-600">Welcome back, {student?.name || currentUser?.name || 'Student'}!</p>
-                        </div>
+                        {certs.length > 0 && (
+                            <div className="flex flex-wrap gap-2 mt-2">
+                                {certs.slice(0,3).map((c: any) => (
+                                    <Badge key={c.id} className={
+                                        c.lastVerificationOk ? 'bg-green-100 text-green-800 border-green-200' : 'bg-yellow-100 text-yellow-800 border-yellow-200'
+                                    }>
+                                        Certificate #{c.tokenId || c.id}: {c.lastVerificationOk ? 'Authentic' : 'Unverified'}
+                                    </Badge>
+                                ))}
+                            </div>
+                        )}
                     </div>
-                                        {certs.length > 0 && (
-                                            <div className="flex flex-wrap gap-2 mt-2">
-                                                {certs.slice(0,3).map((c: any) => (
-                                                    <Badge key={c.id} className={
-                                                        c.lastVerificationOk ? 'bg-green-100 text-green-800 border-green-200' : 'bg-yellow-100 text-yellow-800 border-yellow-200'
-                                                    }>
-                                                        Certificate #{c.tokenId || c.id}: {c.lastVerificationOk ? 'Authentic' : 'Unverified'}
-                                                    </Badge>
-                                                ))}
-                                            </div>
-                                        )}
+                    <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={refreshData}
+                        disabled={loading}
+                        className="flex items-center gap-2"
+                    >
+                        <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                        Refresh
+                    </Button>
                 </div>
 
                 {/* Notification */}
@@ -896,7 +949,9 @@ const StudentPortalContent: React.FC = () => {
                                     <Card className="border border-orange-200 bg-orange-50">
                                         <CardContent className="p-4 text-center">
                                             <Clock className="h-8 w-8 text-orange-600 mx-auto mb-2" />
-                                            <div className="text-2xl font-bold text-orange-600">{stats.pendingAssignments}</div>
+                                            <div className="text-2xl font-bold text-orange-600 mb-2">
+                                                {stats.pendingAssignments}
+                                            </div>
                                             <p className="text-sm text-orange-800 font-medium">Pending</p>
                                         </CardContent>
                                     </Card>
@@ -904,7 +959,9 @@ const StudentPortalContent: React.FC = () => {
                                     <Card className="border border-green-200 bg-green-50">
                                         <CardContent className="p-4 text-center">
                                             <CheckCircle className="h-8 w-8 text-green-600 mx-auto mb-2" />
-                                            <div className="text-2xl font-bold text-green-600">{stats.completedAssignments}</div>
+                                            <div className="text-2xl font-bold text-green-600 mb-2">
+                                                {stats.completedAssignments}
+                                            </div>
                                             <p className="text-sm text-green-800 font-medium">Submitted</p>
                                         </CardContent>
                                     </Card>
@@ -921,7 +978,21 @@ const StudentPortalContent: React.FC = () => {
                                 </div>
 
                                 {/* Assignment List */}
-                                {assignments.length > 0 ? (
+                                {errorState.assignments ? (
+                                    <div className="text-center py-8 bg-red-50 rounded-lg border border-red-200">
+                                        <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+                                        <h3 className="text-lg font-semibold text-red-800 mb-2">Failed to load assignments</h3>
+                                        <p className="text-red-600 mb-4">There was a problem fetching your assignments. Please try again.</p>
+                                        <Button 
+                                            onClick={() => fetchAssignments()} 
+                                            variant="outline"
+                                            className="border-red-300 text-red-700 hover:bg-red-100"
+                                        >
+                                            <RefreshCw className="h-4 w-4 mr-2" />
+                                            Retry
+                                        </Button>
+                                    </div>
+                                ) : assignments.length > 0 ? (
                                     <div className="space-y-4">
                                         {assignments.map((assignment, index) => (
                                             <Card key={index} className="border border-gray-200 hover:shadow-md transition-shadow">
@@ -1155,7 +1226,21 @@ const StudentPortalContent: React.FC = () => {
                                     </div>
 
                                     {/* Grades List */}
-                                    {submissions.filter(s => s.score != null && s.graded).length > 0 ? (
+                                    {errorState.submissions ? (
+                                        <div className="text-center py-8 bg-red-50 rounded-lg border border-red-200">
+                                            <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+                                            <h3 className="text-lg font-semibold text-red-800 mb-2">Failed to load grades</h3>
+                                            <p className="text-red-600 mb-4">There was a problem fetching your grades. Please try again.</p>
+                                            <Button 
+                                                onClick={() => fetchSubmissions()} 
+                                                variant="outline"
+                                                className="border-red-300 text-red-700 hover:bg-red-100"
+                                            >
+                                                <RefreshCw className="h-4 w-4 mr-2" />
+                                                Retry
+                                            </Button>
+                                        </div>
+                                    ) : submissions.filter(s => s.score != null && s.graded).length > 0 ? (
                                         <div className="space-y-3">
                                             {submissions.filter(s => s.score != null && s.graded).map((submission, index) => (
                                                 <Card key={index} className="border border-gray-200">

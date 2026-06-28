@@ -238,6 +238,7 @@ const updateSubmission = asyncHandler(async (req, res) => {
   let badgeRewardResult = null;
 
   // Automatically award badge-based rewards when score qualifies (75% or higher)
+  /* Web3 integration temporarily disabled
   if (score !== undefined && score >= 75) {
     console.log('[DEBUG] Automatic badge awarding triggered:', {
       submissionId: submission.id,
@@ -344,6 +345,7 @@ const updateSubmission = asyncHandler(async (req, res) => {
       tokenAwardResult = { error: 'Token awarding failed: ' + error.message };
     }
   }
+  */
 
   // Fetch the updated submission with associations for response
   const fullSubmission = await Submission.findByPk(updatedSubmission.id, {
@@ -598,7 +600,7 @@ const submitAssignment = asyncHandler(async (req, res) => {
  */
 const saveAnnotatedPDF = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const { annotations, gradedPdfUrl } = req.body;
+  const { annotations, gradedPdfUrl, score } = req.body;
 
   const submission = await Submission.findByPk(id);
 
@@ -607,14 +609,26 @@ const saveAnnotatedPDF = asyncHandler(async (req, res) => {
     throw new Error('Submission not found');
   }
 
-  // Update submission with annotated PDF URL and annotations
-  await submission.update({
+  const updateData = {
     gradedFileUrl: gradedPdfUrl,
     annotations: JSON.stringify(annotations),
     gradedBy: req.user.id,
     gradedDate: new Date(),
     status: 'graded'
-  });
+  };
+
+  if (score !== undefined && score !== null && score !== '') {
+    const scoreNum = Number(score);
+    if (!isNaN(scoreNum)) {
+      updateData.score = scoreNum;
+      updateData.letterGrade = calculateLetterGrade(scoreNum);
+      updateData.gradePoints = calculateGradePoints(scoreNum);
+      updateData.graded = true;
+    }
+  }
+
+  // Update submission with annotated PDF URL and annotations
+  await submission.update(updateData);
 
   res.json({
     message: 'Annotated PDF saved successfully',

@@ -44,7 +44,7 @@ interface PDFAnnotatorProps {
   fileUrl: string;
   studentName: string;
   submissionId: string | number;
-  onSave: (annotations: Annotation[], gradedPdfUrl: string) => void;
+  onSave: (annotations: Annotation[], gradedPdfUrl: string, score?: number) => void;
   existingAnnotations?: Annotation[];
 }
 
@@ -64,6 +64,7 @@ const PDFAnnotator: React.FC<PDFAnnotatorProps> = ({
   const [showCommentInput, setShowCommentInput] = useState<boolean>(false);
   const [pendingAnnotation, setPendingAnnotation] = useState<Omit<Annotation, 'id' | 'text'> | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [score, setScore] = useState<string>('');
 
   const pageRef = useRef<HTMLDivElement>(null);
 
@@ -254,7 +255,7 @@ const PDFAnnotator: React.FC<PDFAnnotatorProps> = ({
   const handleSave = async () => {
     try {
       const gradedPdfUrl = await generateAnnotatedPDF();
-      onSave(annotations, gradedPdfUrl);
+      onSave(annotations, gradedPdfUrl, score ? Number(score) : undefined);
     } catch (error) {
       console.error('Error saving annotations:', error);
       alert('Failed to save annotations. Please try again.');
@@ -352,6 +353,18 @@ const PDFAnnotator: React.FC<PDFAnnotatorProps> = ({
 
             {/* Actions */}
             <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 mr-2 bg-gray-100 p-1 rounded">
+                <span className="text-sm font-medium text-gray-700 ml-1">Score:</span>
+                <input
+                  type="number"
+                  min="0"
+                  max="100"
+                  className="w-16 h-7 px-2 border border-gray-300 rounded text-sm"
+                  placeholder="0-100"
+                  value={score}
+                  onChange={(e) => setScore(e.target.value)}
+                />
+              </div>
               <Button
                 variant="outline"
                 size="sm"
@@ -359,7 +372,7 @@ const PDFAnnotator: React.FC<PDFAnnotatorProps> = ({
                 disabled={isLoading}
               >
                 <Save className="h-4 w-4 mr-1" />
-                {isLoading ? 'Saving...' : 'Save Grade'}
+                {isLoading ? 'Saving...' : 'Save & Grade'}
               </Button>
             </div>
           </div>

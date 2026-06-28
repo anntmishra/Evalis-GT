@@ -256,6 +256,8 @@ const TeacherPortalContent: React.FC = () => {
 
     // Check wallet connection for automatic rewards
     const gradeNumber = Number(grade);
+    /* 
+    // Web3 integration temporarily disabled
     if (gradeNumber >= 75) {
       // Will automatically award badge-based rewards, so student must have wallet linked
       const submission = submissions.find(s => s.id === submissionId);
@@ -264,6 +266,7 @@ const TeacherPortalContent: React.FC = () => {
         return;
       }
     }
+    */
 
     try {
       // Call the grading API
@@ -318,14 +321,17 @@ const TeacherPortalContent: React.FC = () => {
     setSelectedSubmission(null);
   };
 
-  const handlePDFAnnotationSave = async (annotations: any[], gradedPdfUrl: string) => {
+  const handlePDFAnnotationSave = async (annotations: any[], gradedPdfUrl: string, score?: number) => {
     try {
       // Save the annotated PDF to the server
-      await saveAnnotatedPDF(selectedSubmission.id, annotations, gradedPdfUrl);
+      await saveAnnotatedPDF(selectedSubmission.id, annotations, gradedPdfUrl, score);
 
       console.log('PDF annotations saved:', annotations);
       console.log('Graded PDF URL:', gradedPdfUrl);
-      showNotification('PDF annotations saved successfully!', 'success');
+      if (score !== undefined) {
+        console.log('Grade saved:', score);
+      }
+      showNotification('PDF annotations and grade saved successfully!', 'success');
 
       // Refresh submissions to get updated data
       await fetchSubmissions();
@@ -1165,12 +1171,12 @@ const TeacherPortalContent: React.FC = () => {
                                         onClick={() => handleGradeSubmission(submission.id)}
                                       >
                                         Submit Grade
-                                        {gradingScores[submission.id] >= 80 && (
+                                        {false && gradingScores[submission.id] >= 80 && (
                                           <span className="ml-2 text-xs bg-green-400 text-green-900 px-2 py-1 rounded">
                                             + Badge + NFT
                                           </span>
                                         )}
-                                        {gradingScores[submission.id] >= 75 && gradingScores[submission.id] < 80 && (
+                                        {false && gradingScores[submission.id] >= 75 && gradingScores[submission.id] < 80 && (
                                           <span className="ml-2 text-xs bg-yellow-400 text-yellow-900 px-2 py-1 rounded">
                                             + Badge Only
                                           </span>
@@ -1193,7 +1199,7 @@ const TeacherPortalContent: React.FC = () => {
                                 </Button>
                                 
                                 {/* NFT Certificate Award Section - Show for all graded submissions */}
-                                {submission.graded && (
+                                {false && submission.graded && (
                                   <div className="mt-3 p-3 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg border border-yellow-200">
                                     <div className="flex items-center justify-between">
                                       <div className="flex-1">

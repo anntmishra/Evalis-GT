@@ -1,10 +1,11 @@
-const { clerkClient } = require('@clerk/express');
-const { verifyToken } = require('@clerk/backend');
+const { createClerkClient, verifyToken } = require('@clerk/backend');
 
 // Initialize clerk client with secret key from environment
 if (!process.env.CLERK_SECRET_KEY) {
   console.warn('CLERK_SECRET_KEY not found in environment. Clerk authentication will not work.');
 }
+
+const clerkClient = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
 
 /**
  * Verify a Clerk session token from Authorization bearer header.
@@ -70,4 +71,4 @@ async function mapClerkUserToLocal(user, models, options = {}) {
   return null;
 }
 
-module.exports = { verifyClerkToken, mapClerkUserToLocal };
+module.exports = { verifyClerkToken, mapClerkUserToLocal, clerkClient };

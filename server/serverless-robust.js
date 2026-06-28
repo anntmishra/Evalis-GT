@@ -41,60 +41,63 @@ async function requireAdmin(req, res, next) {
     const jwt = require('jsonwebtoken');
     const secret = process.env.JWT_SECRET || 'fallback-secret';
     let decoded;
+    let isVerified = false;
+
+    // 1. Try Local JWT Verification
     try {
       decoded = jwt.verify(token, secret);
-      diag.verified = true;
+      isVerified = true;
+      diag.verified = 'local-jwt';
     } catch (verifyErr) {
-      diag.verifyError = verifyErr.message;
-      // Try soft-decode to inspect role/email
+      diag.localVerifyError = verifyErr.message;
+      
+      // 2. Try Clerk Verification
       try {
-        decoded = jwt.decode(token) || {};
-        diag.softDecoded = true;
-      } catch (decodeErr) {
-        diag.decodeError = decodeErr.message;
-        return res.status(401).json({ success:false, message:'Token decode failed', diag });
+        const { verifyClerkToken } = require('./utils/clerk');
+        const clerkUser = await verifyClerkToken(token);
+        if (clerkUser) {
+           // Map Clerk user to local admin
+           const { Admin } = require('./models');
+           // Ensure DB connected
+           if (!dbConnected) { const { connectDB } = require('./config/db'); await connectDB(); dbConnected = true; }
+           
+           const primaryEmail = clerkUser.emailAddresses?.[0]?.emailAddress;
+           const adminRow = await Admin.findOne({ 
+             where: { 
+               email: primaryEmail 
+             } 
+           });
+           
+           if (adminRow) {
+             decoded = { 
+               id: adminRow.id, 
+               username: adminRow.username, 
+               email: adminRow.email, 
+               role: 'admin',
+               clerkId: clerkUser.id
+             };
+             isVerified = true;
+             diag.verified = 'clerk';
+           } else {
+             diag.clerkUserFound = true;
+             diag.adminMatch = false;
+           }
+        }
+      } catch (clerkErr) {
+        diag.clerkVerifyError = clerkErr.message;
       }
     }
 
-    // Accept if explicit role=admin
+    if (!isVerified) {
+       diag.rejected = true;
+       return res.status(403).json({ success:false, message:'Invalid or expired token', diag });
+    }
+
+    // Accept if role=admin
     if (decoded && decoded.role === 'admin') {
       req.admin = decoded;
       diag.accepted = 'role-admin';
       return next();
-    }
-
-    // Fallback: if token has email/username matching an Admin row
-    const candidateEmail = decoded?.email || decoded?.user?.email;
-    const candidateUsername = decoded?.username;
-    if (candidateEmail || candidateUsername) {
-      try {
-        const { Admin } = require('./models');
-        let where = {};
-        if (candidateEmail) where.email = candidateEmail;
-        if (candidateUsername) where.username = candidateUsername;
-  const adminRow = await Admin.findOne({ where });
-        if (adminRow) {
-          req.admin = { id: adminRow.id, email: adminRow.email, username: adminRow.username, role: 'admin', fallback: true };
-          diag.accepted = 'db-admin-match';
-          return next();
-        }
-        diag.dbAdminMatch = false;
-      } catch (dbErr) {
-        diag.dbError = dbErr.message;
-      }
-    }
-
-    // Final fallback: if only one admin exists in DB and no token role but we have any token (development easing)
-    try {
-      const { Admin } = require('./models');
-  const count = await Admin.count();
-      if (count === 1 && process.env.DEV_SINGLE_ADMIN_FALLBACK === 'true') {
-        diag.singleAdminBypass = true;
-        return next();
-      }
-      diag.singleAdminBypass = false;
-    } catch (cErr) {
-      diag.singleAdminCheckError = cErr.message;
     }
 
     diag.rejected = true;
@@ -393,17 +396,74 @@ app.post('/api/auth/teacher/login', async (req, res) => {
 });
 
 // Auth profile (admin/teacher) - returns decoded token user
-app.get('/api/auth/profile', (req, res) => {
+app.get('/api/auth/profile', async (req, res) => {
   try {
     const auth = req.headers.authorization || '';
     if (!auth.startsWith('Bearer ')) return res.status(401).json({ message: 'No token' });
     const token = auth.slice(7);
     const jwt = require('jsonwebtoken');
     const secret = process.env.JWT_SECRET || 'fallback-secret';
+    
     let decoded;
-    try { decoded = jwt.verify(token, secret); } catch (e) { return res.status(401).json({ message: 'Invalid token', error: e.message }); }
-    res.json({ user: decoded, issuedAt: decoded.iat, expiresAt: decoded.exp });
+    let authSource = 'jwt';
+
+    // 1. Try Local JWT
+    try { 
+      decoded = jwt.verify(token, secret); 
+    } catch (e) { 
+      // 2. Try Clerk Token
+      try {
+        console.log('Local JWT failed, trying Clerk verification...');
+        const { verifyClerkToken, mapClerkUserToLocal } = require('./utils/clerk');
+        
+        // Ensure DB connection for mapping
+        if (!dbConnected) {
+          const { connectDB } = require('./config/db');
+          await connectDB();
+          dbConnected = true;
+        }
+        
+        const clerkUser = await verifyClerkToken(token);
+        if (clerkUser) {
+          const { Student, Teacher, Admin } = require('./models');
+          const mapped = await mapClerkUserToLocal(clerkUser, { Student, Teacher, Admin });
+          
+          if (mapped && mapped.user) {
+            decoded = {
+              id: mapped.user.id || mapped.user.username,
+              email: mapped.user.email,
+              role: mapped.role,
+              name: mapped.user.name,
+              iat: Math.floor(Date.now() / 1000),
+              exp: Math.floor(Date.now() / 1000) + 3600 // Mock expiry
+            };
+            authSource = 'clerk';
+          } else {
+             // Valid Clerk user but no local DB record found
+             // Return basic info from Clerk so frontend doesn't crash, but role might be limited
+             const primaryEmail = clerkUser.emailAddresses?.[0]?.emailAddress;
+             decoded = {
+               id: clerkUser.id,
+               email: primaryEmail,
+               role: 'guest', // or 'student' default?
+               name: `${clerkUser.firstName || ''} ${clerkUser.lastName || ''}`.trim(),
+               iat: Math.floor(Date.now() / 1000),
+               exp: Math.floor(Date.now() / 1000) + 3600
+             };
+             authSource = 'clerk-unmapped';
+          }
+        } else {
+           throw new Error('Clerk verification failed');
+        }
+      } catch (clerkErr) {
+        console.error('Token verification failed (Local & Clerk):', clerkErr.message);
+        return res.status(401).json({ message: 'Invalid token', error: e.message, clerkError: clerkErr.message }); 
+      }
+    }
+    
+    res.json({ user: decoded, issuedAt: decoded.iat, expiresAt: decoded.exp, authSource });
   } catch (e) {
+    console.error('Profile fetch error:', e);
     res.status(500).json({ message: 'Profile fetch failed', error: e.message });
   }
 });
@@ -724,7 +784,7 @@ app.delete('/api/teachers/:id', requireAdmin, async (req, res) => {
     // Delete from Clerk if clerkId exists
     if (teacher.clerkId) {
       try {
-        const { clerkClient } = require('@clerk/express');
+        const { clerkClient } = require('./utils/clerk');
         await clerkClient.users.deleteUser(teacher.clerkId);
         console.log(`✅ Deleted Clerk user: ${teacher.clerkId}`);
       } catch (clerkError) {
@@ -833,7 +893,7 @@ app.delete('/api/teachers/:id', async (req, res) => {
     // Delete from Clerk if clerkId exists
     if (teacher.clerkId) {
       try {
-        const { clerkClient } = require('@clerk/express');
+        const { clerkClient } = require('./utils/clerk');
         await clerkClient.users.deleteUser(teacher.clerkId);
         console.log(`✅ Deleted Clerk user: ${teacher.clerkId}`);
       } catch (clerkError) {
@@ -1224,7 +1284,7 @@ app.delete('/api/students/:id', async (req, res) => {
     // Delete from Clerk if clerkId exists
     if (student.clerkId) {
       try {
-        const { clerkClient } = require('@clerk/express');
+        const { clerkClient } = require('./utils/clerk');
         await clerkClient.users.deleteUser(student.clerkId);
         console.log(`✅ Deleted Clerk user: ${student.clerkId}`);
       } catch (clerkError) {
@@ -2587,7 +2647,7 @@ app.delete('/api/admin/teachers/:id', async (req, res) => {
     // Delete from Clerk if clerkId exists
     if (teacher.clerkId) {
       try {
-        const { clerkClient } = require('@clerk/express');
+        const { clerkClient } = require('./utils/clerk');
         await clerkClient.users.deleteUser(teacher.clerkId);
         console.log(`✅ Deleted Clerk user: ${teacher.clerkId} for teacher ${teacher.id}`);
       } catch (clerkError) {
