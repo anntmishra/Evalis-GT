@@ -29,9 +29,6 @@ RUN mkdir -p /app/server/uploads && \
     chmod 755 /app/server/uploads && \
     chmod 755 /app/server/logs
 
-# Copy environment file template
-COPY .env.example ./.env.example
-
 # Switch to non-root user
 USER nextjs
 
