@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { getTeacherQuizzes, deleteQuiz } from '../api/quizService';
+import { getTeacherQuizzes, deleteQuiz, publishQuiz, publishQuizResults } from '../api/quizService';
 import TeacherQuizCreator from './TeacherQuizCreator';
 import TeacherQuizResults from './TeacherQuizResults';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
-import { Plus, Trash2, BarChart2, Clock, BookOpen, Users } from 'lucide-react';
+import { Plus, Trash2, BarChart2, Clock, BookOpen, Users, Send, CheckCircle2 } from 'lucide-react';
 import { Badge } from './ui/badge';
 
 const TeacherQuizManager: React.FC = () => {
@@ -12,6 +12,9 @@ const TeacherQuizManager: React.FC = () => {
   const [quizzes, setQuizzes] = useState<any[]>([]);
   const [selectedQuizId, setSelectedQuizId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
+  const [actionId, setActionId] = useState<string | null>(null);
 
   useEffect(() => {
     if (view === 'list') {
@@ -21,11 +24,11 @@ const TeacherQuizManager: React.FC = () => {
 
   const loadQuizzes = async () => {
     try {
-      setLoading(true);
+      setLoading(true); setError('');
       const data = await getTeacherQuizzes();
       setQuizzes(data);
     } catch (error) {
-      console.error('Error loading quizzes:', error);
+      setError('Unable to load quizzes. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -40,6 +43,32 @@ const TeacherQuizManager: React.FC = () => {
         console.error('Error deleting quiz:', error);
         alert('Failed to delete quiz');
       }
+    }
+  };
+
+  const handlePublishQuiz = async (quizId: string) => {
+    try {
+      setActionId(quizId); setError(''); setNotice('');
+      await publishQuiz(quizId);
+      setNotice('Quiz published to students.');
+      await loadQuizzes();
+    } catch (error: any) {
+      setError(error.response?.data?.message || 'Unable to publish the quiz.');
+    } finally {
+      setActionId(null);
+    }
+  };
+
+  const handlePublishResults = async (quizId: string) => {
+    try {
+      setActionId(quizId); setError(''); setNotice('');
+      const result = await publishQuizResults(quizId);
+      setNotice(`${result.publishedAttempts} completed result${result.publishedAttempts === 1 ? '' : 's'} published to students.`);
+      await loadQuizzes();
+    } catch (error: any) {
+      setError(error.response?.data?.message || 'Unable to publish quiz results.');
+    } finally {
+      setActionId(null);
     }
   };
 
@@ -69,15 +98,17 @@ const TeacherQuizManager: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">My Quizzes</h2>
-        <Button onClick={() => setView('create')} className="bg-black text-white hover:bg-gray-800">
+    <div className="quiz-workspace space-y-6">
+      <div className="quiz-heading"><div><span className="eyebrow">ASSESSMENTS</span><h2>Quizzes that move learning forward.</h2><p>Create, review and understand how your students are doing.</p></div>
+        <Button onClick={() => setView('create')} className="quiz-create-button">
           <Plus className="h-4 w-4 mr-2" />
           Create New Quiz
         </Button>
       </div>
 
+      {error && <div role="alert" className="workspace-error">{error}<button onClick={loadQuizzes}>Try again</button></div>}
+      {notice && <div role="status" className="workspace-success"><CheckCircle2 size={17}/>{notice}</div>}
+      {!loading && quizzes.length > 0 && <div className="quiz-summary"><div><span>YOUR QUIZZES</span><strong>{quizzes.length}</strong></div><div><span>LIVE WITH STUDENTS</span><strong>{quizzes.filter(quiz => quiz.isPublished).length}</strong></div><div><span>RESULTS RELEASED</span><strong>{quizzes.filter(quiz => quiz.showResultsImmediately).length}</strong></div></div>}
       {loading ? (
         <div className="text-center py-8">Loading quizzes...</div>
       ) : quizzes.length === 0 ? (
@@ -94,9 +125,9 @@ const TeacherQuizManager: React.FC = () => {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4">
+        <div className="quiz-grid">
           {quizzes.map((quiz) => (
-            <Card key={quiz.id} className="hover:shadow-md transition-shadow">
+            <Card key={quiz.id} className="quiz-card">
               <CardContent className="p-6">
                 <div className="flex justify-between items-start">
                   <div>
@@ -125,12 +156,31 @@ const TeacherQuizManager: React.FC = () => {
                   
                   <div className="flex flex-col gap-2">
                     <Badge variant={quiz.isPublished ? 'default' : 'secondary'} className={quiz.isPublished ? 'bg-green-100 text-green-800 hover:bg-green-200' : ''}>
-                      {quiz.isPublished ? 'Published' : 'Draft'}
+                      {quiz.isPublished ? 'Live' : 'Draft'}
+                    </Badge>
+                    <Badge variant={quiz.showResultsImmediately ? 'default' : 'secondary'} className={quiz.showResultsImmediately ? 'bg-blue-100 text-blue-800 hover:bg-blue-200' : ''}>
+                      {quiz.showResultsImmediately ? 'Results published' : 'Results private'}
                     </Badge>
                   </div>
                 </div>
 
                 <div className="mt-6 flex gap-3 border-t pt-4">
+                  {!quiz.isPublished && <Button
+                    className="flex-1"
+                    disabled={actionId === quiz.id}
+                    onClick={() => void handlePublishQuiz(quiz.id)}
+                  >
+                    <Send className="h-4 w-4 mr-2" />
+                    Publish Quiz
+                  </Button>}
+                  {quiz.isPublished && !quiz.showResultsImmediately && <Button
+                    className="flex-1"
+                    disabled={actionId === quiz.id || !(quiz.QuizAttempts || []).some((attempt: any) => attempt.status === 'submitted')}
+                    onClick={() => void handlePublishResults(quiz.id)}
+                  >
+                    <Send className="h-4 w-4 mr-2" />
+                    {(quiz.QuizAttempts || []).some((attempt: any) => attempt.status === 'submitted') ? 'Publish Results' : 'Waiting for attempts'}
+                  </Button>}
                   <Button 
                     variant="outline" 
                     className="flex-1"

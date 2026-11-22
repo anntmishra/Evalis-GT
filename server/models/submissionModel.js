@@ -1,5 +1,6 @@
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/db');
+const { DEFAULT_TENANT_ID } = require('../config/defaultTenant');
 
 const Submission = sequelize.define('Submission', {
   id: {
@@ -10,26 +11,17 @@ const Submission = sequelize.define('Submission', {
   studentId: {
     type: DataTypes.STRING,
     allowNull: false,
-    references: {
-      model: 'Students',
-      key: 'id'
-    }
+    
   },
   subjectId: {
     type: DataTypes.STRING,
     allowNull: false,
-    references: {
-      model: 'Subjects',
-      key: 'id'
-    }
+    
   },
   assignmentId: {
     type: DataTypes.INTEGER,
     allowNull: true,
-    references: {
-      model: 'Assignments',
-      key: 'id'
-    }
+    
   },
   examType: {
     type: DataTypes.STRING,
@@ -59,6 +51,11 @@ const Submission = sequelize.define('Submission', {
     type: DataTypes.FLOAT,
     allowNull: true,
   },
+  gradingState: {
+    type: DataTypes.ENUM('draft', 'submitted', 'published', 'disputed', 'resolved'),
+    defaultValue: 'published',
+    comment: 'Defaults to published for legacy submissions'
+  },
   plagiarismScore: {
     type: DataTypes.FLOAT,
     defaultValue: 0,
@@ -74,10 +71,7 @@ const Submission = sequelize.define('Submission', {
   gradedBy: {
     type: DataTypes.STRING,
     allowNull: true,
-    references: {
-      model: 'Teachers',
-      key: 'id'
-    }
+    
   },
   gradedDate: {
     type: DataTypes.DATE,
@@ -90,8 +84,14 @@ const Submission = sequelize.define('Submission', {
   annotations: {
     type: DataTypes.TEXT,
     allowNull: true,
+  },
+  tenantId: {
+    type: DataTypes.UUID,
+    allowNull: false,
+    defaultValue: DEFAULT_TENANT_ID,
   }
 }, {
+  schema: 'results',
   timestamps: true
 });
 

@@ -1,18 +1,32 @@
 import config from '../config/environment';
 
+let clerkGetToken: (() => Promise<string | null>) | null = null;
+
+export const setTokenGetter = (fn: any) => {
+  clerkGetToken = fn;
+};
+
 /**
  * Get token from local storage (Clerk only)
  */
-export const getToken = (): string | null => {
-  // Use only our application-issued JWT tokens
+export const getToken = async (): Promise<string | null> => {
+  if (clerkGetToken) {
+    try {
+      const token = await clerkGetToken();
+      if (token) return token;
+    } catch (e) {
+      console.error('Error getting token from Clerk:', e);
+    }
+  }
+  // Fallback to local storage
   return localStorage.getItem(config.AUTH.TOKEN_STORAGE_KEY);
 };
 
 /**
  * Get auth config for axios requests
  */
-export const getAuthConfig = () => {
-  const token = getToken();
+export const getAuthConfig = async () => {
+  const token = await getToken();
   return {
     headers: {
       'Content-Type': 'application/json',

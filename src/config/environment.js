@@ -59,7 +59,7 @@ const resolveProdBase = () => {
 };
 
 const getApiBaseUrl = () => ({
-  development: explicitBase || `http://localhost:${devPort}/api`,
+  development: explicitBase || (typeof window !== 'undefined' ? '/api' : `http://localhost:${devPort}/api`),
   test: explicitBase || `http://localhost:${devPort}/api`,
   production: resolveProdBase()
 }[NODE_ENV]);
@@ -103,7 +103,7 @@ const config = {
     },
     TEACHERS: {
       BASE: `${API_BASE_URL}/teachers`,
-      IMPORT: `${API_BASE_URL}/teachers/import-excel`,
+      IMPORT: `${API_BASE_URL}/teachers/import`,
     },
     STUDENTS: {
       BASE: `${API_BASE_URL}/students`,
@@ -128,9 +128,9 @@ const config = {
     USER_STORAGE_KEY: 'user',
     CURRENT_USER_KEY: 'currentUser',
   },
+  // Gemini calls are proxied through the server (see src/api/questionEnhancerService.ts),
+  // so no API key is read or stored on the client.
   AI: {
-    GOOGLE_API_KEY: viteEnv?.VITE_GOOGLE_API_KEY || 'AIzaSyBpm6myAFele0VoFfuEMTApeyhVu57H5Zg',
-    GOOGLE_API_URL: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',
     API_TIMEOUT: 30000, // 30 seconds timeout
     MAX_RETRIES: 5, // Increased from 3 to 5 retries for rate limit errors
     RETRY_DELAY: 3000, // Wait 3 seconds before first retry (quota resets in ~4 seconds per error)

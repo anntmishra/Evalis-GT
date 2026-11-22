@@ -53,8 +53,7 @@ const authStudent = asyncHandler(async (req, res) => {
         email: student.email,
         role: 'student',
         token: token,
-        sessionId: sessionId,
-        authMethod: authMethod // Include auth method for debugging
+        sessionId: sessionId
       });
       return;
     } else {
@@ -135,8 +134,7 @@ const authTeacher = asyncHandler(async (req, res) => {
         batchIds: batchIds,
         role: 'teacher',
         token: token,
-        sessionId: sessionId,
-        authMethod: authMethod // Include auth method for debugging
+        sessionId: sessionId
       });
       return;
     } else {

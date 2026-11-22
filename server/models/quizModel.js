@@ -1,5 +1,6 @@
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/db');
+const { DEFAULT_TENANT_ID } = require('../config/defaultTenant');
 
 const Quiz = sequelize.define('Quiz', {
   id: {
@@ -18,26 +19,17 @@ const Quiz = sequelize.define('Quiz', {
   teacherId: {
     type: DataTypes.STRING,
     allowNull: false,
-    references: {
-      model: 'Teachers',
-      key: 'id'
-    }
+    
   },
   subjectId: {
     type: DataTypes.STRING,
     allowNull: false,
-    references: {
-      model: 'Subjects',
-      key: 'id'
-    }
+    
   },
   batchId: {
     type: DataTypes.STRING,
     allowNull: false,
-    references: {
-      model: 'Batches',
-      key: 'id'
-    }
+    
   },
   timeLimit: {
     type: DataTypes.INTEGER, // minutes
@@ -89,8 +81,14 @@ const Quiz = sequelize.define('Quiz', {
   instructions: {
     type: DataTypes.TEXT,
     allowNull: true,
+  },
+  tenantId: {
+    type: DataTypes.UUID,
+    allowNull: false,
+    defaultValue: DEFAULT_TENANT_ID,
   }
 }, {
+  schema: 'examinations',
   timestamps: true
 });
 

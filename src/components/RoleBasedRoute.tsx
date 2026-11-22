@@ -17,12 +17,17 @@ export default function RoleBasedRoute({
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
   const navigate = useNavigate();
-  const { isSignedIn, getToken } = useAuth();
+  const { isSignedIn, getToken, signOut } = useAuth();
   const { user } = useUser();
 
   useEffect(() => {
     const checkAuthorization = async () => {
       if (!isSignedIn || !user) {
+        // Clear old tokens when signed out
+        localStorage.removeItem(config.AUTH.TOKEN_STORAGE_KEY);
+        localStorage.removeItem(config.AUTH.CURRENT_USER_KEY);
+        localStorage.removeItem('userRole');
+        
         setIsAuthorized(false);
         navigate(redirectTo);
         return;
@@ -48,6 +53,8 @@ export default function RoleBasedRoute({
           setUserRole(userData.role);
           
           if (allowedRoles.includes(userData.role)) {
+            // Save the token to local storage so API requests use it!
+            localStorage.setItem(config.AUTH.TOKEN_STORAGE_KEY, token);
             setIsAuthorized(true);
           } else {
             setIsAuthorized(false);
@@ -67,6 +74,13 @@ export default function RoleBasedRoute({
             }
           }
         } else {
+          if (response.status === 401 || response.status === 403) {
+            console.warn('Unauthorized access to role based route. Signing out.');
+            localStorage.removeItem(config.AUTH.TOKEN_STORAGE_KEY);
+            localStorage.removeItem(config.AUTH.CURRENT_USER_KEY);
+            localStorage.removeItem('userRole');
+            signOut();
+          }
           setIsAuthorized(false);
           navigate(redirectTo);
         }

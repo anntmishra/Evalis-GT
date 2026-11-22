@@ -166,14 +166,6 @@ export const queryGoogleAI = async (
   subjects: Array<{id: string, name: string}> = []
 ): Promise<string> => {
   try {
-    // Get Gemini API key from environment
-    const GEMINI_API_KEY = config.AI.GOOGLE_API_KEY;
-    
-    if (!GEMINI_API_KEY) {
-      console.warn('Gemini API key not found, using mock responses');
-      return generateMockResponse(studentData, userMessage, subjects);
-    }
-    
     // Create subject mapping for better context
     const subjectMapping = subjects.reduce((acc, subject) => {
       acc[subject.id] = subject.name;
@@ -230,9 +222,11 @@ export const queryGoogleAI = async (
 
     console.log('Calling Gemini API for student analysis...');
 
+    // Routed through our server-side proxy so the Gemini API key never reaches the client
     const response = await axios.post(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_API_KEY}`,
+      `${config.API_BASE_URL}/ai/gemini/generate`,
       {
+        model: 'gemini-1.5-flash-latest',
         contents: [
           {
             parts: [
@@ -249,11 +243,7 @@ export const queryGoogleAI = async (
           maxOutputTokens: 1024,
         }
       },
-      {
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      }
+      getAuthConfig()
     );
 
     console.log('Received response from Gemini API');

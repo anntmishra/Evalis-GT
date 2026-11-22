@@ -1,6 +1,7 @@
 const { DataTypes } = require('sequelize');
 const bcrypt = require('bcryptjs');
 const { sequelize } = require('../config/db');
+const { DEFAULT_TENANT_ID } = require('../config/defaultTenant');
 
 const Student = sequelize.define('Student', {
   id: {
@@ -15,6 +16,11 @@ const Student = sequelize.define('Student', {
   section: {
     type: DataTypes.STRING,
     allowNull: false,
+  },
+  sectionGroupId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    comment: 'The lecture group this student is in (see SectionGroup) -- distinct from `section`, which is the smaller tutorial/lab cohort'
   },
   batch: {
     type: DataTypes.STRING,
@@ -38,27 +44,31 @@ const Student = sequelize.define('Student', {
     type: DataTypes.STRING,
     defaultValue: 'student',
   },
-  walletAddress: {
-    type: DataTypes.STRING,
-    allowNull: true,
-    unique: true,
-    validate: {
-      isEthAddressOrNull(value) {
-        if (value && !/^0x[a-fA-F0-9]{40}$/.test(value)) {
-          throw new Error('Invalid Ethereum address');
-        }
-      }
-    }
+  specializationId: {
+    type: DataTypes.UUID,
+    allowNull: true, // Nullable until they choose a specialization
+    
+  },
+  currentSemester: {
+    type: DataTypes.INTEGER,
+    defaultValue: 1,
+  },
+  cgpa: {
+    type: DataTypes.FLOAT,
+    defaultValue: 0.0,
   },
   activeSemesterId: {
     type: DataTypes.STRING,
     allowNull: true,
-    references: {
-      model: 'Semesters',
-      key: 'id'
-    }
+
+  },
+  tenantId: {
+    type: DataTypes.UUID,
+    allowNull: false,
+    defaultValue: DEFAULT_TENANT_ID,
   }
 }, {
+  schema: 'users',
   timestamps: true,
   hooks: {
     beforeSave: async (student) => {

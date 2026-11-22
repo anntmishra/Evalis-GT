@@ -1,9 +1,20 @@
 const asyncHandler = require('express-async-handler');
-const { Teacher, Subject, TeacherSubject, Student, Batch, Semester } = require('../models');
+const { Teacher, Subject, Section, TeachingAssignment, Student, Batch, Semester, School, Department, UserRoleAssignment } = require('../models');
 const XLSX = require('xlsx');
 const jwt = require('jsonwebtoken');
 const { Op } = require('sequelize');
 const { sequelize } = require('../config/db');
+const { recomputeTeacherRole } = require('../services/roleCacheService');
+const { normalizeEmail, validateEmail, unguessableLocalSecret, recordPendingInvite, sendAccountInvitation } = require('../services/accountProvisioningService');
+
+// Roles a teacher import row can seed a grant for, and the scope column each one needs.
+const IMPORTABLE_ROLES = {
+  hod: { scopeColumn: 'departmentId', scopeLabel: 'Department' },
+  programme_coordinator: { scopeColumn: 'batchId', scopeLabel: 'Batch' },
+  dean: { scopeColumn: 'schoolId', scopeLabel: 'School' },
+  assistant_dean: { scopeColumn: 'schoolId', scopeLabel: 'School' },
+  coe: { scopeColumn: null, scopeLabel: null },
+};
 
 /**
  * @desc    Get all teachers
@@ -14,8 +25,8 @@ const getTeachers = asyncHandler(async (req, res) => {
   const teachers = await Teacher.findAll({
     attributes: { exclude: ['password'] },
     include: [{
-      model: Subject,
-      through: { attributes: [] }, // Don't include join table attributes
+      model: TeachingAssignment,
+      include: [{ model: Subject }]
     }]
   });
   res.json(teachers);
@@ -31,8 +42,8 @@ const getTeacherById = asyncHandler(async (req, res) => {
     where: { id: req.params.id },
     attributes: { exclude: ['password'] },
     include: [{
-      model: Subject,
-      through: { attributes: [] }, // Don't include join table attributes
+      model: TeachingAssignment,
+      include: [{ model: Subject }]
     }]
   });
 
@@ -54,7 +65,8 @@ const createTeacher = asyncHandler(async (req, res) => {
     console.log('Teacher creation request received');
     console.log('Request body:', req.body);
     
-    const { name, email, subjects, password, role } = req.body;
+    const { name, subjects, qualification, designation } = req.body;
+    const email = normalizeEmail(req.body.email);
     let { id } = req.body;
 
     console.log('Extracted fields:', { id, name, email, subjectsLength: subjects?.length });
@@ -74,6 +86,9 @@ const createTeacher = asyncHandler(async (req, res) => {
         success: false,
         message: 'Please provide the teacher email'
       });
+    }
+    if (!validateEmail(email)) {
+      return res.status(400).json({ success: false, message: 'Please provide a valid teacher email' });
     }
 
     // Generate teacher ID if not provided
@@ -102,107 +117,22 @@ const createTeacher = asyncHandler(async (req, res) => {
       });
     }
 
-    // Check if user already exists in Clerk
-    let clerkUser = null;
-    try {
-      const { clerkClient } = require('@clerk/express');
-      const existingClerkUsers = await clerkClient.users.getUserList({ emailAddress: [email] });
-      if (existingClerkUsers && existingClerkUsers.length > 0) {
-        clerkUser = existingClerkUsers[0];
-      }
-    } catch (clerkError) {
-      console.warn('Error checking existing Clerk user:', clerkError.message);
-    }
-
-    // Create user in Clerk if doesn't exist
-    if (!clerkUser) {
-      try {
-        const { clerkClient } = require('@clerk/express');
-        clerkUser = await clerkClient.users.createUser({
-          emailAddress: [email],
-          username: email.split('@')[0] + '_teacher_' + Date.now(),
-          firstName: name.split(' ')[0] || name,
-          lastName: name.split(' ').slice(1).join(' ') || undefined,
-          skipPasswordChecks: true,
-          skipPasswordRequirement: true
-        });
-        console.log(`Created Clerk user for teacher: ${email}`);
-      } catch (clerkError) {
-        console.error('Failed to create Clerk user:', clerkError.message);
-        return res.status(500).json({
-          success: false,
-          message: 'Failed to create user account. Please try again.'
-        });
-      }
-    }
-
-    // Generate secure temporary password
-    const { generateSecurePassword, generateResetToken, sendWelcomeEmail } = require('../utils/emailUtils');
-    const temporaryPassword = generateSecurePassword();
-    
-    // Hash password for database storage
-    const bcrypt = require('bcryptjs');
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(temporaryPassword, salt);
-
     console.log('Creating teacher in database...');
     // Create the teacher
     const teacher = await Teacher.create({
       id,
       name,
       email,
-      password: hashedPassword,
-      role: role || 'teacher',
-      clerkId: clerkUser.id // Link to Clerk user
+      password: unguessableLocalSecret(),
+      // Elevated authority is granted separately through scoped role assignments.
+      role: 'teacher',
+      qualification: qualification || null,
+      designation: designation || null,
+      tenantId: req.tenantId,
     });
 
-    // If subjects were provided, assign them
-    if (subjects && subjects.length > 0) {
-      // Create teacher-subject associations
-      const subjectAssociations = subjects.map(subjectId => ({
-        teacherId: id,
-        subjectId: subjectId
-      }));
-      
-      await TeacherSubject.bulkCreate(subjectAssociations);
-      
-      // Reload teacher with subjects
-      await teacher.reload({
-        include: [{
-          model: Subject,
-          through: { attributes: [] }
-        }]
-      });
-    }
-
-    // Generate password reset token
-    const { PasswordResetToken } = require('../models');
-    const resetToken = generateResetToken();
-    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
-
-    // Save reset token
-    await PasswordResetToken.create({
-      userId: teacher.id,
-      userRole: 'teacher',
-      token: resetToken,
-      expiresAt
-    });
-
-    // Generate reset link
-    const resetLink = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/teacher/reset-password?token=${resetToken}`;
-
-    // Send welcome email with password setup
-    try {
-      await sendWelcomeEmail(
-        { ...teacher.toJSON(), role: 'teacher' },
-        temporaryPassword,
-        resetLink
-      );
-      console.log(`Welcome email sent to ${email}`);
-    } catch (emailError) {
-      console.warn('Failed to send welcome email:', emailError.message);
-      // Don't fail the creation if email fails
-    }
+    await recordPendingInvite({ email, role: 'teacher', tenantId: req.tenantId });
+    const invitation = await sendAccountInvitation({ email, role: 'teacher', name });
 
     console.log('Teacher created successfully:', teacher.id);
 
@@ -212,10 +142,11 @@ const createTeacher = asyncHandler(async (req, res) => {
         id: teacher.id,
         name: teacher.name,
         email: teacher.email,
-        subjects: teacher.Subjects || [],
+        subjects: teacher.TeachingAssignments ? teacher.TeachingAssignments.map(ta => ta.Subject) : [],
         role: teacher.role,
-        clerkId: teacher.clerkId,
-        message: 'Teacher created successfully in both database and Clerk. Welcome email sent with password setup instructions.'
+        invitationSent: invitation.sent,
+        invitationError: invitation.sent ? null : invitation.reason,
+        message: invitation.sent ? 'Teacher created. An account setup invitation was emailed.' : `Teacher created, but the invitation was not sent: ${invitation.reason}`
       }
     });
 
@@ -241,122 +172,30 @@ const createTeacher = asyncHandler(async (req, res) => {
  * @access  Private/Admin
  */
 const updateTeacher = asyncHandler(async (req, res) => {
-  const teacher = await Teacher.findOne({ where: { id: req.params.id } });
-
-  if (teacher) {
-    const previousEmail = teacher.email;
-    const newEmail = req.body.email;
-    
-    teacher.name = req.body.name || teacher.name;
-    teacher.email = newEmail || teacher.email;
-    
-    // If email is being added for the first time or changed
-    let passwordChanged = false;
-    let generatedPassword;
-    
-    if (newEmail && (!previousEmail || newEmail !== previousEmail)) {
-      // Import generateRandomPassword
-      const { generateRandomPassword } = require('../utils/passwordUtils');
-      
-      // Generate a new password when email is added or changed
-      generatedPassword = generateRandomPassword(10);
-      teacher.password = generatedPassword;
-      passwordChanged = true;
-    } else if (req.body.password) {
-      // Or if password is explicitly provided
-      teacher.password = req.body.password;
-      passwordChanged = true;
-      generatedPassword = req.body.password;
-    }
-
-    const updatedTeacher = await teacher.save();
-
-    // Update subjects if provided
-    if (req.body.subjects) {
-      // First remove all existing associations
-      await TeacherSubject.destroy({ where: { teacherId: teacher.id } });
-      
-      // Then create new associations
-      if (req.body.subjects.length > 0) {
-        const subjectAssociations = req.body.subjects.map(subjectId => ({
-          teacherId: teacher.id,
-          subjectId: subjectId
-        }));
-        
-        await TeacherSubject.bulkCreate(subjectAssociations);
-      }
-    }
-
-    // Send login credentials if email was added or changed and create Firebase user
-    if (passwordChanged && newEmail) {
-      try {
-        // Import Firebase functions
-        const { createFirebaseUser, updateFirebaseUser, sendPasswordResetEmail } = require('../utils/firebaseUtils');
-        const { sendPasswordResetLink, sendLoginCredentials } = require('../utils/emailUtils');
-        
-        // If changing email, first try to find if a Firebase user already exists
-        let firebaseUser;
-        try {
-          if (previousEmail) {
-            // Try to update the existing Firebase user with the new email
-            firebaseUser = await updateFirebaseUser(null, { 
-              email: newEmail,
-              password: generatedPassword
-            });
-          }
-        } catch (error) {
-          console.log('No existing Firebase user to update, creating new one');
-        }
-        
-        // If no existing user or couldn't update, create a new Firebase user
-        if (!firebaseUser) {
-          firebaseUser = await createFirebaseUser(newEmail, generatedPassword, {
-            id: updatedTeacher.id,
-            name: updatedTeacher.name,
-          });
-        }
-        
-        // Generate password reset link
-        const resetLink = await sendPasswordResetEmail(newEmail);
-        
-        // Send password reset email
-        await sendPasswordResetLink({
-          email: newEmail,
-          name: updatedTeacher.name,
-        }, resetLink);
-        
-        console.log(`Firebase user updated/created and password reset link sent to ${newEmail}`);
-        
-        // Also send login credentials for reference
-        await sendLoginCredentials({
-          id: updatedTeacher.id,
-          name: updatedTeacher.name,
-          email: newEmail
-        }, generatedPassword);
-      } catch (error) {
-        console.error('Error with Firebase operations:', error);
-        // Continue even if Firebase operations fail
-      }
-    }
-
-    // Reload teacher with updated subjects
-    const teacherWithSubjects = await Teacher.findOne({
-      where: { id: teacher.id },
-      attributes: { exclude: ['password'] },
-      include: [{
-        model: Subject,
-        through: { attributes: [] }
-      }]
-    });
-
-    res.json({
-      ...teacherWithSubjects.get(),
-      initialPassword: passwordChanged && newEmail ? generatedPassword : undefined,
-    });
-  } else {
-    res.status(404);
-    throw new Error('Teacher not found');
+  const teacher = await Teacher.findOne({ where: { id: req.params.id, tenantId: req.tenantId } });
+  if (!teacher) { res.status(404); throw new Error('Teacher not found'); }
+  const nextEmail = req.body.email ? normalizeEmail(req.body.email) : teacher.email;
+  if (!validateEmail(nextEmail)) { res.status(400); throw new Error('Please provide a valid teacher email'); }
+  if (nextEmail !== teacher.email) {
+    const duplicate = await Teacher.findOne({ where: { email: nextEmail } });
+    if (duplicate && duplicate.id !== teacher.id) { res.status(409); throw new Error('Email already belongs to another teacher'); }
   }
+  const emailChanged = nextEmail !== teacher.email;
+  await teacher.update({
+    name: req.body.name || teacher.name,
+    email: nextEmail,
+    qualification: req.body.qualification ?? teacher.qualification,
+    designation: req.body.designation ?? teacher.designation,
+  });
+  let invitationSent = false;
+  if (emailChanged) {
+    teacher.clerkId = null;
+    await teacher.save();
+    await recordPendingInvite({ email: nextEmail, role: 'teacher', tenantId: req.tenantId });
+    invitationSent = (await sendAccountInvitation({ email: nextEmail, role: 'teacher', name: teacher.name })).sent;
+  }
+  const result = await Teacher.findByPk(teacher.id, { attributes: { exclude: ['password'] }, include: [{ model: TeachingAssignment, include: [{ model: Subject }, { model: Section }] }] });
+  res.json({ ...result.get(), invitationSent });
 });
 
 /**
@@ -382,9 +221,9 @@ const deleteTeacher = asyncHandler(async (req, res) => {
       }
     }
     
-    // First delete all teacher-subject associations
-    console.log(`Deleting teacher-subject associations for teacher ${teacher.id}`);
-    await TeacherSubject.destroy({ where: { teacherId: teacher.id } });
+    // First delete all teaching assignments
+    console.log(`Deleting teaching assignments for teacher ${teacher.id}`);
+    await TeachingAssignment.destroy({ where: { teacherId: teacher.id } });
     
     // Then delete the teacher from database
     console.log(`Deleting teacher ${teacher.id} from database`);
@@ -406,11 +245,12 @@ const deleteTeacher = asyncHandler(async (req, res) => {
  * @access  Private/Admin
  */
 const assignSubject = asyncHandler(async (req, res) => {
-  const { subjectId } = req.body;
+  const { subjectId, sectionId } = req.body;
+  const sessionType = String(req.body.sessionType || 'lecture').toLowerCase();
   
-  if (!subjectId) {
+  if (!subjectId || !sectionId || !['lecture', 'lab', 'tutorial'].includes(sessionType)) {
     res.status(400);
-    throw new Error('Subject ID is required');
+    throw new Error('Subject ID, section ID, and a valid session type are required');
   }
   
   const teacher = await Teacher.findOne({ where: { id: req.params.id } });
@@ -427,23 +267,32 @@ const assignSubject = asyncHandler(async (req, res) => {
     throw new Error('Subject not found');
   }
   
-  // Check if subject is already assigned
-  const existingAssignment = await TeacherSubject.findOne({
+  const section = await Section.findOne({ where: { id: sectionId, subjectId } });
+  if (!section) { res.status(400); throw new Error('Section does not belong to the selected subject'); }
+
+  const existingAssignment = await TeachingAssignment.findOne({
     where: {
       teacherId: teacher.id,
-      subjectId: subject.id
+      subjectId: subject.id,
+      sectionId,
+      sessionType,
     }
   });
   
   if (existingAssignment) {
-    res.status(400);
-    throw new Error('Subject already assigned to this teacher');
+    if (!existingAssignment.isActive) await existingAssignment.update({ isActive: true, assignedBy: String(req.user.id) });
+    return res.json(existingAssignment);
   }
   
   // Create the association
-  await TeacherSubject.create({
+  await TeachingAssignment.create({
     teacherId: teacher.id,
-    subjectId: subject.id
+    subjectId: subject.id,
+    sectionId,
+    sessionType,
+    batchId: subject.batchId,
+    semesterId: subject.semesterId,
+    assignedBy: String(req.user.id),
   });
   
   // Get updated teacher with subjects
@@ -451,8 +300,8 @@ const assignSubject = asyncHandler(async (req, res) => {
     where: { id: teacher.id },
     attributes: { exclude: ['password'] },
     include: [{
-      model: Subject,
-      through: { attributes: [] }
+      model: TeachingAssignment,
+      include: [{ model: Subject }]
     }]
   });
   
@@ -481,7 +330,7 @@ const removeSubject = asyncHandler(async (req, res) => {
   }
   
   // Check if teacher has this subject
-  const assignment = await TeacherSubject.findOne({
+  const assignment = await TeachingAssignment.findOne({
     where: {
       teacherId: teacher.id,
       subjectId: subject.id
@@ -493,16 +342,17 @@ const removeSubject = asyncHandler(async (req, res) => {
     throw new Error('This subject is not assigned to this teacher');
   }
   
-  // Remove the association
-  await assignment.destroy();
+  // Revoke all active allocations for this teacher and subject. Section-specific
+  // revocation uses DELETE /api/teaching-assignments/:id.
+  await TeachingAssignment.update({ isActive: false }, { where: { teacherId: teacher.id, subjectId: subject.id } });
   
   // Get updated teacher with subjects
   const updatedTeacher = await Teacher.findOne({
     where: { id: teacher.id },
     attributes: { exclude: ['password'] },
     include: [{
-      model: Subject,
-      through: { attributes: [] }
+      model: TeachingAssignment,
+      include: [{ model: Subject }]
     }]
   });
   
@@ -515,16 +365,17 @@ const removeSubject = asyncHandler(async (req, res) => {
  * @access  Private/Admin
  */
 const importTeachersFromExcel = asyncHandler(async (req, res) => {
-  // Check if file is uploaded
-  if (!req.files || !req.files.file) {
+  // Check if file is uploaded (multer populates req.file, not req.files)
+  if (!req.file) {
     res.status(400);
     throw new Error('Please upload an Excel file');
   }
 
+  const tenantId = req.tenantId;
+
   try {
     // Get the file buffer
-    const file = req.files.file;
-    const workbook = XLSX.read(file.data, { type: 'buffer' });
+    const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
     const sheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[sheetName];
     const jsonData = XLSX.utils.sheet_to_json(worksheet);
@@ -532,11 +383,32 @@ const importTeachersFromExcel = asyncHandler(async (req, res) => {
     // Validate and prepare data
     const teachersToCreate = [];
     const teachersToUpdate = [];
+    const roleGrantsToSeed = []; // [{ teacherId, role, scope }]
     const errors = [];
+
+    // School/Department code lookups are cached -- a sheet with hundreds of rows from the
+    // same department shouldn't issue hundreds of duplicate queries.
+    const schoolCache = new Map();
+    const resolveSchoolId = async (code) => {
+      if (!code) return undefined;
+      if (schoolCache.has(code)) return schoolCache.get(code);
+      const found = await School.findOne({ where: { code } });
+      schoolCache.set(code, found ? found.id : null);
+      return schoolCache.get(code);
+    };
+
+    const departmentCache = new Map();
+    const resolveDepartmentId = async (code) => {
+      if (!code) return undefined;
+      if (departmentCache.has(code)) return departmentCache.get(code);
+      const found = await Department.findOne({ where: { code } });
+      departmentCache.set(code, found ? found.id : null);
+      return departmentCache.get(code);
+    };
 
     for (let i = 0; i < jsonData.length; i++) {
       const row = jsonData[i];
-      
+
       // Skip empty rows
       if (!row.TeacherID && !row.ID) {
         errors.push(`Row ${i + 2}: Missing required field (TeacherID/ID)`);
@@ -557,10 +429,12 @@ const importTeachersFromExcel = asyncHandler(async (req, res) => {
       const teacherId = (row.TeacherID || row.ID || '').toString().trim();
       const teacherName = (row.Name || row.TeacherName || '').toString().trim();
       const teacherEmail = (row.Email || row.TeacherEmail || '').toString().trim();
-      
+      const schoolCode = (row.School || row.SchoolCode || row.Affiliation || '').toString().trim();
+      const roleRaw = (row.Role || '').toString().trim().toLowerCase();
+
       // Generate password (last 4 digits of ID)
       const defaultPassword = teacherId.slice(-4);
-      
+
       // Create teacher object
       const teacherData = {
         id: teacherId,
@@ -569,6 +443,41 @@ const importTeachersFromExcel = asyncHandler(async (req, res) => {
         password: defaultPassword,
         role: 'teacher'
       };
+
+      // Optional bulk role-grant seeding: a Role column (hod/programme_coordinator/dean/
+      // assistant_dean/coe) plus whatever scope column that role needs (Department/Batch/
+      // School code -- School also doubles as the row's general affiliation column).
+      if (roleRaw && roleRaw !== 'teacher') {
+        const roleSpec = IMPORTABLE_ROLES[roleRaw];
+        if (!roleSpec) {
+          errors.push(`Row ${i + 2}: Unknown role '${roleRaw}' -- expected one of ${Object.keys(IMPORTABLE_ROLES).join(', ')}`);
+        } else if (roleSpec.scopeColumn === null) {
+          roleGrantsToSeed.push({ teacherId, email: teacherEmail, role: roleRaw, scope: {} });
+        } else if (roleSpec.scopeColumn === 'schoolId') {
+          const schoolId = await resolveSchoolId(schoolCode);
+          if (!schoolId) {
+            errors.push(`Row ${i + 2}: ${roleSpec.scopeLabel} '${schoolCode}' not found for role '${roleRaw}'`);
+          } else {
+            roleGrantsToSeed.push({ teacherId, email: teacherEmail, role: roleRaw, scope: { schoolId } });
+          }
+        } else if (roleSpec.scopeColumn === 'departmentId') {
+          const deptCode = (row.Department || row.DepartmentCode || '').toString().trim();
+          const departmentId = await resolveDepartmentId(deptCode);
+          if (!departmentId) {
+            errors.push(`Row ${i + 2}: ${roleSpec.scopeLabel} '${deptCode}' not found for role '${roleRaw}'`);
+          } else {
+            roleGrantsToSeed.push({ teacherId, email: teacherEmail, role: roleRaw, scope: { departmentId } });
+          }
+        } else if (roleSpec.scopeColumn === 'batchId') {
+          const batchId = (row.Batch || row.BatchId || row.BatchID || '').toString().trim();
+          const batchExists = batchId ? await Batch.findByPk(batchId) : null;
+          if (!batchExists) {
+            errors.push(`Row ${i + 2}: ${roleSpec.scopeLabel} '${batchId}' not found for role '${roleRaw}'`);
+          } else {
+            roleGrantsToSeed.push({ teacherId, email: teacherEmail, role: roleRaw, scope: { batchId, departmentId: batchExists.departmentId } });
+          }
+        }
+      }
 
       // Check if teacher already exists
       const existingTeacher = await Teacher.findOne({ where: { id: teacherData.id } });
@@ -598,14 +507,32 @@ const importTeachersFromExcel = asyncHandler(async (req, res) => {
       );
     }
 
-    // Send confirmation emails (in a real application)
-    // This would be handled by a separate service
+    // Seed any requested role grants now that every teacher row has been created/updated
+    let grantsSeeded = 0;
+    for (const grant of roleGrantsToSeed) {
+      try {
+        await UserRoleAssignment.findOrCreate({
+          where: { tenantId, teacherId: grant.teacherId, role: grant.role, status: 'active', ...grant.scope },
+          defaults: {
+            userId: (grant.email || grant.teacherId).toLowerCase(),
+            grantedBy: req.user?.id || null,
+            grantedAt: new Date()
+          }
+        });
+        await recomputeTeacherRole(grant.teacherId, tenantId);
+        grantsSeeded++;
+      } catch (error) {
+        console.error(`Error seeding role grant for teacher ${grant.teacherId}:`, error);
+        errors.push(`Failed to seed '${grant.role}' grant for teacher ${grant.teacherId}: ${error.message}`);
+      }
+    }
 
     res.status(200).json({
       message: 'Teachers imported successfully',
       totalImported: teachersToCreate.length + teachersToUpdate.length,
       created: teachersToCreate.length,
       updated: teachersToUpdate.length,
+      roleGrantsSeeded: grantsSeeded,
       errors: errors
     });
   } catch (error) {
@@ -877,8 +804,8 @@ const getTeacherSubjects = asyncHandler(async (req, res) => {
     // Find the teacher with their assigned subjects
     const teacher = await Teacher.findByPk(teacherId, {
       include: [{
-        model: Subject,
-        through: { attributes: [] }
+        model: TeachingAssignment,
+        include: [{ model: Subject }]
       }]
     });
     
@@ -898,7 +825,7 @@ const getTeacherSubjects = asyncHandler(async (req, res) => {
     }
     
     // Return the teacher's subjects (even if empty array)
-    res.json(teacher.Subjects || []);
+    res.json(teacher.TeachingAssignments ? teacher.TeachingAssignments.map(ta => ta.Subject) : []);
   } catch (error) {
     console.error('Error in getTeacherSubjects:', error);
     
@@ -995,9 +922,10 @@ const getAccessibleStudents = asyncHandler(async (req, res) => {
     // Find all subjects assigned to the teacher along with their batch information
     const teacherWithSubjects = await Teacher.findByPk(teacherId, {
       include: [{
-        model: Subject,
+        model: TeachingAssignment,
         include: [{
-          model: Batch
+          model: Subject,
+          include: [{ model: Batch }]
         }]
       }]
     });
@@ -1009,8 +937,8 @@ const getAccessibleStudents = asyncHandler(async (req, res) => {
     
     // Extract unique batch IDs from teacher's subjects
     const batchIds = [...new Set(
-      teacherWithSubjects.Subjects
-        .map(subject => subject.batchId)
+      (teacherWithSubjects.TeachingAssignments || [])
+        .map(ta => ta.Subject?.batchId)
         .filter(id => id) // Filter out any undefined or null values
     )];
     
@@ -1050,11 +978,11 @@ const getAccessibleBatches = asyncHandler(async (req, res) => {
     const debug = req.query.debug === '1';
 
     // Step 1: Fetch subject IDs from join table (authoritative for assignments)
-    const teacherSubjectLinks = await TeacherSubject.findAll({
+    const teachingAssignments = await TeachingAssignment.findAll({
       where: { teacherId },
       attributes: ['subjectId']
     });
-    const subjectIds = teacherSubjectLinks.map(l => l.subjectId);
+    const subjectIds = teachingAssignments.map(l => l.subjectId);
 
     if (subjectIds.length === 0) {
       if (debug) return res.json({ batches: [], debug: { subjectIds: [], note: 'No subject assignments for this teacher' } });
@@ -1080,10 +1008,10 @@ const getAccessibleBatches = asyncHandler(async (req, res) => {
     if (batchIdSet.size === 0) {
       const [rows] = await sequelize.query(`
         SELECT DISTINCT COALESCE("Subjects"."batchId", "Semesters"."batchId") AS "batchId"
-        FROM "TeacherSubjects"
-        JOIN "Subjects" ON "Subjects"."id" = "TeacherSubjects"."subjectId"
+        FROM "TeachingAssignments"
+        JOIN "Subjects" ON "Subjects"."id" = "TeachingAssignments"."subjectId"
         LEFT JOIN "Semesters" ON "Semesters"."id" = "Subjects"."semesterId"
-        WHERE "TeacherSubjects"."teacherId" = :teacherId
+        WHERE "TeachingAssignments"."teacherId" = :teacherId
       `, { replacements: { teacherId } });
       rows.forEach(r => r.batchId && batchIdSet.add(r.batchId));
     }
@@ -1120,9 +1048,10 @@ const getTeacherDashboard = asyncHandler(async (req, res) => {
     const teacher = await Teacher.findByPk(teacherId, {
       attributes: { exclude: ['password'] },
       include: [{
-        model: Subject,
+        model: TeachingAssignment,
         include: [{
-          model: Batch
+          model: Subject,
+          include: [{ model: Batch }]
         }]
       }]
     });
@@ -1134,8 +1063,8 @@ const getTeacherDashboard = asyncHandler(async (req, res) => {
     
     // Extract all batch IDs from the teacher's subjects
     const batchIds = [...new Set(
-      teacher.Subjects
-        .map(subject => subject.batchId)
+      (teacher.TeachingAssignments || [])
+        .map(ta => ta.Subject?.batchId)
         .filter(id => id)
     )];
     

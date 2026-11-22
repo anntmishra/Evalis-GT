@@ -10,10 +10,7 @@ const QuizQuestion = sequelize.define('QuizQuestion', {
   quizId: {
     type: DataTypes.UUID,
     allowNull: false,
-    references: {
-      model: 'Quizzes',
-      key: 'id'
-    },
+    
     onDelete: 'CASCADE'
   },
   questionText: {
@@ -42,6 +39,7 @@ const QuizQuestion = sequelize.define('QuizQuestion', {
     allowNull: true,
   }
 }, {
+  schema: 'examinations',
   timestamps: true
 });
 

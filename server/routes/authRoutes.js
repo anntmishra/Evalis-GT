@@ -27,31 +27,11 @@ const { verifyClerkToken, mapClerkUserToLocal } = require('../utils/clerk');
 router.post('/reset-password', authRateLimit, resetPasswordWithToken);
 router.get('/validate-reset-token/:token', validateResetToken);
 
-// Password reset routes (public)
-router.post('/reset-password', authRateLimit, resetPasswordWithToken);
-router.get('/validate-reset-token/:token', validateResetToken);
-
 // Auth routes with rate limiting
 router.post('/student/login', authRateLimit, authStudent);
 router.post('/teacher/login', authRateLimit, authTeacher);
 router.post('/teacher/setup-password', authRateLimit, setupTeacherPassword);
 router.post('/admin/login', authRateLimit, authAdmin);
-// Development-only admin credential debug (does not issue token)
-if (process.env.NODE_ENV !== 'production') {
-  const { Admin } = require('../models');
-  const bcrypt = require('bcryptjs');
-  router.post('/admin/debug-check', async (req, res) => {
-    try {
-      const { username, password } = req.body;
-      const admin = await Admin.findOne({ where: { username } });
-      if (!admin) return res.status(404).json({ ok: false, reason: 'not_found' });
-      const match = await bcrypt.compare(password || '', admin.password || '');
-      return res.json({ ok: true, user: admin.username, match, hashPrefix: admin.password?.substring(0, 10) });
-    } catch (e) {
-      return res.status(500).json({ ok: false, error: e.message });
-    }
-  });
-}
 // Lightweight status endpoint for token validation / keep-alive (always 200 to avoid console noise)
 router.get('/status', async (req, res) => {
   const authHeader = req.headers.authorization;

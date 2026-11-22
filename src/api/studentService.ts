@@ -1,25 +1,25 @@
-import axios from 'axios';
+import api from './index';
 import { Student } from '../types/university';
 import config from '../config/environment';
 
-// Get the appropriate API base URL based on user role
-const getApiBaseUrl = () => {
+// Get the appropriate API path prefix based on user role
+const getApiPathPrefix = () => {
   try {
     const currentUser = localStorage.getItem(config.AUTH.CURRENT_USER_KEY);
     if (currentUser) {
       const userData = JSON.parse(currentUser);
       if (userData.role === 'admin') {
-        return config.ADMIN_API_BASE_URL;
+        return '/admin';
       }
     }
   } catch (e) {
     // Fallback to regular API
   }
-  return config.API_BASE_URL;
+  return '';
 };
 
-const getApiUrl = () => `${getApiBaseUrl()}/students`;
-const getBatchApiUrl = (batchId: string) => `${getApiBaseUrl()}/batches/${batchId}/students`;
+const getApiUrl = () => `${getApiPathPrefix()}/students`;
+const getBatchApiUrl = (batchId: string) => `${getApiPathPrefix()}/batches/${batchId}/students`;
 
 // Get token from storage
 const getToken = () => {
@@ -58,9 +58,8 @@ export const checkSessionValidity = async (): Promise<boolean> => {
   
   try {
     // Make a lightweight API call to check if the token is still valid
-    const response = await axios.get(
-      `${config.API_ENDPOINTS.AUTH}/status`,
-      { headers: { Authorization: `Bearer ${token}` } }
+    const response = await api.get(
+      `${config.API_ENDPOINTS.AUTH}/status`
     );
     
     if (response.status === 200) {
@@ -92,10 +91,7 @@ export const attemptSessionRecovery = async (): Promise<boolean> => {
     if (user.refreshToken) {
       console.log('Found refresh token, attempting refresh');
       try {
-        const response = await axios.post(
-          `${config.API_ENDPOINTS.AUTH}/refresh`,
-          { refreshToken: user.refreshToken }
-        );
+        const response = await api.post(`${config.API_ENDPOINTS.AUTH}/refresh`, { refreshToken: user.refreshToken });
         
         if (response.status === 200 && response.data.token) {
           // Update tokens
@@ -166,7 +162,7 @@ export const getAllStudents = async () => {
   try {
     console.log('Fetching all students from API');
     const API_URL = getApiUrl();
-    const response = await axios.get(API_URL, authConfig());
+    const response = await api.get(API_URL);
     
     // Log response structure to debug
     console.log('getAllStudents response structure:', {
@@ -200,7 +196,7 @@ export const getStudentsByBatch = async (batchId: string) => {
     console.log(`Fetching students for batch: ${batchId}`);
     const API_URL = getBatchApiUrl(batchId);
     console.log('Fetching students from:', API_URL);
-    const response = await axios.get(API_URL, authConfig());
+    const response = await api.get(API_URL);
     
     // Handle both response formats: array or {students: array}
     const students = Array.isArray(response.data) 
@@ -224,14 +220,14 @@ export const getStudentAssignments = async (studentId?: string) => {
     
     if (studentId) {
       // Admin access - use the parameter-based endpoint
-      API_URL = `${getApiBaseUrl()}/students/${studentId}/assignments`;
+      API_URL = `${getApiUrl()}/students/${studentId}/assignments`;
     } else {
       // Student access - use the user-based endpoint
-      API_URL = `${getApiBaseUrl()}/assignments/student`;
+      API_URL = `${getApiUrl()}/assignments/student`;
     }
     
     console.log('Fetching student assignments from:', API_URL);
-    const response = await axios.get(API_URL, authConfig());
+    const response = await api.get(API_URL);
     return response.data;
   } catch (error: any) {
     console.error('Error fetching student assignments:', error);
@@ -246,14 +242,14 @@ export const getStudentSubjects = async (studentId?: string) => {
     
     if (studentId) {
       // Admin/Teacher access - use the parameter-based endpoint
-      API_URL = `${getApiBaseUrl()}/students/${studentId}/subjects`;
+      API_URL = `${getApiUrl()}/students/${studentId}/subjects`;
     } else {
       // Student access - use the user-based endpoint
-      API_URL = `${getApiBaseUrl()}/students/subjects`;
+      API_URL = `${getApiUrl()}/students/subjects`;
     }
     
     console.log('Fetching student subjects from:', API_URL);
-    const response = await axios.get(API_URL, authConfig());
+    const response = await api.get(API_URL);
     return response.data;
   } catch (error: any) {
     console.error('Error fetching student subjects:', error);
@@ -265,7 +261,7 @@ export const getStudentSubjects = async (studentId?: string) => {
 export const getStudentById = async (id: string) => {
   try {
     const API_URL = getApiUrl();
-    const response = await axios.get(`${API_URL}/${id}`, authConfig());
+    const response = await api.get(`${API_URL}/${id}`);
     return response.data;
   } catch (error) {
     throw error;
@@ -278,7 +274,7 @@ export const createStudent = async (student: Partial<Student>) => {
     const API_URL = getApiUrl();
     console.log('Creating student with data:', JSON.stringify(student));
     console.log('Creating student at:', API_URL);
-    const response = await axios.post(API_URL, student, authConfig());
+    const response = await api.post(API_URL, student);
     console.log('Create student response:', response.data);
     return response.data;
   } catch (error: any) {
@@ -292,7 +288,7 @@ export const updateStudent = async (id: string, student: Partial<Student>) => {
   try {
     const API_URL = getApiUrl();
     console.log('Updating student at:', `${API_URL}/${id}`);
-    const response = await axios.put(`${API_URL}/${id}`, student, authConfig());
+    const response = await api.put(`${API_URL}/${id}`, student);
     return response.data;
   } catch (error: any) {
     throw error;
@@ -303,7 +299,7 @@ export const updateStudent = async (id: string, student: Partial<Student>) => {
 export const deleteStudent = async (id: string) => {
   try {
     const API_URL = getApiUrl();
-    const response = await axios.delete(`${API_URL}/${id}`, authConfig());
+    const response = await api.delete(`${API_URL}/${id}`);
     return response.data;
   } catch (error: any) {
     throw error;
@@ -326,13 +322,11 @@ export const submitAssignment = async (assignmentId: string, submissionData: {
       formData.append('file', submissionData.file);
     }
 
-    const response = await axios.post(
-      `${config.API_BASE_URL}/submissions/assignment/${assignmentId}`,
+    const response = await api.post(
+      `/submissions/assignment/${assignmentId}`,
       formData,
       {
-        ...authConfig(),
         headers: {
-          ...authConfig().headers,
           'Content-Type': 'multipart/form-data',
         }
       }
@@ -345,131 +339,6 @@ export const submitAssignment = async (assignmentId: string, submissionData: {
   }
 };
 
-// Web3 Rewards Functions
-
-// Link student's wallet address
-export const linkWallet = async (walletAddress: string) => {
-  try {
-    const response = await axios.post(
-      `${config.API_BASE_URL}/web3/link-wallet`,
-      { walletAddress },
-      authConfig()
-    );
-    return response.data;
-  } catch (error: any) {
-    console.error('Error linking wallet:', error);
-    throw error;
-  }
-};
-
-// Get current student's token balance
-export const getMyTokenBalance = async () => {
-  try {
-    const response = await axios.get(
-      `${config.API_BASE_URL}/web3/me`,
-      authConfig()
-    );
-    return response.data;
-  } catch (error: any) {
-    console.error('Error fetching token balance:', error);
-    throw error;
-  }
-};
-
-// Get current student's NFT certificates
-export const getMyCertificates = async () => {
-  try {
-    console.log('🔍 getMyCertificates: Starting certificate fetch...');
-    
-    // First get current user info to get student ID
-    const currentUser = localStorage.getItem(config.AUTH.CURRENT_USER_KEY);
-    if (!currentUser) {
-      console.error('❌ getMyCertificates: User not logged in');
-      throw new Error('User not logged in');
-    }
-    
-    const userData = JSON.parse(currentUser);
-    const studentId = userData.id;
-    
-    console.log(`📋 getMyCertificates: Fetching certificates for student ID: ${studentId}`);
-    
-    const response = await axios.get(
-      `${config.API_BASE_URL}/web3/student/${studentId}/certificates`,
-      authConfig()
-    );
-    
-    console.log('✅ getMyCertificates: API response received:', response.data);
-    console.log(`📊 getMyCertificates: Found ${response.data?.length || 0} certificates`);
-    
-    return response.data;
-  } catch (error: any) {
-    console.error('❌ getMyCertificates: Error fetching certificates:', error);
-    
-    // Log more details about the error
-    if (error.response) {
-      console.error('  - Status:', error.response.status);
-      console.error('  - Data:', error.response.data);
-    } else if (error.request) {
-      console.error('  - Network error, no response received');
-    } else {
-      console.error('  - Error message:', error.message);
-    }
-    
-    throw error;
-  }
-};
-
-// Get current student's badges
-export const getMyBadges = async () => {
-  try {
-    // First get current user info to get student ID
-    const currentUser = localStorage.getItem(config.AUTH.CURRENT_USER_KEY);
-    if (!currentUser) {
-      throw new Error('User not logged in');
-    }
-    
-    const userData = JSON.parse(currentUser);
-    const studentId = userData.id;
-    
-    const response = await axios.get(
-      `${config.API_BASE_URL}/web3/student/${studentId}/badges`,
-      authConfig()
-    );
-    return response.data;
-  } catch (error: any) {
-    console.error('Error fetching badges:', error);
-    throw error;
-  }
-};
-
-// Get specific student's token balance (for admin/teacher use)
-export const getStudentTokenBalance = async (studentId: string) => {
-  try {
-    const response = await axios.get(
-      `${config.API_BASE_URL}/web3/student/${studentId}/balance`,
-      authConfig()
-    );
-    return response.data;
-  } catch (error: any) {
-    console.error('Error fetching student token balance:', error);
-    throw error;
-  }
-};
-
-// Get specific student's certificates (for admin/teacher use)
-export const getStudentCertificates = async (studentId: string) => {
-  try {
-    const response = await axios.get(
-      `${config.API_BASE_URL}/web3/student/${studentId}/certificates`,
-      authConfig()
-    );
-    return response.data;
-  } catch (error: any) {
-    console.error('Error fetching student certificates:', error);
-    throw error;
-  }
-};
-
 export default {
   getAllStudents,
   getStudentsByBatch,
@@ -477,11 +346,5 @@ export default {
   createStudent,
   updateStudent,
   deleteStudent,
-  submitAssignment,
-  linkWallet,
-  getMyTokenBalance,
-  getMyCertificates,
-  getMyBadges,
-  getStudentTokenBalance,
-  getStudentCertificates
-}; 
+  submitAssignment
+};

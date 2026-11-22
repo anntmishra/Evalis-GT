@@ -1,6 +1,7 @@
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const dotenv = require('dotenv');
+const { resolvePublicAppUrl } = require('./publicAppUrl');
 
 dotenv.config();
 
@@ -226,10 +227,43 @@ const sendPasswordResetLink = async (user, resetLink) => {
   }
 };
 
+const escapeHtml = value => String(value || '').replace(/[&<>'"]/g, character => ({
+  '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+}[character]));
+
+// Clerk owns production passwords. For an account that has already claimed its Clerk
+// identity, administrators send this access reminder instead of generating or exposing a
+// replacement password. The user starts Clerk's verified "Forgot password" flow.
+const sendAccountAccessEmail = async ({ email, name, role }) => {
+  if (!email) throw new Error('User email is required');
+  const safeRole = role === 'student' ? 'student' : 'teacher';
+  const base = resolvePublicAppUrl();
+  const signInUrl = `${base}/${safeRole}/sign-in`;
+  const mailOptions = {
+    from: `"Evalis Admin" <${process.env.EMAIL_USER}>`,
+    to: email,
+    subject: 'Access your Evalis account',
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;border:1px solid #e0e0e0;border-radius:8px">
+        <h2>Hello ${escapeHtml(name || 'User')},</h2>
+        <p>Your Evalis ${safeRole} account is ready.</p>
+        <p>Use the button below to sign in. If you do not remember your password, choose <strong>Forgot password</strong> on the Clerk sign-in screen. Clerk will verify your email before allowing a new password.</p>
+        <p style="margin:24px 0"><a href="${signInUrl}" style="background:#1d4ed8;color:#fff;padding:12px 20px;text-decoration:none;border-radius:6px">Open Evalis sign in</a></p>
+        <p>No administrator can view or email your password.</p>
+      </div>`,
+  };
+  if (EMAIL_DRY_RUN || !transporter) {
+    console.log(`[emailUtils] DRY RUN - account access email NOT sent to ${email}`);
+    return { messageId: 'dry-run', accepted: [email] };
+  }
+  return transporter.sendMail(mailOptions);
+};
+
 module.exports = {
   generateSecurePassword,
   generateResetToken,
   sendWelcomeEmail,
   sendLoginCredentials,
   sendPasswordResetLink,
+  sendAccountAccessEmail,
 }; 

@@ -78,7 +78,6 @@ const fileCategories = {
 
   // Monitoring and debug files
   utilityFiles: [
-    'adminOnlyServer.js',      // Keep - useful for admin operations
     'inspectDatabase.js',      // Keep - database debugging
     'verifyDatabase.js',       // Keep - database verification
     'showAdminCredentials.js', // Keep - admin utility
@@ -99,7 +98,6 @@ const essentialFiles = [
   'setupFreshDatabase.js',
   'setupNeonDB.js',
   'migrateMongoDB.js',
-  'adminOnlyServer.js',
   'inspectDatabase.js',
   'verifyDatabase.js',
   'showAdminCredentials.js',

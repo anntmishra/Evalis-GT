@@ -1,64 +1,7 @@
-import { useNavigate } from 'react-router-dom';
-import { Button } from '../components/ui/button';
-import { GraduationCap, Shield, User } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Layers, GraduationCap, BookOpen } from 'lucide-react';
+import { EvalisBrand } from '../components/brand/EvalisBrand';
 
 export default function Login() {
-  const navigate = useNavigate();
-
-  const roles = [
-    { id: 'student', label: 'Student', icon: User, color: 'blue' },
-    { id: 'teacher', label: 'Teacher', icon: GraduationCap, color: 'green' },
-    { id: 'admin', label: 'Admin', icon: Shield, color: 'red' }
-  ] as const;
-
-  const bg = (c: string) =>
-    c === 'red' ? 'bg-red-600 hover:bg-red-700' : c === 'green' ? 'bg-green-600 hover:bg-green-700' : 'bg-blue-600 hover:bg-blue-700';
-  const ring = (c: string) =>
-    c === 'red' ? 'ring-red-200' : c === 'green' ? 'ring-green-200' : 'ring-blue-200';
-
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-white px-6">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 text-xs text-gray-500">
-            <span className="h-2 w-2 rounded-full bg-emerald-500" />
-            Secure by Clerk
-          </div>
-          <h1 className="mt-3 text-3xl font-semibold text-gray-900 tracking-tight">Welcome to Evalis</h1>
-          <p className="mt-2 text-sm text-gray-600">Choose your portal to continue</p>
-        </div>
-
-        <div className="space-y-3">
-          {roles.map((r) => {
-            const Icon = r.icon;
-            return (
-              <div
-                key={r.id}
-                className={`w-full flex items-center justify-between rounded-xl border border-gray-200 ${ring(r.color)} px-4 py-3 transition-shadow hover:shadow-sm`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className={`h-9 w-9 rounded-lg flex items-center justify-center text-white ${bg(r.color)}`}>
-                    <Icon className="h-4 w-4" />
-                  </div>
-                  <div className="text-left">
-                    <div className="text-sm font-medium text-gray-900">{r.label}</div>
-                    <div className="text-xs text-gray-500">Sign in to {r.label} portal</div>
-                  </div>
-                </div>
-                <Button 
-                  onClick={() => navigate(`/${r.id}/sign-in`)}
-                  className={`${bg(r.color)} text-white`} 
-                  size="sm"
-                >
-                  Continue
-                </Button>
-              </div>
-            );
-          })}
-        </div>
-
-        <p className="mt-6 text-center text-xs text-gray-500">Each portal is separate. Signing in to one doesn’t sign you into others.</p>
-      </div>
-    </div>
-  );
+  return <main className="entry-page"><section className="entry-story"><EvalisBrand/><div className="entry-story-content"><span className="eyebrow light">THE ACADEMIC OPERATING SYSTEM</span><h1>Clear signals.<br/>Better work.<br/><em>Real momentum.</em></h1><p>One connected place for the people who make learning happen.</p><div className="academic-orbit" aria-hidden="true"><div className="orbit-ring ring-one"/><div className="orbit-ring ring-two"/><div className="orbit-core"><Layers size={44}/></div><span className="orbit-label orbit-learn">LEARN</span><span className="orbit-label orbit-teach">TEACH</span><span className="orbit-label orbit-grow">GROW</span></div></div><p className="entry-footnote">Every academic move, made visible.</p></section><section className="entry-access"><div className="entry-access-top"><span>WELCOME TO EVALIS</span><Link to="/">Explore the system</Link></div><div className="entry-form-wrap"><span className="eyebrow">YOUR ROLE OPENS YOUR WORKSPACE</span><h2>Choose your starting point.</h2><p className="entry-description">Your verified account opens the exact academic tools assigned to you.</p><div className="entry-choice-list"><Link to="/student/sign-in" className="entry-choice"><GraduationCap size={25}/><span><strong>Student</strong><small>Courses, submissions and published results</small></span></Link><Link to="/teacher/sign-in" className="entry-choice"><BookOpen size={25}/><span><strong>Teacher</strong><small>Teaching, coordination and academic leadership</small></span></Link></div></div><p className="entry-footer">Protected by role-aware institutional access.</p></section></main>;
 }

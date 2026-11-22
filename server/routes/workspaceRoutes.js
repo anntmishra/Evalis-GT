@@ -1,0 +1,12 @@
+const router = require('express').Router();
+const { protect, requireRole } = require('../middleware/authMiddleware');
+const controller = require('../controllers/workspaceController');
+router.use(protect);
+router.get('/catalog', controller.catalog);
+router.get('/overview', controller.overview);
+router.get('/results', requireRole(['coe']), controller.results);
+router.post('/results/:batchId/publish', requireRole(['coe']), controller.publish);
+router.get('/approvals', requireRole(['coe']), controller.approvals);
+router.get('/approvals/:id', requireRole(['coe']), controller.approvalPreview);
+router.post('/approvals/:id', requireRole(['coe']), controller.approve);
+module.exports = router;

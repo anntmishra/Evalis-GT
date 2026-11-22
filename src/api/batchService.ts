@@ -83,6 +83,7 @@ export const createBatch = async (batch: {
   startYear: number;
   endYear: number;
   active?: boolean;
+  programId?: string;
 }) => {
   const API_URL = getApiUrl();
   
@@ -106,6 +107,7 @@ export const updateBatch = async (id: string, batch: {
   startYear: number;
   endYear: number;
   active?: boolean;
+  programId?: string;
 }) => {
   const API_URL = getApiUrl();
   

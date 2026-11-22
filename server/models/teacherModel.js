@@ -1,6 +1,7 @@
 const { DataTypes, Op } = require('sequelize');
 const bcrypt = require('bcryptjs');
 const { sequelize } = require('../config/db');
+const { DEFAULT_TENANT_ID } = require('../config/defaultTenant');
 
 const Teacher = sequelize.define('Teacher', {
   id: {
@@ -29,6 +30,14 @@ const Teacher = sequelize.define('Teacher', {
     allowNull: true,
     unique: true,
   },
+  qualification: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  designation: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   password: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -37,19 +46,13 @@ const Teacher = sequelize.define('Teacher', {
     type: DataTypes.STRING,
     defaultValue: 'teacher',
   },
-  walletAddress: {
-    type: DataTypes.STRING,
-    allowNull: true,
-    unique: true,
-    validate: {
-      isEthAddressOrNull(value) {
-        if (value && !/^0x[a-fA-F0-9]{40}$/.test(value)) {
-          throw new Error('Invalid Ethereum address');
-        }
-      }
-    }
+  tenantId: {
+    type: DataTypes.UUID,
+    allowNull: false,
+    defaultValue: DEFAULT_TENANT_ID,
   }
 }, {
+  schema: 'users',
   timestamps: true,
   hooks: {
     beforeSave: async (teacher) => {
@@ -67,12 +70,7 @@ const Teacher = sequelize.define('Teacher', {
 
 // Instance method to check if entered password matches the stored hashed password
 Teacher.prototype.matchPassword = async function(enteredPassword) {
-  console.log('Comparing passwords:');
-  console.log('- Entered password:', enteredPassword);
-  console.log('- Stored hash:', this.password);
-  const result = await bcrypt.compare(enteredPassword, this.password);
-  console.log('- Match result:', result);
-  return result;
+  return bcrypt.compare(enteredPassword, this.password);
 };
 
 // Static method to generate teacher ID

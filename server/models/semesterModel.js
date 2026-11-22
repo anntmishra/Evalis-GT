@@ -34,12 +34,10 @@ const Semester = sequelize.define('Semester', {
   batchId: {
     type: DataTypes.STRING,
     allowNull: false,
-    references: {
-      model: 'Batches',
-      key: 'id'
-    }
+    
   }
 }, {
+  schema: 'academics',
   timestamps: true
 });
 

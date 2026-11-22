@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getStudentQuizzes, startQuizAttempt, submitQuizAttempt } from '../api/quizService';
+import { getStudentQuizzes, getQuizResults, startQuizAttempt, submitQuizAttempt } from '../api/quizService';
 
 const StudentQuizInterface: React.FC = () => {
   const [quizzes, setQuizzes] = useState<any[]>([]);
@@ -12,6 +12,7 @@ const StudentQuizInterface: React.FC = () => {
   const [result, setResult] = useState<any>(null);
   const [selectedResult, setSelectedResult] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<'available' | 'attempted'>('available');
+  const [error, setError] = useState('');
 
   useEffect(() => {
     loadQuizzes();
@@ -76,6 +77,29 @@ const StudentQuizInterface: React.FC = () => {
     }
   };
 
+  const handleViewResult = async (quizId: string, attemptId: string) => {
+    try {
+      setLoading(true); setError('');
+      const attempts = await getQuizResults(quizId);
+      const selected = attempts.find((item: any) => item.id === attemptId);
+      if (!selected) throw new Error('Result not found');
+      setSelectedResult(selected);
+    } catch (error: any) {
+      setError(error.response?.data?.message || error.message || 'Unable to load this result.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const availabilityFor = (quiz: any) => {
+    const now = Date.now();
+    const start = new Date(quiz.startDate).getTime();
+    const end = new Date(quiz.endDate).getTime();
+    if (now < start) return { canStart: false, label: 'Upcoming', detail: `Opens ${new Date(quiz.startDate).toLocaleString()}`, className: 'bg-blue-50 text-blue-700' };
+    if (now > end) return { canStart: false, label: 'Closed', detail: `Closed ${new Date(quiz.endDate).toLocaleString()}`, className: 'bg-slate-100 text-slate-600' };
+    return { canStart: true, label: 'Open now', detail: `Closes ${new Date(quiz.endDate).toLocaleString()}`, className: 'bg-green-50 text-green-700' };
+  };
+
   if (selectedResult) {
     return (
       <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow">
@@ -133,19 +157,12 @@ const StudentQuizInterface: React.FC = () => {
   }
 
   if (result) {
+    const released = result.resultsPublished !== false && result.score !== undefined && result.score !== null;
     return (
       <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow">
         <h2 className="text-2xl font-bold mb-4">Quiz Submitted Successfully!</h2>
         <div className="bg-blue-50 p-6 rounded">
-          <p className="text-3xl font-bold mb-2">
-            Score: {result.score} / {result.totalMarks}
-          </p>
-          <p className="text-lg">
-            Status: <span className={result.passed ? 'text-green-600' : 'text-red-600'}>
-              {result.passed ? 'Passed ✓' : 'Failed ✗'}
-            </span>
-          </p>
-          <p className="mt-2">Time Spent: {Math.floor(result.timeSpent / 60)} minutes</p>
+          {released ? <><p className="text-3xl font-bold mb-2">Score: {result.score} / {result.totalMarks}</p><p className="text-lg">Status: <span className={result.passed ? 'text-green-600' : 'text-red-600'}>{result.passed ? 'Passed ✓' : 'Failed ✗'}</span></p><p className="mt-2">Time Spent: {Math.floor(result.timeSpent / 60)} minutes</p></> : <><p className="text-2xl font-bold mb-2">Submission received</p><p>Your teacher is reviewing the quiz results. Your score will appear here after the results are published.</p></>}
         </div>
         <button
           onClick={() => {
@@ -218,6 +235,7 @@ const StudentQuizInterface: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto p-6">
       <h2 className="text-2xl font-bold mb-6">Quizzes</h2>
+      {error && <p className="workspace-error mb-4" role="alert">{error}</p>}
       
       {/* Tab Navigation */}
       <div className="flex space-x-4 mb-6 border-b">
@@ -229,7 +247,7 @@ const StudentQuizInterface: React.FC = () => {
               : 'text-gray-600'
           }`}
         >
-          Available Quizzes ({quizzes.length})
+          Published Quizzes ({quizzes.length})
         </button>
         <button
           onClick={() => setActiveTab('attempted')}
@@ -247,11 +265,13 @@ const StudentQuizInterface: React.FC = () => {
       {activeTab === 'available' && (
         <>
           {quizzes.length === 0 ? (
-            <p className="text-gray-500">No quizzes available</p>
+            <p className="text-gray-500">No published quizzes for your batch yet.</p>
           ) : (
             <div className="space-y-4">
-              {quizzes.map((quiz: any) => (
-                <div key={quiz.id} className="bg-white p-6 rounded-lg shadow">
+              {quizzes.map((quiz: any) => {
+                const availability = availabilityFor(quiz);
+                return <div key={quiz.id} className="bg-white p-6 rounded-lg shadow">
+                  <div className="mb-3 flex items-center justify-between gap-3"><span className={`rounded-full px-3 py-1 text-sm font-medium ${availability.className}`}>{availability.label}</span><span className="text-sm text-gray-500">{availability.detail}</span></div>
                   <h3 className="text-xl font-bold mb-2">{quiz.title}</h3>
                   <p className="text-gray-600 mb-4">{quiz.description}</p>
                   
@@ -264,13 +284,13 @@ const StudentQuizInterface: React.FC = () => {
 
                   <button
                     onClick={() => handleStartQuiz(quiz.id)}
-                    disabled={loading}
+                    disabled={loading || !availability.canStart}
                     className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
                   >
-                    {loading ? 'Starting...' : 'Start Quiz'}
+                    {loading ? 'Starting...' : availability.canStart ? 'Start Quiz' : availability.label}
                   </button>
                 </div>
-              ))}
+              })}
             </div>
           )}
         </>
@@ -300,22 +320,17 @@ const StudentQuizInterface: React.FC = () => {
                     {quiz.QuizAttempts.map((att: any) => (
                       <div key={att.id} className="flex justify-between items-center mb-2">
                         <div className="flex-1">
-                          <p className="text-sm">
-                            Attempt {att.attemptNumber}: {att.score} / {quiz.totalMarks} - 
-                            <span className={att.passed ? 'text-green-600' : 'text-red-600'}>
-                              {' '}{att.passed ? '✅ Passed' : '❌ Failed'}
-                            </span>
-                          </p>
+                          {quiz.resultsPublished ? <p className="text-sm">Attempt {att.attemptNumber}: {att.score} / {quiz.totalMarks} - <span className={att.passed ? 'text-green-600' : 'text-red-600'}>{' '}{att.passed ? '✅ Passed' : '❌ Failed'}</span></p> : <p className="text-sm font-medium text-amber-700">Attempt {att.attemptNumber}: Result awaiting teacher release</p>}
                           <p className="text-xs text-gray-500">
                             {new Date(att.submittedAt).toLocaleString()}
                           </p>
                         </div>
-                        <button
-                          onClick={() => setSelectedResult(att)}
+                        {quiz.resultsPublished && <button
+                          onClick={() => void handleViewResult(quiz.id, att.id)}
                           className="text-blue-600 hover:underline text-sm"
                         >
                           View Details
-                        </button>
+                        </button>}
                       </div>
                     ))}
                   </div>

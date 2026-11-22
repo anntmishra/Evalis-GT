@@ -93,6 +93,11 @@ const handleLogout = () => {
   localStorage.removeItem(config.AUTH.CURRENT_USER_KEY);
   localStorage.removeItem('lastTokenRefresh');
   
+  if (import.meta.env.DEV) {
+    console.warn('[DEV] handleLogout called. Skipping redirect to / to allow testing admin portals.');
+    return;
+  }
+
   // Redirect to login
   const currentPath = window.location.pathname;
   if (!currentPath.includes('/login') && !currentPath.includes('/signin')) {

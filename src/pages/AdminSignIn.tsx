@@ -5,7 +5,11 @@ import { useAuth } from '../hooks/useAuth';
 import { Button } from '../components/ui/button';
 import { AlertCircle } from 'lucide-react';
 
-const AdminSignIn: React.FC = () => {
+interface AdminSignInProps {
+  roleTarget?: 'coe' | 'master_admin';
+}
+
+const AdminSignIn: React.FC<AdminSignInProps> = ({ roleTarget }) => {
   const { isSignedIn, loading, currentUser } = useAuth();
 
   if (loading) {
@@ -17,9 +21,10 @@ const AdminSignIn: React.FC = () => {
   }
 
   if (isSignedIn && currentUser) {
-    // Check if user has admin role
-    if (currentUser.role === 'admin') {
-      return <Navigate to="/admin" replace />;
+    if (currentUser.role === 'master_admin' || (currentUser.role === 'admin' && roleTarget === 'master_admin')) {
+      return <Navigate to="/dashboard/master-admin" replace />;
+    } else if (currentUser.role === 'coe' || currentUser.role === 'admin') {
+      return <Navigate to="/dashboard/coe" replace />;
     } else {
       // User is signed in but not an admin
       return (
@@ -49,7 +54,7 @@ const AdminSignIn: React.FC = () => {
           <SignIn 
             routing="hash"
             signUpUrl="/admin/signup"
-            redirectUrl="/admin"
+            redirectUrl={roleTarget === 'master_admin' ? '/dashboard/master-admin' : '/dashboard/coe'}
             appearance={{
               elements: {
                 formButtonPrimary: 'bg-red-600 hover:bg-red-700 text-white',

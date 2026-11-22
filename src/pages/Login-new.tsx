@@ -9,7 +9,6 @@ import {
 } from 'lucide-react';
 import Header from '../components/Header';
 import ClerkAuth from '../components/ClerkAuth';
-import ClerkAuthBridge from '../components/ClerkAuthBridge';
 import { useAuth, useUser } from '@clerk/clerk-react';
 
 export default function Login() {
@@ -77,7 +76,6 @@ export default function Login() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <ClerkAuthBridge />
       
       <div className="container max-w-4xl mx-auto px-6 py-8">
         <div className="text-center mb-8">

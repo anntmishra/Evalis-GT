@@ -1,7 +1,7 @@
 const dotenv = require('dotenv');
 const colors = require('colors');
 const bcrypt = require('bcryptjs');
-const { Student, Teacher, Subject, Batch, Submission, Admin, TeacherSubject, sequelize } = require('./models');
+const { Student, Teacher, Subject, Batch, Submission, Admin, TeachingAssignment, sequelize } = require('./models');
 const { connectDB } = require('./config/db');
 
 // Load env vars
@@ -97,7 +97,7 @@ const teachers = [
   }
 ];
 
-const teacherSubjects = [
+const teachingAssignments = [
   {
     teacherId: 'T001',
     subjectId: 'CSE101'
@@ -215,18 +215,10 @@ const importData = async () => {
     conn = await connectDB();
     console.log('Connection established, starting import...'.green);
     
-    // Clear existing data - use Sequelize's truncate method to reset sequences
-    console.log('Clearing existing data...'.cyan);
-    await sequelize.transaction(async (transaction) => {
-      await Submission.destroy({ truncate: { cascade: true }, transaction });
-      await TeacherSubject.destroy({ truncate: { cascade: true }, transaction });
-      await Student.destroy({ truncate: { cascade: true }, transaction });
-      await Teacher.destroy({ truncate: { cascade: true }, transaction });
-      await Subject.destroy({ truncate: { cascade: true }, transaction });
-      await Batch.destroy({ truncate: { cascade: true }, transaction });
-      await Admin.destroy({ truncate: { cascade: true }, transaction });
-    });
-    console.log('Existing data cleared'.green);
+    // Sync models and recreate tables to ensure clean state
+    console.log('Syncing database (force: true)...'.cyan);
+    await sequelize.sync({ force: true });
+    console.log('Database synced and tables recreated'.green);
 
     // Insert new data
     console.log('Importing new data...'.cyan);
@@ -264,7 +256,7 @@ const importData = async () => {
     await Admin.bulkCreate(adminsWithHashedPasswords);
 
     // Insert teacher-subject relationships
-    await TeacherSubject.bulkCreate(teacherSubjects);
+    await TeachingAssignment.bulkCreate(teachingAssignments);
     
     // Insert submissions
     await Submission.bulkCreate(submissions);
@@ -289,7 +281,7 @@ const destroyData = async () => {
     console.log('Deleting all data...'.cyan);
     await sequelize.transaction(async (transaction) => {
       await Submission.destroy({ truncate: { cascade: true }, transaction });
-      await TeacherSubject.destroy({ truncate: { cascade: true }, transaction });
+      await TeachingAssignment.destroy({ truncate: { cascade: true }, transaction });
       await Student.destroy({ truncate: { cascade: true }, transaction });
       await Teacher.destroy({ truncate: { cascade: true }, transaction });
       await Subject.destroy({ truncate: { cascade: true }, transaction });

@@ -1,6 +1,8 @@
+import { LOCAL_AUTH, DevelopmentAuthProvider } from './context/DevelopmentAuth';
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
+import './design/workspace.css'
 import App from './App.tsx'
 import { ClerkProvider } from '@clerk/clerk-react'
 import ErrorBoundary from './components/ErrorBoundary.jsx'
@@ -15,9 +17,7 @@ if (!PUBLISHABLE_KEY) {
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ErrorBoundary>
-      <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
-        <App />
-      </ClerkProvider>
+      <>{LOCAL_AUTH ? <DevelopmentAuthProvider><App /></DevelopmentAuthProvider> : <ClerkProvider publishableKey={PUBLISHABLE_KEY}><App /></ClerkProvider>}</>
     </ErrorBoundary>
   </StrictMode>,
 )

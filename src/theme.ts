@@ -4,24 +4,24 @@ import { createTheme } from '@mui/material/styles';
 export const theme = createTheme({
   palette: {
     primary: {
-      main: '#000000',
-      light: '#333333',
-      dark: '#000000',
+      main: '#625bf6',
+      light: '#8f8aff',
+      dark: '#4138c2',
       contrastText: '#ffffff',
     },
     secondary: {
-      main: '#ffffff',
-      light: '#ffffff',
-      dark: '#e0e0e0',
-      contrastText: '#000000',
+      main: '#ff6b4a',
+      light: '#ff977f',
+      dark: '#d94b2c',
+      contrastText: '#ffffff',
     },
     background: {
-      default: '#ffffff',
+      default: '#f5f4f8',
       paper: '#ffffff',
     },
     text: {
-      primary: '#000000',
-      secondary: '#424242',
+      primary: '#171421',
+      secondary: '#696579',
     },
     grey: {
       50: '#fafafa',
@@ -39,19 +39,34 @@ export const theme = createTheme({
   typography: {
     fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
     h1: {
+      fontFamily: '"Manrope", "Inter", sans-serif',
       fontWeight: 700,
       fontSize: '3.5rem',
       letterSpacing: '-0.02em',
     },
     h2: {
+      fontFamily: '"Manrope", "Inter", sans-serif',
       fontWeight: 600,
       fontSize: '2.5rem',
       letterSpacing: '-0.01em',
     },
     h3: {
+      fontFamily: '"Manrope", "Inter", sans-serif',
       fontWeight: 600,
       fontSize: '2rem',
       letterSpacing: '-0.01em',
+    },
+    h4: {
+      fontFamily: '"Manrope", "Inter", sans-serif',
+      fontWeight: 600,
+    },
+    h5: {
+      fontFamily: '"Manrope", "Inter", sans-serif',
+      fontWeight: 600,
+    },
+    h6: {
+      fontFamily: '"Manrope", "Inter", sans-serif',
+      fontWeight: 600,
     },
     body1: {
       fontSize: '1rem',
@@ -67,7 +82,7 @@ export const theme = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: 8,
+          borderRadius: 999,
           textTransform: 'none',
           fontWeight: 600,
           padding: '10px 24px',
@@ -79,9 +94,9 @@ export const theme = createTheme({
           },
         },
         outlined: {
-          borderWidth: '2px',
+          borderWidth: '1px',
           '&:hover': {
-            borderWidth: '2px',
+            borderWidth: '1px',
           },
         },
       },
@@ -90,8 +105,8 @@ export const theme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: 16,
-          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
-          border: '1px solid rgba(0, 0, 0, 0.08)',
+          boxShadow: '0 16px 40px rgba(30, 22, 54, 0.07)',
+          border: '1px solid #e3e0e9',
         },
       },
     },
@@ -119,8 +134,8 @@ export const modernTheme = {
       muted: '#f8f9fa',
     },
     text: {
-      primary: '#000000',
-      secondary: '#424242',
+      primary: '#142131',
+      secondary: '#667587',
       muted: '#6b7280',
     },
     border: {
@@ -181,4 +196,4 @@ export const modernTheme = {
     lg: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
     xl: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
   },
-} as const; 
+} as const;

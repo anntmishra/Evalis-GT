@@ -1,269 +1,39 @@
-# Evalis - University Grading and Submission Portal
+# Evalis
 
-Evalis is a comprehensive university grading and submission portal that provides a platform for students, teachers, and administrators to manage academic activities efficiently.
+Evalis is an academic workspace for students, faculty, programme coordinators, department and school leaders, examination staff, and administrators. The frontend is React/Vite; the API is Express; application data is in PostgreSQL on Neon.
 
-## Features
+## Run locally
 
+Install dependencies in the repository root and `server/`, then set the required environment variables in the ignored root `.env`. Use a pooled PostgreSQL URL for application traffic and an unpooled URL for migrations. The server requires `DATABASE_URL`, `DATABASE_URL_UNPOOLED`, and `JWT_SECRET`. Local frontend development uses `.env.development.local` with `VITE_AUTH_MODE=local` and `VITE_API_BASE_URL=/api`.
 
-## Admin Login Troubleshooting
-
-If you cannot log in as admin:
-
-1. Ensure the backend is actually running (check logs for "Server running" message).
-2. Confirm an admin row exists:
-   - Run: `node server/createAdmin.js` (creates if missing, password = env DEFAULT_ADMIN_PASSWORD or `admin123`).
-3. To reset the admin password explicitly:
-   - Run: `node server/createAdmin.js --reset --password=newStrongPass123`.
-4. Verify environment variables `JWT_SECRET` and `DATABASE_URL` are set and the DB is reachable.
-5. If you recreated the database, re-run: `node server/setupFreshDatabase.js` then recreate admin.
-6. Observe login request/response in browser dev tools; 401 with correct username usually means password mismatch.
-
-After resetting, try login with:
-```
-username: admin
-password: (the password you set / admin123)
+```sh
+npm install
+npm --prefix server install
+npm run dev
 ```
 
-If problems persist, check server logs for lines containing `Admin login attempt` and `password match result` to pinpoint the issue.
+The frontend is at `http://localhost:5173`; the API is at `http://localhost:3000`. The public sign-in shows **Student** and **Teacher**. Academic leaders enter through Teacher and are routed by their verified server role. Administrative entry is private. Development credentials are stored in the ignored, local-only `.local-db/development-logins.json`. Never commit or publish that file.
 
-### CORS Issues (Frontend 5173 -> Backend 3000)
+The development login uses existing password/JWT endpoints. Production still uses Clerk. The [auth replacement plan](docs/auth-replacement-plan.md) defines the migration to persistent, revocable first-party sessions.
 
-Ensure backend started with NODE_ENV=development or set FRONTEND_URL env var, e.g.:
+## Database
+
+The new Neon database has the application schema, 14 records recovered from the local `server/exports` snapshot, and a separate development institution with eight test accounts. The previous remote databases were inaccessible, so the recovered snapshot is the only imported historical source. Existing Neon-managed `neon_auth` tables were left untouched.
+
+`npm run db:verify` performs a read-only check of the schema, recovered fields, role accounts, passwords, academic links, and migration baseline. `npm run db:prepare` first checks that the target application schema is empty. `npm run db:prepare -- --apply` initializes an empty development database transactionally; it refuses an occupied schema. Do not run it against a shared or production database.
+
+Submissions and graded files currently use server filesystem storage; PostgreSQL stores their metadata and URLs. A 1 GB database is ample for the present records, but reliable deployment of uploaded files still needs object storage and a retention policy. Do not put PDF binaries in PostgreSQL.
+
+## Verify
+
+```sh
+npm run check:baseline
+npm run db:verify
+curl http://localhost:3000/api/health
 ```
-FRONTEND_URL=http://localhost:5173
-```
-To temporarily allow any origin (dev only):
-```
-CORS_ALLOW_ANY=true
-```
-Clear browser cache or hard-reload after changing CORS settings.
 
-## Prerequisites
-- npm or yarn
+The baseline runs lint, server syntax, isolated tests, TypeScript checks, and a production frontend build. The health endpoint reports the database status under `checks.database.status`. The application schema is not changed at server startup; migrations are explicit.
 
-## Installation
+## Current boundaries
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/anantmishra/evalis.git
-   cd evalis
-   ```
-
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Create a `.env` file in the root directory with the following variables:
-   ```
-   MONGODB_URI=your_mongodb_connection_string
-   JWT_SECRET=your_jwt_secret
-   NODE_ENV=development
-   PORT=5000
-   
-   # Email Configuration (Optional but recommended)
-   EMAIL_HOST=smtp.gmail.com
-   EMAIL_PORT=587
-   EMAIL_SECURE=false
-   EMAIL_USER=your_email@gmail.com
-   EMAIL_PASS=your_app_password
-   FRONTEND_URL=http://localhost:5173
-   VITE_GOOGLE_AI_API_KEY=your_api_key_here
-   ```
-
-   > **Note on Email Configuration**: 
-   > 
-   > To use the email functionality (sending login credentials to students):
-   > 
-   > - For Gmail: You need to create an "App Password" in your Google Account security settings.
-   > - For other providers: Use the appropriate SMTP settings and credentials.
-   > - The `FRONTEND_URL` should point to your frontend application's URL.
-
-## Database Setup
-
-1. Create a MongoDB database (local or MongoDB Atlas)
-2. Update the `.env` file with your MongoDB connection string
-3. Seed the database with initial data:
-   ```bash
-   npm run data:import
-   ```
-
-## Database Setup (PostgreSQL)
-
-### Prerequisites
-- PostgreSQL installed on your system (version 12 or higher recommended)
-- Basic knowledge of PostgreSQL administration
-
-### Setup Instructions
-
-1. Install PostgreSQL if you haven't already:
-   ```bash
-   # For Ubuntu/Debian
-   sudo apt update
-   sudo apt install postgresql postgresql-contrib
-   
-   # For macOS with Homebrew
-   brew install postgresql
-   
-   # For Windows
-   # Download the installer from https://www.postgresql.org/download/windows/
-   ```
-
-2. Start the PostgreSQL service:
-   ```bash
-   # Ubuntu/Debian
-   sudo service postgresql start
-   
-   # macOS
-   brew services start postgresql
-   
-   # Windows
-   # The service should start automatically after installation
-   ```
-
-3. Create the database:
-   ```bash
-   # Option 1: Using the provided SQL script
-   psql -U postgres -f init-db.sql
-   
-   # Option 2: Manually via psql
-   psql -U postgres
-   postgres=# CREATE DATABASE evalis;
-   postgres=# \q
-   ```
-
-4. Configure environment variables:
-   Update the `.env` file with your PostgreSQL connection details if different from the defaults:
-   ```
-   POSTGRES_HOST=localhost
-   POSTGRES_PORT=5432
-   POSTGRES_DB=evalis
-   POSTGRES_USER=postgres
-   POSTGRES_PASSWORD=yourpassword
-   POSTGRES_SSL=false
-   ```
-
-5. Run the application with database synchronization:
-   ```bash
-   npm run server:dev
-   ```
-   This will create all the required tables in the database.
-
-6. (Optional) Seed the database with initial data:
-   ```bash
-   npm run data:import
-   ```
-
-### Database Schemas
-
-The application uses the following main database tables:
-
-- `Students`: Student records with authentication
-- `Teachers`: Teacher records with authentication
-- `Subjects`: Available subjects/courses 
-- `Batches`: Student batch/year information
-- `Submissions`: Student assignment/exam submissions
-- `TeacherSubjects`: Association between teachers and their assigned subjects
-- `Admins`: Administrator accounts
-
-## Running the Application
-
-### Development Mode
-
-1. Start the backend server:
-   ```bash
-   npm run server:dev
-   ```
-
-2. In a separate terminal, start the frontend development server:
-   ```bash
-   npm run dev
-   ```
-
-### Production Mode
-
-1. Build the frontend:
-   ```bash
-   npm run build
-   ```
-
-2. Start the server:
-   ```bash
-   npm run server
-   ```
-
-## API Endpoints
-
-### Authentication
-- `POST /api/auth/student/login` - Student login
-- `POST /api/auth/teacher/login` - Teacher login
-- `POST /api/auth/admin/login` - Admin login
-- `GET /api/auth/profile` - Get user profile
-
-### Students
-- `GET /api/students` - Get all students (Admin only)
-- `GET /api/students/:id` - Get student by ID
-- `POST /api/students` - Create a new student (Admin only)
-- `PUT /api/students/:id` - Update student (Admin only)
-- `DELETE /api/students/:id` - Delete student (Admin only)
-- `GET /api/students/:id/submissions` - Get student submissions
-- `POST /api/students/import` - Import students from Excel (Admin only)
-
-### Teachers
-- `GET /api/teachers` - Get all teachers (Admin only)
-- `GET /api/teachers/:id` - Get teacher by ID (Admin only)
-- `POST /api/teachers` - Create a new teacher (Admin only)
-- `PUT /api/teachers/:id` - Update teacher (Admin only)
-- `DELETE /api/teachers/:id` - Delete teacher (Admin only)
-- `POST /api/teachers/:id/subjects` - Assign subject to teacher (Admin only)
-- `DELETE /api/teachers/:id/subjects/:subjectId` - Remove subject from teacher (Admin only)
-
-### Subjects
-- `GET /api/subjects` - Get all subjects
-- `GET /api/subjects/:id` - Get subject by ID
-- `POST /api/subjects` - Create a new subject (Admin only)
-- `PUT /api/subjects/:id` - Update subject (Admin only)
-- `DELETE /api/subjects/:id` - Delete subject (Admin only)
-
-### Batches
-- `GET /api/batches` - Get all batches
-- `GET /api/batches/:id` - Get batch by ID
-- `POST /api/batches` - Create a new batch (Admin only)
-- `PUT /api/batches/:id` - Update batch (Admin only)
-- `DELETE /api/batches/:id` - Delete batch (Admin only)
-- `GET /api/batches/:id/students` - Get students in a batch
-
-## Demo Credentials
-
-### Student Login
-- ID: E23CSE001
-- Password: anant123
-
-### Teacher Login
-- ID: T001
-- Password: smith123
-
-### Admin Login
-- Username: admin
-- Password: admin123
-
-## Google AI Integration
-
-The ProfileChatbot component now integrates with Google AI Studio's Gemini model for real-time student analysis. To use this feature:
-
-1. Obtain a Google AI Studio API key from [Google AI Studio](https://makersuite.google.com/)
-2. Add your API key to the `.env` file:
-   ```
-   VITE_GOOGLE_AI_API_KEY=your_api_key_here
-   ```
-3. The chatbot will automatically use the Google AI API to generate personalized responses based on student data
-
-The AI provides:
-- Personalized academic insights
-- Performance analysis based on grades and attendance
-- Customized recommendations for improvement
-- Natural language interactions with students
-
-## License
-
-This project is licensed under the ISC License.
+Dashboard overviews and key student, faculty, coordinator, leadership, and examination read routes use verified tenant and academic scope. Assessment approval and result publication are separate role-gated actions. Student submission scores stay hidden until publication. Full account replacement, complete browser acceptance coverage, course-grade policy, and durable cloud file storage remain separate work. The current development JWT stored in browser storage is only for local testing, not the planned production session design.

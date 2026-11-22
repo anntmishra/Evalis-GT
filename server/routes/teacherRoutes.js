@@ -16,16 +16,13 @@ const {
   getAccessibleBatches,
   getTeacherDashboard
 } = require('../controllers/teacherController');
-const { protect, admin, teacher } = require('../middleware/authMiddleware');
+const { protect, admin, adminOrCoe, teacher, requireRole } = require('../middleware/authMiddleware');
+const { importAcademicWorkbook } = require('../controllers/bulkImportController');
 
 // Teacher routes
 router.route('/')
-  .get(protect, admin, getTeachers)
-  .post(protect, admin, createTeacher);
-
-// Development test account route
-router.route('/create-test-account')
-  .post(createTestTeacher);
+  .get(protect, requireRole(['dean', 'assistant_dean', 'hod']), getTeachers)
+  .post(protect, adminOrCoe, createTeacher);
 
 router.route('/subjects')
   .get(protect, teacher, getTeacherSubjects);
@@ -68,8 +65,11 @@ router.route('/:id/subjects/:subjectId')
 router.route('/:id/students')
   .get(protect, teacher, getStudentsByTeacher);
 
+const multer = require('multer');
+const upload = multer({ storage: multer.memoryStorage() });
+
 // Route for Excel import
 router.route('/import')
-  .post(protect, admin, importTeachersFromExcel);
+  .post(protect, admin, upload.single('file'), (req, _res, next) => { req.body.mode = 'teachers'; next(); }, importAcademicWorkbook);
 
 module.exports = router; 

@@ -30,7 +30,7 @@ interface ToggleSemesterResponse {
  */
 export const generateSemestersForBatch = async (batchId: string): Promise<GenerateSemestersResponse> => {
   try {
-    const response = await axios.post(`${API_URL}/semesters/generate/${batchId}`, {}, getAuthConfig());
+    const response = await axios.post(`${API_URL}/semesters/generate/${batchId}`, {}, await getAuthConfig());
     return response.data;
   } catch (error: any) {
     if (error.response && error.response.data) {
@@ -51,7 +51,7 @@ export const setActiveSemesterForStudent = async (
     const response = await axios.post(
       `${API_URL}/semesters/${semesterId}/student/${studentId}`, 
       {}, 
-      getAuthConfig()
+      await getAuthConfig()
     );
     return response.data;
   } catch (error: any) {
@@ -73,7 +73,7 @@ export const setActiveSemesterForBatch = async (
     const response = await axios.post(
       `${API_URL}/semesters/${semesterId}/batch/${batchId}`, 
       {}, 
-      getAuthConfig()
+      await getAuthConfig()
     );
     return response.data;
   } catch (error: any) {
@@ -88,7 +88,7 @@ export const setActiveSemesterForBatch = async (
 export const activateSemester = async (semesterId: string): Promise<ToggleSemesterResponse> => {
   try {
     const semBase = config.API_ENDPOINTS?.SEMESTERS || '/api/semesters';
-    const response = await axios.put(`${semBase}/${semesterId}/activate`, {}, getAuthConfig());
+    const response = await axios.put(`${semBase}/${semesterId}/activate`, {}, await getAuthConfig());
     return response.data;
   } catch (error: any) {
     if (error.response?.data) throw error.response.data;
@@ -100,7 +100,7 @@ export const activateSemester = async (semesterId: string): Promise<ToggleSemest
 export const deactivateSemester = async (semesterId: string): Promise<ToggleSemesterResponse> => {
   try {
     const semBase = config.API_ENDPOINTS?.SEMESTERS || '/api/semesters';
-    const response = await axios.put(`${semBase}/${semesterId}/deactivate`, {}, getAuthConfig());
+    const response = await axios.put(`${semBase}/${semesterId}/deactivate`, {}, await getAuthConfig());
     return response.data;
   } catch (error: any) {
     if (error.response?.data) throw error.response.data;

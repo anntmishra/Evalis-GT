@@ -1,10 +1,6 @@
 import axios from 'axios';
 import config from '../config/environment';
 
-// Google API configuration from centralized config
-const GOOGLE_API_KEY = config.AI.GOOGLE_API_KEY;
-const GOOGLE_API_URL = config.AI.GOOGLE_API_URL;
-
 // Retry configuration optimized for speed
 const MAX_RETRIES = 1; // Reduced from 3 to 1 for faster responses
 const INITIAL_RETRY_DELAY = 500; // Reduced from 1000ms to 500ms
@@ -124,24 +120,36 @@ export interface BloomTextAnomalyResponse {
 class QuestionEnhancerService {
   private apiUrl: string;
 
+  private geminiUrl: string;
+
   constructor() {
     this.apiUrl = config.API_BASE_URL.replace(/\/$/, '');
-    
-    // Log API key info (masked for security)
-    if (GOOGLE_API_KEY) {
-      console.log('Google API Key loaded:', GOOGLE_API_KEY.substring(0, 20) + '...');
-    } else {
-      console.warn('Warning: Google API Key is not configured!');
-    }
+    this.geminiUrl = `${this.apiUrl}/ai/gemini/generate`;
   }
 
   /**
-   * Check if Google API is properly configured
+   * Call Gemini through our server-side proxy (keeps the API key off the client)
    */
-  private checkApiKeyConfigured(): void {
-    if (!GOOGLE_API_KEY || GOOGLE_API_KEY.length < 30) {
-      throw new Error('Google API key is not properly configured. Please check your environment variables.');
-    }
+  private callGemini(
+    prompt: string,
+    generationConfig?: Record<string, unknown>,
+    axiosConfig?: Record<string, unknown>
+  ) {
+    const token = localStorage.getItem(config.AUTH.TOKEN_STORAGE_KEY);
+    return axios.post(
+      this.geminiUrl,
+      {
+        contents: [{ parts: [{ text: prompt }] }],
+        ...(generationConfig ? { generationConfig } : {})
+      },
+      {
+        ...(axiosConfig || {}),
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        }
+      }
+    );
   }
 
   /**
@@ -154,8 +162,6 @@ class QuestionEnhancerService {
     try {
       // First try to use Google API for better enhancement
       try {
-        this.checkApiKeyConfigured();
-        
         const prompt = `
 You are an educational expert specializing in creating high-quality assessment questions.
 Please analyze and enhance the following ${question.type.toUpperCase()} question worth ${question.marks} marks:
@@ -178,15 +184,7 @@ Provide your response as a JSON object with the following structure:
 }
         `;
 
-        const response = await retryWithBackoff(() => 
-          axios.post(`${GOOGLE_API_URL}?key=${GOOGLE_API_KEY}`, {
-            contents: [{
-              parts: [{
-                text: prompt
-              }]
-            }]
-          })
-        );
+        const response = await retryWithBackoff(() => this.callGemini(prompt));
         
         // Extract JSON from response
         const text = response.data.candidates[0].content.parts[0].text;
@@ -265,15 +263,7 @@ Provide your response as a JSON object with the following structure:
 }
         `;
 
-        const response = await retryWithBackoff(() => 
-          axios.post(`${GOOGLE_API_URL}?key=${GOOGLE_API_KEY}`, {
-            contents: [{
-              parts: [{
-                text: prompt
-              }]
-            }]
-          })
-        );
+        const response = await retryWithBackoff(() => this.callGemini(prompt));
         
         // Extract JSON from response
         const text = response.data.candidates[0].content.parts[0].text;
@@ -365,15 +355,7 @@ Please format your response as a JSON object with this structure:
 `;
 
         console.log("Sending prompt to Google API");
-        const response = await retryWithBackoff(() => 
-          axios.post(`${GOOGLE_API_URL}?key=${GOOGLE_API_KEY}`, {
-            contents: [{
-              parts: [{
-                text: prompt
-              }]
-            }]
-          })
-        );
+        const response = await retryWithBackoff(() => this.callGemini(prompt));
         
         console.log("Received response from Google API");
         
@@ -433,15 +415,7 @@ Generate ${count} questions about ${topic} for the ${cognitiveLevel} cognitive l
 Return the response as a plain list of questions, one per line.`;
 
         try {
-          const fallbackResponse = await retryWithBackoff(() => 
-            axios.post(`${GOOGLE_API_URL}?key=${GOOGLE_API_KEY}`, {
-              contents: [{
-                parts: [{
-                  text: simplePrompt
-                }]
-              }]
-            })
-          );
+          const fallbackResponse = await retryWithBackoff(() => this.callGemini(simplePrompt));
           
           if (fallbackResponse.data && 
               fallbackResponse.data.candidates && 
@@ -527,19 +501,12 @@ Provide your response as a JSON object with the following structure:
       `;
 
       console.log("Sending prompt to Google API");
-      const response = await retryWithBackoff(() => 
-        axios.post(`${GOOGLE_API_URL}?key=${GOOGLE_API_KEY}`, {
-          contents: [{
-            parts: [{
-              text: fullPrompt
-            }]
-          }],
-          generationConfig: {
-            temperature: 0.7,
-            topK: 40,
-            topP: 0.95,
-            maxOutputTokens: 2048,
-          }
+      const response = await retryWithBackoff(() =>
+        this.callGemini(fullPrompt, {
+          temperature: 0.7,
+          topK: 40,
+          topP: 0.95,
+          maxOutputTokens: 2048,
         })
       );
       
@@ -606,15 +573,7 @@ Provide your response as a JSON object with the following structure:
         const simplePrompt = `Generate educational questions based on this request: ${prompt}
         Please provide at least 3 questions, numbered 1, 2, 3, etc.`;
         
-        const fallbackResponse = await retryWithBackoff(() => 
-          axios.post(`${GOOGLE_API_URL}?key=${GOOGLE_API_KEY}`, {
-            contents: [{
-              parts: [{
-                text: simplePrompt
-              }]
-            }]
-          })
-        );
+        const fallbackResponse = await retryWithBackoff(() => this.callGemini(simplePrompt));
         
         if (fallbackResponse.data && 
             fallbackResponse.data.candidates && 
@@ -708,7 +667,6 @@ Provide your response as a JSON object with the following structure:
     targetBloomLevel?: CognitiveLevel
   ): Promise<BloomTextAnomalyResponse> {
     try {
-      this.checkApiKeyConfigured();
       console.log(`Analyzing question for Bloom text anomalies: "${question.text}"`);
       
       // Try backend API first
@@ -765,16 +723,8 @@ Focus on:
 - Providing measurable and fair assessment criteria
       `;
 
-      const response = await retryWithBackoff(() => 
-        axios.post(`${GOOGLE_API_URL}?key=${GOOGLE_API_KEY}`, {
-          contents: [{
-            parts: [{
-              text: prompt
-            }]
-          }]
-        }, {
-          timeout: 30000 // 30 second timeout for faster response
-        })
+      const response = await retryWithBackoff(() =>
+        this.callGemini(prompt, undefined, { timeout: 30000 })
       );
 
       if (!response.data || !response.data.candidates || !response.data.candidates[0]) {

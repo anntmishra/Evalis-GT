@@ -96,7 +96,7 @@ const UserSignup: React.FC<UserSignupProps> = ({ onSuccess, onCancel }) => {
       
       setSuccess(true);
       if (onSuccess) {
-        onSuccess();
+        onSuccess?.();
       }
     } catch (error: any) {
       console.error('Signup error:', error);

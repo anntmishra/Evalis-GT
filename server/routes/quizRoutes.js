@@ -9,6 +9,8 @@ const {
   submitQuizAttempt,
   getQuizResults,
   getQuizAttempts,
+  publishQuiz,
+  publishQuizResults,
   updateQuiz,
   deleteQuiz
 } = require('../controllers/quizController');
@@ -24,6 +26,8 @@ router.get('/:id/results', protect, student, getQuizResults);
 router.post('/', protect, teacher, createQuiz);
 router.get('/', protect, teacher, getTeacherQuizzes);
 router.get('/:id/attempts', protect, teacher, getQuizAttempts);
+router.post('/:id/publish', protect, teacher, publishQuiz);
+router.post('/:id/results/publish', protect, teacher, publishQuizResults);
 
 // Shared routes - put :id routes last
 router.get('/:id', protect, getQuizById);

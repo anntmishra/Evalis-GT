@@ -10,10 +10,7 @@ const QuizOption = sequelize.define('QuizOption', {
   questionId: {
     type: DataTypes.UUID,
     allowNull: false,
-    references: {
-      model: 'QuizQuestions',
-      key: 'id'
-    },
+    
     onDelete: 'CASCADE'
   },
   optionText: {
@@ -29,6 +26,7 @@ const QuizOption = sequelize.define('QuizOption', {
     allowNull: false,
   }
 }, {
+  schema: 'examinations',
   timestamps: true
 });
 

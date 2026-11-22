@@ -516,26 +516,15 @@ export const getTeacherSubmissions = async () => {
   }
 };
 
-// Grade a submission with optional EVT token awarding
-export const gradeSubmission = async (submissionId: number, score: number, feedback: string, tokenAward?: {
-  awardTokens: boolean;
-  tokenAmount: number;
-  tokenReason?: string;
-}) => {
+// Grade a submission
+export const gradeSubmission = async (submissionId: number, score: number, feedback: string) => {
   try {
-    console.log('Grading submission:', submissionId, score, feedback, tokenAward);
+    console.log('Grading submission:', submissionId, score, feedback);
     const requestBody: any = {
       score,
       feedback,
       plagiarismScore: 0 // Default for now
     };
-
-    // Add token awarding parameters if provided
-    if (tokenAward?.awardTokens && tokenAward.tokenAmount > 0) {
-      requestBody.awardTokens = true;
-      requestBody.tokenAmount = tokenAward.tokenAmount;
-      requestBody.tokenReason = tokenAward.tokenReason;
-    }
 
     const response = await axios.put(
       `${config.API_ENDPOINTS.SUBMISSIONS}/${submissionId}`,
@@ -594,185 +583,6 @@ export const saveAnnotatedPDF = async (submissionId: number, annotations: any[],
   }
 };
 
-// Web3 Rewards Functions
-
-// Award EVT tokens to a student
-export const awardEvtTokens = async (studentId: string, amount: number, reason?: string) => {
-  try {
-    console.log('Awarding EVT tokens:', studentId, amount, reason);
-    const response = await axios.post(
-      `${config.API_BASE_URL}/web3/award/tokens`,
-      {
-        studentId,
-        amount,
-        reason
-      },
-      authConfig()
-    );
-    return response.data;
-  } catch (error) {
-    console.error('Error awarding EVT tokens:', error);
-    throw error;
-  }
-};
-
-// Award NFT certificate to a student
-export const awardNftCertificate = async (submissionId: number, metadataUri: string) => {
-  try {
-    console.log('Awarding NFT certificate:', submissionId, metadataUri);
-    const response = await axios.post(
-      `${config.API_BASE_URL}/web3/award/certificate`,
-      {
-        submissionId,
-        metadataUri
-      },
-      authConfig()
-    );
-    return response.data;
-  } catch (error: any) {
-    console.error('Error awarding NFT certificate:', error);
-    
-    // Handle authentication errors specifically
-    if (error.message === 'Authentication required - no token available') {
-      throw new Error('Please log in again to award NFT certificates');
-    }
-    
-    if (error.response?.status === 401) {
-      throw new Error('Your session has expired. Please log in again.');
-    }
-    
-    throw error;
-  }
-};
-
-// Award badge-based EVT tokens and optional NFT certificate based on grade
-export const awardBadgeBasedRewards = async (submissionId: number, awardCertificate: boolean = false) => {
-  try {
-    console.log('Awarding badge-based rewards:', submissionId, awardCertificate);
-    const response = await axios.post(
-      `${config.API_BASE_URL}/web3/award/badge-rewards`,
-      {
-        submissionId,
-        awardCertificate
-      },
-      authConfig()
-    );
-    return response.data;
-  } catch (error: any) {
-    console.error('Error awarding badge-based rewards:', error);
-    
-    // Handle authentication errors specifically
-    if (error.message === 'Authentication required - no token available') {
-      throw new Error('Please log in again to award badge rewards');
-    }
-    
-    if (error.response?.status === 401) {
-      throw new Error('Your session has expired. Please log in again.');
-    }
-    
-    throw error;
-  }
-};
-
-// Award manual NFT certificate (can be used regardless of grade)
-export const awardManualCertificate = async (submissionId: number, reason?: string) => {
-  try {
-    console.log('Awarding manual NFT certificate:', submissionId, reason);
-    const response = await axios.post(
-      `${config.API_BASE_URL}/web3/award/certificate/manual`,
-      {
-        submissionId,
-        reason
-      },
-      authConfig()
-    );
-    return response.data;
-  } catch (error: any) {
-    console.error('Error awarding manual NFT certificate:', error);
-    
-    // Handle authentication errors specifically
-    if (error.message === 'Authentication required - no token available') {
-      throw new Error('Please log in again to award certificates');
-    }
-    
-    if (error.response?.status === 401) {
-      throw new Error('Your session has expired. Please log in again.');
-    }
-    
-    throw error;
-  }
-};
-
-// Get available badge tiers
-export const getBadgeTiers = async () => {
-  try {
-    const response = await axios.get(`${config.API_BASE_URL}/web3/badges`);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching badge tiers:', error);
-    throw error;
-  }
-};
-
-// Get badge for specific grade
-export const getBadgeForGrade = async (grade: number) => {
-  try {
-    const response = await axios.get(`${config.API_BASE_URL}/web3/badge/grade/${grade}`);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching badge for grade:', error);
-    throw error;
-  }
-};
-
-// Get student's token balance
-export const getStudentTokenBalance = async (studentId: string) => {
-  try {
-    const response = await axios.get(
-      `${config.API_BASE_URL}/web3/student/${studentId}/balance`,
-      authConfig()
-    );
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching student token balance:', error);
-    throw error;
-  }
-};
-
-// Get student's certificates
-export const getStudentCertificates = async (studentId: string) => {
-  try {
-    const response = await axios.get(
-      `${config.API_BASE_URL}/web3/student/${studentId}/certificates`,
-      authConfig()
-    );
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching student certificates:', error);
-    throw error;
-  }
-};
-
-// Batch award tokens to multiple students
-export const batchAwardTokens = async (awards: Array<{
-  studentId: string;
-  amount: number;
-  reason?: string;
-}>) => {
-  try {
-    console.log('Batch awarding EVT tokens:', awards);
-    const response = await axios.post(
-      `${config.API_BASE_URL}/web3/award/tokens/batch`,
-      { awards },
-      authConfig()
-    );
-    return response.data;
-  } catch (error) {
-    console.error('Error batch awarding tokens:', error);
-    throw error;
-  }
-};
-
 export default {
   getTeachers,
   getTeacherById,
@@ -791,10 +601,7 @@ export default {
   getTeacherSubmissions,
   gradeSubmission,
   deleteAssignment,
-  saveAnnotatedPDF,
-  awardBadgeBasedRewards,
-  getBadgeTiers,
-  getBadgeForGrade
+  saveAnnotatedPDF
 };
 
 // Debug function to check authentication state

@@ -1,6 +1,15 @@
 const asyncHandler = require('express-async-handler');
-const { Submission, Student, Subject, Teacher, TeacherSubject, Assignment } = require('../models');
+const { Submission, Student, Subject, Teacher, TeachingAssignment, Assignment, GradeRevision } = require('../models');
 const { Op } = require('sequelize');
+const { academicScope, requireSubject, requireTeacher, deny } = require('../utils/academicScope');
+const { submissionView } = require('../utils/submissionView');
+const fail = (message, statusCode = 400) => Object.assign(new Error(message), { statusCode });
+function validateScore(score) { if (typeof score !== 'number' || !Number.isFinite(score) || score < 0 || score > 100) throw fail('Score must be a number between 0 and 100'); }
+async function checkSubmission(req, row) {
+  if (row.tenantId !== req.tenantId) throw deny();
+  await requireSubject(req, row.subjectId);
+  if (req.user.role === 'student' && row.studentId !== req.user.id) throw deny();
+}
 
 // Grade Scale System
 const GRADE_SCALE = [
@@ -17,12 +26,12 @@ const GRADE_SCALE = [
 
 // Helper functions for grade calculation
 const calculateLetterGrade = (score) => {
-  const grade = GRADE_SCALE.find(scale => score >= scale.min && score <= scale.max);
+  const grade = GRADE_SCALE.find(scale => score >= scale.min);
   return grade ? grade.grade : 'F';
 };
 
 const calculateGradePoints = (score) => {
-  const grade = GRADE_SCALE.find(scale => score >= scale.min && score <= scale.max);
+  const grade = GRADE_SCALE.find(scale => score >= scale.min);
   return grade ? grade.gradePoint : 0.0;
 };
 
@@ -32,11 +41,13 @@ const calculateGradePoints = (score) => {
  * @access  Private/Admin
  */
 const getSubmissions = asyncHandler(async (req, res) => {
+  const scope = await academicScope(req);
   const submissions = await Submission.findAll({
+    where: { tenantId: req.tenantId, subjectId: { [Op.in]: scope.subjectIds } },
     include: [
       {
         model: Student,
-        attributes: ['id', 'name', 'section', 'batch', 'walletAddress']
+        attributes: ['id', 'name', 'section', 'batch']
       },
       {
         model: Subject,
@@ -53,7 +64,7 @@ const getSubmissions = asyncHandler(async (req, res) => {
     ],
     order: [['submissionDate', 'DESC']]
   });
-  
+
   res.json(submissions);
 });
 
@@ -67,7 +78,7 @@ const getSubmissionById = asyncHandler(async (req, res) => {
     include: [
       {
         model: Student,
-        attributes: ['id', 'name', 'section', 'batch', 'walletAddress']
+        attributes: ['id', 'name', 'section', 'batch']
       },
       {
         model: Subject,
@@ -89,39 +100,8 @@ const getSubmissionById = asyncHandler(async (req, res) => {
     throw new Error('Submission not found');
   }
 
-  // Check permissions:
-  // 1. Admin can see all submissions
-  // 2. Teacher can see submissions for their subjects
-  // 3. Student can only see their own submissions
-  const isAdmin = req.user.role === 'admin';
-  const isTeacher = req.user.role === 'teacher';
-  const isStudent = req.user.role === 'student';
-
-  if (isAdmin) {
-    // Admin can see all
-    res.json(submission);
-  } else if (isTeacher) {
-    // Check if the subject is taught by this teacher
-    const teachesSubject = await TeacherSubject.findOne({
-      where: {
-        teacherId: req.user.id,
-        subjectId: submission.subjectId
-      }
-    });
-
-    if (teachesSubject) {
-      res.json(submission);
-    } else {
-      res.status(403);
-      throw new Error('Not authorized to view this submission');
-    }
-  } else if (isStudent && submission.studentId === req.user.id) {
-    // Student can see their own submission
-    res.json(submission);
-  } else {
-    res.status(403);
-    throw new Error('Not authorized to view this submission');
-  }
+  await checkSubmission(req, submission);
+  res.json(submissionView(submission, req.user.role));
 });
 
 /**
@@ -137,6 +117,8 @@ const createSubmission = asyncHandler(async (req, res) => {
     throw new Error('Please provide all required fields: subjectId, examType, submissionText');
   }
 
+  await requireSubject(req, subjectId);
+
   // If assignmentId is provided, verify it exists and matches the subject
   if (assignmentId) {
     const assignment = await Assignment.findByPk(assignmentId);
@@ -146,6 +128,8 @@ const createSubmission = asyncHandler(async (req, res) => {
       throw new Error('Assignment not found');
     }
     
+    if (assignment.dueDate && new Date(assignment.dueDate) < new Date()) throw fail('The deadline has passed');
+    if (await Submission.count({ where: { studentId: req.user.id, assignmentId } })) throw fail('Already submitted', 409);
     if (assignment.subjectId !== subjectId) {
       res.status(400);
       throw new Error('Assignment does not match the provided subject');
@@ -161,6 +145,7 @@ const createSubmission = asyncHandler(async (req, res) => {
   }
 
   const submission = await Submission.create({
+    tenantId: req.tenantId,
     studentId: req.user.id,
     subjectId,
     assignmentId: assignmentId || null,
@@ -173,7 +158,8 @@ const createSubmission = asyncHandler(async (req, res) => {
     feedback: '',
     graded: false,
     gradedBy: null,
-    gradedDate: null
+    gradedDate: null,
+    gradingState: 'submitted'
   });
 
   if (submission) {
@@ -190,7 +176,7 @@ const createSubmission = asyncHandler(async (req, res) => {
  * @access  Private/Teacher, Admin
  */
 const updateSubmission = asyncHandler(async (req, res) => {
-  const { score, feedback, plagiarismScore, awardTokens, tokenAmount, tokenReason, useBadgeRewards, awardCertificate } = req.body;
+  const { score, feedback, plagiarismScore, gradingState, reason } = req.body;
 
   const submission = await Submission.findByPk(req.params.id);
 
@@ -199,25 +185,36 @@ const updateSubmission = asyncHandler(async (req, res) => {
     throw new Error('Submission not found');
   }
 
-  // Check if the teacher is assigned to this subject
-  if (req.user.role === 'teacher') {
-    const teachesSubject = await TeacherSubject.findOne({
-      where: {
-        teacherId: req.user.id,
-        subjectId: submission.subjectId
-      }
-    });
+  await checkSubmission(req, submission);
+  if (score !== undefined) validateScore(score);
+  if (gradingState !== undefined && !['draft', 'submitted'].includes(gradingState)) throw fail('Results must be published through the examination office');
+  if (submission.gradingState === 'published') throw fail('Published results are locked. A controlled revision workflow is required.', 409);
 
-    if (!teachesSubject) {
-      res.status(403);
-      throw new Error('Not authorized to grade this submission');
+  // Check for grade revisions on published grades
+  if (submission.gradingState === 'published' && score !== undefined && score !== submission.score) {
+    if (!reason) {
+      res.status(400);
+      throw new Error('A reason is required when modifying a published grade for the audit log.');
     }
+
+    // Create audit log
+    await GradeRevision.create({
+      submissionId: submission.id,
+      oldGrade: submission.score,
+      newGrade: score,
+      changedBy: req.user.id,
+      reason: reason
+    });
   }
 
   // Update fields
   submission.score = score !== undefined ? score : submission.score;
   submission.feedback = feedback !== undefined ? feedback : submission.feedback;
   submission.plagiarismScore = plagiarismScore !== undefined ? plagiarismScore : submission.plagiarismScore;
+
+  if (gradingState !== undefined) {
+    submission.gradingState = gradingState;
+  }
 
   // Calculate letter grade if score is provided
   if (score !== undefined) {
@@ -234,125 +231,15 @@ const updateSubmission = asyncHandler(async (req, res) => {
 
   const updatedSubmission = await submission.save();
 
-  let tokenAwardResult = null;
-  let badgeRewardResult = null;
 
-  // Automatically award badge-based rewards when score qualifies (75% or higher)
-  /* Web3 integration temporarily disabled
-  if (score !== undefined && score >= 75) {
-    console.log('[DEBUG] Automatic badge awarding triggered:', {
-      submissionId: submission.id,
-      studentId: submission.studentId,
-      score: score,
-      awardCertificate: score >= 80
-    });
-    
-    try {
-      const rewardsCtrl = require('../web3/rewardsController');
-      
-      const badgeResult = await new Promise((resolve) => {
-        const mockReq = {
-          body: {
-            submissionId: submission.id,
-            awardCertificate: score >= 80 // Automatically award certificate for 80% or higher
-          },
-          user: req.user
-        };
-        
-        const mockRes = {
-          status: (code) => mockRes,
-          json: (data) => {
-            console.log('[DEBUG] Badge award result:', data);
-            resolve(data);
-            return mockRes;
-          }
-        };
 
-        rewardsCtrl.awardBadgeBasedRewards(mockReq, mockRes);
-      });
-      
-      badgeRewardResult = badgeResult;
-      
-    } catch (error) {
-      console.error('[DEBUG] Error awarding badge-based rewards:', error);
-      badgeRewardResult = { error: 'Badge reward awarding failed: ' + error.message };
-    }
-  }
-  // Badge-based rewards system (new) - only if explicitly requested
-  else if (useBadgeRewards && score !== undefined) {
-    try {
-      const rewardsCtrl = require('../web3/rewardsController');
-      
-      const badgeResult = await new Promise((resolve) => {
-        const mockReq = {
-          body: {
-            submissionId: submission.id,
-            awardCertificate: awardCertificate || false
-          },
-          user: req.user
-        };
-        
-        const mockRes = {
-          status: (code) => mockRes,
-          json: (data) => {
-            resolve(data);
-            return mockRes;
-          }
-        };
-
-        rewardsCtrl.awardBadgeBasedRewards(mockReq, mockRes);
-      });
-      
-      badgeRewardResult = badgeResult;
-      
-    } catch (error) {
-      console.error('Error awarding badge-based rewards:', error);
-      badgeRewardResult = { error: 'Badge reward awarding failed: ' + error.message };
-    }
-  }
-  // Manual token awarding system (existing) - only if not using automatic badge rewards
-  else if (awardTokens && tokenAmount && tokenAmount > 0 && !badgeRewardResult) {
-    try {
-      const rewardsCtrl = require('../web3/rewardsController');
-      
-      // Call the rewards controller directly
-      const awardResult = await new Promise((resolve) => {
-        const mockReq = {
-          body: {
-            studentId: submission.studentId,
-            amount: tokenAmount,
-            reason: tokenReason || `Excellent work on assignment (Score: ${score}%)`
-          },
-          user: req.user
-        };
-        
-        const mockRes = {
-          status: (code) => mockRes,
-          json: (data) => {
-            resolve(data);
-            return mockRes;
-          }
-        };
-
-        rewardsCtrl.awardEvtTokens(mockReq, mockRes);
-      });
-      
-      tokenAwardResult = awardResult;
-      
-    } catch (error) {
-      console.error('Error awarding EVT tokens:', error);
-      // Don't fail the grading if token awarding fails
-      tokenAwardResult = { error: 'Token awarding failed: ' + error.message };
-    }
-  }
-  */
 
   // Fetch the updated submission with associations for response
   const fullSubmission = await Submission.findByPk(updatedSubmission.id, {
     include: [
       {
         model: Student,
-        attributes: ['id', 'name', 'section', 'batch', 'walletAddress']
+        attributes: ['id', 'name', 'section', 'batch']
       },
       {
         model: Subject,
@@ -369,10 +256,15 @@ const updateSubmission = asyncHandler(async (req, res) => {
     ]
   });
 
+  const value = fullSubmission.toJSON();
   const response = {
-    submission: fullSubmission,
-    tokenAward: tokenAwardResult,
-    badgeReward: badgeRewardResult
+    submission: {
+      ...value,
+      student: value.Student || null,
+      subject: value.Subject || null,
+      teacher: value.Teacher || null,
+      assignment: value.Assignment || null
+    }
   };
 
   res.json(response);
@@ -397,6 +289,7 @@ const deleteSubmission = asyncHandler(async (req, res) => {
     throw new Error('Not authorized to delete submissions');
   }
 
+  await checkSubmission(req, submission);
   await submission.destroy();
   res.json({ message: 'Submission removed' });
 });
@@ -409,35 +302,14 @@ const deleteSubmission = asyncHandler(async (req, res) => {
 const getSubmissionsBySubject = asyncHandler(async (req, res) => {
   const subjectId = req.params.subjectId;
 
-  // Verify the subject exists
-  const subject = await Subject.findByPk(subjectId);
-  
-  if (!subject) {
-    res.status(404);
-    throw new Error('Subject not found');
-  }
-
-  // Check if teacher is assigned to this subject
-  if (req.user.role === 'teacher') {
-    const teachesSubject = await TeacherSubject.findOne({
-      where: {
-        teacherId: req.user.id,
-        subjectId: subjectId
-      }
-    });
-
-    if (!teachesSubject) {
-      res.status(403);
-      throw new Error('Not authorized to view submissions for this subject');
-    }
-  }
+  await requireSubject(req, subjectId);
 
   const submissions = await Submission.findAll({
-    where: { subjectId },
+    where: { subjectId, tenantId: req.tenantId },
     include: [
       {
         model: Student,
-        attributes: ['id', 'name', 'section', 'batch', 'walletAddress']
+        attributes: ['id', 'name', 'section', 'batch']
       },
       {
         model: Subject,
@@ -465,6 +337,8 @@ const getSubmissionsBySubject = asyncHandler(async (req, res) => {
  */
 const getSubmissionsByTeacher = asyncHandler(async (req, res) => {
   const teacherId = req.params.teacherId;
+  await requireTeacher(req, teacherId);
+  const scope = await academicScope(req);
   
   // Verify the teacher exists
   const teacher = await Teacher.findByPk(teacherId, {
@@ -486,7 +360,7 @@ const getSubmissionsByTeacher = asyncHandler(async (req, res) => {
   }
 
   // Get all subjects taught by this teacher
-  const subjectIds = teacher.Subjects.map(subject => subject.id);
+  const subjectIds = teacher.Subjects.map(subject => subject.id).filter(id => scope.subjectIds.includes(id));
   
   if (subjectIds.length === 0) {
     return res.json([]);
@@ -495,6 +369,7 @@ const getSubmissionsByTeacher = asyncHandler(async (req, res) => {
   // Find all submissions for these subjects
   const submissions = await Submission.findAll({
     where: {
+      tenantId: req.tenantId,
       subjectId: {
         [Op.in]: subjectIds
       }
@@ -502,7 +377,7 @@ const getSubmissionsByTeacher = asyncHandler(async (req, res) => {
     include: [
       {
         model: Student,
-        attributes: ['id', 'name', 'section', 'batch', 'walletAddress']
+        attributes: ['id', 'name', 'section', 'batch']
       },
       {
         model: Subject,
@@ -520,7 +395,7 @@ const getSubmissionsByTeacher = asyncHandler(async (req, res) => {
     order: [['submissionDate', 'DESC']]
   });
 
-  res.json(submissions);
+  res.json(submissions.map(row => { const value = row.toJSON(); return { ...value, student: value.Student || null }; }));
 });
 
 /**
@@ -546,6 +421,9 @@ const submitAssignment = asyncHandler(async (req, res) => {
     throw new Error('Assignment not found');
   }
 
+  await requireSubject(req, assignment.subjectId);
+  if (!req.file && !submissionText?.trim()) throw fail('Upload a file or enter an answer');
+
   // Check if due date has passed
   if (assignment.dueDate && new Date(assignment.dueDate) < new Date()) {
     res.status(400);
@@ -570,6 +448,7 @@ const submitAssignment = asyncHandler(async (req, res) => {
 
   // Create submission
   const submission = await Submission.create({
+    tenantId: req.tenantId,
     studentId: req.user.id,
     subjectId: assignment.subjectId,
     assignmentId,
@@ -582,7 +461,8 @@ const submitAssignment = asyncHandler(async (req, res) => {
     feedback: '',
     graded: false,
     gradedBy: null,
-    gradedDate: null
+    gradedDate: null,
+    gradingState: 'submitted'
   });
 
   if (submission) {
@@ -609,12 +489,15 @@ const saveAnnotatedPDF = asyncHandler(async (req, res) => {
     throw new Error('Submission not found');
   }
 
+  await checkSubmission(req, submission);
+  if (submission.gradingState === 'published') throw fail('Published results are locked', 409);
+  if (score !== undefined && score !== null && score !== '') validateScore(Number(score));
   const updateData = {
     gradedFileUrl: gradedPdfUrl,
     annotations: JSON.stringify(annotations),
     gradedBy: req.user.id,
     gradedDate: new Date(),
-    status: 'graded'
+    gradingState: 'submitted'
   };
 
   if (score !== undefined && score !== null && score !== '') {
@@ -636,7 +519,7 @@ const saveAnnotatedPDF = asyncHandler(async (req, res) => {
       include: [
         {
           model: Student,
-          attributes: ['id', 'name', 'section', 'batch', 'walletAddress']
+          attributes: ['id', 'name', 'section', 'batch']
         },
         {
           model: Assignment,
@@ -657,4 +540,4 @@ module.exports = {
   getSubmissionsByTeacher,
   submitAssignment,
   saveAnnotatedPDF
-}; 
+};

@@ -44,6 +44,16 @@ export const deleteQuiz = async (quizId: string) => {
   return response.data;
 };
 
+export const publishQuiz = async (quizId: string) => {
+  const response = await axios.post(`${API_URL}/quizzes/${quizId}/publish`, {}, authHeaders());
+  return response.data;
+};
+
+export const publishQuizResults = async (quizId: string) => {
+  const response = await axios.post(`${API_URL}/quizzes/${quizId}/results/publish`, {}, authHeaders());
+  return response.data;
+};
+
 // Student APIs
 export const getStudentQuizzes = async () => {
   const response = await axios.get(`${API_URL}/quizzes/student`, authHeaders());

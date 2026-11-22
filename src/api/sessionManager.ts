@@ -38,7 +38,7 @@ class SessionManager {
 
   private async ping() {
     try {
-      const token = getToken();
+      const token = await getToken();
       if (!token) return;
 
       // Make a lightweight request to keep session alive

@@ -8,7 +8,6 @@ export default function EditTeacher({ teacherId, onClose, onSuccess }) {
     name: '',
     email: '',
     subjects: [],
-    password: '',
     role: 'teacher'  // Explicitly set the role
   });
   const [allSubjects, setAllSubjects] = useState([]);
@@ -72,7 +71,7 @@ export default function EditTeacher({ teacherId, onClose, onSuccess }) {
       setError(null);
       
       // Validate required fields
-      if (!teacher.id || !teacher.name || !teacher.email) {
+      if (!teacher.name || !teacher.email) {
         setError('Please fill in all required fields');
         setSaving(false);
         return;
@@ -92,11 +91,6 @@ export default function EditTeacher({ teacherId, onClose, onSuccess }) {
         role: 'teacher', // Always ensure role is set correctly
         subjects: teacher.subjects || []
       };
-      
-      // Remove password if it's empty (for updates)
-      if (teacherId && !teacherData.password) {
-        delete teacherData.password;
-      }
       
       console.log('Submitting teacher data:', teacherData);
       
@@ -228,26 +222,7 @@ export default function EditTeacher({ teacherId, onClose, onSuccess }) {
             <p className="mt-1 text-xs text-gray-500">Hold Ctrl/Cmd to select multiple subjects</p>
           </div>
           
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-              {teacherId ? 'New Password (optional)' : 'Password'}
-            </label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={teacher.password || ''}
-              onChange={handleChange}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-              placeholder={teacherId ? "Leave blank to keep current password" : "Enter password"}
-              required={!teacherId}
-            />
-            {teacherId && (
-              <p className="mt-1 text-xs text-gray-500">
-                Leave blank to keep the current password.
-              </p>
-            )}
-          </div>
+          {!teacherId && <p className="text-xs text-gray-500">A secure Clerk invitation will be sent to the teacher. The teacher chooses their own password.</p>}
         </div>
         
         <div className="mt-6 flex justify-end space-x-3">

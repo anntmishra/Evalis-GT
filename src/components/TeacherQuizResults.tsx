@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import config from '../config/environment';
+import { publishQuizResults } from '../api/quizService';
 
 const API_URL = config.API_BASE_URL;
 
@@ -37,6 +38,7 @@ interface Quiz {
   title: string;
   totalMarks: number;
   passingMarks: number;
+  showResultsImmediately: boolean;
 }
 
 const TeacherQuizResults: React.FC<{ quizId: string; onBack: () => void }> = ({ quizId, onBack }) => {
@@ -44,6 +46,9 @@ const TeacherQuizResults: React.FC<{ quizId: string; onBack: () => void }> = ({ 
   const [attempts, setAttempts] = useState<QuizAttempt[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedAttempt, setSelectedAttempt] = useState<QuizAttempt | null>(null);
+  const [publishing, setPublishing] = useState(false);
+  const [notice, setNotice] = useState('');
+  const [error, setError] = useState('');
 
   useEffect(() => {
     loadResults();
@@ -72,6 +77,19 @@ const TeacherQuizResults: React.FC<{ quizId: string; onBack: () => void }> = ({ 
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}m ${secs}s`;
+  };
+
+  const releaseResults = async () => {
+    try {
+      setPublishing(true); setError(''); setNotice('');
+      const result = await publishQuizResults(quizId);
+      setQuiz(current => current ? { ...current, showResultsImmediately: true } : current);
+      setNotice(`${result.publishedAttempts} completed result${result.publishedAttempts === 1 ? '' : 's'} published to students.`);
+    } catch (error: any) {
+      setError(error.response?.data?.message || 'Unable to publish quiz results.');
+    } finally {
+      setPublishing(false);
+    }
   };
 
   if (loading) return <div className="p-6">Loading...</div>;
@@ -146,6 +164,13 @@ const TeacherQuizResults: React.FC<{ quizId: string; onBack: () => void }> = ({ 
       <h2 className="text-2xl font-bold mb-6">
         Quiz Results: {quiz?.title}
       </h2>
+
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-lg border border-slate-200 bg-white p-4">
+        <div><strong>{quiz?.showResultsImmediately ? 'Results are published' : 'Results are private'}</strong><p className="text-sm text-gray-600">{quiz?.showResultsImmediately ? 'Students can see their scores and answer review.' : 'Review the attempts, then release all completed results when ready.'}</p></div>
+        {!quiz?.showResultsImmediately && <button className="action-primary" disabled={publishing || attempts.length === 0} onClick={() => void releaseResults()}>{publishing ? 'Publishing…' : attempts.length ? 'Publish Results' : 'Waiting for attempts'}</button>}
+      </div>
+      {notice && <p className="workspace-success" role="status">{notice}</p>}
+      {error && <p className="workspace-error" role="alert">{error}</p>}
 
       {attempts.length === 0 ? (
         <p className="text-gray-500">No students have attempted this quiz yet.</p>

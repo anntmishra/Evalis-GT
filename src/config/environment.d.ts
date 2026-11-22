@@ -40,8 +40,6 @@ export interface Config {
     CURRENT_USER_KEY: string;
   };
   AI: {
-    GOOGLE_API_KEY: string;
-    GOOGLE_API_URL: string;
     API_TIMEOUT: number;
     MAX_RETRIES: number;
     RETRY_DELAY: number;

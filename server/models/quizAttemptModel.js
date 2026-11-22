@@ -10,19 +10,13 @@ const QuizAttempt = sequelize.define('QuizAttempt', {
   quizId: {
     type: DataTypes.UUID,
     allowNull: false,
-    references: {
-      model: 'Quizzes',
-      key: 'id'
-    },
+    
     onDelete: 'CASCADE'
   },
   studentId: {
     type: DataTypes.STRING,
     allowNull: false,
-    references: {
-      model: 'Students',
-      key: 'id'
-    }
+    
   },
   attemptNumber: {
     type: DataTypes.INTEGER,
@@ -59,6 +53,7 @@ const QuizAttempt = sequelize.define('QuizAttempt', {
     defaultValue: 'in_progress',
   }
 }, {
+  schema: 'grading',
   timestamps: true
 });
 

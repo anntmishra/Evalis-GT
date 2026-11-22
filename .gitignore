@@ -72,3 +72,7 @@ server.log
 /test-*.js
 /test-*.sh
 /verify-web3-online.js
+
+# Local database credentials and recovery artifacts
+.env.*.local
+.local-db/

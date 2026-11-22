@@ -37,17 +37,8 @@ jobs:
         npm install --force
         cd server && npm install --force
     
-    - name: Run linter
-      run: npm run lint
-    
-    - name: Build frontend
-      run: npm run build
-    
-    - name: Run tests (if available)
-      run: |
-        # Add your test command here
-        # npm test
-        echo "Tests would run here"
+    - name: Verify baseline (syntax, auth boundaries, types, production build)
+      run: npm run check:baseline
 
   build-and-push:
     needs: test

@@ -57,6 +57,7 @@ import questionEnhancerService, {
   BloomTextAnomalyResponse
 } from '../api/questionEnhancerService';
 import { generateQuestionPaperPDF, PDFQuestion } from '../api/pdfExportService';
+import { getMyQuestionPapers, submitQuestionPaper, updateQuestionPaper } from '../api/questionPaperService';
 import { 
   BLOOM_TAXONOMY, 
   getAllBloomLevels,
@@ -118,6 +119,8 @@ const TeacherQuestionPaperCreator: React.FC<QuestionPaperCreatorProps> = ({
   const [loading, setLoading] = useState<boolean>(false);
   const [success, setSuccess] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [myPapers, setMyPapers] = useState<any[]>([]);
+  const [editingPaperId, setEditingPaperId] = useState<string | null>(null);
   
   // Image related state
   const [currentImage, setCurrentImage] = useState<File | null>(null);
@@ -190,7 +193,20 @@ const TeacherQuestionPaperCreator: React.FC<QuestionPaperCreatorProps> = ({
     };
 
     checkAiService();
+    getMyQuestionPapers().then(setMyPapers).catch(() => undefined);
   }, []);
+
+  const loadPaperForRevision = (paper: any) => {
+    setEditingPaperId(paper.id);
+    setTitle(paper.title || '');
+    setSelectedSubject(paper.subjectId || '');
+    setSelectedExamType(paper.examType || '');
+    setDuration(paper.durationMinutes || 180);
+    setQuestions(Array.isArray(paper.questions) ? paper.questions : []);
+    setCourseOutcomes(Array.isArray(paper.courseOutcomes) ? paper.courseOutcomes : []);
+    setSuccess(false); setError(null);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const handleSubjectChange = (event: SelectChangeEvent) => {
     setSelectedSubject(event.target.value);
@@ -731,21 +747,16 @@ const TeacherQuestionPaperCreator: React.FC<QuestionPaperCreatorProps> = ({
     setError(null);
 
     try {
-      // TODO: Implement API call to save the question paper
-      // const response = await createQuestionPaper({
-      //   title,
-      //   subjectId: selectedSubject,
-      //   examType: selectedExamType,
-      //   totalMarks,
-      //   duration,
-      //   questions
-      // });
-
-      // Simulate API call for now
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Call PDF export function
-      await exportToPdf();
+      const payload = {
+        title: title.trim(),
+        subjectId: selectedSubject,
+        examType: selectedExamType,
+        durationMinutes: duration,
+        questions,
+        courseOutcomes,
+      };
+      if (editingPaperId) await updateQuestionPaper(editingPaperId, { ...payload, submitForApproval: true });
+      else await submitQuestionPaper(payload);
       
       setSuccess(true);
       // Clear form after successful creation
@@ -753,6 +764,9 @@ const TeacherQuestionPaperCreator: React.FC<QuestionPaperCreatorProps> = ({
       setSelectedSubject('');
       setSelectedExamType('');
       setQuestions([]);
+      setCourseOutcomes([]);
+      setEditingPaperId(null);
+      setMyPapers(await getMyQuestionPapers());
       
       // Notify parent component
       onQuestionPaperCreated();
@@ -889,6 +903,8 @@ const TeacherQuestionPaperCreator: React.FC<QuestionPaperCreatorProps> = ({
           {error}
         </Alert>
       )}
+
+      {myPapers.length > 0 && <Paper variant="outlined" sx={{ mb: 3, p: 2 }}><Typography variant="subtitle1" fontWeight="bold">Your question papers</Typography><Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>Track each approval stage. Papers returned for changes can be reopened, corrected, and resubmitted.</Typography><Box sx={{ display: 'grid', gap: 1 }}>{myPapers.slice(0, 6).map((paper: any) => <Box key={paper.id} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, borderTop: '1px solid', borderColor: 'divider', pt: 1 }}><Box><Typography variant="body2" fontWeight="bold">{paper.title}</Typography><Typography variant="caption" color="text.secondary">{String(paper.status).replace(/_/g, ' ')} · version {paper.version}</Typography></Box>{['draft','changes_requested'].includes(paper.status) && <Button size="small" variant="outlined" onClick={() => loadPaperForRevision(paper)}>Open revision</Button>}</Box>)}</Box></Paper>}
 
       <Grid container spacing={3}>
         <Grid item xs={12}>
@@ -2141,7 +2157,7 @@ const TeacherQuestionPaperCreator: React.FC<QuestionPaperCreatorProps> = ({
               onClick={handleSave}
               disabled={loading || pdfExporting || questions.length === 0}
             >
-              {loading ? 'Saving...' : 'Save & Export'}
+              {loading ? 'Submitting...' : editingPaperId ? 'Resubmit for Approval' : 'Submit for Approval'}
             </Button>
           </Box>
         </Grid>

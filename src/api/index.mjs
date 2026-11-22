@@ -57,11 +57,11 @@ api.interceptors.response.use(
 // Add request interceptor to add auth token to headers
 api.interceptors.request.use(
   async (reqConfig) => {
-    // Get the latest token (Clerk only)
-    const token = getAuthToken();
+    // getToken may read Clerk asynchronously; always resolve it before building
+    // the Authorization header. Without await the header becomes "Bearer [object Promise]".
+    const token = await getAuthToken();
     
     if (token) {
-      console.log('Adding token to request:', token.substring(0, 15) + '...');
       reqConfig.headers.Authorization = `Bearer ${token}`;
     } else {
       console.warn('No auth token available for request');

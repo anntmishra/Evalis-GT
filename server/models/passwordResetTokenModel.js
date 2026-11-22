@@ -29,12 +29,13 @@ const PasswordResetToken = sequelize.define('PasswordResetToken', {
     defaultValue: false,
   }
 }, {
+  schema: 'notifications',
   timestamps: true,
   indexes: [
     {
       fields: ['token']
-    },
-    {
+    }, {
+  schema: 'notifications',
       fields: ['userId', 'userRole']
     }
   ]

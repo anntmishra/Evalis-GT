@@ -43,12 +43,16 @@ export default function StudentList() {
       const response = await getStudents(selectedBatch, page);
       
       // Handle the data structure from the API
-      if (response.data.students) {
+      if (response.data && Array.isArray(response.data.students)) {
         setStudents(response.data.students);
-        setTotalPages(response.data.pages);
-        setTotalStudents(response.data.total);
-      } else {
+        setTotalPages(response.data.pages || 1);
+        setTotalStudents(response.data.total || 0);
+      } else if (Array.isArray(response.data)) {
         setStudents(response.data);
+        setTotalPages(1);
+        setTotalStudents(response.data.length);
+      } else {
+        setStudents([]);
       }
       
       setError(null);

@@ -8,14 +8,11 @@ export default function EditStudent({ studentId, onClose, onSuccess }) {
     section: '',
     batch: '',
     email: '',
-    password: '',
   });
   const [batches, setBatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
-  const [initialPassword, setInitialPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
@@ -66,19 +63,10 @@ export default function EditStudent({ studentId, onClose, onSuccess }) {
         response = await createStudent(student);
       }
       
-      // Check if initialPassword was returned
-      if (response.initialPassword) {
-        setInitialPassword(response.initialPassword);
-        setShowPassword(true);
-      }
-      
       if (onSuccess) {
         onSuccess();
       }
-      
-      if (response.initialPassword) {
-        // Don't close the modal if we have a password to show
-      } else if (onClose) {
+      if (onClose) {
         onClose();
       }
     } catch (err) {
@@ -87,10 +75,6 @@ export default function EditStudent({ studentId, onClose, onSuccess }) {
     } finally {
       setSaving(false);
     }
-  };
-
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(initialPassword);
   };
 
   const handleDelete = async () => {
@@ -146,36 +130,6 @@ export default function EditStudent({ studentId, onClose, onSuccess }) {
         </div>
       )}
 
-      {/* Password notification if available */}
-      {initialPassword && (
-        <div className="mb-4 p-4 bg-green-100 text-green-800 rounded-md">
-          <h3 className="font-semibold mb-2">Student Created Successfully!</h3>
-          <p className="mb-2">An email with login instructions has been sent to {student.email}.</p>
-          <div className="flex items-center mt-3 bg-white p-2 rounded border border-green-300">
-            <span className="mr-2 font-medium">Password:</span>
-            <input 
-              type={showPassword ? "text" : "password"} 
-              value={initialPassword} 
-              readOnly 
-              className="flex-grow border-0 focus:ring-0"
-            />
-            <button 
-              onClick={() => setShowPassword(!showPassword)} 
-              className="text-blue-600 hover:text-blue-800 px-2"
-            >
-              {showPassword ? 'Hide' : 'Show'}
-            </button>
-            <button 
-              onClick={copyToClipboard} 
-              className="ml-2 px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm"
-            >
-              Copy
-            </button>
-          </div>
-          <p className="text-xs mt-2">Please keep this password secure.</p>
-        </div>
-      )}
-      
       <form onSubmit={handleSubmit}>
         <div className="space-y-4">
           <div>
@@ -216,7 +170,7 @@ export default function EditStudent({ studentId, onClose, onSuccess }) {
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
             />
             <p className="mt-1 text-xs text-gray-500">
-              {!studentId && "If provided, a login email with credentials will be sent to this address."}
+              {!studentId && "A secure Clerk invitation will be sent to this address. The student chooses their own password."}
             </p>
           </div>
           
@@ -252,26 +206,6 @@ export default function EditStudent({ studentId, onClose, onSuccess }) {
             </select>
           </div>
           
-          {/* Password field - shown for both new and editing students */}
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-              {studentId ? 'New Password (optional)' : 'Password'}
-            </label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={student.password || ''}
-              onChange={handleChange}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-              placeholder={studentId ? "Leave blank to keep current password" : "Leave blank for auto-generated password"}
-            />
-            <p className="mt-1 text-xs text-gray-500">
-              {studentId 
-                ? "Leave blank to keep the current password." 
-                : "If left blank, a random password will be generated if email is provided, otherwise the student ID will be used."}
-            </p>
-          </div>
         </div>
         
         <div className="mt-6 flex justify-between">

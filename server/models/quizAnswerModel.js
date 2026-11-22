@@ -10,27 +10,18 @@ const QuizAnswer = sequelize.define('QuizAnswer', {
   attemptId: {
     type: DataTypes.UUID,
     allowNull: false,
-    references: {
-      model: 'QuizAttempts',
-      key: 'id'
-    },
+    
     onDelete: 'CASCADE'
   },
   questionId: {
     type: DataTypes.UUID,
     allowNull: false,
-    references: {
-      model: 'QuizQuestions',
-      key: 'id'
-    }
+    
   },
   selectedOptionId: {
     type: DataTypes.UUID,
     allowNull: false,
-    references: {
-      model: 'QuizOptions',
-      key: 'id'
-    }
+    
   },
   isCorrect: {
     type: DataTypes.BOOLEAN,
@@ -41,6 +32,7 @@ const QuizAnswer = sequelize.define('QuizAnswer', {
     defaultValue: 0,
   }
 }, {
+  schema: 'grading',
   timestamps: true
 });
 

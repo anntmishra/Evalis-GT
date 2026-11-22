@@ -2,10 +2,16 @@ import { useEffect } from 'react';
 import { useAuth, useUser } from '@clerk/clerk-react';
 import config from '../config/environment';
 
+import { setTokenGetter } from '../api/authUtils';
+
 // Bridge Clerk session token into localStorage TOKEN_STORAGE_KEY so existing API calls continue to work
 export default function ClerkAuthBridge() {
-  const { getToken, isSignedIn /*, signOut*/ } = useAuth();
+  const { getToken, isSignedIn, signOut } = useAuth();
   const { user } = useUser();
+
+  useEffect(() => {
+    setTokenGetter(getToken);
+  }, [getToken]);
 
   useEffect(() => {
     let active = true;
@@ -16,6 +22,7 @@ export default function ClerkAuthBridge() {
           // Clear tokens when signed out
           localStorage.removeItem(config.AUTH.TOKEN_STORAGE_KEY);
           localStorage.removeItem(config.AUTH.CURRENT_USER_KEY);
+          localStorage.removeItem('currentUser');
           localStorage.removeItem('userRole'); // Clear cached role
           return;
         }
@@ -47,14 +54,21 @@ export default function ClerkAuthBridge() {
               };
               
               localStorage.setItem(config.AUTH.CURRENT_USER_KEY, JSON.stringify(userWithRole));
+              localStorage.setItem('currentUser', JSON.stringify(userWithRole));
               if (userData.role) {
                 localStorage.setItem('userRole', userData.role); // Cache role separately
               }
               
               console.log('User authenticated with role:', userData.role);
+            } else if (response.status === 401 || response.status === 403) {
+              console.warn('User explicitly unauthorized. Signing out of Clerk.');
+              localStorage.removeItem(config.AUTH.TOKEN_STORAGE_KEY);
+              localStorage.removeItem(config.AUTH.CURRENT_USER_KEY);
+              localStorage.removeItem('currentUser');
+              localStorage.removeItem('userRole'); // Clear cached role
+              // Force sign out to break redirect loops
+              signOut();
             } else {
-              // Don’t force sign-out here; backend might be temporarily unreachable or slow.
-              // Keep current local session and try again on next interval.
               console.warn('Profile verification failed (status ' + response.status + '). Will retry later.');
             }
           } catch (error) {

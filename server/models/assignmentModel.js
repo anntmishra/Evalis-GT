@@ -18,18 +18,12 @@ const Assignment = sequelize.define('Assignment', {
   subjectId: {
     type: DataTypes.STRING,
     allowNull: false,
-    references: {
-      model: 'Subjects',
-      key: 'id'
-    }
+    
   },
   teacherId: {
     type: DataTypes.STRING,
     allowNull: false,
-    references: {
-      model: 'Teachers',
-      key: 'id'
-    }
+    
   },
   examType: {
     type: DataTypes.STRING,
@@ -61,6 +55,7 @@ const Assignment = sequelize.define('Assignment', {
     defaultValue: DataTypes.NOW,
   }
 }, {
+  schema: 'grading',
   timestamps: true
 });
 

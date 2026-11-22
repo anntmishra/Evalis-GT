@@ -24,7 +24,7 @@ export default function TeacherList() {
     try {
       setLoading(true);
       const response = await getTeachers();
-      setTeachers(response.data);
+      setTeachers(response.data || []);
       setError(null);
     } catch (err) {
       console.error('Error fetching teachers:', err);

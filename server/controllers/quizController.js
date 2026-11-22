@@ -1,6 +1,9 @@
 const asyncHandler = require('express-async-handler');
-const { Quiz, QuizQuestion, QuizOption, QuizAttempt, QuizAnswer, Student, Teacher, Subject, Batch } = require('../models');
+const { sequelize, Quiz, QuizQuestion, QuizOption, QuizAttempt, QuizAnswer, Student, Teacher, Subject, Batch } = require('../models');
 const { Op } = require('sequelize');
+const redisConfig = require('../config/redis');
+const queueService = require('../services/queueService');
+const { academicScope, requireSubject, deny } = require('../utils/academicScope');
 
 // @desc    Create a new quiz
 // @route   POST /api/quizzes
@@ -29,7 +32,21 @@ const createQuiz = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error('Please provide all required fields');
   }
+  const invalidQuestion = questions.some(question =>
+    !question.questionText?.trim()
+    || !Array.isArray(question.options)
+    || question.options.length < 2
+    || question.options.some(option => !option.optionText?.trim())
+    || question.options.filter(option => option.isCorrect === true).length !== 1
+  );
+  if (invalidQuestion) {
+    res.status(400);
+    throw new Error('Every question needs text, at least two options, and exactly one correct answer');
+  }
 
+  const subject = await requireSubject(req, subjectId);
+  if (subject.batchId !== batchId) { res.status(400); throw new Error('Subject does not belong to the selected batch'); }
+  if (new Date(endDate) <= new Date(startDate)) { res.status(400); throw new Error('Invalid quiz date range'); }
   // Calculate total marks
   const totalMarks = questions.reduce((sum, q) => sum + (q.marks || 1), 0);
 
@@ -38,6 +55,7 @@ const createQuiz = asyncHandler(async (req, res) => {
     title,
     description,
     teacherId: req.user.id,
+    tenantId: req.tenantId,
     subjectId,
     batchId,
     timeLimit: timeLimit || 60,
@@ -45,12 +63,16 @@ const createQuiz = asyncHandler(async (req, res) => {
     passingMarks: passingMarks || Math.floor(totalMarks * 0.4),
     startDate,
     endDate,
-    isPublished: isPublished || false,
+    // Basic classroom quizzes are owned by the teacher and do not enter the
+    // examination approval queue. Teachers may still explicitly save a draft.
+    isPublished: isPublished !== false,
     isActive: true,
     allowMultipleAttempts: allowMultipleAttempts || false,
     maxAttempts: maxAttempts || 1,
     shuffleQuestions: shuffleQuestions || false,
-    showResultsImmediately: showResultsImmediately !== undefined ? showResultsImmediately : true,
+    // Result publication is a separate teacher decision. Until it is released,
+    // students can see that they submitted but cannot see marks or answers.
+    showResultsImmediately: showResultsImmediately === true,
     instructions
   });
 
@@ -103,7 +125,7 @@ const createQuiz = asyncHandler(async (req, res) => {
 // @access  Teacher only
 const getTeacherQuizzes = asyncHandler(async (req, res) => {
   const quizzes = await Quiz.findAll({
-    where: { teacherId: req.user.id },
+    where: { teacherId: req.user.id, tenantId: req.tenantId },
     include: [
       { model: Subject, attributes: ['id', 'name', 'section'] },
       { model: Batch, attributes: ['id', 'name'] },
@@ -111,7 +133,8 @@ const getTeacherQuizzes = asyncHandler(async (req, res) => {
         model: QuizQuestion,
         attributes: ['id'],
         include: [{ model: QuizOption, attributes: ['id'] }]
-      }
+      },
+      { model: QuizAttempt, attributes: ['id', 'status', 'submittedAt'] }
     ],
     order: [['createdAt', 'DESC']]
   });
@@ -123,26 +146,22 @@ const getTeacherQuizzes = asyncHandler(async (req, res) => {
 // @route   GET /api/quizzes/student
 // @access  Student only
 const getStudentQuizzes = asyncHandler(async (req, res) => {
-  const student = await Student.findByPk(req.user.id);
-  
+  const student = await Student.findOne({ where: { id: req.user.id, tenantId: req.tenantId } });
+
   if (!student) {
     res.status(404);
     throw new Error('Student not found');
   }
 
-  const now = new Date();
-  
-  console.log('Student batch:', student.batch);
-  console.log('Current date:', now);
-  
-  // 1. Get active quizzes (whether attempted or not)
-  const activeQuizzes = await Quiz.findAll({
+  // List every published quiz for the student's batch. Availability is still
+  // enforced when an attempt starts, but upcoming and closed quizzes remain
+  // visible so publication never appears to have failed.
+  const publishedQuizzes = await Quiz.findAll({
     where: {
       batchId: student.batch,
+      tenantId: req.tenantId,
       isPublished: true,
-      isActive: true,
-      startDate: { [Op.lte]: now },
-      endDate: { [Op.gte]: now }
+      isActive: true
     },
     include: [
       { model: Subject, attributes: ['id', 'name', 'section'] },
@@ -157,73 +176,73 @@ const getStudentQuizzes = asyncHandler(async (req, res) => {
     order: [['startDate', 'DESC']]
   });
 
-  // 2. Get all quizzes that have been attempted by this student (including past ones)
-  const attemptedQuizzes = await Quiz.findAll({
-    where: {
-      batchId: student.batch,
-      isPublished: true,
-      isActive: true
-    },
-    include: [
-      { model: Subject, attributes: ['id', 'name', 'section'] },
-      { model: Teacher, attributes: ['id', 'name'] },
-      {
-        model: QuizAttempt,
-        where: { studentId: req.user.id },
-        required: true, // Must have an attempt
-        attributes: ['id', 'attemptNumber', 'score', 'passed', 'submittedAt', 'status']
-      }
-    ],
-    order: [['startDate', 'DESC']]
+  const safeQuizzes = publishedQuizzes.map(row => {
+    const quiz = row.toJSON();
+    quiz.resultsPublished = Boolean(quiz.showResultsImmediately);
+    if (!quiz.showResultsImmediately) {
+      quiz.QuizAttempts = (quiz.QuizAttempts || []).map(attempt => ({
+        id: attempt.id,
+        attemptNumber: attempt.attemptNumber,
+        submittedAt: attempt.submittedAt,
+        status: attempt.status,
+        resultsPublished: false
+      }));
+    }
+    return quiz;
   });
 
-  // Merge results to avoid duplicates
-  const quizMap = new Map();
-  
-  activeQuizzes.forEach(q => quizMap.set(q.id, q));
-  attemptedQuizzes.forEach(q => quizMap.set(q.id, q));
-  
-  const combinedQuizzes = Array.from(quizMap.values());
-  
-  // Sort by startDate DESC
-  combinedQuizzes.sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
-
-  console.log(`Found ${combinedQuizzes.length} quizzes for student (${activeQuizzes.length} active, ${attemptedQuizzes.length} attempted)`);
-
-  res.json(combinedQuizzes);
+  res.json(safeQuizzes);
 });
 
 // @desc    Get quiz by ID with questions
 // @route   GET /api/quizzes/:id
 // @access  Teacher (own quiz) or Student (published quiz)
 const getQuizById = asyncHandler(async (req, res) => {
-  const quiz = await Quiz.findByPk(req.params.id, {
-    include: [
-      {
-        model: QuizQuestion,
-        include: [QuizOption],
-        order: [['orderIndex', 'ASC']]
-      },
-      { model: Teacher, attributes: ['id', 'name'] },
-      { model: Subject, attributes: ['id', 'name', 'section'] },
-      { model: Batch, attributes: ['id', 'name'] }
-    ]
-  });
+  const cacheKey = `quiz:${req.tenantId}:${req.params.id}`;
 
-  if (!quiz) {
-    res.status(404);
-    throw new Error('Quiz not found');
+  // 1. Check Redis Cache
+  let quiz = await redisConfig.get(cacheKey);
+
+  if (quiz) {
+    quiz = JSON.parse(quiz);
+    console.log(`[Cache Hit] Returning quiz ${req.params.id} from Redis`);
+  } else {
+    // 2. Fetch from DB
+    quiz = await Quiz.findOne({ where: { id: req.params.id, tenantId: req.tenantId },
+      include: [
+        {
+          model: QuizQuestion,
+          include: [QuizOption],
+          order: [['orderIndex', 'ASC']]
+        },
+        { model: Teacher, attributes: ['id', 'name'] },
+        { model: Subject, attributes: ['id', 'name', 'section'] },
+        { model: Batch, attributes: ['id', 'name'] }
+      ]
+    });
+
+    if (!quiz) {
+      res.status(404);
+      throw new Error('Quiz not found');
+    }
+
+    // 3. Cache the fetched result (TTL: 1 hour)
+    console.log(`[Cache Miss] Fetching quiz ${req.params.id} from Postgres`);
+    await redisConfig.set(cacheKey, JSON.stringify(quiz), 'EX', 3600);
   }
 
+  if (quiz.tenantId !== req.tenantId) throw deny();
+  await requireSubject(req, quiz.subjectId);
   // Check access
-  const isTeacher = req.user.role === 'teacher' && quiz.teacherId === req.user.id;
-  const isStudent = req.user.role === 'student' && quiz.isPublished;
+  const isTeacher = req.user.role !== 'student' && (quiz.teacherId === req.user.id || ['admin','coe'].includes(req.user.role));
+  const isStudent = req.user.role === 'student' && quiz.batchId === req.user.batch && quiz.isPublished && quiz.isActive;
 
   if (!isTeacher && !isStudent) {
     res.status(403);
     throw new Error('Not authorized to access this quiz');
   }
 
+  if (isStudent) { const safe = typeof quiz.toJSON === 'function' ? quiz.toJSON() : { ...quiz }; for (const question of safe.QuizQuestions || []) { delete question.explanation; for (const option of question.QuizOptions || []) delete option.isCorrect; } return res.json(safe); }
   res.json(quiz);
 });
 
@@ -231,7 +250,7 @@ const getQuizById = asyncHandler(async (req, res) => {
 // @route   POST /api/quizzes/:id/start
 // @access  Student only
 const startQuizAttempt = asyncHandler(async (req, res) => {
-  const quiz = await Quiz.findByPk(req.params.id);
+  const quiz = await Quiz.findOne({ where: { id: req.params.id, tenantId: req.tenantId, batchId: req.user.batch } });
 
   if (!quiz) {
     res.status(404);
@@ -318,6 +337,7 @@ const submitQuizAttempt = asyncHandler(async (req, res) => {
     throw new Error('Attempt not found');
   }
 
+  if (attempt.Quiz?.tenantId !== req.tenantId || attempt.Quiz?.batchId !== req.user.batch || attempt.Quiz?.id !== req.params.id) throw deny();
   if (attempt.studentId !== req.user.id) {
     res.status(403);
     throw new Error('Not authorized');
@@ -328,6 +348,25 @@ const submitQuizAttempt = asyncHandler(async (req, res) => {
     throw new Error('Quiz already submitted');
   }
 
+  // Dispatch grading to background queue if available
+  const jobId = await queueService.addQuizGradingJob({
+    attemptId: attempt.id,
+    answers,
+    timeSpent,
+    passingMarks: attempt.Quiz.passingMarks
+  });
+
+  if (jobId) {
+    // Return early, background worker will grade it
+    res.status(202).json({
+      message: 'Quiz submitted and is being graded',
+      attemptId: attempt.id,
+      status: 'grading_in_progress'
+    });
+    return;
+  }
+
+  // Fallback: Grade inline if queue is not active
   let totalScore = 0;
 
   // Process each answer
@@ -335,7 +374,7 @@ const submitQuizAttempt = asyncHandler(async (req, res) => {
     const question = await QuizQuestion.findByPk(answer.questionId);
     const selectedOption = await QuizOption.findByPk(answer.selectedOptionId);
 
-    if (!question || !selectedOption) continue;
+    if (!question || !selectedOption || question.quizId !== attempt.Quiz.id || selectedOption.questionId !== question.id) continue;
 
     const isCorrect = selectedOption.isCorrect;
     const marksAwarded = isCorrect ? question.marks : 0;
@@ -374,6 +413,17 @@ const submitQuizAttempt = asyncHandler(async (req, res) => {
     ]
   });
 
+  if (!attempt.Quiz.showResultsImmediately) {
+    return res.json({
+      id: attempt.id,
+      attemptNumber: attempt.attemptNumber,
+      submittedAt: attempt.submittedAt,
+      status: attempt.status,
+      resultsPublished: false,
+      message: 'Quiz submitted. Your teacher has not published the results yet.'
+    });
+  }
+
   res.json(completeAttempt);
 });
 
@@ -381,6 +431,13 @@ const submitQuizAttempt = asyncHandler(async (req, res) => {
 // @route   GET /api/quizzes/:id/results
 // @access  Student only
 const getQuizResults = asyncHandler(async (req, res) => {
+  const quiz = await Quiz.findOne({ where: { id: req.params.id, tenantId: req.tenantId, batchId: req.user.batch } });
+  if (!quiz) throw deny();
+  if (!quiz.showResultsImmediately) {
+    const error = new Error('Quiz results have not been published by the teacher yet');
+    error.statusCode = 409;
+    throw error;
+  }
   const attempts = await QuizAttempt.findAll({
     where: {
       quizId: req.params.id,
@@ -407,7 +464,7 @@ const getQuizResults = asyncHandler(async (req, res) => {
 // @route   GET /api/quizzes/:id/attempts
 // @access  Teacher only
 const getQuizAttempts = asyncHandler(async (req, res) => {
-  const quiz = await Quiz.findByPk(req.params.id);
+  const quiz = await Quiz.findOne({ where: { id: req.params.id, tenantId: req.tenantId } });
 
   if (!quiz) {
     res.status(404);
@@ -443,11 +500,54 @@ const getQuizAttempts = asyncHandler(async (req, res) => {
   res.json(attempts);
 });
 
+// @desc    Publish a teacher-owned quiz directly to students
+// @route   POST /api/quizzes/:id/publish
+// @access  Teacher only
+const publishQuiz = asyncHandler(async (req, res) => {
+  const quiz = await Quiz.findOne({ where: { id: req.params.id, tenantId: req.tenantId } });
+  if (!quiz) { res.status(404); throw new Error('Quiz not found'); }
+  if (quiz.teacherId !== req.user.id) { res.status(403); throw new Error('Not authorized to publish this quiz'); }
+
+  const questions = await QuizQuestion.count({ where: { quizId: quiz.id } });
+  if (!questions || new Date(quiz.endDate) <= new Date(quiz.startDate)) {
+    const error = new Error('Quiz needs questions and a valid date range before publishing');
+    error.statusCode = 409;
+    throw error;
+  }
+
+  await quiz.update({ isPublished: true, isActive: true });
+  await redisConfig.del(`quiz:${req.tenantId}:${quiz.id}`);
+  res.json({ success: true, isPublished: true });
+});
+
+// @desc    Release auto-graded quiz results to students
+// @route   POST /api/quizzes/:id/results/publish
+// @access  Teacher only
+const publishQuizResults = asyncHandler(async (req, res) => {
+  const quiz = await Quiz.findOne({ where: { id: req.params.id, tenantId: req.tenantId } });
+  if (!quiz) { res.status(404); throw new Error('Quiz not found'); }
+  if (quiz.teacherId !== req.user.id) { res.status(403); throw new Error('Not authorized to publish these results'); }
+
+  const submittedAttempts = await QuizAttempt.count({ where: { quizId: quiz.id, status: 'submitted' } });
+  if (!submittedAttempts) {
+    const error = new Error('There are no completed attempts to publish yet');
+    error.statusCode = 409;
+    throw error;
+  }
+
+  await quiz.update({ showResultsImmediately: true });
+  await redisConfig.del(`quiz:${req.tenantId}:${quiz.id}`);
+  res.json({ success: true, resultsPublished: true, publishedAttempts: submittedAttempts });
+});
+
 // @desc    Update quiz
 // @route   PUT /api/quizzes/:id
 // @access  Teacher only
 const updateQuiz = asyncHandler(async (req, res) => {
-  const quiz = await Quiz.findByPk(req.params.id);
+  // Invalidate cache
+  await redisConfig.del(`quiz:${req.tenantId}:${req.params.id}`);
+
+  const quiz = await Quiz.findOne({ where: { id: req.params.id, tenantId: req.tenantId } });
 
   if (!quiz) {
     res.status(404);
@@ -472,7 +572,8 @@ const updateQuiz = asyncHandler(async (req, res) => {
     });
   } else {
     // Full update allowed if no attempts
-    await quiz.update(req.body);
+    const updates = {}; for (const key of ['title','description','timeLimit','passingMarks','startDate','endDate','isActive','allowMultipleAttempts','maxAttempts','shuffleQuestions','showResultsImmediately','instructions']) if (req.body[key] !== undefined) updates[key] = req.body[key];
+    await quiz.update(updates);
   }
 
   const updatedQuiz = await Quiz.findByPk(quiz.id, {
@@ -494,7 +595,7 @@ const updateQuiz = asyncHandler(async (req, res) => {
 // @route   DELETE /api/quizzes/:id
 // @access  Teacher only
 const deleteQuiz = asyncHandler(async (req, res) => {
-  const quiz = await Quiz.findByPk(req.params.id);
+  const quiz = await Quiz.findOne({ where: { id: req.params.id, tenantId: req.tenantId } });
 
   if (!quiz) {
     res.status(404);
@@ -506,7 +607,22 @@ const deleteQuiz = asyncHandler(async (req, res) => {
     throw new Error('Not authorized to delete this quiz');
   }
 
-  await quiz.destroy();
+  // Remove dependent records in an explicit transaction. Some deployed schemas
+  // predate the cascade constraints, so relying on model-level cascade alone can
+  // leave a teacher unable to delete a quiz after students have attempted it.
+  await sequelize.transaction(async transaction => {
+    const questions = await QuizQuestion.findAll({ where: { quizId: quiz.id }, attributes: ['id'], transaction });
+    const attempts = await QuizAttempt.findAll({ where: { quizId: quiz.id }, attributes: ['id'], transaction });
+    const questionIds = questions.map(row => row.id);
+    const attemptIds = attempts.map(row => row.id);
+
+    if (attemptIds.length) await QuizAnswer.destroy({ where: { attemptId: { [Op.in]: attemptIds } }, transaction });
+    if (attemptIds.length) await QuizAttempt.destroy({ where: { id: { [Op.in]: attemptIds } }, transaction });
+    if (questionIds.length) await QuizOption.destroy({ where: { questionId: { [Op.in]: questionIds } }, transaction });
+    if (questionIds.length) await QuizQuestion.destroy({ where: { id: { [Op.in]: questionIds } }, transaction });
+    await quiz.destroy({ transaction });
+  });
+  await redisConfig.del(`quiz:${req.tenantId}:${quiz.id}`);
 
   res.json({ message: 'Quiz deleted successfully' });
 });
@@ -520,6 +636,51 @@ module.exports = {
   submitQuizAttempt,
   getQuizResults,
   getQuizAttempts,
+  publishQuiz,
+  publishQuizResults,
   updateQuiz,
   deleteQuiz
 };
+
+// Initialize background grading worker
+if (queueService.isQueueActive) {
+  queueService.initWorker(async (jobData) => {
+    const { attemptId, answers, timeSpent, passingMarks } = jobData;
+
+    const attempt = await QuizAttempt.findByPk(attemptId, {
+      include: [{ model: Quiz }]
+    });
+
+    if (!attempt) throw new Error('Attempt not found in worker');
+
+    let totalScore = 0;
+
+    for (const answer of answers) {
+      const question = await QuizQuestion.findByPk(answer.questionId);
+      const selectedOption = await QuizOption.findByPk(answer.selectedOptionId);
+
+      if (!question || !selectedOption) continue;
+
+      const isCorrect = selectedOption.isCorrect;
+      const marksAwarded = isCorrect ? question.marks : 0;
+      totalScore += marksAwarded;
+
+      await QuizAnswer.create({
+        attemptId: attempt.id,
+        questionId: answer.questionId,
+        selectedOptionId: answer.selectedOptionId,
+        isCorrect,
+        marksAwarded
+      });
+    }
+
+    const passed = totalScore >= passingMarks;
+    await attempt.update({
+      score: totalScore,
+      passed,
+      submittedAt: new Date(),
+      timeSpent: timeSpent || 0,
+      status: 'submitted'
+    });
+  });
+}

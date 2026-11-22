@@ -1,36 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Box,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Button,
-  CircularProgress,
-  Alert,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Typography,
-  Paper,
-  Chip,
-  IconButton,
-  FormControlLabel,
-  Switch
-} from '@mui/material';
-import { 
-  Sort as SortIcon, 
-  KeyboardArrowUp as SortUpIcon, 
-  KeyboardArrowDown as SortDownIcon, 
-  Edit as EditIcon, 
-  Delete as DeleteIcon, 
-  Add as AddIcon
-} from '@mui/icons-material';
+import { Plus, Edit2, Trash2, Search, X } from 'lucide-react';
 import { getAllBatches, createBatch, updateBatch, deleteBatch } from '../api/batchService';
+import PremiumCard from './ui/PremiumCard';
+import api from '../api/index.js';
+import { Button } from './ui/button';
 
 interface Batch {
   id: string;
@@ -39,14 +12,16 @@ interface Batch {
   startYear: number;
   endYear: number;
   active: boolean;
+  programId?: string;
 }
 
 interface BatchFormData {
   name: string;
   department: string;
   startYear: number;
-  endYear: number;
+  durationInYears: number;
   active: boolean;
+  programId?: string;
 }
 
 interface BatchListProps {
@@ -56,24 +31,33 @@ interface BatchListProps {
 const BatchList: React.FC<BatchListProps> = ({ onBatchChange }) => {
   const [batches, setBatches] = useState<Batch[]>([]);
   const [loading, setLoading] = useState(true);
+  const [programs, setPrograms] = useState<Array<{id:string;name:string;code:string}>>([]);
   const [error, setError] = useState<string | null>(null);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Modals state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
   const [currentBatch, setCurrentBatch] = useState<Batch | null>(null);
-  const [sortField, setSortField] = useState<keyof Batch>('name');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [batchToDelete, setBatchToDelete] = useState<Batch | null>(null);
+
   const [formData, setFormData] = useState<BatchFormData>({
     name: '',
-    department: 'BTech',
+    department: '',
+    programId: '',
     startYear: new Date().getFullYear(),
-    endYear: new Date().getFullYear() + 4,
+    durationInYears: 4,
     active: true
   });
+  
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Fetch batches when component mounts
   useEffect(() => {
     fetchBatches();
+    api.get('/programs').then(response => setPrograms(response.data)).catch(() => setError('Unable to load programmes. Add a school and programme first.'));
   }, []);
 
   const fetchBatches = async () => {
@@ -84,428 +68,352 @@ const BatchList: React.FC<BatchListProps> = ({ onBatchChange }) => {
       setBatches(response);
     } catch (err) {
       console.error('Error fetching batches:', err);
-      setError('Failed to load batches. Please try again later.');
+      setError('Failed to load academic sessions. Please try again later.');
     } finally {
       setLoading(false);
     }
   };
 
-  // Handle sorting
-  const handleSort = (field: keyof Batch) => {
-    if (sortField === field) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortField(field);
-      setSortDirection('asc');
-    }
-  };
-
-  const sortedBatches = [...batches].sort((a, b) => {
-    let aValue = a[sortField];
-    let bValue = b[sortField];
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target;
     
-    if (typeof aValue === 'string') {
-      aValue = aValue.toLowerCase();
-      bValue = (bValue as string).toLowerCase();
-    }
-    
-    if (sortDirection === 'asc') {
-      return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+    if (type === 'checkbox') {
+      const checked = (e.target as HTMLInputElement).checked;
+      setFormData({ ...formData, [name]: checked });
     } else {
-      return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
+      setFormData({ ...formData, [name]: type === 'number' ? parseInt(value) || 0 : value });
     }
-  });
-
-  // Render sort icon
-  const renderSortIcon = (field: keyof Batch) => {
-    if (sortField !== field) return <SortIcon sx={{ fontSize: 16, ml: 0.5 }} />;
-    return sortDirection === 'asc' ? 
-      <SortUpIcon sx={{ fontSize: 16, ml: 0.5 }} /> : 
-      <SortDownIcon sx={{ fontSize: 16, ml: 0.5 }} />;
   };
 
-  // Form handling
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
-      [name]: type === 'checkbox' ? checked : (type === 'number' ? Number(value) : value)
-    });
-  };
-
-  // Add batch handlers
-  const handleShowAddModal = () => {
-    const currentYear = new Date().getFullYear();
+  const openAddModal = () => {
+    setModalMode('add');
     setFormData({
       name: '',
-      department: 'BTech',
-      startYear: currentYear,
-      endYear: currentYear + 4,
+      department: '',
+    programId: '',
+      startYear: new Date().getFullYear(),
+      durationInYears: 4,
       active: true
     });
-    setShowAddModal(true);
+    setCurrentBatch(null);
+    setIsModalOpen(true);
   };
 
-  const handleAddBatch = async () => {
-    try {
-      setLoading(true);
-      // Auto-generate name if left blank
-      const payload = { ...formData } as BatchFormData;
-      if (!payload.name.trim()) {
-        payload.name = `${payload.department} ${payload.startYear}-${payload.endYear}`;
-      }
-      if (payload.endYear <= payload.startYear) {
-        throw new Error('End year must be greater than start year');
-      }
-      await createBatch(payload);
-      await fetchBatches();
-      setShowAddModal(false);
-      setError(null);
-      // Notify parent component about the change
-      if (onBatchChange) {
-        onBatchChange();
-      }
-    } catch (err) {
-      console.error('Error adding batch:', err);
-      const message = (err as any)?.response?.data?.message || (err as Error).message || 'Failed to add batch. Please try again.';
-      setError(message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Edit batch handlers
-  const handleShowEditModal = (batch: Batch) => {
-    setCurrentBatch(batch);
+  const openEditModal = (batch: Batch) => {
+    setModalMode('edit');
     setFormData({
       name: batch.name,
       department: batch.department,
+      programId: batch.programId || '',
       startYear: batch.startYear,
-      endYear: batch.endYear,
+      durationInYears: batch.endYear - batch.startYear,
       active: batch.active
     });
-    setShowEditModal(true);
-  };
-
-  const handleEditBatch = async () => {
-    if (!currentBatch) return;
-    
-    try {
-      setLoading(true);
-      const payload = { ...formData } as BatchFormData;
-      if (!payload.name.trim()) {
-        payload.name = `${payload.department} ${payload.startYear}-${payload.endYear}`;
-      }
-      if (payload.endYear <= payload.startYear) {
-        throw new Error('End year must be greater than start year');
-      }
-      await updateBatch(currentBatch.id, payload);
-      await fetchBatches();
-      setShowEditModal(false);
-      setError(null);
-      // Notify parent component about the change
-      if (onBatchChange) {
-        onBatchChange();
-      }
-    } catch (err) {
-      console.error('Error updating batch:', err);
-      const message = (err as any)?.response?.data?.message || (err as Error).message || 'Failed to update batch. Please try again.';
-      setError(message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Delete batch handlers
-  const handleShowDeleteModal = (batch: Batch) => {
     setCurrentBatch(batch);
-    setShowDeleteModal(true);
+    setIsModalOpen(true);
   };
 
-  const handleDeleteBatch = async () => {
-    if (!currentBatch) return;
+  const openDeleteModal = (batch: Batch) => {
+    setBatchToDelete(batch);
+    setIsDeleteModalOpen(true);
+  };
+
+  const closeModals = () => {
+    setIsModalOpen(false);
+    setIsDeleteModalOpen(false);
+    setBatchToDelete(null);
+    setCurrentBatch(null);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
     
     try {
-      setLoading(true);
-      await deleteBatch(currentBatch.id);
-      await fetchBatches();
-      setShowDeleteModal(false);
-      setError(null);
-      // Notify parent component about the change
-      if (onBatchChange) {
-        onBatchChange();
+      if (!formData.programId) { setError('Select a programme for this academic session.'); setIsSubmitting(false); return; }
+      const payload = {
+        ...formData,
+        department: programs.find(program => program.id === formData.programId)?.name || formData.department,
+        startYear: Number(formData.startYear),
+        durationInYears: Number(formData.durationInYears),
+        endYear: Number(formData.startYear) + Number(formData.durationInYears)
+      };
+
+      if (modalMode === 'add') {
+        await createBatch(payload);
+      } else if (modalMode === 'edit' && currentBatch) {
+        await updateBatch(currentBatch.id, payload);
       }
-    } catch (err) {
-      console.error('Error deleting batch:', err);
-      setError('Failed to delete batch. Please try again.');
+      
+      closeModals();
+      fetchBatches();
+      if (onBatchChange) onBatchChange();
+    } catch (err: any) {
+      console.error('Error submitting batch:', err);
+      alert(err.response?.data?.message || 'Failed to save program details.');
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
   };
+
+  const handleDelete = async () => {
+    if (!batchToDelete) return;
+    setIsSubmitting(true);
+    
+    try {
+      await deleteBatch(batchToDelete.id);
+      closeModals();
+      fetchBatches();
+      if (onBatchChange) onBatchChange();
+    } catch (err: any) {
+      console.error('Error deleting batch:', err);
+      alert(err.response?.data?.message || 'Failed to delete program.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const filteredBatches = batches.filter(b => 
+    b.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    b.department.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4">Batches</Typography>
-        <Button 
-          variant="contained" 
-          startIcon={<AddIcon />}
-          onClick={handleShowAddModal}
-        >
-          Add Batch
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h2 className="font-serif text-2xl font-bold tracking-tight text-foreground">Academic Sessions</h2>
+          <p className="text-muted-foreground font-sans mt-1 text-sm">
+            Manage academic batches (e.g. 2024-2028).
+          </p>
+        </div>
+        <Button onClick={openAddModal} className="shrink-0 flex items-center gap-2">
+          <Plus size={16} />
+          <span>Add Session</span>
         </Button>
-      </Box>
+      </div>
 
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
-      )}
+      <PremiumCard className="overflow-hidden p-0">
+        <div className="p-4 border-b border-border/50 bg-secondary/20 flex flex-col sm:flex-row gap-4 justify-between items-center">
+          <div className="relative w-full sm:max-w-xs">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <input 
+              type="text" 
+              placeholder="Search sessions..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-9 pr-4 py-2 bg-background border border-input rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary transition-all"
+            />
+          </div>
+        </div>
 
-      {loading && !batches.length ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 5 }}>
-          <CircularProgress />
-        </Box>
-      ) : (
-        <TableContainer component={Paper}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell 
-                  onClick={() => handleSort('id')} 
-                  sx={{ cursor: 'pointer', userSelect: 'none' }}
-                >
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    ID {renderSortIcon('id')}
-                  </Box>
-                </TableCell>
-                <TableCell 
-                  onClick={() => handleSort('name')} 
-                  sx={{ cursor: 'pointer', userSelect: 'none' }}
-                >
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    Name {renderSortIcon('name')}
-                  </Box>
-                </TableCell>
-                <TableCell 
-                  onClick={() => handleSort('department')} 
-                  sx={{ cursor: 'pointer', userSelect: 'none' }}
-                >
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    Department {renderSortIcon('department')}
-                  </Box>
-                </TableCell>
-                <TableCell 
-                  onClick={() => handleSort('startYear')} 
-                  sx={{ cursor: 'pointer', userSelect: 'none' }}
-                >
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    Start Year {renderSortIcon('startYear')}
-                  </Box>
-                </TableCell>
-                <TableCell 
-                  onClick={() => handleSort('endYear')} 
-                  sx={{ cursor: 'pointer', userSelect: 'none' }}
-                >
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    End Year {renderSortIcon('endYear')}
-                  </Box>
-                </TableCell>
-                <TableCell 
-                  onClick={() => handleSort('active')} 
-                  sx={{ cursor: 'pointer', userSelect: 'none' }}
-                >
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    Status {renderSortIcon('active')}
-                  </Box>
-                </TableCell>
-                <TableCell>Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {sortedBatches.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={7} align="center">
-                    <Typography variant="body2" color="textSecondary">
-                      No batches found
-                    </Typography>
-                  </TableCell>
-                </TableRow>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm text-left">
+            <thead className="bg-muted text-muted-foreground uppercase text-xs">
+              <tr>
+                <th className="px-6 py-4 font-medium tracking-wider">ID</th>
+                <th className="px-6 py-4 font-medium tracking-wider">Name</th>
+                <th className="px-6 py-4 font-medium tracking-wider">Department</th>
+                <th className="px-6 py-4 font-medium tracking-wider">Duration</th>
+                <th className="px-6 py-4 font-medium tracking-wider">Status</th>
+                <th className="px-6 py-4 font-medium tracking-wider text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {loading ? (
+                <tr>
+                  <td colSpan={6} className="px-6 py-12 text-center text-muted-foreground">
+                    <div className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+                    <p className="mt-2 text-sm">Loading academic sessions...</p>
+                  </td>
+                </tr>
+              ) : error ? (
+                <tr>
+                  <td colSpan={6} className="px-6 py-12 text-center text-destructive">
+                    {error}
+                  </td>
+                </tr>
+              ) : filteredBatches.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-6 py-12 text-center text-muted-foreground">
+                    No academic sessions found. Click 'Add Session' to create one.
+                  </td>
+                </tr>
               ) : (
-                sortedBatches.map((batch) => (
-                  <TableRow key={batch.id}>
-                    <TableCell>{batch.id}</TableCell>
-                    <TableCell>{batch.name}</TableCell>
-                    <TableCell>{batch.department}</TableCell>
-                    <TableCell>{batch.startYear}</TableCell>
-                    <TableCell>{batch.endYear}</TableCell>
-                    <TableCell>
-                      <Chip 
-                        label={batch.active ? 'Active' : 'Inactive'}
-                        color={batch.active ? 'success' : 'default'}
-                        size="small"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <IconButton 
-                        size="small"
-                        onClick={() => handleShowEditModal(batch)}
-                        color="primary"
-                      >
-                        <EditIcon />
-                      </IconButton>
-                      <IconButton 
-                        size="small"
-                        onClick={() => handleShowDeleteModal(batch)}
-                        color="error"
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
+                filteredBatches.map((batch) => (
+                  <tr key={batch.id} className="hover:bg-secondary/20 transition-colors">
+                    <td className="px-6 py-4 font-mono text-xs text-muted-foreground">{batch.id}</td>
+                    <td className="px-6 py-4 font-medium text-foreground">{batch.name}</td>
+                    <td className="px-6 py-4 text-muted-foreground">{batch.department}</td>
+                    <td className="px-6 py-4 text-muted-foreground">{batch.startYear} - {batch.endYear}</td>
+                    <td className="px-6 py-4">
+                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                        batch.active ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'
+                      }`}>
+                        {batch.active ? 'Active' : 'Inactive'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <button 
+                          onClick={() => openEditModal(batch)}
+                          className="p-1.5 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-md transition-colors"
+                          title="Edit"
+                        >
+                          <Edit2 size={16} />
+                        </button>
+                        <button 
+                          onClick={() => openDeleteModal(batch)}
+                          className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md transition-colors"
+                          title="Delete"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
                 ))
               )}
-            </TableBody>
-          </Table>
-        </TableContainer>
+            </tbody>
+          </table>
+        </div>
+      </PremiumCard>
+
+      {/* Add/Edit Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm">
+          <div className="bg-card border border-border shadow-lg rounded-xl w-full max-w-md animate-fade-in flex flex-col max-h-[90vh]">
+            <div className="px-6 py-4 border-b border-border flex items-center justify-between">
+              <h3 className="font-serif text-lg font-bold">
+                {modalMode === 'add' ? 'Add New Academic Session' : 'Edit Academic Session'}
+              </h3>
+              <button 
+                onClick={closeModals}
+                className="text-muted-foreground hover:text-foreground transition-colors p-1"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            
+            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Session Identifier (ID)</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  required
+                  placeholder="e.g., BTech CS 2024"
+                  className="w-full px-3 py-2 bg-background border border-input rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <label className="text-sm font-medium" htmlFor="session-program">Programme</label>
+                <select id="session-program" name="programId" value={formData.programId || ''} onChange={handleInputChange} required className="w-full px-3 py-2 bg-background border border-input rounded-md">
+                  <option value="">Select a programme</option>{programs.map(program => <option key={program.id} value={program.id}>{program.name} · {program.code}</option>)}
+                </select>
+                {programs.length === 0 && <p className="text-xs text-muted-foreground">Create a school and programme before adding a session.</p>}
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Start Year</label>
+                  <input
+                    type="number"
+                    name="startYear"
+                    value={formData.startYear}
+                    onChange={handleInputChange}
+                    required
+                    min={2000}
+                    max={2100}
+                    className="w-full px-3 py-2 bg-background border border-input rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Duration (Years)</label>
+                  <input
+                    type="number"
+                    name="durationInYears"
+                    value={formData.durationInYears}
+                    onChange={handleInputChange}
+                    required
+                    min={1}
+                    max={10}
+                    className="w-full px-3 py-2 bg-background border border-input rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
+                  />
+                  {modalMode === 'add' && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      This will automatically generate {formData.durationInYears * 2} semesters.
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 pt-2">
+                <input
+                  type="checkbox"
+                  id="active-status"
+                  name="active"
+                  checked={formData.active}
+                  onChange={handleInputChange}
+                  className="h-4 w-4 rounded border-input text-primary focus:ring-primary"
+                />
+                <label htmlFor="active-status" className="text-sm font-medium cursor-pointer">
+                  Session is Active
+                </label>
+              </div>
+            </form>
+
+            <div className="px-6 py-4 border-t border-border flex justify-end gap-3 bg-secondary/10">
+              <Button variant="outline" onClick={closeModals} type="button">
+                Cancel
+              </Button>
+              <Button onClick={handleSubmit} disabled={isSubmitting}>
+                {isSubmitting ? 'Saving...' : modalMode === 'add' ? 'Create Session' : 'Save Changes'}
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
 
-      {/* Add Batch Dialog */}
-      <Dialog open={showAddModal} onClose={() => setShowAddModal(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Add New Batch</DialogTitle>
-        <DialogContent>
-          <Box sx={{ pt: 1 }}>
-            <TextField
-              fullWidth
-              label="Batch Name"
-              name="name"
-              value={formData.name}
-              onChange={handleInputChange}
-              placeholder="e.g., BTech 2022-26"
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              fullWidth
-              label="Department"
-              name="department"
-              value={formData.department}
-              onChange={handleInputChange}
-              placeholder="e.g., Computer Science"
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              fullWidth
-              label="Start Year"
-              name="startYear"
-              type="number"
-              value={formData.startYear}
-              onChange={handleInputChange}
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              fullWidth
-              label="End Year"
-              name="endYear"
-              type="number"
-              value={formData.endYear}
-              onChange={handleInputChange}
-              sx={{ mb: 2 }}
-            />
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={formData.active}
-                  onChange={handleInputChange}
-                  name="active"
-                />
-              }
-              label="Active"
-            />
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setShowAddModal(false)}>Cancel</Button>
-          <Button onClick={handleAddBatch} variant="contained" disabled={loading}>
-            {loading ? <CircularProgress size={24} /> : 'Add Batch'}
-          </Button>
-        </DialogActions>
-      </Dialog>
+      {/* Delete Confirmation Modal */}
+      {isDeleteModalOpen && batchToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm">
+          <div className="bg-card border border-border shadow-lg rounded-xl w-full max-w-sm animate-fade-in flex flex-col">
+            <div className="px-6 py-4 border-b border-border flex items-center justify-between">
+              <h3 className="font-serif text-lg font-bold text-destructive">Delete Academic Session</h3>
+              <button 
+                onClick={closeModals}
+                className="text-muted-foreground hover:text-foreground transition-colors p-1"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="px-6 py-6">
+              <p className="text-sm text-foreground">
+                Are you sure you want to delete the academic session <span className="font-bold">{batchToDelete.name}</span>?
+              </p>
+              <p className="text-xs text-muted-foreground mt-2">
+                This action cannot be undone and may affect associated students and subjects.
+              </p>
+            </div>
 
-      {/* Edit Batch Dialog */}
-      <Dialog open={showEditModal} onClose={() => setShowEditModal(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Edit Batch</DialogTitle>
-        <DialogContent>
-          <Box sx={{ pt: 1 }}>
-            <TextField
-              fullWidth
-              label="Batch Name"
-              name="name"
-              value={formData.name}
-              onChange={handleInputChange}
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              fullWidth
-              label="Department"
-              name="department"
-              value={formData.department}
-              onChange={handleInputChange}
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              fullWidth
-              label="Start Year"
-              name="startYear"
-              type="number"
-              value={formData.startYear}
-              onChange={handleInputChange}
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              fullWidth
-              label="End Year"
-              name="endYear"
-              type="number"
-              value={formData.endYear}
-              onChange={handleInputChange}
-              sx={{ mb: 2 }}
-            />
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={formData.active}
-                  onChange={handleInputChange}
-                  name="active"
-                />
-              }
-              label="Active"
-            />
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setShowEditModal(false)}>Cancel</Button>
-          <Button onClick={handleEditBatch} variant="contained" disabled={loading}>
-            {loading ? <CircularProgress size={24} /> : 'Save Changes'}
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={showDeleteModal} onClose={() => setShowDeleteModal(false)}>
-        <DialogTitle>Confirm Delete</DialogTitle>
-        <DialogContent>
-          <Typography>
-            Are you sure you want to delete the batch "{currentBatch?.name}"? This action cannot be undone.
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setShowDeleteModal(false)}>Cancel</Button>
-          <Button onClick={handleDeleteBatch} variant="contained" color="error" disabled={loading}>
-            {loading ? <CircularProgress size={24} /> : 'Delete'}
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Box>
+            <div className="px-6 py-4 border-t border-border flex justify-end gap-3 bg-secondary/10">
+              <Button variant="outline" onClick={closeModals} disabled={isSubmitting}>
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={handleDelete} disabled={isSubmitting}>
+                {isSubmitting ? 'Deleting...' : 'Delete Program'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 

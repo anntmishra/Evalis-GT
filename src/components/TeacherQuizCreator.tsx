@@ -20,7 +20,6 @@ const TeacherQuizCreator: React.FC = () => {
   const [timeLimit, setTimeLimit] = useState(60);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [isPublished, setIsPublished] = useState(false);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [subjects, setSubjects] = useState<any[]>([]);
   const [batches, setBatches] = useState<any[]>([]);
@@ -96,6 +95,14 @@ const TeacherQuizCreator: React.FC = () => {
         setMessage('Please fill all required fields');
         return;
       }
+      if (new Date(endDate) <= new Date(startDate)) {
+        setMessage('End date must be after the start date');
+        return;
+      }
+      if (questions.some(question => !question.questionText.trim() || question.options.length < 2 || question.options.some(option => !option.optionText.trim()) || question.options.filter(option => option.isCorrect).length !== 1)) {
+        setMessage('Every question needs text, at least two options, and exactly one correct answer');
+        return;
+      }
 
       const quizData = {
         title,
@@ -105,12 +112,13 @@ const TeacherQuizCreator: React.FC = () => {
         timeLimit,
         startDate,
         endDate,
-        isPublished,
+        isPublished: true,
+        showResultsImmediately: false,
         questions
       };
 
       await createQuiz(quizData);
-      setMessage('Quiz created successfully!');
+      setMessage('Quiz published to students. Results will stay private until you release them.');
       
       // Reset form
       setTimeout(() => {
@@ -130,7 +138,7 @@ const TeacherQuizCreator: React.FC = () => {
       <h2 className="text-2xl font-bold mb-6">Create Quiz</h2>
       
       {message && (
-        <div className={`p-4 mb-4 rounded ${message.includes('success') ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+        <div className={`p-4 mb-4 rounded ${message.startsWith('Quiz published') ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
           {message}
         </div>
       )}
@@ -218,17 +226,7 @@ const TeacherQuizCreator: React.FC = () => {
           </div>
         </div>
 
-        <div>
-          <label className="flex items-center">
-            <input
-              type="checkbox"
-              checked={isPublished}
-              onChange={(e) => setIsPublished(e.target.checked)}
-              className="mr-2"
-            />
-            Publish immediately
-          </label>
-        </div>
+        <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">This basic quiz is published directly to the selected batch. It does not need examination-office approval. Auto-graded scores remain private until you publish the results.</div>
 
         <div className="border-t pt-4 mt-6">
           <h3 className="text-xl font-bold mb-4">Questions</h3>
@@ -302,7 +300,7 @@ const TeacherQuizCreator: React.FC = () => {
             disabled={loading}
             className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
           >
-            {loading ? 'Creating...' : 'Create Quiz'}
+            {loading ? 'Publishing...' : 'Create & Publish Quiz'}
           </button>
         </div>
       </div>

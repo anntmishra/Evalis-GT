@@ -8,13 +8,21 @@ const {
   deleteSubject,
   getSubjectsBySection,
   getSubjectsByBatch,
-  getSubjectsBySemester
+  getSubjectsBySemester,
+  importSubjectsFromExcel
 } = require('../controllers/subjectController');
 const { protect, admin } = require('../middleware/authMiddleware');
+const multer = require('multer');
+
+// Configure multer for memory storage (for parsing Excel in-memory)
+const upload = multer({ storage: multer.memoryStorage() });
 
 // Subject routes
 // NOTE: Order matters. Specific prefixed routes must be declared BEFORE the generic '/:id'
 // to avoid Express treating 'section' | 'batch' | 'semester' as an :id parameter.
+
+router.route('/import-excel')
+  .post(protect, admin, upload.single('file'), importSubjectsFromExcel);
 
 router.route('/')
   .get(protect, getSubjects)

@@ -58,10 +58,9 @@ api.interceptors.response.use(
 api.interceptors.request.use(
   async (reqConfig) => {
     // Get the latest token (Clerk only)
-    const token = getAuthToken();
+    const token = await getAuthToken();
     
     if (token) {
-      console.log('Adding token to request:', token.substring(0, 15) + '...');
       reqConfig.headers.Authorization = `Bearer ${token}`;
     } else {
       console.warn('No auth token available for request');

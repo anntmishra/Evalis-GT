@@ -6,7 +6,7 @@ const {
   Teacher, 
   Batch, 
   Subject, 
-  TeacherSubject, 
+  TeachingAssignment, 
   Semester,
   PasswordResetToken
 } = require('../models');
@@ -943,7 +943,7 @@ const assignSubjectToTeacher = asyncHandler(async (req, res) => {
   }
 
   // Check if assignment already exists
-  const existingAssignment = await TeacherSubject.findOne({
+  const existingAssignment = await TeachingAssignment.findOne({
     where: {
       teacherId,
       subjectId
@@ -956,9 +956,10 @@ const assignSubjectToTeacher = asyncHandler(async (req, res) => {
   }
 
   // Create teacher-subject assignment
-  const assignment = await TeacherSubject.create({
+  const assignment = await TeachingAssignment.create({
     teacherId,
-    subjectId
+    subjectId,
+    sessionType: 'lecture'
   });
 
   // Return comprehensive information about the assignment
@@ -989,8 +990,8 @@ const assignSubjectToTeacher = asyncHandler(async (req, res) => {
  * @access  Private/Admin
  */
 const getTeacherSubjectAssignments = asyncHandler(async (req, res) => {
-  // Get all teacher-subject assignments with related teacher and subject details
-  const assignments = await TeacherSubject.findAll({
+  // Get all teaching assignments with related teacher and subject details
+  const assignments = await TeachingAssignment.findAll({
     include: [
       {
         model: Teacher,

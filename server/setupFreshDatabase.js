@@ -16,22 +16,16 @@ const setupFreshDatabase = async () => {
     // Import all models to ensure they are registered
     const models = require('./models');
     
+    // Create PostgreSQL schemas required by Evalis architecture
+    const schemas = ['users', 'academics', 'subjects', 'examinations', 'grading', 'results', 'notifications', 'administration'];
+    for (const schema of schemas) {
+      await sequelize.query(`CREATE SCHEMA IF NOT EXISTS ${schema};`);
+    }
+    console.log('✅ Required PostgreSQL schemas ensured.'.green);
+
     // Force sync to recreate all tables
     await sequelize.sync({ force: true });
     console.log('✅ All database tables created successfully!'.green.bold);
-    
-    // Import and run seeders
-    console.log('🌱 Seeding database with initial data...'.yellow);
-    
-    // Seed batches first
-    const seedBatches = require('./seeders/seedBatches');
-    await seedBatches();
-    console.log('✅ Batches seeded successfully!'.green);
-    
-    // Seed semesters
-    const seedSemesters = require('./seeders/seedSemesters');
-    await seedSemesters();
-    console.log('✅ Semesters seeded successfully!'.green);
     
     // Create default admin
     console.log('👤 Creating default admin user...'.yellow);

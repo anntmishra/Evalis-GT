@@ -41,16 +41,23 @@ const teacherRoutes = require('./routes/teacherRoutes');
 const subjectRoutes = require('./routes/subjectRoutes');
 const batchRoutes = require('./routes/batchRoutes');
 const submissionRoutes = require('./routes/submissionRoutes');
+const gradeRoutes = require('./routes/gradeRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const semesterRoutes = require('./routes/semesterRoutes');
 const assignmentRoutes = require('./routes/assignmentRoutes');
-const governanceRoutes = require('./routes/governanceRoutes');
 const aiAnalyzerRoutes = require('./routes/aiAnalyzerRoutes');
-const merchandiseRoutes = require('./routes/merchandiseRoutes');
-
 const quizRoutes = require('./routes/quizRoutes');
-const { startGovernanceListener } = require('./web3/governanceListener');
-
+const departmentRoutes = require('./routes/departmentRoutes');
+const programRoutes = require('./routes/programRoutes');
+const sectionRoutes = require('./routes/sectionRoutes');
+const teachingAssignmentRoutes = require('./routes/teachingAssignmentRoutes');
+const hierarchyRoutes = require('./routes/hierarchyRoutes');
+const roleRequestRoutes = require('./routes/roleRequestRoutes');
+const handoutRoutes = require('./routes/handoutRoutes');
+const schoolRoutes = require('./routes/schoolRoutes');
+const adminToolsRoutes = require('./routes/adminToolsRoutes');
+const coordinatorRoutes = require('./routes/coordinatorRoutes');
+const geminiRoutes = require('./routes/geminiRoutes');
 // Function to try binding to ports recursively
 const startServerOnPort = (app, port, maxAttempts = 10) => {
   if (maxAttempts <= 0) {
@@ -153,15 +160,10 @@ const startServer = async () => {
     // Connect to database
     await connectDB();
     
-    // Sync models with database
-    // In production, you shouldn't use force: true
     const isDev = process.env.NODE_ENV === 'development';
-    logger.info(`Syncing database in ${isDev ? 'development' : 'production'} mode...`);
-    
-    // Temporarily use sync without alter to avoid conflicts
-    await models.sequelize.sync({ alter: false });
-    logger.info('Database synced successfully');
-    
+    // Schema changes are explicit setup/migration operations, not server startup work.
+    logger.info('Database connected; schema managed by setup and migrations.');
+
     const app = express();
     
     // Request logging middleware (only in development or if explicitly enabled)
@@ -306,24 +308,31 @@ const startServer = async () => {
     }
 
     // Routes
+    app.use('/api/workspace', require('./routes/workspaceRoutes'));
     app.use('/api/auth', authRoutes);
     app.use('/api/students', studentRoutes);
     app.use('/api/teachers', teacherRoutes);
     app.use('/api/subjects', subjectRoutes);
+    app.use('/api/grades', gradeRoutes);
     app.use('/api/batches', batchRoutes);
     app.use('/api/submissions', submissionRoutes);
     app.use('/api/admin', adminRoutes);
     app.use('/api/semesters', semesterRoutes);
     app.use('/api/assignments', assignmentRoutes);
     app.use('/api/ai-analyzer', aiAnalyzerRoutes);
-    app.use('/api/merchandise', merchandiseRoutes);
-
     app.use('/api/quizzes', quizRoutes);
-    const web3Routes = require('./routes/web3Routes');
-    app.use('/api/web3', web3Routes);
-    const certificateRoutes = require('./routes/certificateRoutes');
-    app.use('/api/certificates', certificateRoutes);
-  app.use('/api/governance', governanceRoutes);
+    app.use('/api/departments', departmentRoutes);
+    app.use('/api/programs', programRoutes);
+    app.use('/api/sections', sectionRoutes);
+    app.use('/api/teaching-assignments', teachingAssignmentRoutes);
+    app.use('/api/hierarchy', hierarchyRoutes);
+    app.use('/api/role-requests', roleRequestRoutes);
+    app.use('/api/handouts', handoutRoutes);
+    app.use('/api/question-papers', require('./routes/questionPaperRoutes'));
+    app.use('/api/schools', schoolRoutes);
+    app.use('/api/admin-tools', adminToolsRoutes);
+    app.use('/api/coordinator', coordinatorRoutes);
+    app.use('/api/ai/gemini', geminiRoutes);
 
     // Test route for debugging CORS issues
     app.get('/api/test', (req, res) => {

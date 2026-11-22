@@ -779,7 +779,7 @@ app.put('/api/teachers/:id', requireAdmin, async (req, res) => {
 app.delete('/api/teachers/:id', requireAdmin, async (req, res) => {
   try {
     if (!dbConnected) { const { connectDB } = require('./config/db'); await connectDB(); dbConnected = true; }
-    const { Teacher, TeacherSubject } = require('./models'); const teacher = await Teacher.findByPk(req.params.id);
+    const { Teacher, TeachingAssignment } = require('./models'); const teacher = await Teacher.findByPk(req.params.id);
     if (!teacher) return res.status(404).json({ success:false, message:'Teacher not found' });
     // Delete from Clerk if clerkId exists
     if (teacher.clerkId) {
@@ -791,7 +791,7 @@ app.delete('/api/teachers/:id', requireAdmin, async (req, res) => {
         console.warn(`⚠️ Failed to delete Clerk user: ${clerkError.message}`);
       }
     }
-    await TeacherSubject.destroy({ where:{ teacherId: teacher.id } });
+    await TeachingAssignment.destroy({ where:{ teacherId: teacher.id } });
     await teacher.destroy();
     res.json({ success:true, message:'Teacher deleted' });
   } catch (e) { console.error('Delete teacher error:', e); res.status(500).json({ success:false, message:'Failed to delete teacher', error:e.message }); }
@@ -812,8 +812,8 @@ app.get('/api/teachers/:id', requireAdmin, async (req, res) => {
 app.delete('/api/teachers/:teacherId/subjects/:subjectId', requireAdmin, async (req, res) => {
   try {
     if (!dbConnected) { const { connectDB } = require('./config/db'); await connectDB(); dbConnected = true; }
-    const { TeacherSubject } = require('./models'); const { teacherId, subjectId } = req.params;
-    const deleted = await TeacherSubject.destroy({ where:{ teacherId, subjectId } });
+    const { TeachingAssignment } = require('./models'); const { teacherId, subjectId } = req.params;
+    const deleted = await TeachingAssignment.destroy({ where:{ teacherId, subjectId } });
     if (!deleted) return res.status(404).json({ success:false, message:'Assignment not found' });
     res.json({ success:true, message:'Assignment removed' });
   } catch (e) { console.error('Remove assignment error:', e); res.status(500).json({ success:false, message:'Failed to remove assignment', error:e.message }); }
@@ -888,7 +888,7 @@ app.put('/api/teachers/:id', async (req, res) => {
 
 app.delete('/api/teachers/:id', async (req, res) => {
   try { if (!dbConnected) { const { connectDB } = require('./config/db'); await connectDB(); dbConnected = true; }
-    const { Teacher, TeacherSubject } = require('./models'); const teacher = await Teacher.findByPk(req.params.id);
+    const { Teacher, TeachingAssignment } = require('./models'); const teacher = await Teacher.findByPk(req.params.id);
     if (!teacher) return res.status(404).json({ success:false, message:'Teacher not found' });
     // Delete from Clerk if clerkId exists
     if (teacher.clerkId) {
@@ -901,7 +901,7 @@ app.delete('/api/teachers/:id', async (req, res) => {
       }
     }
     // Clean assignments
-    await TeacherSubject.destroy({ where:{ teacherId: teacher.id } });
+    await TeachingAssignment.destroy({ where:{ teacherId: teacher.id } });
     await teacher.destroy();
     res.json({ success:true, message:'Teacher deleted' });
   } catch(e){ console.error('Delete teacher error:', e); res.status(500).json({ success:false, message:'Failed to delete teacher', error:e.message }); }
@@ -1073,10 +1073,10 @@ app.get('/api/teachers/:id/students', async (req, res) => {
     }
     
     console.log(`Fetching students for teacher: ${teacherId}`);
-    const { Subject, Student, TeacherSubject, Batch, Semester } = require('./models');
+    const { Subject, Student, TeachingAssignment, Batch, Semester } = require('./models');
     
     // Get subject assignments for this teacher
-    const links = await TeacherSubject.findAll({ 
+    const links = await TeachingAssignment.findAll({ 
       where: { teacherId }, 
       attributes: ['subjectId'] 
     });
@@ -1226,8 +1226,8 @@ app.delete('/api/assignments/:id', async (req, res) => {
 // Remove subject assignment (generic) aligns with frontend removeSubject()
 app.delete('/api/teachers/:teacherId/subjects/:subjectId', async (req, res) => {
   try { if (!dbConnected) { const { connectDB } = require('./config/db'); await connectDB(); dbConnected = true; }
-    const { TeacherSubject } = require('./models'); const { teacherId, subjectId } = req.params;
-    const deleted = await TeacherSubject.destroy({ where:{ teacherId, subjectId } });
+    const { TeachingAssignment } = require('./models'); const { teacherId, subjectId } = req.params;
+    const deleted = await TeachingAssignment.destroy({ where:{ teacherId, subjectId } });
     if (!deleted) return res.status(404).json({ success:false, message:'Assignment not found' });
     res.json({ success:true, message:'Assignment removed' });
   } catch(e){ console.error('Remove assignment error:', e); res.status(500).json({ success:false, message:'Failed to remove assignment', error:e.message }); }
@@ -1236,12 +1236,12 @@ app.delete('/api/teachers/:teacherId/subjects/:subjectId', async (req, res) => {
 // Optional: assign subject via generic route POST /api/teachers/:id/subjects
 app.post('/api/teachers/:id/subjects', async (req, res) => {
   try { if (!dbConnected) { const { connectDB } = require('./config/db'); await connectDB(); dbConnected = true; }
-    const { Teacher, Subject, TeacherSubject } = require('./models'); const teacherId = req.params.id; const { subjectId } = req.body;
+    const { Teacher, Subject, TeachingAssignment } = require('./models'); const teacherId = req.params.id; const { subjectId } = req.body;
     if (!subjectId) return res.status(400).json({ success:false, message:'subjectId required' });
     const teacher = await Teacher.findByPk(teacherId); if (!teacher) return res.status(404).json({ success:false, message:'Teacher not found' });
     const subject = await Subject.findByPk(subjectId); if (!subject) return res.status(404).json({ success:false, message:'Subject not found' });
-    const exists = await TeacherSubject.findOne({ where:{ teacherId, subjectId } }); if (exists) return res.status(400).json({ success:false, message:'Already assigned' });
-    await TeacherSubject.create({ teacherId, subjectId });
+    const exists = await TeachingAssignment.findOne({ where:{ teacherId, subjectId } }); if (exists) return res.status(400).json({ success:false, message:'Already assigned' });
+    await TeachingAssignment.create({ teacherId, subjectId });
     res.status(201).json({ success:true, message:'Subject assigned' });
   } catch(e){ console.error('Assign subject (generic) error:', e); res.status(500).json({ success:false, message:'Failed to assign subject', error:e.message }); }
 });
@@ -1949,7 +1949,7 @@ app.post('/api/admin/assign/subject', async (req, res) => {
       dbConnected = true;
     }
 
-    const { Teacher, Subject, TeacherSubject, Semester } = require('./models');
+    const { Teacher, Subject, TeachingAssignment, Semester } = require('./models');
     const { teacherId, subjectId } = req.body;
 
     console.log('[AssignSubject] payload', { teacherId, subjectId });
@@ -1984,7 +1984,7 @@ app.post('/api/admin/assign/subject', async (req, res) => {
     }
 
     // Check if assignment already exists
-    const existingAssignment = await TeacherSubject.findOne({
+    const existingAssignment = await TeachingAssignment.findOne({
       where: {
         teacherId,
         subjectId
@@ -1999,7 +1999,7 @@ app.post('/api/admin/assign/subject', async (req, res) => {
     }
 
     // Create teacher-subject assignment
-    const assignment = await TeacherSubject.create({
+    const assignment = await TeachingAssignment.create({
       teacherId,
       subjectId
     });
@@ -2035,8 +2035,8 @@ app.get('/api/admin/assignments', async (req, res) => {
       await connectDB();
       dbConnected = true;
     }
-    const { TeacherSubject, Teacher, Subject, Semester } = require('./models');
-    const assignments = await TeacherSubject.findAll({
+    const { TeachingAssignment, Teacher, Subject, Semester } = require('./models');
+    const assignments = await TeachingAssignment.findAll({
       include: [
         { model: Teacher, attributes: ['id','name','email'] },
         { model: Subject, include: [ { model: Semester, attributes: ['id','name','number'] } ] }
@@ -2633,7 +2633,7 @@ app.delete('/api/admin/teachers/:id', async (req, res) => {
       dbConnected = true;
     }
 
-    const { Teacher, TeacherSubject } = require('./models');
+    const { Teacher, TeachingAssignment } = require('./models');
     const { id } = req.params;
 
     const teacher = await Teacher.findByPk(id);
@@ -2657,7 +2657,7 @@ app.delete('/api/admin/teachers/:id', async (req, res) => {
     }
 
     // Delete teacher-subject associations first
-    await TeacherSubject.destroy({ where: { teacherId: teacher.id } });
+    await TeachingAssignment.destroy({ where: { teacherId: teacher.id } });
 
     await teacher.destroy();
 
@@ -2677,9 +2677,6 @@ app.delete('/api/admin/teachers/:id', async (req, res) => {
 // Attach modular routers that share logic with the monolithic server build
 const attachOptionalRoutes = () => {
   const routesToAttach = [
-
-    { path: '/api/web3', loader: () => require('./routes/web3Routes') },
-    { path: '/api/certificates', loader: () => require('./routes/certificateRoutes') },
     { path: '/api/quizzes', loader: () => require('./routes/quizRoutes') }
   ];
 
@@ -2721,22 +2718,11 @@ app.use('*', (req, res) => {
       '/api/admin/*',
       '/api/semesters/*',
       '/api/assignments/*',
-
-      '/api/web3/*',
-      '/api/certificates/*',
       '/api/quizzes/*'
     ]
   });
 });
 
-// Attach additional routers that may not be present if server/server.js load order differs
-try {
-  const web3Routes = require('./routes/web3Routes');
-  app.use('/api/web3', web3Routes);
-  const certificateRoutes = require('./routes/certificateRoutes');
-  app.use('/api/certificates', certificateRoutes);
-} catch (e) {
-  console.warn('web3Routes not attached in serverless build:', e?.message);
-}
+
 
 module.exports = app;

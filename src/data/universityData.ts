@@ -1,29 +1,11 @@
 import type { Subject, GradeScale, ExamType } from '../types/university';
 
-export const BATCHES = [
-  { id: '2023-2027', name: 'BTech 2023-2027' },
-  { id: '2022-2026', name: 'BTech 2022-2026' },
-  { id: '2021-2025', name: 'BTech 2021-2025' },
-  { id: '2020-2024', name: 'BTech 2020-2024' }
-];
+export const BATCHES: {id: string, name: string}[] = [];
 
 // Students are now managed through the database
 // Use the API endpoints to fetch student data dynamically
 
-export const SUBJECTS: Record<string, Subject[]> = {
-  'CSE-1': [
-    { id: 'CSE101', name: 'Introduction to Programming' },
-    { id: 'CSE102', name: 'Data Structures' },
-    { id: 'CSE103', name: 'Database Management Systems' },
-    { id: 'CSE104', name: 'Computer Networks' }
-  ],
-  'CSE-2': [
-    { id: 'CSE201', name: 'Object Oriented Programming' },
-    { id: 'CSE202', name: 'Operating Systems' },
-    { id: 'CSE203', name: 'Software Engineering' },
-    { id: 'CSE204', name: 'Web Development' }
-  ]
-};
+export const SUBJECTS: Record<string, Subject[]> = {};
 
 export const EXAM_TYPES: ExamType[] = [
   { id: 'mid-sem', name: 'Mid Semester' },

@@ -1,6 +1,7 @@
 const { DataTypes } = require('sequelize');
 const bcrypt = require('bcryptjs');
 const { sequelize } = require('../config/db');
+const { DEFAULT_TENANT_ID } = require('../config/defaultTenant');
 
 const Admin = sequelize.define('Admin', {
   id: {
@@ -34,8 +35,14 @@ const Admin = sequelize.define('Admin', {
   role: {
     type: DataTypes.STRING,
     defaultValue: 'admin',
+  },
+  tenantId: {
+    type: DataTypes.UUID,
+    allowNull: false,
+    defaultValue: DEFAULT_TENANT_ID,
   }
 }, {
+  schema: 'users',
   timestamps: true,
   hooks: {
     beforeSave: async (admin) => {

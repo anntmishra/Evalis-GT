@@ -18,7 +18,7 @@ export interface Proposal {
 }
 
 export const createProposal = async (data: Partial<Proposal>) => {
-  const authConfig = getAuthConfig();
+  const authConfig = await getAuthConfig();
   console.log('Creating governance proposal with auth config:', {
     hasToken: !!(authConfig.headers?.Authorization),
     tokenPreview: authConfig.headers?.Authorization ? 
@@ -38,7 +38,7 @@ export const createProposal = async (data: Partial<Proposal>) => {
 
 export const listProposals = async (status?: string): Promise<Proposal[]> => {
   const url = status ? `${API_URL}/proposals?status=${encodeURIComponent(status)}` : `${API_URL}/proposals`;
-  const res = await axios.get(url, getAuthConfig());
+  const res = await axios.get(url, await getAuthConfig());
   return res.data;
 };
 
@@ -52,7 +52,7 @@ export interface ProposalVoter {
 }
 
 export const getProposal = async (id: string) => {
-  const res = await axios.get(`${API_URL}/proposals/${id}`, getAuthConfig());
+  const res = await axios.get(`${API_URL}/proposals/${id}`, await getAuthConfig());
   return res.data as { 
     proposal: Proposal; 
     totals: number[]; 
@@ -63,12 +63,12 @@ export const getProposal = async (id: string) => {
 };
 
 export const castVote = async (id: string, choiceIndex: number) => {
-  const res = await axios.post(`${API_URL}/proposals/${id}/vote`, { choiceIndex }, getAuthConfig());
+  const res = await axios.post(`${API_URL}/proposals/${id}/vote`, { choiceIndex }, await getAuthConfig());
   return res.data;
 };
 
 export const closeProposal = async (id: string) => {
-  const res = await axios.post(`${API_URL}/proposals/${id}/close`, {}, getAuthConfig());
+  const res = await axios.post(`${API_URL}/proposals/${id}/close`, {}, await getAuthConfig());
   return res.data;
 };
 
@@ -82,11 +82,11 @@ export interface NotificationItem {
 }
 
 export const listNotifications = async (): Promise<NotificationItem[]> => {
-  const res = await axios.get(`${API_URL}/notifications`, getAuthConfig());
+  const res = await axios.get(`${API_URL}/notifications`, await getAuthConfig());
   return res.data;
 };
 
 export const markNotificationRead = async (id: string) => {
-  const res = await axios.post(`${API_URL}/notifications/${id}/read`, {}, getAuthConfig());
+  const res = await axios.post(`${API_URL}/notifications/${id}/read`, {}, await getAuthConfig());
   return res.data;
 };

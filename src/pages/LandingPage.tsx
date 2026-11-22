@@ -1,325 +1,41 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Button } from '../components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
-import { Badge } from '../components/ui/badge';
-import { 
-  GraduationCap, 
-  Shield, 
-  BarChart3, 
-  TrendingUp, 
-  LogIn, 
-  Play, 
-  User, 
-  BookOpen,
-  Code,
-  ArrowRight,
-  CheckCircle,
-  Star,
-  Zap
-} from 'lucide-react';
-import Header from '../components/Header';
+import { Link } from 'react-router-dom';
+import { BookOpen, CheckCircle2, GraduationCap, Orbit, ShieldCheck, Sparkles } from 'lucide-react';
+import { EvalisBrand, EvalisMark } from '../components/brand/EvalisBrand';
 
-const LandingPage: React.FC = () => {
-  const navigate = useNavigate();
-  const [demoDialogOpen, setDemoDialogOpen] = useState(false);
+const signals = [
+  ['01', 'Set the work', 'Create clear assessments and quizzes that reach the right cohort.'],
+  ['02', 'See the signal', 'Submissions, grading and feedback move through one visible system.'],
+  ['03', 'Close the loop', 'Publish trusted results and give every learner a useful next step.']
+];
 
-  const features = [
-    {
-      icon: <GraduationCap className="h-8 w-8" />,
-      title: 'Smart Grading',
-      description: 'AI-powered grading system with automatic CGPA calculation and intelligent performance tracking.',
-      highlight: 'AI-Powered'
-    },
-    {
-      icon: <BarChart3 className="h-8 w-8" />,
-      title: 'Advanced Analytics',
-      description: 'Comprehensive grade distribution and performance analytics with visual insights.',
-      highlight: 'Real-time'
-    },
-    {
-      icon: <TrendingUp className="h-8 w-8" />,
-      title: 'Progress Tracking',
-      description: 'Visual representation of academic progress with predictive performance indicators.',
-      highlight: 'Predictive'
-    },
-    {
-      icon: <Shield className="h-8 w-8" />,
-      title: 'Secure Access',
-      description: 'Enterprise-grade security with role-based access control and data encryption.',
-      highlight: 'Enterprise'
-    }
-  ];
-
-  const demoOptions = [
-    {
-      title: 'Student Experience',
-      icon: <User className="h-10 w-10" />,
-      description: 'Explore the student dashboard with sample assignments and grades',
-      path: '/student',
-      color: 'bg-blue-50 hover:bg-blue-100 border-blue-200'
-    },
-    {
-      title: 'Teacher Portal',
-      icon: <BookOpen className="h-10 w-10" />,
-      description: 'Try the teacher interface with grading tools and class management',
-      path: '/teacher',
-      color: 'bg-green-50 hover:bg-green-100 border-green-200'
-    },
-    {
-      title: 'Admin Dashboard',
-      icon: <Code className="h-10 w-10" />,
-      description: 'Experience the full administrative control panel',
-      path: '/admin',
-      color: 'bg-purple-50 hover:bg-purple-100 border-purple-200'
-    }
-  ];
-
-  const stats = [
-    { number: '10K+', label: 'Students' },
-    { number: '500+', label: 'Teachers' },
-    { number: '50+', label: 'Institutions' },
-    { number: '99.9%', label: 'Uptime' }
-  ];
-
-  const handleDemoClick = (path: string) => {
-    setDemoDialogOpen(false);
-    navigate(path);
-  };
-
-  return (
-    <div className="min-h-screen bg-white">
-      {/* Header */}
-      <Header showBackButton={false} />
-
-      {/* Action Buttons */}
-      <div className="fixed top-4 right-6 z-50 flex gap-3">
-        <Dialog open={demoDialogOpen} onOpenChange={setDemoDialogOpen}>
-          <DialogTrigger asChild>
-            <Button variant="outline" className="bg-white/90 backdrop-blur-sm border-gray-200 hover:bg-gray-50">
-              <Play className="h-4 w-4 mr-2" />
-              Try Demo
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-2xl">
-            <DialogHeader>
-              <DialogTitle className="text-2xl font-bold">Choose Your Experience</DialogTitle>
-              <DialogDescription>
-                Select a demo mode to explore Evalis features
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-              {demoOptions.map((option, index) => (
-                <Card 
-                  key={index}
-                  className={`cursor-pointer transition-all duration-200 hover:shadow-lg ${option.color}`}
-                  onClick={() => handleDemoClick(option.path)}
-                >
-                  <CardContent className="p-6 text-center">
-                    <div className="flex justify-center mb-4 text-gray-700">
-                      {option.icon}
-                    </div>
-                    <h3 className="font-semibold text-lg mb-2 text-gray-900">{option.title}</h3>
-                    <p className="text-sm text-gray-600 leading-relaxed">{option.description}</p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </DialogContent>
-        </Dialog>
-        
-        <Button onClick={() => navigate('/login')} className="bg-black hover:bg-gray-800 text-white">
-          <LogIn className="h-4 w-4 mr-2" />
-          Login
-        </Button>
-      </div>
-
-      {/* Hero Section */}
-      <section className="pt-32 pb-20 px-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-8">
-              <div className="space-y-4">
-                <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-200">
-                  <Zap className="h-3 w-3 mr-1" />
-                  Next-Gen Education Platform
-                </Badge>
-                <h1 className="text-5xl lg:text-6xl font-bold text-black leading-tight">
-                  Smart Grading
-                  <span className="block text-gray-600">Made Simple</span>
-                </h1>
-                <p className="text-xl text-gray-600 leading-relaxed max-w-lg">
-                  Transform your academic experience with our intelligent grading system. 
-                  Streamlined, secure, and designed for modern education.
-                </p>
-              </div>
-              
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Button 
-                  size="lg" 
-                  onClick={() => navigate('/get-started')}
-                  className="bg-black hover:bg-gray-800 text-white px-8 py-3 text-lg"
-                >
-                  Get Started
-                  <ArrowRight className="h-5 w-5 ml-2" />
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="lg"
-                  onClick={() => navigate('/login')}
-                  className="border-gray-300 hover:bg-gray-50 px-8 py-3 text-lg"
-                >
-                  <LogIn className="h-5 w-5 mr-2" />
-                  Login
-                </Button>
-              </div>
-
-              {/* Stats */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 pt-8 border-t border-gray-100">
-                {stats.map((stat, index) => (
-                  <div key={index} className="text-center">
-                    <div className="text-2xl font-bold text-black">{stat.number}</div>
-                    <div className="text-sm text-gray-600">{stat.label}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-gray-100 to-gray-200 rounded-3xl transform rotate-3"></div>
-              <div className="relative bg-white rounded-3xl p-8 shadow-2xl border border-gray-100">
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-black rounded-full flex items-center justify-center">
-                        <GraduationCap className="h-5 w-5 text-white" />
-                      </div>
-                      <div>
-                        <div className="font-semibold text-black">Evalis Dashboard</div>
-                        <div className="text-sm text-gray-500">Grade Management</div>
-                      </div>
-                    </div>
-                    <Badge className="bg-green-100 text-green-800 border-green-200">Live</Badge>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <span className="text-sm font-medium">Mathematics</span>
-                      <Badge variant="outline">A+</Badge>
-                    </div>
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <span className="text-sm font-medium">Physics</span>
-                      <Badge variant="outline">A</Badge>
-                    </div>
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <span className="text-sm font-medium">Chemistry</span>
-                      <Badge variant="outline">B+</Badge>
-                    </div>
-                  </div>
-                  
-                  <div className="pt-4 border-t border-gray-100">
-                    <div className="flex items-center justify-between">
-                      <span className="font-semibold text-black">Overall CGPA</span>
-                      <span className="text-2xl font-bold text-black">8.7</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+export default function LandingPage() {
+  return <div className="brand-site">
+    <header className="brand-header"><EvalisBrand/><nav aria-label="Public navigation"><a href="#system">The system</a><a href="#workspaces">Workspaces</a><Link className="brand-button secondary" to="/login">Sign in</Link><Link className="brand-button primary" to="/login">Enter Evalis</Link></nav></header>
+    <main>
+      <section className="brand-hero">
+        <div className="hero-noise" aria-hidden="true"/>
+        <div className="brand-hero-copy"><div className="brand-kicker"><Sparkles size={15}/>The academic operating system</div><h1>Turn academic<br/><em>motion</em> into<br/><span>momentum.</span></h1><p>Evalis connects teaching, submissions, grading and results in one beautifully accountable workspace—so institutions can move with clarity.</p><div className="brand-hero-actions"><Link className="brand-button signal" to="/login">Open your workspace</Link><a className="brand-text-link" href="#system">See how it moves</a></div><div className="hero-trust"><span><CheckCircle2/>Role-aware access</span><span><CheckCircle2/>Live academic data</span><span><CheckCircle2/>One source of truth</span></div></div>
+        <div className="signal-stage" aria-label="A connected view of teaching, assessment and progress">
+          <div className="signal-orbit orbit-a"/><div className="signal-orbit orbit-b"/><div className="signal-orbit orbit-c"/>
+          <div className="signal-core"><EvalisMark size={58}/><span>LIVE SIGNAL</span><strong>84%</strong><small>academic flow</small></div>
+          <article className="signal-card signal-card-a"><span className="signal-card-icon"><BookOpen size={18}/></span><small>ASSESSMENT</small><strong>Systems thinking</strong><div className="mini-progress"><i/></div><p>32 of 38 submitted</p></article>
+          <article className="signal-card signal-card-b"><span className="pulse-dot"/><small>FEEDBACK LOOP</small><strong>12 ready to review</strong><div className="avatar-stack"><i>MK</i><i>RA</i><i>+9</i></div></article>
+          <article className="signal-card signal-card-c"><small>RESULT STATUS</small><strong>Published</strong><span>Verified · visible · complete</span></article>
+          <div className="signal-caption"><Orbit size={17}/> Every action leaves a clear signal.</div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <Badge variant="outline" className="mb-4 bg-white border-gray-200">
-              <Star className="h-3 w-3 mr-1" />
-              Features
-            </Badge>
-            <h2 className="text-4xl font-bold text-black mb-4">
-              Everything you need for modern grading
-            </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Powerful tools designed to streamline academic management and enhance learning outcomes.
-            </p>
-          </div>
-          
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {features.map((feature, index) => (
-              <Card key={index} className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-white">
-                <CardHeader className="pb-4">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="p-3 bg-gray-100 rounded-lg text-black">
-                      {feature.icon}
-                    </div>
-                    <Badge variant="secondary" className="bg-black text-white">
-                      {feature.highlight}
-                    </Badge>
-                  </div>
-                  <CardTitle className="text-xl text-black">{feature.title}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription className="text-gray-600 leading-relaxed">
-                    {feature.description}
-                  </CardDescription>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
+      <section className="brand-proof" aria-label="Product principles"><span>BUILT FOR THE WHOLE ACADEMIC JOURNEY</span><div>Teach</div><i/><div>Assess</div><i/><div>Review</div><i/><div>Publish</div><i/><div>Grow</div></section>
 
-      {/* CTA Section */}
-      <section className="py-20 bg-black text-white">
-        <div className="max-w-4xl mx-auto text-center px-6">
-          <h2 className="text-4xl font-bold mb-6">
-            Ready to transform your grading experience?
-          </h2>
-          <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-            Join thousands of educators and students who trust Evalis for their academic management needs.
-          </p>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button 
-              size="lg"
-              onClick={() => navigate('/get-started')}
-              className="bg-white text-black hover:bg-gray-100 px-8 py-3 text-lg"
-            >
-              Get Started Free
-              <ArrowRight className="h-5 w-5 ml-2" />
-            </Button>
-            <Button 
-              variant="outline" 
-              size="lg"
-              onClick={() => navigate('/login')}
-              className="border-gray-600 text-white hover:bg-gray-900 px-8 py-3 text-lg"
-            >
-              <LogIn className="h-5 w-5 mr-2" />
-              Login Now
-            </Button>
-          </div>
-          
-          <div className="flex items-center justify-center mt-8 space-x-6 text-sm text-gray-400">
-            <div className="flex items-center">
-              <CheckCircle className="h-4 w-4 mr-2" />
-              Free to start
-            </div>
-            <div className="flex items-center">
-              <CheckCircle className="h-4 w-4 mr-2" />
-              No credit card required
-            </div>
-            <div className="flex items-center">
-              <CheckCircle className="h-4 w-4 mr-2" />
-              Setup in minutes
-            </div>
-          </div>
-        </div>
-      </section>
-    </div>
-  );
-};
+      <section className="system-section" id="system"><div className="system-intro"><span className="brand-kicker dark">The system, made human</span><h2>Less chasing.<br/>More knowing.</h2><p>A calm interface on top of serious academic operations. Every person sees the work, decisions and next actions that belong to them.</p></div><div className="signal-steps">{signals.map(([number,title,copy])=><article key={number}><span>{number}</span><div><h3>{title}</h3><p>{copy}</p></div></article>)}</div></section>
 
-export default LandingPage;
+      <section className="workspace-showcase" id="workspaces"><div className="showcase-heading"><div><span className="brand-kicker dark">One campus. Precisely personal.</span><h2>Built around the person doing the work.</h2></div><p>The public entrance stays simple. Your verified role opens the exact tools, data and permissions you need.</p></div><div className="workspace-showcase-grid">
+        <Link to="/login?role=student" className="showcase-card student"><span className="showcase-icon"><GraduationCap/></span><small>STUDENT WORKSPACE</small><h3>Know what’s next.<br/>Own your progress.</h3><p>Assessments, quizzes, submissions and published feedback in one focused view.</p><span className="showcase-cta">Enter as student</span><div className="showcase-number">01</div></Link>
+        <Link to="/login?role=teacher" className="showcase-card teacher"><span className="showcase-icon"><BookOpen/></span><small>EDUCATOR WORKSPACE</small><h3>Make the work clear.<br/>Make feedback count.</h3><p>Create, review and understand learning without losing time to fragmented tools.</p><span className="showcase-cta">Enter as educator</span><div className="showcase-number">02</div></Link>
+      </div></section>
+
+      <section className="brand-manifesto"><div className="manifesto-mark"><ShieldCheck/></div><span>THE EVALIS STANDARD</span><h2>Serious infrastructure.<br/><em>Zero institutional beige.</em></h2><p>Reliable by design. Distinctive by choice. Made for the people moving education forward.</p><Link className="brand-button signal" to="/login">Find your workspace</Link></section>
+    </main>
+    <footer className="brand-footer"><EvalisBrand compact/><p>Clarity for every academic move.</p><div><a href="#system">System</a><a href="#workspaces">Workspaces</a><Link to="/login">Sign in</Link></div></footer>
+  </div>;
+}

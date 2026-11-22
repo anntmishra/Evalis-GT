@@ -1,340 +1,41 @@
-import React, { useState } from 'react';
-import {
-  Box,
-  Typography,
-  Card,
-  CardContent,
-  TextField,
-  Button,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Grid,
-  Alert,
-  CircularProgress,
-  SelectChangeEvent
-} from '@mui/material';
-import { Save, InsertPhoto, AttachFile } from '@mui/icons-material';
-import { useAuth } from '@clerk/clerk-react';
-import config from '../config/environment';
+import { FormEvent, useState } from 'react';
+import { CalendarDays, CheckCircle2, FileText, Paperclip, Plus, X } from 'lucide-react';
+import { createAssessment } from '../api/assessmentService';
 
-interface Subject {
-  id: string;
-  name: string;
-}
+interface Option { id: string; name: string }
+interface Props { subjects: Option[]; examTypes: Option[]; onAssignmentCreated?: () => void | Promise<void> }
 
-interface ExamType {
-  id: string;
-  name: string;
-}
-
-interface TeacherAssignmentCreatorProps {
-  subjects: Subject[];
-  examTypes: ExamType[];
-  onAssignmentCreated?: () => void;
-}
-
-const TeacherAssignmentCreator: React.FC<TeacherAssignmentCreatorProps> = ({
-  subjects,
-  examTypes,
-  onAssignmentCreated
-}) => {
-  const { getToken } = useAuth();
+export default function TeacherAssignmentCreator({ subjects, examTypes, onAssignmentCreated }: Props) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [subjectId, setSubjectId] = useState('');
   const [examType, setExamType] = useState('');
   const [dueDate, setDueDate] = useState('');
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
-  const [filePreview, setFilePreview] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const selectedFile = e.target.files[0];
-      setFile(selectedFile);
-
-      // Create preview for images
-      if (selectedFile.type.startsWith('image/')) {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          setFilePreview(event.target?.result as string);
-        };
-        reader.readAsDataURL(selectedFile);
-      } else {
-        setFilePreview(null);
-      }
-    }
+  const selectFile = (selected?: File) => {
+    if (!selected) return setFile(null);
+    if (selected.size > 10 * 1024 * 1024) return setError('The attachment must be 10 MB or smaller.');
+    setError(''); setFile(selected);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!title || !subjectId || !examType) {
-      setError('Please fill in all required fields');
-      return;
-    }
-
+  const submit = async (event: FormEvent) => {
+    event.preventDefault(); setError(''); setSuccess('');
+    if (!title.trim() || !subjectId || !examType) return setError('Title, subject, and assessment type are required.');
+    if (dueDate && new Date(dueDate).getTime() <= Date.now()) return setError('Choose a deadline in the future.');
+    setBusy(true);
     try {
-      setLoading(true);
-      setError(null);
-
-      // Create FormData for file upload
-      const formData = new FormData();
-      formData.append('title', title);
-      formData.append('description', description);
-      formData.append('subjectId', subjectId);
-      formData.append('examType', examType);
-      if (dueDate) formData.append('dueDate', dueDate);
-      if (file) formData.append('file', file);
-
-      console.log('FormData contents:');
-      console.log('- title:', title);
-      console.log('- subjectId:', subjectId);
-      console.log('- examType:', examType);
-      console.log('- dueDate:', dueDate || 'not set');
-      console.log('- file:', file ? file.name : 'not attached');
-
-      try {
-        // Ensure we have a fresh token before making the request
-        // This fixes the issue where the token in localStorage might be expired
-        const token = await getToken();
-        if (token) {
-          localStorage.setItem(config.AUTH.TOKEN_STORAGE_KEY, token);
-        }
-
-        // Use the centralized API for file upload which handles auth tokens automatically
-        const api = await import('../api');
-
-        if (file) {
-          console.log('Uploading with FormData via API client');
-          await api.uploadAssignment(formData);
-        } else {
-          // Standard API call without file
-          console.log('Creating assignment without file via API client');
-          await api.createAssignment({
-            title,
-            description,
-            subjectId,
-            examType,
-            dueDate: dueDate || null,
-          });
-        }
-
-        console.log('Assignment created successfully');
-      } catch (apiError: any) {
-        console.error('Error in assignment creation:', apiError);
-        throw apiError;
-      }
-
-      setSuccess(true);
-
-      // Reset form
-      setTitle('');
-      setDescription('');
-      setSubjectId('');
-      setExamType('');
-      setDueDate('');
-      setFile(null);
-      setFilePreview(null);
-
-      // Notify parent component
-      if (onAssignmentCreated) {
-        onAssignmentCreated();
-      }
-
-      // Clear success message after a delay
-      setTimeout(() => {
-        setSuccess(false);
-      }, 3000);
+      await createAssessment({ title: title.trim(), description: description.trim(), subjectId, examType, dueDate: dueDate || null, file });
+      setSuccess(`${title.trim()} is now available in the student assessment portal.`);
+      setTitle(''); setDescription(''); setSubjectId(''); setExamType(''); setDueDate(''); setFile(null);
+      await onAssignmentCreated?.();
     } catch (err: any) {
-      console.error('Error creating assignment:', err);
-      setError(err.response?.data?.message || err.message || 'Failed to create assignment');
-    } finally {
-      setLoading(false);
-    }
+      setError(err?.response?.data?.message || 'The assessment could not be created. Try again.');
+    } finally { setBusy(false); }
   };
 
-  return (
-    <Card>
-      <CardContent>
-        <Typography variant="h5" gutterBottom>
-          Create New Assignment
-        </Typography>
-
-        {error && (
-          <Alert severity="error" sx={{ mb: 3 }}>
-            {error}
-          </Alert>
-        )}
-
-        {success && (
-          <Alert severity="success" sx={{ mb: 3 }}>
-            Assignment created successfully!
-          </Alert>
-        )}
-
-        <form onSubmit={handleSubmit}>
-          <Grid container spacing={3}>
-            <Grid item xs={12}>
-              <TextField
-                label="Assignment Title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                fullWidth
-                required
-                disabled={loading}
-              />
-            </Grid>
-
-            <Grid item xs={12} md={6}>
-              <FormControl fullWidth required>
-                <InputLabel>Subject</InputLabel>
-                <Select
-                  value={subjectId}
-                  label="Subject"
-                  onChange={(e: SelectChangeEvent) => setSubjectId(e.target.value)}
-                  disabled={loading}
-                >
-                  {subjects.map((subject) => (
-                    <MenuItem key={subject.id} value={subject.id}>
-                      {subject.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-
-            <Grid item xs={12} md={6}>
-              <FormControl fullWidth required>
-                <InputLabel>Assignment Type</InputLabel>
-                <Select
-                  value={examType}
-                  label="Assignment Type"
-                  onChange={(e: SelectChangeEvent) => setExamType(e.target.value)}
-                  disabled={loading}
-                >
-                  {examTypes.map((type) => (
-                    <MenuItem key={type.id} value={type.id}>
-                      {type.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-
-            <Grid item xs={12} md={6}>
-              <TextField
-                label="Due Date"
-                type="datetime-local"
-                value={dueDate}
-                onChange={(e) => setDueDate(e.target.value)}
-                fullWidth
-                InputLabelProps={{ shrink: true }}
-                disabled={loading}
-              />
-            </Grid>
-
-            <Grid item xs={12}>
-              <TextField
-                label="Description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                fullWidth
-                multiline
-                rows={4}
-                disabled={loading}
-                placeholder="Provide detailed instructions for the assignment..."
-              />
-            </Grid>
-
-            <Grid item xs={12}>
-              <Box
-                sx={{
-                  border: '1px dashed #ccc',
-                  borderRadius: 1,
-                  p: 3,
-                  textAlign: 'center',
-                  mb: 2,
-                  bgcolor: 'background.paper'
-                }}
-              >
-                <input
-                  accept="image/*,application/pdf,.doc,.docx,.ppt,.pptx"
-                  style={{ display: 'none' }}
-                  id="file-upload"
-                  type="file"
-                  onChange={handleFileChange}
-                  disabled={loading}
-                />
-                <label htmlFor="file-upload">
-                  <Button
-                    component="span"
-                    variant="outlined"
-                    startIcon={<AttachFile />}
-                    disabled={loading}
-                    sx={{ mb: 2 }}
-                  >
-                    {file ? 'Change File' : 'Upload Assignment File or Image'}
-                  </Button>
-                </label>
-
-                {file && (
-                  <Box sx={{ mt: 2, textAlign: 'left' }}>
-                    <Typography variant="subtitle2" gutterBottom>
-                      Selected File:
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      {file.type.startsWith('image/') ? <InsertPhoto sx={{ mr: 1 }} /> : <AttachFile sx={{ mr: 1 }} />}
-                      <Typography variant="body2">
-                        {file.name} ({(file.size / 1024).toFixed(1)} KB)
-                      </Typography>
-                    </Box>
-                  </Box>
-                )}
-
-                {filePreview && (
-                  <Box sx={{ mt: 2, textAlign: 'center' }}>
-                    <Typography variant="subtitle2" gutterBottom>
-                      Preview:
-                    </Typography>
-                    <Box
-                      component="img"
-                      src={filePreview}
-                      sx={{
-                        maxWidth: '100%',
-                        maxHeight: '200px',
-                        objectFit: 'contain',
-                        border: '1px solid #eee',
-                        borderRadius: 1
-                      }}
-                      alt="File preview"
-                    />
-                  </Box>
-                )}
-              </Box>
-            </Grid>
-
-            <Grid item xs={12}>
-              <Button
-                type="submit"
-                variant="contained"
-                color="primary"
-                startIcon={loading ? <CircularProgress size={20} /> : <Save />}
-                disabled={loading || !title || !subjectId || !examType}
-                fullWidth
-              >
-                {loading ? 'Creating...' : 'Create Assignment'}
-              </Button>
-            </Grid>
-          </Grid>
-        </form>
-      </CardContent>
-    </Card>
-  );
-};
-
-export default TeacherAssignmentCreator; 
+  return <section className="assessment-create-panel"><div className="assessment-create-copy"><span className="eyebrow light">CREATE AN ASSESSMENT</span><h2>Set the work in motion.</h2><p>Give students a clear brief, a fair deadline, and any supporting material they need.</p><div className="create-principles"><span><CheckCircle2 size={16}/>Appears in the assigned student batch</span><span><CheckCircle2 size={16}/>Submissions stay private to authorised faculty</span><span><CheckCircle2 size={16}/>Scores remain hidden until publication</span></div></div><form className="assessment-create-form" onSubmit={submit}><div className="field-wide"><label htmlFor="assessment-title">Assessment title</label><input id="assessment-title" value={title} onChange={event => setTitle(event.target.value)} placeholder="e.g. Data structures case study" required/></div><div><label htmlFor="assessment-subject-create">Subject</label><select id="assessment-subject-create" value={subjectId} onChange={event => setSubjectId(event.target.value)} required><option value="">Choose subject</option>{subjects.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}</select></div><div><label htmlFor="assessment-type">Assessment type</label><select id="assessment-type" value={examType} onChange={event => setExamType(event.target.value)} required><option value="">Choose type</option>{examTypes.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}</select></div><div className="field-wide"><label htmlFor="assessment-description">Brief and instructions</label><textarea id="assessment-description" rows={6} value={description} onChange={event => setDescription(event.target.value)} placeholder="Explain the task, expected outcome, and evaluation criteria."/></div><div><label htmlFor="assessment-deadline">Deadline</label><div className="input-with-icon"><CalendarDays size={17}/><input id="assessment-deadline" type="datetime-local" value={dueDate} min={new Date(Date.now() + 60_000).toISOString().slice(0, 16)} onChange={event => setDueDate(event.target.value)}/></div></div><div><label>Supporting material</label><label className="compact-upload" htmlFor="assessment-brief-file"><Paperclip size={17}/><span>{file ? file.name : 'Attach a file'}</span><input id="assessment-brief-file" type="file" accept="image/*,.pdf,.doc,.docx,.ppt,.pptx" onChange={event => selectFile(event.target.files?.[0])}/></label>{file && <button type="button" className="remove-file" onClick={() => setFile(null)}><X size={14}/>Remove</button>}</div>{error && <p className="workspace-error field-wide" role="alert">{error}</p>}{success && <p className="workspace-success field-wide" role="status"><CheckCircle2 size={17}/>{success}</p>}<div className="field-wide create-submit"><span><FileText size={17}/>Students can submit text, a file, or both.</span><button className="action-lime" disabled={busy || !subjects.length}>{busy ? 'Creating…' : <><Plus size={16}/>Create assessment</>}</button></div></form></section>;
+}

@@ -23,7 +23,7 @@ export interface Semester {
 // Get all semesters
 export const getAllSemesters = async (): Promise<Semester[]> => {
   try {
-    const response = await axios.get(API_URL, getAuthConfig());
+    const response = await axios.get(API_URL, await getAuthConfig());
     return response.data;
   } catch (error) {
     throw error;
@@ -33,7 +33,7 @@ export const getAllSemesters = async (): Promise<Semester[]> => {
 // Get semester by ID
 export const getSemesterById = async (id: string): Promise<Semester> => {
   try {
-    const response = await axios.get(`${API_URL}/${id}`, getAuthConfig());
+    const response = await axios.get(`${API_URL}/${id}`, await getAuthConfig());
     return response.data;
   } catch (error) {
     throw error;
@@ -43,7 +43,7 @@ export const getSemesterById = async (id: string): Promise<Semester> => {
 // Get semesters for a specific batch
 export const getBatchSemesters = async (batchId: string): Promise<Semester[]> => {
   try {
-    const response = await axios.get(`${API_URL}/batch/${batchId}`, getAuthConfig());
+    const response = await axios.get(`${API_URL}/batch/${batchId}`, await getAuthConfig());
     return response.data;
   } catch (error) {
     throw error;
@@ -53,7 +53,7 @@ export const getBatchSemesters = async (batchId: string): Promise<Semester[]> =>
 // Create semester
 export const createSemester = async (semesterData: any): Promise<any> => {
   try {
-    const response = await axios.post(API_URL, semesterData, getAuthConfig());
+    const response = await axios.post(API_URL, semesterData, await getAuthConfig());
     return response.data;
   } catch (error) {
     throw error;
@@ -63,7 +63,7 @@ export const createSemester = async (semesterData: any): Promise<any> => {
 // Update semester
 export const updateSemester = async (id: string, semesterData: Partial<Semester>): Promise<Semester> => {
   try {
-    const response = await axios.put(`${API_URL}/${id}`, semesterData, getAuthConfig());
+    const response = await axios.put(`${API_URL}/${id}`, semesterData, await getAuthConfig());
     return response.data;
   } catch (error) {
     throw error;
@@ -76,7 +76,7 @@ export const setActiveSemesterForStudents = async (semesterId: string, studentId
     const response = await axios.put(
       `${API_URL}/${semesterId}/set-active`, 
       { studentIds }, 
-      getAuthConfig()
+      await getAuthConfig()
     );
     return response.data;
   } catch (error) {
