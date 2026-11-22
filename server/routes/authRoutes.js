@@ -82,8 +82,9 @@ router.get('/status', async (req, res) => {
   if (!user && token) {
     console.log('Attempting Clerk verification...');
     try {
-      const clerkUser = await verifyClerkToken(token);
-      if (clerkUser) {
+      const clerkResult = await verifyClerkToken(token);
+      if (clerkResult) {
+        const clerkUser = clerkResult.user || clerkResult;
         console.log('Clerk token verified');
         const mapped = await mapClerkUserToLocal(clerkUser, { Student, Teacher, Admin });
         if (mapped?.user) {

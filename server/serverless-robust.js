@@ -54,8 +54,9 @@ async function requireAdmin(req, res, next) {
       // 2. Try Clerk Verification
       try {
         const { verifyClerkToken } = require('./utils/clerk');
-        const clerkUser = await verifyClerkToken(token);
-        if (clerkUser) {
+        const clerkResult = await verifyClerkToken(token);
+        if (clerkResult) {
+           const clerkUser = clerkResult.user || clerkResult;
            // Map Clerk user to local admin
            const { Admin } = require('./models');
            // Ensure DB connected
@@ -423,8 +424,9 @@ app.get('/api/auth/profile', async (req, res) => {
           dbConnected = true;
         }
         
-        const clerkUser = await verifyClerkToken(token);
-        if (clerkUser) {
+        const clerkResult = await verifyClerkToken(token);
+        if (clerkResult) {
+          const clerkUser = clerkResult.user || clerkResult;
           const { Student, Teacher, Admin } = require('./models');
           const mapped = await mapClerkUserToLocal(clerkUser, { Student, Teacher, Admin });
           
