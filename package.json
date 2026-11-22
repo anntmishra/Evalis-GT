@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "type": "commonjs",
   "engines": {
-    "node": "20.x"
+    "node": "26.x"
   },
   "scripts": {
     "dev": "concurrently \"npm run server:dev\" \"npm run frontend\"",

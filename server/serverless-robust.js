@@ -1,3 +1,5 @@
+require('./utils/nodeRuntimeCompat');
+
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
